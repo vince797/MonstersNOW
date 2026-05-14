@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="MonstersNOW is a new website project ready for design, content, and development."
+    />
+    <title>MonstersNOW</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="#" aria-label="MonstersNOW home">
+        <span class="brand-mark" aria-hidden="true">M</span>
+        <span>MonstersNOW</span>
+      </a>
+
+      <nav class="site-nav" aria-label="Main navigation">
+        <a href="#work">Work</a>
+        <a href="#about">About</a>
+        <a href="#contact">Contact</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-media" aria-hidden="true">
+          <div class="poster">
+            <div class="poster-grid"></div>
+            <div class="poster-panel panel-one"></div>
+            <div class="poster-panel panel-two"></div>
+            <div class="poster-panel panel-three"></div>
+          </div>
+        </div>
+
+        <div class="hero-content">
+          <p class="eyebrow">New website starter</p>
+          <h1 id="hero-title">MonstersNOW</h1>
+          <p class="hero-copy">
+            A clean starting point for the site: structure, responsive styling,
+            and room for the real content to take shape.
+          </p>
+          <div class="hero-actions">
+            <a class="button primary" href="#work">View sections</a>
+            <a class="button secondary" href="mailto:hello@example.com">Contact</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="work" aria-labelledby="work-title">
+        <div class="section-heading">
+          <p class="eyebrow">Foundation</p>
+          <h2 id="work-title">Ready to customize</h2>
+        </div>
+        <div class="feature-grid">
+          <article class="feature-card">
+            <h3>Clear page structure</h3>
+            <p>Header, hero, content sections, and footer are already wired up.</p>
+          </article>
+          <article class="feature-card">
+            <h3>Responsive CSS</h3>
+            <p>The layout adapts across desktop and mobile without extra tooling.</p>
+          </article>
+          <article class="feature-card">
+            <h3>Simple JavaScript</h3>
+            <p>A small script handles footer year updates and future interactions.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="split-section" id="about" aria-labelledby="about-title">
+        <div>
+          <p class="eyebrow">Next steps</p>
+          <h2 id="about-title">Bring in the real content</h2>
+        </div>
+        <p>
+          Replace the placeholder copy with the site’s actual purpose, audience,
+          imagery, and calls to action. The current files are intentionally small
+          so iteration stays fast.
+        </p>
+      </section>
+
+      <section class="contact-band" id="contact" aria-labelledby="contact-title">
+        <div>
+          <p class="eyebrow">Contact</p>
+          <h2 id="contact-title">Start shaping the site.</h2>
+        </div>
+        <a class="button primary" href="mailto:hello@example.com">Email us</a>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <span>&copy; <span id="year"></span> MonstersNOW</span>
+    </footer>
+
+    <script src="scripts/main.js"></script>
+  </body>
+</html>
