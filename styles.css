@@ -812,8 +812,8 @@ main > section {
 }
 
 .style-option {
-  min-height: 40px;
-  padding: 0 10px;
+  min-height: 46px;
+  padding: 8px 10px;
   background: #fff;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -822,6 +822,8 @@ main > section {
   font: inherit;
   font-size: 0.84rem;
   font-weight: 900;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
 }
 
 .style-option:hover,

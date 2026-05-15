@@ -10,7 +10,7 @@ Starter website for MonstersNOW.
 - `scripts/main.js` - small browser behaviors
 - `api/convert-monster.js` - Vercel serverless AI converter endpoint
 - `api/lulu-sandbox-*.js` - server-side Lulu Print API sandbox endpoints
-- `lib/` - shared server-side helpers for API routes
+- `lib/` - shared server-side helpers for API routes, including the MonstersNOW image style prompt
 - `assets/` - images, icons, downloads, and other static files
 
 ## Run locally
@@ -31,7 +31,10 @@ environment variable, `/api/convert-monster` returns a configuration error
 instead of showing demo artwork as if it came from the upload.
 
 The converter uses the uploaded child drawing as the source of truth and the
-cropped images in `assets/master-references/` as light style references.
+Soft 3D Storybook Monster images in `assets/master-references/` as style references. The
+default brand direction is centralized as `Soft 3D Storybook Monster` in
+`lib/monster-style.js` so character previews, story scenes, book pages, product
+previews, and approval/revision previews can reuse the same prompt language.
 
 ## Lulu sandbox
 

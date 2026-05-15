@@ -52,16 +52,17 @@ const maxUploadBytes = 8 * 1024 * 1024;
 const maxFreePreviews = 3;
 const heicConverterUrl = "https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js";
 const demoMonsterImage = "assets/step-2-character.jpg?v=20260515-horns";
+const defaultPreviewStyle = "storybook";
 const previewStyleLabels = {
-  storybook: "Storybook",
-  cute: "Cute",
-  silly: "Silly",
-  adventure: "Adventure",
+  storybook: "Soft 3D Storybook Monster",
+  cute: "Soft 3D Cute Monster",
+  silly: "Soft 3D Silly Monster",
+  adventure: "Soft 3D Adventure Monster",
 };
 let drawingPreviewUrl;
 let selectedDrawingFile;
 let coloringPageUrl;
-let selectedMonsterStyle = "storybook";
+let selectedMonsterStyle = defaultPreviewStyle;
 let previewsUsed = 0;
 let generatedPreviews = [];
 let selectedPreviewId;
@@ -119,15 +120,15 @@ if (monsterUpload && drawingPreview && monsterPreview && convertButton) {
       updateStyleButtons();
 
       if (selectedDrawingFile && previewsUsed < maxFreePreviews && converterNote && !isGeneratingPreview) {
-        converterNote.textContent = `${previewStyleLabels[selectedMonsterStyle]} style selected. Create another version when ready.`;
+        converterNote.textContent = `${getPreviewStyleLabel(selectedMonsterStyle)} selected. Create another version when ready.`;
       }
 
       if (isGeneratingPreview) {
-        setUploadActionStatus(`${previewStyleLabels[selectedMonsterStyle]} style selected for the next version.`);
+        setUploadActionStatus(`${getPreviewStyleLabel(selectedMonsterStyle)} selected for the next version.`);
       } else if (selectedDrawingFile && previewsUsed < maxFreePreviews) {
-        setUploadActionStatus(`${previewStyleLabels[selectedMonsterStyle]} style selected. Try another version when ready.`);
+        setUploadActionStatus(`${getPreviewStyleLabel(selectedMonsterStyle)} selected. Try another version when ready.`);
       } else if (!selectedDrawingFile) {
-        setUploadActionStatus(`${previewStyleLabels[selectedMonsterStyle]} style selected. Upload a drawing to start automatically.`);
+        setUploadActionStatus(`${getPreviewStyleLabel(selectedMonsterStyle)} selected. Upload a drawing to start automatically.`);
       }
     });
   });
@@ -372,8 +373,8 @@ async function selectDrawingFile(file) {
 
   if (converterNote) {
     converterNote.textContent = shouldConvertHeic
-      ? `HEIC photo converted. Creating a ${previewStyleLabels[selectedMonsterStyle].toLowerCase()} monster preview now.`
-      : `Creating a ${previewStyleLabels[selectedMonsterStyle].toLowerCase()} monster preview now.`;
+      ? `HEIC photo converted. Creating a ${getPreviewStyleLabel(selectedMonsterStyle).toLowerCase()} preview now.`
+      : `Creating a ${getPreviewStyleLabel(selectedMonsterStyle).toLowerCase()} preview now.`;
   }
 
   setUploadActionStatus(
@@ -405,10 +406,10 @@ async function requestMonsterPreview() {
 
   isGeneratingPreview = true;
   syncPreviewControls();
-  setUploadActionStatus(`Creating your ${previewStyleLabels[selectedMonsterStyle].toLowerCase()} monster preview.`);
+  setUploadActionStatus(`Creating your ${getPreviewStyleLabel(selectedMonsterStyle).toLowerCase()} preview.`);
 
   if (converterStatus) {
-    converterStatus.textContent = `Creating ${previewStyleLabels[selectedMonsterStyle].toLowerCase()} preview...`;
+    converterStatus.textContent = `Creating ${getPreviewStyleLabel(selectedMonsterStyle).toLowerCase()} preview...`;
   }
 
   if (converterNote) {
@@ -452,14 +453,14 @@ function applyMonsterResult(result) {
   }
 
   if (converterStatus) {
-    converterStatus.textContent = `${previewStyleLabels[style]} monster preview ready.`;
+    converterStatus.textContent = `${getPreviewStyleLabel(style)} preview ready.`;
   }
 
   if (converterNote) {
-    converterNote.textContent = `Choose this version, download the free coloring page, or try another style. ${describeRemainingPreviews(remaining)}`;
+    converterNote.textContent = `Choose this version, download the free coloring page, or try another version. ${describeRemainingPreviews(remaining)}`;
   }
 
-  setUploadActionStatus(`${previewStyleLabels[style]} preview ready below. ${describeRemainingPreviews(remaining)}`);
+  setUploadActionStatus(`${getPreviewStyleLabel(style)} preview ready below. ${describeRemainingPreviews(remaining)}`);
   scrollToResultPanel({ focus: true, delay: 120 });
 }
 
@@ -492,7 +493,7 @@ function renderPreviewHistory() {
     const button = document.createElement("button");
     const image = document.createElement("img");
     const label = document.createElement("span");
-    const styleLabel = previewStyleLabels[preview.style];
+    const styleLabel = getPreviewStyleLabel(preview.style);
 
     button.type = "button";
     button.className = "preview-choice";
@@ -519,7 +520,7 @@ function selectGeneratedPreview(id, announce = false) {
 
   selectedPreviewId = preview.id;
   monsterPreview.src = preview.image;
-  monsterPreview.alt = `${previewStyleLabels[preview.style]} generated monster character preview.`;
+  monsterPreview.alt = `${getPreviewStyleLabel(preview.style)} generated monster character preview.`;
   coloringPageUrl = preview.coloringPage;
   updatePreviewPresentation(true);
 
@@ -536,11 +537,11 @@ function selectGeneratedPreview(id, announce = false) {
   }
 
   if (announce && converterStatus) {
-    converterStatus.textContent = `${previewStyleLabels[preview.style]} preview selected.`;
+    converterStatus.textContent = `${getPreviewStyleLabel(preview.style)} preview selected.`;
   }
 
   if (announce) {
-    setUploadActionStatus(`${previewStyleLabels[preview.style]} preview selected.`);
+    setUploadActionStatus(`${getPreviewStyleLabel(preview.style)} preview selected.`);
   }
 }
 
@@ -644,7 +645,7 @@ function syncPreviewControls() {
   if (previewCount) {
     previewCount.textContent = selectedDrawingFile
       ? describeRemainingPreviews(remaining)
-      : `${maxFreePreviews} free previews per drawing.`;
+      : `${maxFreePreviews} free ${getPreviewStyleLabel(defaultPreviewStyle)} previews per drawing.`;
   }
 }
 
@@ -658,7 +659,11 @@ function updatePreviewPresentation(hasPreview) {
 }
 
 function normalizePreviewStyle(style) {
-  return Object.prototype.hasOwnProperty.call(previewStyleLabels, style) ? style : "storybook";
+  return Object.prototype.hasOwnProperty.call(previewStyleLabels, style) ? style : defaultPreviewStyle;
+}
+
+function getPreviewStyleLabel(style) {
+  return previewStyleLabels[normalizePreviewStyle(style)];
 }
 
 function describeRemainingPreviews(remaining) {

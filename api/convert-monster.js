@@ -1,6 +1,13 @@
 const fs = require("node:fs/promises");
 const path = require("node:path");
 const { Blob } = require("node:buffer");
+const {
+  MONSTERSNOW_COLORING_PAGE_NEGATIVE_PROMPT,
+  MONSTERSNOW_IMAGE_NEGATIVE_PROMPT,
+  buildMonsterCharacterPrompt,
+  getMonsterStyleLabel,
+  normalizeMonsterStyleId,
+} = require("../lib/monster-style");
 
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 const IMAGE_MODEL = process.env.OPENAI_IMAGE_MODEL || "gpt-image-1.5";
@@ -10,17 +17,14 @@ const FUNCTION_TIMEOUT_BUFFER_MS = 6 * 1000;
 const COLORING_PAGE_MIN_BUDGET_MS = 18 * 1000;
 const FALLBACK_IMAGE_MODELS = ["gpt-image-1"];
 
-const referenceImages = [
-  "assets/master-references/character-purple-storybook-style.jpg",
-  "assets/master-references/coloring-page-line-art.jpg",
+const characterReferenceImages = [
+  "assets/master-references/soft-3d-storybook-monster-01.png",
+  "assets/master-references/soft-3d-storybook-monster-02.png",
+  "assets/master-references/soft-3d-storybook-monster-03.png",
+  "assets/master-references/soft-3d-storybook-monster-04.png",
+  "assets/master-references/soft-3d-storybook-monster-05.png",
 ];
-
-const previewStyles = {
-  storybook: "classic MonstersNOW storybook style with a warm, polished children's book character look",
-  cute: "extra cute and gentle, with rounder shapes, softer features, and a sweet friendly expression",
-  silly: "playful and goofy, with a bigger smile, lively pose, and funny kid-friendly personality",
-  adventure: "storybook adventure style, with a brave cheerful pose and slightly more energetic character design",
-};
+const coloringPageReferenceImage = "assets/master-references/coloring-page-line-art.jpg";
 
 module.exports = async function handler(request, response) {
   if (request.method !== "POST") {
@@ -77,6 +81,7 @@ module.exports = async function handler(request, response) {
       coloringPage,
       warnings,
       style,
+      styleLabel: getMonsterStyleLabel(style),
       variationNumber,
       message: coloringPage
         ? "Monster preview and coloring page created."
@@ -124,7 +129,7 @@ function isSafeDataUrl(value) {
 }
 
 function normalizePreviewStyle(style) {
-  return Object.prototype.hasOwnProperty.call(previewStyles, style) ? style : "storybook";
+  return normalizeMonsterStyleId(style);
 }
 
 function normalizeVariationNumber(value) {
@@ -138,17 +143,30 @@ function normalizeVariationNumber(value) {
 }
 
 async function loadReferenceImages() {
-  return Promise.all(
-    referenceImages.map(async (assetPath) => {
-      const absolutePath = path.join(process.cwd(), assetPath);
-      const file = await fs.readFile(absolutePath);
-      return {
-        buffer: file,
-        filename: path.basename(assetPath),
-        mimeType: "image/jpeg",
-      };
-    }),
-  );
+  const [characterStyle, coloringPage] = await Promise.all([
+    Promise.all(characterReferenceImages.map(loadReferenceImage)),
+    loadReferenceImage(coloringPageReferenceImage),
+  ]);
+
+  return {
+    characterStyle,
+    coloringPage,
+  };
+}
+
+async function loadReferenceImage(assetPath) {
+  const absolutePath = path.join(process.cwd(), assetPath);
+  const file = await fs.readFile(absolutePath);
+
+  return {
+    buffer: file,
+    filename: path.basename(assetPath),
+    mimeType: getReferenceMimeType(assetPath),
+  };
+}
+
+function getReferenceMimeType(assetPath) {
+  return path.extname(assetPath).toLowerCase() === ".png" ? "image/png" : "image/jpeg";
 }
 
 function getRemainingRequestBudget(startedAt) {
@@ -157,15 +175,9 @@ function getRemainingRequestBudget(startedAt) {
 
 async function createMonsterImage(drawing, references, style, variationNumber, timeoutMs) {
   return createImageEdit({
-    prompt: [
-      "Transform the child's monster drawing into a friendly MonstersNOW children's book character.",
-      "Preserve the drawing's main body shape, number of eyes, horns, limbs, colors, expression, and personality.",
-      "Use the reference monster only for brand style: rounded friendly form, bright colors, soft storybook lighting, polished 3D children's illustration.",
-      `For this preview, use ${previewStyles[style]}.`,
-      `Make this version distinct from prior previews while staying faithful to the drawing. Preview number ${variationNumber} of 3.`,
-      "White background. No text. No logo. No scary details. Kid-friendly.",
-    ].join(" "),
-    images: [dataUrlToImagePart(drawing, "drawing.jpg"), references[0]],
+    prompt: buildMonsterCharacterPrompt({ style, variationNumber }),
+    negativePrompt: MONSTERSNOW_IMAGE_NEGATIVE_PROMPT,
+    images: [dataUrlToImagePart(drawing, "drawing.jpg"), ...references.characterStyle],
     size: "1024x1024",
     timeoutMs,
   });
@@ -208,17 +220,19 @@ async function createColoringPage(monsterImage, references, timeoutMs) {
   return createImageEdit({
     prompt: [
       "Create a black-and-white printable coloring page of this monster character.",
+      "Preserve the monster's identity, proportions, number of eyes, horns, limbs, teeth, spots, stripes, and other defining features.",
       "Use clean bold outlines, simple interior details, open white fill areas, and no shading.",
       "Use the line-art reference only for coloring page style.",
       "White background. No text. No logo. Kid-friendly.",
     ].join(" "),
-    images: [dataUrlToImagePart(monsterImage, "monster-preview.png"), references[1]],
+    negativePrompt: MONSTERSNOW_COLORING_PAGE_NEGATIVE_PROMPT,
+    images: [dataUrlToImagePart(monsterImage, "monster-preview.png"), references.coloringPage],
     size: "1024x1024",
     timeoutMs,
   });
 }
 
-async function createImageEdit({ prompt, images, size, timeoutMs }) {
+async function createImageEdit({ prompt, negativePrompt, images, size, timeoutMs }) {
   const models = getImageModels();
   let lastError;
 
@@ -228,7 +242,7 @@ async function createImageEdit({ prompt, images, size, timeoutMs }) {
     try {
       return await requestImageEdit({
         model,
-        prompt,
+        prompt: preparePromptForOpenAIImageEdit({ prompt, negativePrompt }),
         images,
         size,
         timeoutMs,
@@ -252,6 +266,17 @@ async function createImageEdit({ prompt, images, size, timeoutMs }) {
 
 function getImageModels() {
   return [...new Set([IMAGE_MODEL, ...FALLBACK_IMAGE_MODELS].filter(Boolean))];
+}
+
+function preparePromptForOpenAIImageEdit({ prompt, negativePrompt }) {
+  if (!negativePrompt) {
+    return prompt;
+  }
+
+  // OpenAI image edits currently do not expose a separate negative_prompt
+  // field, so keep MonstersNOW's shared exclusions centralized and fold them
+  // into the prompt text for this provider.
+  return `${prompt} Avoid: ${negativePrompt}.`;
 }
 
 function shouldRetryWithFallbackModel(error, index, models) {
