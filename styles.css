@@ -315,14 +315,47 @@ main > section {
   text-align: center;
 }
 
+.section-heading p:not(.eyebrow) {
+  margin: 14px auto 0;
+  color: var(--muted);
+  font-size: 1.05rem;
+}
+
 .steps-section,
 .converter-section,
 .books-section,
 .about-section,
+.pricing-section,
 .reviews-section,
 .faq-section,
 .cta-section {
   padding: clamp(48px, 7vw, 92px) clamp(20px, 6vw, 88px);
+}
+
+.proof-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  padding: 0 clamp(20px, 6vw, 88px);
+  background: var(--line);
+  border-block: 1px solid var(--line);
+}
+
+.proof-strip span {
+  display: grid;
+  min-height: 78px;
+  align-content: center;
+  gap: 2px;
+  padding: 12px 18px;
+  background: #fff;
+  color: var(--muted);
+  font-size: 0.88rem;
+  font-weight: 800;
+}
+
+.proof-strip strong {
+  color: var(--navy);
+  font-size: 1.05rem;
 }
 
 .converter-section {
@@ -467,6 +500,13 @@ main > section {
 
 .upload-guidance {
   color: var(--muted);
+}
+
+.privacy-note {
+  margin: -6px 0 0;
+  color: var(--teal-dark);
+  font-size: 0.84rem;
+  font-weight: 800;
 }
 
 .converter-error {
@@ -705,7 +745,8 @@ main > section {
 .book-card p,
 .review-card p,
 .faq-grid p,
-.about-section p {
+.about-section p,
+.pricing-card p {
   color: var(--muted);
 }
 
@@ -826,6 +867,88 @@ main > section {
   font-size: 1.12rem;
 }
 
+.trust-copy {
+  display: grid;
+  gap: 16px;
+}
+
+.feature-list {
+  display: grid;
+  gap: 10px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.feature-list li {
+  position: relative;
+  padding-left: 24px;
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.feature-list li::before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  color: var(--teal-dark);
+  content: "✓";
+  font-weight: 900;
+}
+
+.pricing-section {
+  background: #fff;
+}
+
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  max-width: 960px;
+  margin: 30px auto 0;
+}
+
+.pricing-card {
+  display: grid;
+  align-content: start;
+  gap: 16px;
+  min-height: 420px;
+  padding: 28px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 14px 30px rgba(6, 27, 59, 0.08);
+}
+
+.pricing-card.featured {
+  border-color: #9bdce2;
+  background: #f8fdfe;
+}
+
+.pricing-card > span {
+  width: fit-content;
+  padding: 4px 10px;
+  color: var(--teal-dark);
+  background: #eafafa;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.pricing-card .price {
+  margin: 0;
+  color: var(--navy);
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 900;
+  line-height: 1;
+}
+
+.pricing-card .button {
+  width: fit-content;
+  margin-top: auto;
+}
+
 .reviews-section {
   background:
     radial-gradient(circle at 84% 100%, rgba(0, 169, 179, 0.18), transparent 26%),
@@ -849,11 +972,19 @@ main > section {
 }
 
 .review-card p {
-  margin: 10px 0 18px;
+  margin: 10px 0 0;
 }
 
-.review-card strong {
-  color: var(--navy);
+.review-card span {
+  display: inline-grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  margin-bottom: 14px;
+  color: #fff;
+  background: var(--teal);
+  border-radius: 50%;
+  font-weight: 900;
 }
 
 .trust-row {
@@ -881,10 +1012,9 @@ main > section {
 }
 
 .cta-section {
-  display: flex;
+  display: grid;
   flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
+  justify-items: center;
   gap: 22px;
   background: var(--paper);
   text-align: center;
@@ -944,7 +1074,9 @@ main > section {
     grid-template-columns: 1fr;
   }
 
+  .proof-strip,
   .book-grid,
+  .pricing-grid,
   .trust-row {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -985,6 +1117,7 @@ main > section {
   .review-grid,
   .faq-grid,
   .about-section,
+  .pricing-grid,
   .site-footer {
     grid-template-columns: 1fr;
   }
@@ -1006,8 +1139,7 @@ main > section {
 }
 
 @media (max-width: 520px) {
-  .site-nav a:nth-child(4),
-  .site-nav a:nth-child(5) {
+  .site-nav a:first-child {
     display: none;
   }
 
@@ -1048,6 +1180,7 @@ main > section {
     display: none;
   }
 
+  .proof-strip,
   .book-grid,
   .trust-row {
     grid-template-columns: 1fr;

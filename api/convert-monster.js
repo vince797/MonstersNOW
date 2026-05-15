@@ -1,8 +1,10 @@
 const fs = require("node:fs/promises");
 const path = require("node:path");
+const { Blob } = require("node:buffer");
 
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
-const IMAGE_MODEL = "gpt-image-1.5";
+const IMAGE_MODEL = process.env.OPENAI_IMAGE_MODEL || "gpt-image-1.5";
+const IMAGE_QUALITY = process.env.OPENAI_IMAGE_QUALITY || "low";
 
 const referenceImages = [
   "assets/master-references/character-purple-storybook-style.jpg",
@@ -123,7 +125,11 @@ async function loadReferenceImages() {
     referenceImages.map(async (assetPath) => {
       const absolutePath = path.join(process.cwd(), assetPath);
       const file = await fs.readFile(absolutePath);
-      return `data:image/jpeg;base64,${file.toString("base64")}`;
+      return {
+        buffer: file,
+        filename: path.basename(assetPath),
+        mimeType: "image/jpeg",
+      };
     }),
   );
 }
@@ -138,7 +144,7 @@ async function createMonsterImage(drawing, references, style, variationNumber) {
       `Make this version distinct from prior previews while staying faithful to the drawing. Preview number ${variationNumber} of 3.`,
       "White background. No text. No logo. No scary details. Kid-friendly.",
     ].join(" "),
-    images: [drawing, references[0]],
+    images: [dataUrlToImagePart(drawing, "drawing.jpg"), references[0]],
     size: "1024x1024",
   });
 }
@@ -151,28 +157,35 @@ async function createColoringPage(monsterImage, references) {
       "Use the line-art reference only for coloring page style.",
       "White background. No text. No logo. Kid-friendly.",
     ].join(" "),
-    images: [monsterImage, references[1]],
+    images: [dataUrlToImagePart(monsterImage, "monster-preview.png"), references[1]],
     size: "1024x1024",
   });
 }
 
 async function createImageEdit({ prompt, images, size }) {
+  const formData = new FormData();
+
+  formData.append("model", IMAGE_MODEL);
+  formData.append("prompt", prompt);
+  formData.append("n", "1");
+  formData.append("size", size);
+  formData.append("quality", IMAGE_QUALITY);
+  formData.append("output_format", "png");
+
+  images.forEach((image, index) => {
+    formData.append(
+      "image[]",
+      new Blob([image.buffer], { type: image.mimeType }),
+      image.filename || `image-${index + 1}.png`,
+    );
+  });
+
   const apiResponse = await fetch("https://api.openai.com/v1/images/edits", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-      "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      model: IMAGE_MODEL,
-      images: images.map((imageUrl) => ({ image_url: imageUrl })),
-      prompt,
-      n: 1,
-      size,
-      quality: "medium",
-      output_format: "png",
-      input_fidelity: "high",
-    }),
+    body: formData,
   });
 
   const body = await apiResponse.json().catch(() => ({}));
@@ -188,4 +201,21 @@ async function createImageEdit({ prompt, images, size }) {
   }
 
   return `data:image/png;base64,${base64}`;
+}
+
+function dataUrlToImagePart(dataUrl, filename) {
+  const match = dataUrl.match(/^data:(image\/(?:png|jpe?g|webp|gif));base64,([A-Za-z0-9+/=]+)$/i);
+
+  if (!match) {
+    throw new Error("Invalid image data URL.");
+  }
+
+  const mimeType = match[1].toLowerCase().replace("image/jpg", "image/jpeg");
+  const buffer = Buffer.from(match[2], "base64");
+
+  return {
+    buffer,
+    filename,
+    mimeType,
+  };
 }

@@ -104,7 +104,7 @@ if (monsterUpload && drawingPreview && monsterPreview && convertButton) {
 
       try {
         if (coloringPageUrl) {
-          downloadImage(coloringPageUrl, "monstersnow-coloring-page.png");
+          await downloadPrintableColoringPage(coloringPageUrl);
         } else {
           await downloadColoringPage(monsterPreview);
         }
@@ -544,6 +544,12 @@ async function downloadColoringPage(sourceImage) {
   downloadImage(printablePage.toDataURL("image/png"), "monstersnow-coloring-page.png");
 }
 
+async function downloadPrintableColoringPage(source) {
+  const lineArt = typeof source === "string" ? await loadImage(source) : source;
+  const printablePage = await createPrintableColoringPage(lineArt);
+  downloadImage(printablePage.toDataURL("image/png"), "monstersnow-coloring-page.png");
+}
+
 function ensureImageLoaded(image) {
   if (image.complete && image.naturalWidth > 0) {
     return Promise.resolve();
@@ -559,16 +565,17 @@ function createLineArtCanvas(sourceImage) {
   const canvas = document.createElement("canvas");
   const sourceWidth = sourceImage.naturalWidth || 1024;
   const sourceHeight = sourceImage.naturalHeight || 1024;
-  const scale = Math.min(1, 1200 / Math.max(sourceWidth, sourceHeight));
-  const width = Math.max(1, Math.round(sourceWidth * scale));
-  const height = Math.max(1, Math.round(sourceHeight * scale));
+  const crop = getLineArtCrop(sourceWidth, sourceHeight);
+  const scale = Math.min(1, 1200 / Math.max(crop.width, crop.height));
+  const width = Math.max(1, Math.round(crop.width * scale));
+  const height = Math.max(1, Math.round(crop.height * scale));
   const context = canvas.getContext("2d", { willReadFrequently: true });
 
   canvas.width = width;
   canvas.height = height;
   context.fillStyle = "#ffffff";
   context.fillRect(0, 0, width, height);
-  context.drawImage(sourceImage, 0, 0, width, height);
+  context.drawImage(sourceImage, crop.x, crop.y, crop.width, crop.height, 0, 0, width, height);
 
   const imageData = context.getImageData(0, 0, width, height);
   const { data } = imageData;
@@ -604,7 +611,7 @@ function createLineArtCanvas(sourceImage) {
       const gx = -topLeft - 2 * left - bottomLeft + topRight + 2 * right + bottomRight;
       const gy = -topLeft - 2 * top - topRight + bottomLeft + 2 * bottom + bottomRight;
       const edge = Math.sqrt(gx * gx + gy * gy);
-      const shouldDrawLine = edge > 42 || grayscale[pixel] < 62;
+      const shouldDrawLine = edge > 64 || grayscale[pixel] < 46;
 
       if (shouldDrawLine) {
         drawLinePixel(lineData.data, outputIndex);
@@ -615,6 +622,24 @@ function createLineArtCanvas(sourceImage) {
   context.putImageData(lineData, 0, 0);
 
   return canvas;
+}
+
+function getLineArtCrop(sourceWidth, sourceHeight) {
+  if (sourceWidth > sourceHeight * 1.45) {
+    return {
+      x: 0,
+      y: 0,
+      width: Math.min(sourceWidth, Math.round(sourceHeight * 1.18)),
+      height: sourceHeight,
+    };
+  }
+
+  return {
+    x: 0,
+    y: 0,
+    width: sourceWidth,
+    height: sourceHeight,
+  };
 }
 
 function drawLinePixel(data, outputIndex) {
@@ -629,14 +654,14 @@ async function createPrintableColoringPage(lineArt) {
   const context = page.getContext("2d");
   const pageWidth = 1700;
   const pageHeight = 2200;
-  const margin = 92;
-  const maxArtWidth = 1320;
-  const maxArtHeight = 1440;
+  const margin = 86;
+  const maxArtWidth = 1380;
+  const maxArtHeight = 1360;
   const scale = Math.min(maxArtWidth / lineArt.width, maxArtHeight / lineArt.height);
   const artWidth = Math.round(lineArt.width * scale);
   const artHeight = Math.round(lineArt.height * scale);
   const artX = Math.round((pageWidth - artWidth) / 2);
-  const artY = 360;
+  const artY = Math.round(460 + Math.max(0, (maxArtHeight - artHeight) / 2));
 
   page.width = pageWidth;
   page.height = pageHeight;
@@ -644,46 +669,65 @@ async function createPrintableColoringPage(lineArt) {
   context.fillRect(0, 0, pageWidth, pageHeight);
 
   drawPrintableBorder(context, pageWidth, pageHeight, margin);
-  drawColoringPageLogo(context, margin + 34, margin + 56);
+  drawColoringPageLogo(context, margin + 46, margin + 82);
 
   context.fillStyle = "#161616";
   context.textAlign = "center";
   context.textBaseline = "alphabetic";
-  context.font = "700 86px Arial, sans-serif";
-  context.fillText("My Monster Coloring Page", pageWidth / 2, 210);
+  context.font = "700 76px Arial, sans-serif";
+  context.fillText("My Monster Coloring Page", pageWidth / 2, 276);
 
   context.drawImage(lineArt, artX, artY, artWidth, artHeight);
 
-  context.font = "600 34px Arial, sans-serif";
-  context.fillText("Turn drawings into storybooks", pageWidth / 2, pageHeight - 138);
+  context.fillStyle = "#222";
+  context.font = "600 30px Arial, sans-serif";
+  context.fillText("Turn drawings into storybooks", pageWidth / 2, pageHeight - 128);
 
   return page;
 }
 
 function drawPrintableBorder(context, pageWidth, pageHeight, margin) {
   context.strokeStyle = "#161616";
-  context.lineWidth = 6;
-  context.strokeRect(margin, margin, pageWidth - margin * 2, pageHeight - margin * 2);
+  context.lineWidth = 5;
+  drawRoundedRect(context, margin, margin, pageWidth - margin * 2, pageHeight - margin * 2, 18);
+  context.stroke();
   context.lineWidth = 2;
-  context.strokeRect(
+  drawRoundedRect(
+    context,
     margin + 22,
     margin + 22,
     pageWidth - (margin + 22) * 2,
     pageHeight - (margin + 22) * 2,
+    10,
   );
+  context.stroke();
 }
 
 function drawColoringPageLogo(context, x, y) {
   context.save();
   context.textAlign = "left";
   context.textBaseline = "alphabetic";
-  context.font = "800 48px Arial, sans-serif";
+  context.font = "800 42px Arial, sans-serif";
   context.fillStyle = "#061b3b";
   context.fillText("Monsters", x, y);
   context.fillStyle = "#ff6a00";
-  context.fillText("NOW", x + 218, y);
+  context.fillText("NOW", x + 190, y);
   context.fillStyle = "#061b3b";
-  context.font = "700 18px Arial, sans-serif";
-  context.fillText("Turn drawings into storybooks", x + 2, y + 30);
+  context.font = "700 15px Arial, sans-serif";
+  context.fillText("Turn drawings into storybooks", x + 2, y + 26);
   context.restore();
+}
+
+function drawRoundedRect(context, x, y, width, height, radius) {
+  context.beginPath();
+  context.moveTo(x + radius, y);
+  context.lineTo(x + width - radius, y);
+  context.quadraticCurveTo(x + width, y, x + width, y + radius);
+  context.lineTo(x + width, y + height - radius);
+  context.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+  context.lineTo(x + radius, y + height);
+  context.quadraticCurveTo(x, y + height, x, y + height - radius);
+  context.lineTo(x, y + radius);
+  context.quadraticCurveTo(x, y, x + radius, y);
+  context.closePath();
 }
