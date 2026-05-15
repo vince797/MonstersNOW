@@ -5,6 +5,9 @@
     "api/convert-monster.js": {
       "maxDuration": 60,
       "includeFiles": "assets/master-references/**"
+    },
+    "api/convert-heic.js": {
+      "maxDuration": 30
     }
   },
   "headers": [

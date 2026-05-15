@@ -826,6 +826,16 @@ function getConvertedJpegName(filename) {
 }
 
 async function convertHeicToJpeg(file) {
+  try {
+    return await convertHeicToJpegInBrowser(file);
+  } catch (error) {
+    console.warn("Browser HEIC conversion failed; trying server fallback.", error);
+    setUploadActionStatus("Finishing HEIC conversion...");
+    return convertHeicToJpegOnServer(file);
+  }
+}
+
+async function convertHeicToJpegInBrowser(file) {
   const heic2any = await loadHeicConverter();
   const converted = await heic2any({
     blob: file,
@@ -839,6 +849,44 @@ async function convertHeicToJpeg(file) {
   }
 
   return blob;
+}
+
+async function convertHeicToJpegOnServer(file) {
+  const image = await fileToDataUrl(file);
+  const response = await fetch("/api/convert-heic", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ image }),
+  });
+  const result = await response.json().catch(() => ({
+    error: "HEIC converter did not return a readable response.",
+  }));
+
+  if (!response.ok || !result.image) {
+    throw new Error(result.error || "HEIC photo could not be converted.");
+  }
+
+  return dataUrlToBlob(result.image);
+}
+
+function dataUrlToBlob(dataUrl) {
+  const match = String(dataUrl).match(/^data:([^;]+);base64,(.+)$/);
+
+  if (!match) {
+    throw new Error("Converted image response was not a valid data URL.");
+  }
+
+  const [, type, base64] = match;
+  const binary = window.atob(base64);
+  const bytes = new Uint8Array(binary.length);
+
+  for (let index = 0; index < binary.length; index += 1) {
+    bytes[index] = binary.charCodeAt(index);
+  }
+
+  return new Blob([bytes], { type });
 }
 
 function loadHeicConverter() {
