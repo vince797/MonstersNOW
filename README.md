@@ -26,8 +26,8 @@ vercel dev
 ## AI converter
 
 Set `OPENAI_API_KEY` in Vercel before using the real converter. Without that
-environment variable, `/api/convert-monster` returns demo artwork so the page
-continues to work.
+environment variable, `/api/convert-monster` returns a configuration error
+instead of showing demo artwork as if it came from the upload.
 
 The converter uses the uploaded child drawing as the source of truth and the
 cropped images in `assets/master-references/` as light style references.

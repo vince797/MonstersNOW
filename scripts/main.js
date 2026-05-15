@@ -246,7 +246,7 @@ async function requestMonsterPreview() {
     applyMonsterResult(result);
   } catch (error) {
     console.error(error);
-    showDemoMonster();
+    showMonsterGenerationError(error);
   } finally {
     isGeneratingPreview = false;
     syncPreviewControls();
@@ -255,11 +255,10 @@ async function requestMonsterPreview() {
 
 function applyMonsterResult(result) {
   const style = normalizePreviewStyle(result.style);
-  const isDemo = result.mode === "demo";
   const preview = addGeneratedPreview({
-    image: result.monsterImage || demoMonsterImage,
+    image: result.monsterImage,
     coloringPage: result.coloringPage,
-    mode: isDemo ? "demo" : "ai",
+    mode: "ai",
     style,
   });
   const remaining = maxFreePreviews - previewsUsed;
@@ -272,15 +271,11 @@ function applyMonsterResult(result) {
   }
 
   if (converterStatus) {
-    converterStatus.textContent = isDemo
-      ? `${previewStyleLabels[style]} demo preview ready.`
-      : `${previewStyleLabels[style]} monster preview ready.`;
+    converterStatus.textContent = `${previewStyleLabels[style]} monster preview ready.`;
   }
 
   if (converterNote) {
-    converterNote.textContent = isDemo
-      ? `The AI route is ready, but the API key is not configured here yet. ${describeRemainingPreviews(remaining)}`
-      : `Choose this version, download the free coloring page, or try another style. ${describeRemainingPreviews(remaining)}`;
+    converterNote.textContent = `Choose this version, download the free coloring page, or try another style. ${describeRemainingPreviews(remaining)}`;
   }
 
   setUploadActionStatus(`${previewStyleLabels[style]} preview ready below. ${describeRemainingPreviews(remaining)}`);
@@ -583,16 +578,27 @@ async function convertMonster(drawing, style, variationNumber) {
     throw new Error(result.error || "Could not create monster preview.");
   }
 
+  if (!result.monsterImage) {
+    throw new Error("The generator did not return a monster preview.");
+  }
+
   return result;
 }
 
-function showDemoMonster() {
-  applyMonsterResult({
-    mode: "demo",
-    monsterImage: demoMonsterImage,
-    coloringPage: null,
-    style: selectedMonsterStyle,
-  });
+function showMonsterGenerationError(error) {
+  const message = error?.message || "The monster generator is temporarily unavailable.";
+
+  if (converterStatus) {
+    converterStatus.textContent = "Monster preview could not be created.";
+  }
+
+  if (converterNote) {
+    converterNote.textContent = `${message} Your uploaded drawing is still selected, and this did not use one of your free previews.`;
+  }
+
+  setUploadActionStatus("The generator could not finish. Try again in a moment.");
+  setConverterStage(selectedDrawingFile ? "preview" : "upload");
+  scrollToResultPanel({ focus: true, delay: 120 });
 }
 
 function downloadImage(url, filename) {

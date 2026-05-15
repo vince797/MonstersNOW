@@ -43,13 +43,11 @@ module.exports = async function handler(request, response) {
   }
 
   if (!process.env.OPENAI_API_KEY) {
-    return response.status(200).json({
-      mode: "demo",
-      monsterImage: "/assets/step-2-character.jpg?v=20260515-horns",
-      coloringPage: null,
+    return response.status(503).json({
+      code: "missing_openai_api_key",
+      error: "The monster generator is not configured yet.",
       style,
       variationNumber,
-      message: "OPENAI_API_KEY is not configured yet. Returning demo artwork.",
     });
   }
 
@@ -70,6 +68,7 @@ module.exports = async function handler(request, response) {
     console.error(error);
 
     return response.status(502).json({
+      code: "monster_generator_unavailable",
       error: "The monster generator is temporarily unavailable.",
     });
   }

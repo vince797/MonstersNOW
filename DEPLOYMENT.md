@@ -36,8 +36,9 @@ Add it in Vercel under Project Settings > Environment Variables for Production,
 Preview, and Development. Keep it server-side only; never add it to browser
 JavaScript.
 
-Without `OPENAI_API_KEY`, the API route intentionally returns demo artwork so
-the homepage still works.
+Without `OPENAI_API_KEY`, the API route returns a configuration error. This
+prevents the UI from showing sample artwork as if it came from a customer's
+upload.
 
 ## Lulu sandbox environment variables
 
