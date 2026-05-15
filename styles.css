@@ -493,6 +493,7 @@ main > section {
 
 .upload-guidance,
 .converter-error,
+.upload-action-status,
 .interest-form p {
   margin: 0;
   font-size: 0.9rem;
@@ -507,6 +508,12 @@ main > section {
   color: var(--teal-dark);
   font-size: 0.84rem;
   font-weight: 800;
+}
+
+.upload-action-status {
+  color: var(--navy);
+  font-weight: 900;
+  text-align: center;
 }
 
 .converter-error {
@@ -548,6 +555,11 @@ main > section {
 
 .result-panel {
   grid-template-rows: auto 1fr;
+}
+
+.result-panel:focus {
+  outline: 3px solid rgba(0, 169, 179, 0.22);
+  outline-offset: 4px;
 }
 
 .result-panel h3 {
@@ -670,18 +682,18 @@ main > section {
   display: none;
 }
 
-.interest-form label {
+.interest-form > label {
   color: var(--navy);
   font-weight: 900;
 }
 
-.interest-form div {
+.interest-form > div:not(.storybook-format-options) {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 8px;
 }
 
-.interest-form input {
+.interest-form input[type="email"] {
   min-width: 0;
   min-height: 46px;
   padding: 0 12px;
@@ -689,6 +701,52 @@ main > section {
   border-radius: 8px;
   color: var(--ink);
   font: inherit;
+}
+
+.storybook-format-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.storybook-format-choice {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.storybook-format-choice:has(input:checked) {
+  border-color: var(--teal);
+  background: #eafafa;
+}
+
+.storybook-format-choice input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--teal);
+}
+
+.storybook-format-choice span {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.storybook-format-choice strong {
+  color: var(--navy);
+  font-size: 0.9rem;
+}
+
+.storybook-format-choice small {
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 800;
 }
 
 .interest-form p {
@@ -939,9 +997,41 @@ main > section {
 .pricing-card .price {
   margin: 0;
   color: var(--navy);
-  font-size: clamp(2rem, 4vw, 3rem);
+  font-size: clamp(1.9rem, 4vw, 2.8rem);
   font-weight: 900;
   line-height: 1;
+}
+
+.storybook-price-list {
+  display: grid;
+  gap: 8px;
+}
+
+.storybook-price-list div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-block: 1px solid var(--line);
+}
+
+.storybook-price-list div + div {
+  border-top: 0;
+}
+
+.storybook-price-list strong {
+  min-width: 0;
+  color: var(--navy);
+  font-size: 0.92rem;
+}
+
+.storybook-price-list span {
+  color: var(--teal-dark);
+  font-size: 0.9rem;
+  font-weight: 900;
+  text-align: right;
+  white-space: nowrap;
 }
 
 .pricing-card .button {

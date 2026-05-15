@@ -39,6 +39,24 @@ JavaScript.
 Without `OPENAI_API_KEY`, the API route intentionally returns demo artwork so
 the homepage still works.
 
+## Lulu sandbox environment variables
+
+The Lulu sandbox API routes are server-side only. Add these to Development and
+Preview while testing:
+
+```text
+LULU_SANDBOX_API_BASE_URL=https://api.sandbox.lulu.com
+LULU_SANDBOX_CLIENT_KEY
+LULU_SANDBOX_CLIENT_SECRET
+LULU_SANDBOX_CONTACT_EMAIL
+LULU_SANDBOX_ENDPOINT_SECRET
+```
+
+Do not add production Lulu credentials until the PDF generation and sandbox
+print-job flow have been validated. The sandbox integration supports softcover
+and hardcover storybook variants; both should be proofed before enabling paid
+checkout.
+
 ## Add the domain in Vercel
 
 In the Vercel dashboard, open the project, then go to Settings > Domains and add:

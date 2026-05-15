@@ -9,10 +9,12 @@ const drawingPreview = document.querySelector("#drawing-preview");
 const monsterPreview = document.querySelector("#monster-preview");
 const convertButton = document.querySelector("#convert-button");
 const regenerateButton = document.querySelector("#regenerate-monster");
+const resultPanel = document.querySelector("#monster-result");
 const downloadColoringButton = document.querySelector("#download-coloring");
 const converterStatus = document.querySelector("#converter-status");
 const converterNote = document.querySelector("#converter-note");
 const previewCount = document.querySelector("#preview-count");
+const uploadActionStatus = document.querySelector("#upload-action-status");
 const uploadError = document.querySelector("#upload-error");
 const uploadTitle = document.querySelector(".upload-drop strong");
 const uploadMeta = document.querySelector(".upload-drop small");
@@ -23,6 +25,7 @@ const storybookInterestButton = document.querySelector("#storybook-interest");
 const storybookInterestForm = document.querySelector("#storybook-interest-form");
 const interestEmail = document.querySelector("#interest-email");
 const interestStatus = document.querySelector("#interest-status");
+const storybookFormatInputs = [...document.querySelectorAll('input[name="storybook-format"]')];
 
 const allowedUploadTypes = new Set(["image/png", "image/jpeg", "image/webp", "image/gif"]);
 const maxUploadBytes = 8 * 1024 * 1024;
@@ -91,6 +94,7 @@ if (monsterUpload && drawingPreview && monsterPreview && convertButton) {
       converterNote.textContent = "Ready to create a MonstersNOW-style character preview.";
     }
 
+    setUploadActionStatus("Tap Create Monster. The preview will appear below.");
     syncPreviewControls();
   });
 
@@ -137,6 +141,10 @@ if (monsterUpload && drawingPreview && monsterPreview && convertButton) {
       if (selectedDrawingFile && previewsUsed < maxFreePreviews && converterNote) {
         converterNote.textContent = `${previewStyleLabels[selectedMonsterStyle]} style selected. Create another version when ready.`;
       }
+
+      if (selectedDrawingFile && previewsUsed < maxFreePreviews) {
+        setUploadActionStatus(`${previewStyleLabels[selectedMonsterStyle]} style selected. Tap the button to generate it.`);
+      }
     });
   });
 
@@ -166,16 +174,36 @@ if (storybookInterestButton && storybookInterestForm) {
       return;
     }
 
-    localStorage.setItem("monstersnow_storybook_interest", email);
+    const selectedFormat = getSelectedStorybookFormat();
+
+    localStorage.setItem(
+      "monstersnow_storybook_interest",
+      JSON.stringify({
+        email,
+        format: selectedFormat.value,
+      }),
+    );
 
     if (interestStatus) {
-      interestStatus.textContent = "Thanks. Storybook ordering is coming soon.";
+      interestStatus.textContent = `Thanks. We will follow up about the ${selectedFormat.label.toLowerCase()} option.`;
     }
 
     window.location.href = `mailto:hello@monstersnow.com?subject=${encodeURIComponent(
       "MonstersNOW storybook interest",
-    )}&body=${encodeURIComponent(`Please notify me when storybook ordering opens: ${email}`)}`;
+    )}&body=${encodeURIComponent(
+      `Please notify me when storybook ordering opens: ${email}\nPreferred format: ${selectedFormat.label}`,
+    )}`;
   });
+}
+
+function getSelectedStorybookFormat() {
+  const selected = storybookFormatInputs.find((input) => input.checked);
+  const value = selected?.value === "hardcover" ? "hardcover" : "softcover";
+
+  return {
+    value,
+    label: value === "hardcover" ? "Hardcover Keepsake ($59.99 + shipping)" : "Softcover Storybook ($39.99 + shipping)",
+  };
 }
 
 async function requestMonsterPreview() {
@@ -193,11 +221,14 @@ async function requestMonsterPreview() {
     }
 
     syncPreviewControls();
+    setUploadActionStatus("Preview limit reached. Choose one of the versions below.");
+    scrollToResultPanel();
     return;
   }
 
   isGeneratingPreview = true;
   syncPreviewControls();
+  setUploadActionStatus("Creating your monster preview. Watch the panel below.");
 
   if (converterStatus) {
     converterStatus.textContent = "Creating monster preview...";
@@ -206,6 +237,8 @@ async function requestMonsterPreview() {
   if (converterNote) {
     converterNote.textContent = "This usually takes a short moment. Try up to three versions before choosing one.";
   }
+
+  scrollToResultPanel();
 
   try {
     const drawing = await prepareImageForUpload(selectedDrawingFile);
@@ -249,6 +282,9 @@ function applyMonsterResult(result) {
       ? `The AI route is ready, but the API key is not configured here yet. ${describeRemainingPreviews(remaining)}`
       : `Choose this version, download the free coloring page, or try another style. ${describeRemainingPreviews(remaining)}`;
   }
+
+  setUploadActionStatus(`${previewStyleLabels[style]} preview ready below. ${describeRemainingPreviews(remaining)}`);
+  scrollToResultPanel({ focus: true, delay: 120 });
 }
 
 function addGeneratedPreview({ image, coloringPage, mode, style }) {
@@ -321,6 +357,10 @@ function selectGeneratedPreview(id, announce = false) {
   if (announce && converterStatus) {
     converterStatus.textContent = `${previewStyleLabels[preview.style]} preview selected.`;
   }
+
+  if (announce) {
+    setUploadActionStatus(`${previewStyleLabels[preview.style]} preview selected.`);
+  }
 }
 
 function resetPreviewState() {
@@ -339,6 +379,7 @@ function resetPreviewState() {
     downloadColoringButton.disabled = true;
   }
 
+  setUploadActionStatus("Upload a drawing to unlock the free monster preview.");
   syncPreviewControls();
 }
 
@@ -423,6 +464,7 @@ function resetUpload() {
     uploadMeta.textContent = "PNG, JPG, WebP, or GIF under 8 MB";
   }
 
+  setUploadActionStatus("Upload a drawing to unlock the free monster preview.");
   setConverterStage("upload");
   syncPreviewControls();
 }
@@ -434,6 +476,29 @@ function showUploadError(message) {
 
   uploadError.textContent = message;
   uploadError.hidden = !message;
+}
+
+function setUploadActionStatus(message) {
+  if (uploadActionStatus) {
+    uploadActionStatus.textContent = message;
+  }
+}
+
+function scrollToResultPanel({ focus = false, delay = 0 } = {}) {
+  if (!resultPanel || !window.matchMedia("(max-width: 1040px)").matches) {
+    return;
+  }
+
+  window.setTimeout(() => {
+    resultPanel.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+
+    if (focus) {
+      resultPanel.focus({ preventScroll: true });
+    }
+  }, delay);
 }
 
 function setConverterStage(stage) {

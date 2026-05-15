@@ -117,9 +117,12 @@
             <button class="button primary converter-button" id="convert-button" type="button" disabled>
               Create Monster
             </button>
+            <p class="upload-action-status" id="upload-action-status" role="status">
+              Upload a drawing to unlock the free monster preview.
+            </p>
           </form>
 
-          <div class="result-panel" aria-live="polite">
+          <div class="result-panel" id="monster-result" aria-live="polite" tabindex="-1">
             <div class="converter-preview monster-preview">
               <img
                 id="monster-preview"
@@ -168,6 +171,22 @@
               </div>
               <form class="interest-form" id="storybook-interest-form" hidden>
                 <label for="interest-email">Storybook ordering is coming soon.</label>
+                <div class="storybook-format-options" role="radiogroup" aria-label="Preferred storybook format">
+                  <label class="storybook-format-choice">
+                    <input type="radio" name="storybook-format" value="softcover" checked />
+                    <span>
+                      <strong>Softcover</strong>
+                      <small>$39.99 + shipping</small>
+                    </span>
+                  </label>
+                  <label class="storybook-format-choice">
+                    <input type="radio" name="storybook-format" value="hardcover" />
+                    <span>
+                      <strong>Hardcover</strong>
+                      <small>$59.99 + shipping</small>
+                    </span>
+                  </label>
+                </div>
                 <div>
                   <input id="interest-email" type="email" placeholder="Email for storybook updates" autocomplete="email" />
                   <button class="button secondary" type="submit">Notify Me</button>
@@ -306,11 +325,21 @@
           <article class="pricing-card">
             <span>Paid</span>
             <h3>Printed Storybook</h3>
-            <p class="price">Coming soon</p>
+            <p class="price">From $39.99</p>
+            <div class="storybook-price-list" aria-label="Storybook format prices">
+              <div>
+                <strong>Softcover Storybook</strong>
+                <span>$39.99 + shipping</span>
+              </div>
+              <div>
+                <strong>Hardcover Keepsake</strong>
+                <span>$59.99 + shipping</span>
+              </div>
+            </div>
             <ul class="feature-list">
               <li>Personalized story starring their monster.</li>
-              <li>Cover and interior page previews.</li>
-              <li>Lulu print-on-demand fulfillment planned.</li>
+              <li>Cover and interior page previews before printing.</li>
+              <li>Lulu print-on-demand fulfillment with shipping at checkout.</li>
             </ul>
             <a class="button secondary" href="#converter">Get Book Updates</a>
           </article>
@@ -406,6 +435,6 @@
       <p>&copy; <span id="year"></span> MonstersNOW. All rights reserved.</p>
     </footer>
 
-    <script src="scripts/main.js?v=20260515-mvp-flow"></script>
+    <script src="scripts/main.js?v=20260515-preview-scroll"></script>
   </body>
 </html>
