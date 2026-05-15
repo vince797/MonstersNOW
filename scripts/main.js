@@ -22,6 +22,7 @@ const interestStatus = document.querySelector("#interest-status");
 
 const allowedUploadTypes = new Set(["image/png", "image/jpeg", "image/webp", "image/gif"]);
 const maxUploadBytes = 8 * 1024 * 1024;
+const demoMonsterImage = "assets/step-2-character.jpg?v=20260515-horns";
 let drawingPreviewUrl;
 let selectedDrawingFile;
 let coloringPageUrl;
@@ -97,7 +98,7 @@ if (monsterUpload && drawingPreview && monsterPreview && convertButton) {
       const result = await convertMonster(drawing);
       const isDemo = result.mode === "demo";
 
-      monsterPreview.src = result.monsterImage || "assets/step-2-character.jpg";
+      monsterPreview.src = result.monsterImage || demoMonsterImage;
       monsterPreview.alt = isDemo
         ? "Demo generated monster character preview."
         : "Generated monster character preview.";
@@ -320,7 +321,7 @@ async function convertMonster(drawing) {
 }
 
 function showDemoMonster() {
-  monsterPreview.src = "assets/step-2-character.jpg";
+  monsterPreview.src = demoMonsterImage;
   monsterPreview.alt = "Demo generated monster character preview.";
   coloringPageUrl = undefined;
   setConverterStage("download");

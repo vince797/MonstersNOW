@@ -588,6 +588,7 @@ main > section {
 
 .step-card {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   align-content: start;
   min-height: 340px;
   padding: 24px;
@@ -623,14 +624,23 @@ main > section {
 }
 
 .step-art.image-art {
-  width: min(340px, 100%);
-  height: auto;
-  justify-self: center;
+  position: relative;
+  display: grid;
+  width: auto;
+  max-width: none;
+  aspect-ratio: 1.95;
+  align-items: center;
+  justify-self: stretch;
+  overflow: hidden;
 }
 
 .step-art img {
   display: block;
+  position: absolute;
+  inset: 0;
   width: 100%;
+  height: 100%;
+  object-fit: contain;
   border-radius: 0;
   mix-blend-mode: multiply;
 }
@@ -794,12 +804,13 @@ main > section {
   align-items: center;
   gap: 24px;
   padding: 42px clamp(20px, 6vw, 88px);
-  color: rgba(255, 255, 255, 0.75);
-  background: #03142c;
+  color: var(--muted);
+  background: #f7fcfd;
+  border-top: 1px solid var(--line);
 }
 
 .footer-brand {
-  color: #fff;
+  color: var(--navy);
 }
 
 .site-footer nav {
@@ -810,6 +821,7 @@ main > section {
 }
 
 .site-footer nav a {
+  color: var(--navy);
   text-decoration: none;
 }
 
@@ -890,7 +902,9 @@ main > section {
   }
 
   .step-art.image-art {
-    width: min(360px, 100%);
+    width: auto;
+    max-width: none;
+    aspect-ratio: 1.95;
   }
 
   .site-footer,
