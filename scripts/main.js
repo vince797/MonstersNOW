@@ -16,6 +16,7 @@ const converterNote = document.querySelector("#converter-note");
 const previewCount = document.querySelector("#preview-count");
 const uploadActionStatus = document.querySelector("#upload-action-status");
 const uploadError = document.querySelector("#upload-error");
+const uploadDrop = document.querySelector(".upload-drop");
 const uploadTitle = document.querySelector(".upload-drop strong");
 const uploadMeta = document.querySelector(".upload-drop small");
 const flowSteps = [...document.querySelectorAll(".converter-flow li")];
@@ -45,59 +46,16 @@ let previewsUsed = 0;
 let generatedPreviews = [];
 let selectedPreviewId;
 let isGeneratingPreview = false;
+let uploadDragDepth = 0;
 
 if (monsterUpload && drawingPreview && monsterPreview && convertButton) {
   monsterUpload.addEventListener("change", () => {
     const [file] = monsterUpload.files;
 
-    if (!file) {
-      return;
-    }
-
-    const validationError = validateDrawing(file);
-
-    if (validationError) {
-      resetUpload();
-      showUploadError(validationError);
-      return;
-    }
-
-    if (drawingPreviewUrl) {
-      URL.revokeObjectURL(drawingPreviewUrl);
-    }
-
-    drawingPreviewUrl = URL.createObjectURL(file);
-    selectedDrawingFile = file;
-    resetPreviewState();
-    drawingPreview.src = drawingPreviewUrl;
-    drawingPreview.alt = "Uploaded child monster drawing.";
-    setConverterStage("preview");
-    showUploadError("");
-
-    if (uploadTitle) {
-      uploadTitle.textContent = file.name;
-    }
-
-    if (uploadMeta) {
-      uploadMeta.textContent = `${formatBytes(file.size)} selected`;
-    }
-
-    if (downloadColoringButton) {
-      downloadColoringButton.disabled = true;
-    }
-
-    if (converterStatus) {
-      converterStatus.textContent = "Drawing loaded.";
-    }
-
-    if (converterNote) {
-      converterNote.textContent = "Ready to create a MonstersNOW-style character preview.";
-    }
-
-    setUploadActionStatus("Tap Create Monster. The preview will appear below.");
-    syncPreviewControls();
+    selectDrawingFile(file);
   });
 
+  bindUploadDropZone();
   convertButton.addEventListener("click", requestMonsterPreview);
   regenerateButton?.addEventListener("click", requestMonsterPreview);
 
@@ -204,6 +162,119 @@ function getSelectedStorybookFormat() {
     value,
     label: value === "hardcover" ? "Hardcover Keepsake ($59.99 + shipping)" : "Softcover Storybook ($39.99 + shipping)",
   };
+}
+
+function bindUploadDropZone() {
+  if (!uploadDrop) {
+    return;
+  }
+
+  uploadDrop.addEventListener("dragenter", (event) => {
+    if (!hasFileDrag(event)) {
+      return;
+    }
+
+    event.preventDefault();
+    uploadDragDepth += 1;
+    uploadDrop.classList.add("is-dragging");
+    setUploadActionStatus("Drop the drawing to upload it.");
+  });
+
+  uploadDrop.addEventListener("dragover", (event) => {
+    if (!hasFileDrag(event)) {
+      return;
+    }
+
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "copy";
+  });
+
+  uploadDrop.addEventListener("dragleave", (event) => {
+    if (!hasFileDrag(event)) {
+      return;
+    }
+
+    uploadDragDepth = Math.max(0, uploadDragDepth - 1);
+
+    if (uploadDragDepth === 0) {
+      clearUploadDragState();
+    }
+  });
+
+  uploadDrop.addEventListener("drop", (event) => {
+    if (!hasFileDrag(event)) {
+      return;
+    }
+
+    event.preventDefault();
+    clearUploadDragState();
+    selectDrawingFile(getDroppedDrawingFile(event.dataTransfer?.files));
+  });
+
+  uploadDrop.addEventListener("dragend", clearUploadDragState);
+}
+
+function hasFileDrag(event) {
+  return Array.from(event.dataTransfer?.types || []).includes("Files");
+}
+
+function clearUploadDragState() {
+  uploadDragDepth = 0;
+  uploadDrop?.classList.remove("is-dragging");
+}
+
+function getDroppedDrawingFile(files) {
+  return [...(files || [])].find((file) => file.type.startsWith("image/")) || files?.[0];
+}
+
+function selectDrawingFile(file) {
+  if (!file) {
+    showUploadError("Drop a PNG, JPG, WebP, or GIF image.");
+    return;
+  }
+
+  const validationError = validateDrawing(file);
+
+  if (validationError) {
+    resetUpload();
+    showUploadError(validationError);
+    return;
+  }
+
+  if (drawingPreviewUrl) {
+    URL.revokeObjectURL(drawingPreviewUrl);
+  }
+
+  drawingPreviewUrl = URL.createObjectURL(file);
+  selectedDrawingFile = file;
+  resetPreviewState();
+  drawingPreview.src = drawingPreviewUrl;
+  drawingPreview.alt = "Uploaded child monster drawing.";
+  setConverterStage("preview");
+  showUploadError("");
+
+  if (uploadTitle) {
+    uploadTitle.textContent = file.name;
+  }
+
+  if (uploadMeta) {
+    uploadMeta.textContent = `${formatBytes(file.size)} selected`;
+  }
+
+  if (downloadColoringButton) {
+    downloadColoringButton.disabled = true;
+  }
+
+  if (converterStatus) {
+    converterStatus.textContent = "Drawing loaded.";
+  }
+
+  if (converterNote) {
+    converterNote.textContent = "Ready to create a MonstersNOW-style character preview.";
+  }
+
+  setUploadActionStatus("Tap Create Monster. The preview will appear below.");
+  syncPreviewControls();
 }
 
 async function requestMonsterPreview() {
