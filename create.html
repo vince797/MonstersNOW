@@ -60,12 +60,17 @@
             <label class="upload-drop" for="monster-upload">
               <span>Drawing</span>
               <strong>Upload or take a picture</strong>
-              <small>PNG, JPG, WebP, or GIF under 8 MB</small>
+              <small>PNG, JPG, HEIC, WebP, or GIF under 8 MB</small>
             </label>
-            <input id="monster-upload" type="file" accept="image/png,image/jpeg,image/webp,image/gif" />
+            <input
+              id="monster-upload"
+              type="file"
+              accept="image/png,image/jpeg,image/webp,image/gif,image/heic,image/heif,image/heic-sequence,image/heif-sequence,.heic,.heif"
+            />
             <ul class="upload-tips" aria-label="Upload tips">
               <li>Bright, straight-on photo</li>
               <li>Drawing fills most of the frame</li>
+              <li>iPhone HEIC photos convert automatically</li>
               <li>Artwork only when possible</li>
             </ul>
             <p class="privacy-note">We do not publish children's artwork without permission.</p>

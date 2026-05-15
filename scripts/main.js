@@ -35,9 +35,22 @@ const featureShowDrawing = document.querySelector("#feature-show-drawing");
 const featureDisplayName = document.querySelector("#feature-display-name");
 const featurePermissionFields = document.querySelector("#feature-permission-fields");
 
-const allowedUploadTypes = new Set(["image/png", "image/jpeg", "image/webp", "image/gif"]);
+const allowedUploadTypes = new Set([
+  "image/png",
+  "image/jpeg",
+  "image/webp",
+  "image/gif",
+  "image/heic",
+  "image/heif",
+  "image/heic-sequence",
+  "image/heif-sequence",
+]);
+const allowedUploadExtensions = new Set(["png", "jpg", "jpeg", "webp", "gif", "heic", "heif"]);
+const heicUploadExtensions = new Set(["heic", "heif"]);
+const heicUploadTypes = new Set(["image/heic", "image/heif", "image/heic-sequence", "image/heif-sequence"]);
 const maxUploadBytes = 8 * 1024 * 1024;
 const maxFreePreviews = 3;
+const heicConverterUrl = "https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js";
 const demoMonsterImage = "assets/step-2-character.jpg?v=20260515-horns";
 const previewStyleLabels = {
   storybook: "Storybook",
@@ -54,6 +67,8 @@ let generatedPreviews = [];
 let selectedPreviewId;
 let isGeneratingPreview = false;
 let uploadDragDepth = 0;
+let uploadSelectionId = 0;
+let heicConverterPromise;
 
 if (monsterUpload && drawingPreview && monsterPreview && convertButton) {
   monsterUpload.addEventListener("change", () => {
@@ -267,12 +282,12 @@ function clearUploadDragState() {
 }
 
 function getDroppedDrawingFile(files) {
-  return [...(files || [])].find((file) => file.type.startsWith("image/")) || files?.[0];
+  return [...(files || [])].find((file) => isAllowedDrawingUpload(file)) || files?.[0];
 }
 
-function selectDrawingFile(file) {
+async function selectDrawingFile(file) {
   if (!file) {
-    showUploadError("Drop a PNG, JPG, WebP, or GIF image.");
+    showUploadError("Drop a PNG, JPG, HEIC, WebP, or GIF image.");
     return;
   }
 
@@ -284,15 +299,51 @@ function selectDrawingFile(file) {
     return;
   }
 
+  const selectionId = ++uploadSelectionId;
+  const shouldConvertHeic = isHeicUpload(file);
+
+  selectedDrawingFile = undefined;
+  resetPreviewState();
+  showUploadError("");
+  setUploadActionStatus(shouldConvertHeic ? "Converting HEIC photo to JPEG..." : "Preparing drawing preview.");
+
+  if (convertButton) {
+    convertButton.disabled = true;
+  }
+
+  let normalizedFile;
+
+  try {
+    normalizedFile = await normalizeDrawingUpload(file);
+  } catch (error) {
+    console.error(error);
+
+    if (selectionId !== uploadSelectionId) {
+      return;
+    }
+
+    resetUpload();
+    showUploadError(
+      shouldConvertHeic
+        ? "HEIC photo could not be converted. Please save it as JPG or PNG and upload again."
+        : "This image could not be prepared. Please try a different file.",
+    );
+    return;
+  }
+
+  if (selectionId !== uploadSelectionId) {
+    return;
+  }
+
   if (drawingPreviewUrl) {
     URL.revokeObjectURL(drawingPreviewUrl);
   }
 
-  drawingPreviewUrl = URL.createObjectURL(file);
-  selectedDrawingFile = file;
+  drawingPreviewUrl = URL.createObjectURL(normalizedFile);
+  selectedDrawingFile = normalizedFile;
   resetPreviewState();
   drawingPreview.src = drawingPreviewUrl;
-  drawingPreview.alt = "Uploaded child monster drawing.";
+  drawingPreview.alt = shouldConvertHeic ? "Uploaded HEIC drawing converted to JPEG." : "Uploaded child monster drawing.";
   setConverterStage("preview");
   showUploadError("");
 
@@ -302,7 +353,9 @@ function selectDrawingFile(file) {
   }
 
   if (uploadMeta) {
-    uploadMeta.textContent = `${formatBytes(file.size)} selected`;
+    uploadMeta.textContent = shouldConvertHeic
+      ? `${formatBytes(file.size)} HEIC converted to JPEG`
+      : `${formatBytes(file.size)} selected`;
   }
 
   if (downloadColoringButton) {
@@ -314,10 +367,14 @@ function selectDrawingFile(file) {
   }
 
   if (converterNote) {
-    converterNote.textContent = "Ready to create a MonstersNOW-style character preview.";
+    converterNote.textContent = shouldConvertHeic
+      ? "HEIC photo converted. Ready to create a MonstersNOW-style character preview."
+      : "Ready to create a MonstersNOW-style character preview.";
   }
 
-  setUploadActionStatus("Choose a style, then create the first preview.");
+  setUploadActionStatus(
+    shouldConvertHeic ? "HEIC converted. Choose a style, then create the first preview." : "Choose a style, then create the first preview.",
+  );
   syncPreviewControls();
 }
 
@@ -606,8 +663,8 @@ function describeRemainingPreviews(remaining) {
 }
 
 function validateDrawing(file) {
-  if (!allowedUploadTypes.has(file.type)) {
-    return "Please upload a PNG, JPG, WebP, or GIF image.";
+  if (!isAllowedDrawingUpload(file)) {
+    return "Please upload a PNG, JPG, HEIC, WebP, or GIF image.";
   }
 
   if (file.size > maxUploadBytes) {
@@ -618,9 +675,20 @@ function validateDrawing(file) {
 }
 
 function resetUpload() {
+  uploadSelectionId += 1;
   selectedDrawingFile = undefined;
   resetPreviewState();
   monsterUpload.value = "";
+
+  if (drawingPreviewUrl) {
+    URL.revokeObjectURL(drawingPreviewUrl);
+    drawingPreviewUrl = undefined;
+  }
+
+  if (drawingPreview) {
+    drawingPreview.src = "assets/step-1-drawing.jpg";
+    drawingPreview.alt = "Sample child monster drawing.";
+  }
 
   if (downloadColoringButton) {
     downloadColoringButton.disabled = true;
@@ -632,7 +700,7 @@ function resetUpload() {
   }
 
   if (uploadMeta) {
-    uploadMeta.textContent = "PNG, JPG, WebP, or GIF under 8 MB";
+    uploadMeta.textContent = "PNG, JPG, HEIC, WebP, or GIF under 8 MB";
   }
 
   setUploadActionStatus("Upload a drawing to create the first preview.");
@@ -706,6 +774,97 @@ function formatUploadName(filename) {
   const trailing = Math.floor(available * 0.44);
 
   return `${basename.slice(0, leading)}...${basename.slice(-trailing)}${extension}`;
+}
+
+function isAllowedDrawingUpload(file) {
+  if (!file) {
+    return false;
+  }
+
+  return allowedUploadTypes.has(file.type) || allowedUploadExtensions.has(getFileExtension(file.name));
+}
+
+function isHeicUpload(file) {
+  return heicUploadTypes.has(file.type) || heicUploadExtensions.has(getFileExtension(file.name));
+}
+
+function getFileExtension(filename) {
+  const extension = typeof filename === "string" ? filename.split(".").pop() : "";
+
+  return extension ? extension.toLowerCase() : "";
+}
+
+async function normalizeDrawingUpload(file) {
+  if (!isHeicUpload(file)) {
+    return file;
+  }
+
+  const convertedBlob = await convertHeicToJpeg(file);
+  const convertedName = getConvertedJpegName(file.name);
+
+  if (typeof File === "function") {
+    return new File([convertedBlob], convertedName, {
+      type: "image/jpeg",
+      lastModified: Date.now(),
+    });
+  }
+
+  convertedBlob.name = convertedName;
+  return convertedBlob;
+}
+
+function getConvertedJpegName(filename) {
+  if (typeof filename !== "string" || !filename.trim()) {
+    return "monstersnow-drawing.jpg";
+  }
+
+  if (/\.(heic|heif)$/i.test(filename)) {
+    return filename.replace(/\.(heic|heif)$/i, ".jpg");
+  }
+
+  return `${filename}.jpg`;
+}
+
+async function convertHeicToJpeg(file) {
+  const heic2any = await loadHeicConverter();
+  const converted = await heic2any({
+    blob: file,
+    toType: "image/jpeg",
+    quality: 0.9,
+  });
+  const blob = Array.isArray(converted) ? converted[0] : converted;
+
+  if (!(blob instanceof Blob)) {
+    throw new Error("HEIC converter did not return a JPEG image.");
+  }
+
+  return blob;
+}
+
+function loadHeicConverter() {
+  if (typeof window.heic2any === "function") {
+    return Promise.resolve(window.heic2any);
+  }
+
+  if (!heicConverterPromise) {
+    heicConverterPromise = new Promise((resolve, reject) => {
+      const script = document.createElement("script");
+
+      script.src = heicConverterUrl;
+      script.async = true;
+      script.addEventListener("load", () => {
+        if (typeof window.heic2any === "function") {
+          resolve(window.heic2any);
+        } else {
+          reject(new Error("HEIC converter loaded without exposing heic2any."));
+        }
+      });
+      script.addEventListener("error", () => reject(new Error("HEIC converter could not be loaded.")));
+      document.head.append(script);
+    });
+  }
+
+  return heicConverterPromise;
 }
 
 async function prepareImageForUpload(file) {
