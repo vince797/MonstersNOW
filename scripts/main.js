@@ -348,7 +348,7 @@ function downloadImage(url, filename) {
 async function downloadColoringPage(sourceImage) {
   await ensureImageLoaded(sourceImage);
   const lineArt = createLineArtCanvas(sourceImage);
-  const printablePage = createPrintableColoringPage(lineArt);
+  const printablePage = await createPrintableColoringPage(lineArt);
   downloadImage(printablePage.toDataURL("image/png"), "monstersnow-coloring-page.png");
 }
 
@@ -432,33 +432,66 @@ function drawLinePixel(data, outputIndex) {
   data[outputIndex + 3] = 255;
 }
 
-function createPrintableColoringPage(lineArt) {
+async function createPrintableColoringPage(lineArt) {
   const page = document.createElement("canvas");
   const context = page.getContext("2d");
-  const pageWidth = 1600;
-  const pageHeight = 2071;
-  const maxArtWidth = 1240;
-  const maxArtHeight = 1320;
+  const pageWidth = 1700;
+  const pageHeight = 2200;
+  const margin = 92;
+  const maxArtWidth = 1320;
+  const maxArtHeight = 1440;
   const scale = Math.min(maxArtWidth / lineArt.width, maxArtHeight / lineArt.height);
   const artWidth = Math.round(lineArt.width * scale);
   const artHeight = Math.round(lineArt.height * scale);
   const artX = Math.round((pageWidth - artWidth) / 2);
-  const artY = 320;
+  const artY = 360;
 
   page.width = pageWidth;
   page.height = pageHeight;
   context.fillStyle = "#ffffff";
   context.fillRect(0, 0, pageWidth, pageHeight);
-  context.strokeStyle = "#161616";
-  context.lineWidth = 5;
-  context.strokeRect(72, 72, pageWidth - 144, pageHeight - 144);
+
+  drawPrintableBorder(context, pageWidth, pageHeight, margin);
+  drawColoringPageLogo(context, margin + 34, margin + 56);
+
   context.fillStyle = "#161616";
   context.textAlign = "center";
-  context.font = "700 88px Arial, sans-serif";
-  context.fillText("My Monster", pageWidth / 2, 190);
+  context.textBaseline = "alphabetic";
+  context.font = "700 86px Arial, sans-serif";
+  context.fillText("My Monster Coloring Page", pageWidth / 2, 210);
+
   context.drawImage(lineArt, artX, artY, artWidth, artHeight);
-  context.font = "700 34px Arial, sans-serif";
-  context.fillText("MonstersNOW", pageWidth / 2, pageHeight - 132);
+
+  context.font = "600 34px Arial, sans-serif";
+  context.fillText("Turn drawings into storybooks", pageWidth / 2, pageHeight - 138);
 
   return page;
+}
+
+function drawPrintableBorder(context, pageWidth, pageHeight, margin) {
+  context.strokeStyle = "#161616";
+  context.lineWidth = 6;
+  context.strokeRect(margin, margin, pageWidth - margin * 2, pageHeight - margin * 2);
+  context.lineWidth = 2;
+  context.strokeRect(
+    margin + 22,
+    margin + 22,
+    pageWidth - (margin + 22) * 2,
+    pageHeight - (margin + 22) * 2,
+  );
+}
+
+function drawColoringPageLogo(context, x, y) {
+  context.save();
+  context.textAlign = "left";
+  context.textBaseline = "alphabetic";
+  context.font = "800 48px Arial, sans-serif";
+  context.fillStyle = "#061b3b";
+  context.fillText("Monsters", x, y);
+  context.fillStyle = "#ff6a00";
+  context.fillText("NOW", x + 218, y);
+  context.fillStyle = "#061b3b";
+  context.font = "700 18px Arial, sans-serif";
+  context.fillText("Turn drawings into storybooks", x + 2, y + 30);
+  context.restore();
 }
