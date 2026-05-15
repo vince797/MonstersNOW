@@ -3,7 +3,8 @@
   "trailingSlash": false,
   "functions": {
     "api/convert-monster.js": {
-      "maxDuration": 60
+      "maxDuration": 60,
+      "includeFiles": "assets/master-references/**"
     }
   },
   "headers": [

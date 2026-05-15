@@ -5,6 +5,10 @@ const { Blob } = require("node:buffer");
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 const IMAGE_MODEL = process.env.OPENAI_IMAGE_MODEL || "gpt-image-1.5";
 const IMAGE_QUALITY = process.env.OPENAI_IMAGE_QUALITY || "low";
+const FUNCTION_TIME_BUDGET_MS = 60 * 1000;
+const FUNCTION_TIMEOUT_BUFFER_MS = 6 * 1000;
+const COLORING_PAGE_MIN_BUDGET_MS = 18 * 1000;
+const FALLBACK_IMAGE_MODELS = ["gpt-image-1"];
 
 const referenceImages = [
   "assets/master-references/character-purple-storybook-style.jpg",
@@ -52,20 +56,34 @@ module.exports = async function handler(request, response) {
   }
 
   try {
+    const startedAt = Date.now();
     const references = await loadReferenceImages();
-    const monsterImage = await createMonsterImage(drawing, references, style, variationNumber);
-    const coloringPage = await createColoringPage(monsterImage, references);
+    const monsterImage = await createMonsterImage(
+      drawing,
+      references,
+      style,
+      variationNumber,
+      getRemainingRequestBudget(startedAt),
+    );
+    const { coloringPage, warnings } = await createOptionalColoringPage(
+      monsterImage,
+      references,
+      getRemainingRequestBudget(startedAt),
+    );
 
     return response.status(200).json({
       mode: "ai",
       monsterImage,
       coloringPage,
+      warnings,
       style,
       variationNumber,
-      message: "Monster preview and coloring page created.",
+      message: coloringPage
+        ? "Monster preview and coloring page created."
+        : "Monster preview created. Coloring page will be prepared in the browser.",
     });
   } catch (error) {
-    console.error(error);
+    console.error("Monster preview generation failed", formatErrorForLog(error));
 
     return response.status(502).json({
       code: "monster_generator_unavailable",
@@ -133,7 +151,11 @@ async function loadReferenceImages() {
   );
 }
 
-async function createMonsterImage(drawing, references, style, variationNumber) {
+function getRemainingRequestBudget(startedAt) {
+  return Math.max(1, FUNCTION_TIME_BUDGET_MS - FUNCTION_TIMEOUT_BUFFER_MS - (Date.now() - startedAt));
+}
+
+async function createMonsterImage(drawing, references, style, variationNumber, timeoutMs) {
   return createImageEdit({
     prompt: [
       "Transform the child's monster drawing into a friendly MonstersNOW children's book character.",
@@ -145,10 +167,44 @@ async function createMonsterImage(drawing, references, style, variationNumber) {
     ].join(" "),
     images: [dataUrlToImagePart(drawing, "drawing.jpg"), references[0]],
     size: "1024x1024",
+    timeoutMs,
   });
 }
 
-async function createColoringPage(monsterImage, references) {
+async function createOptionalColoringPage(monsterImage, references, timeoutMs) {
+  if (timeoutMs < COLORING_PAGE_MIN_BUDGET_MS) {
+    return {
+      coloringPage: null,
+      warnings: [
+        {
+          code: "coloring_page_deferred",
+          message: "The coloring page will be prepared in the browser from the generated preview.",
+        },
+      ],
+    };
+  }
+
+  try {
+    return {
+      coloringPage: await createColoringPage(monsterImage, references, timeoutMs),
+      warnings: [],
+    };
+  } catch (error) {
+    console.warn("Coloring page generation failed after preview succeeded", formatErrorForLog(error));
+
+    return {
+      coloringPage: null,
+      warnings: [
+        {
+          code: "coloring_page_unavailable",
+          message: "The coloring page will be prepared in the browser from the generated preview.",
+        },
+      ],
+    };
+  }
+}
+
+async function createColoringPage(monsterImage, references, timeoutMs) {
   return createImageEdit({
     prompt: [
       "Create a black-and-white printable coloring page of this monster character.",
@@ -158,13 +214,70 @@ async function createColoringPage(monsterImage, references) {
     ].join(" "),
     images: [dataUrlToImagePart(monsterImage, "monster-preview.png"), references[1]],
     size: "1024x1024",
+    timeoutMs,
   });
 }
 
-async function createImageEdit({ prompt, images, size }) {
-  const formData = new FormData();
+async function createImageEdit({ prompt, images, size, timeoutMs }) {
+  const models = getImageModels();
+  let lastError;
 
-  formData.append("model", IMAGE_MODEL);
+  for (let index = 0; index < models.length; index += 1) {
+    const model = models[index];
+
+    try {
+      return await requestImageEdit({
+        model,
+        prompt,
+        images,
+        size,
+        timeoutMs,
+      });
+    } catch (error) {
+      lastError = error;
+
+      if (!shouldRetryWithFallbackModel(error, index, models)) {
+        throw error;
+      }
+
+      console.warn(
+        `OpenAI image edit failed with ${model}; retrying with ${models[index + 1]}`,
+        formatErrorForLog(error),
+      );
+    }
+  }
+
+  throw lastError;
+}
+
+function getImageModels() {
+  return [...new Set([IMAGE_MODEL, ...FALLBACK_IMAGE_MODELS].filter(Boolean))];
+}
+
+function shouldRetryWithFallbackModel(error, index, models) {
+  if (index >= models.length - 1) {
+    return false;
+  }
+
+  const message = `${error?.message || ""} ${error?.code || ""}`.toLowerCase();
+
+  return (
+    error?.status === 404 ||
+    message.includes("model") ||
+    message.includes("not have access") ||
+    message.includes("unsupported")
+  );
+}
+
+async function requestImageEdit({ model, prompt, images, size, timeoutMs }) {
+  const formData = new FormData();
+  const controller = new AbortController();
+  const requestTimeoutMs = Number.isFinite(timeoutMs)
+    ? Math.max(1, timeoutMs)
+    : FUNCTION_TIME_BUDGET_MS - FUNCTION_TIMEOUT_BUFFER_MS;
+  const timeout = setTimeout(() => controller.abort(), requestTimeoutMs);
+
+  formData.append("model", model);
   formData.append("prompt", prompt);
   formData.append("n", "1");
   formData.append("size", size);
@@ -179,18 +292,40 @@ async function createImageEdit({ prompt, images, size }) {
     );
   });
 
-  const apiResponse = await fetch("https://api.openai.com/v1/images/edits", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-    },
-    body: formData,
-  });
+  let apiResponse;
+
+  try {
+    apiResponse = await fetch("https://api.openai.com/v1/images/edits", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+      },
+      body: formData,
+      signal: controller.signal,
+    });
+  } catch (error) {
+    if (error?.name === "AbortError") {
+      throw createOpenAIError("OpenAI image request timed out.", {
+        code: "openai_image_timeout",
+        status: 504,
+      });
+    }
+
+    throw error;
+  } finally {
+    clearTimeout(timeout);
+  }
 
   const body = await apiResponse.json().catch(() => ({}));
 
   if (!apiResponse.ok) {
-    throw new Error(body.error?.message || `OpenAI image request failed: ${apiResponse.status}`);
+    throw createOpenAIError(body.error?.message || `OpenAI image request failed: ${apiResponse.status}`, {
+      code: body.error?.code,
+      type: body.error?.type,
+      param: body.error?.param,
+      status: apiResponse.status,
+      requestId: apiResponse.headers.get("x-request-id"),
+    });
   }
 
   const base64 = body.data?.[0]?.b64_json;
@@ -216,5 +351,24 @@ function dataUrlToImagePart(dataUrl, filename) {
     buffer,
     filename,
     mimeType,
+  };
+}
+
+function createOpenAIError(message, details = {}) {
+  const error = new Error(message);
+
+  Object.assign(error, details);
+
+  return error;
+}
+
+function formatErrorForLog(error) {
+  return {
+    message: error?.message,
+    code: error?.code,
+    type: error?.type,
+    param: error?.param,
+    status: error?.status,
+    requestId: error?.requestId,
   };
 }
