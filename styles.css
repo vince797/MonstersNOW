@@ -694,6 +694,7 @@ main > section {
 }
 
 .monster-preview {
+  min-height: clamp(300px, 34vw, 430px);
   border: 1px solid #d9edf0;
   border-radius: 8px;
   background: #f8fdfe;
@@ -704,6 +705,11 @@ main > section {
   max-height: 270px;
   object-fit: contain;
   mix-blend-mode: multiply;
+}
+
+.monster-preview img {
+  width: min(520px, 96%);
+  max-height: 390px;
 }
 
 .is-example-preview .monster-preview img {
