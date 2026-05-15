@@ -17,6 +17,7 @@
       </a>
 
       <nav class="site-nav" aria-label="Main navigation">
+        <a href="#converter">Create</a>
         <a href="#how-it-works">How It Works</a>
         <a href="#books">Books</a>
         <a href="#about">About Us</a>
@@ -25,7 +26,7 @@
       </nav>
 
       <div class="header-actions">
-        <a class="button header-button" href="#start">Create Your Book</a>
+        <a class="button header-button" href="#converter">Create Your Book</a>
       </div>
     </header>
 
@@ -49,7 +50,7 @@
           </div>
 
           <div class="hero-actions">
-            <a class="button primary" href="#start">Create Your Book</a>
+            <a class="button primary" href="#converter">Create Your Book</a>
             <a class="button secondary" href="#how-it-works">See How It Works</a>
           </div>
 
@@ -67,6 +68,86 @@
         </div>
       </section>
 
+      <section class="converter-section" id="converter" aria-labelledby="converter-title">
+        <div class="converter-copy">
+          <p class="eyebrow">Free monster preview</p>
+          <h2 id="converter-title">Create the monster from the drawing.</h2>
+          <p>
+            Upload a drawing for free. Download a black-and-white coloring page
+            for free, then create a printed storybook if you want one.
+          </p>
+          <div class="free-includes" aria-label="Free MonstersNOW options">
+            <span>Free upload</span>
+            <span>Free monster preview</span>
+            <span>Free coloring page</span>
+          </div>
+          <ol class="converter-flow" aria-label="Converter progress">
+            <li class="is-active" data-flow-step="upload"><i>1</i>Upload</li>
+            <li data-flow-step="preview"><i>2</i>Preview</li>
+            <li data-flow-step="download"><i>3</i>Download</li>
+          </ol>
+        </div>
+
+        <div class="converter-tool" data-converter>
+          <form class="upload-panel" novalidate>
+            <label class="upload-drop" for="monster-upload">
+              <span>Drawing</span>
+              <strong>Upload or take a picture</strong>
+              <small>PNG, JPG, WebP, or GIF under 8 MB</small>
+            </label>
+            <input id="monster-upload" type="file" accept="image/png,image/jpeg,image/webp,image/gif" />
+            <p class="upload-guidance">Best results come from a bright, straight-on photo with the drawing filling most of the frame.</p>
+            <p class="converter-error" id="upload-error" role="alert" hidden></p>
+
+            <div class="converter-preview drawing-preview">
+              <img
+                id="drawing-preview"
+                src="assets/step-1-drawing.jpg"
+                alt="Sample child monster drawing."
+              />
+            </div>
+
+            <button class="button primary converter-button" id="convert-button" type="button" disabled>
+              Create Monster
+            </button>
+          </form>
+
+          <div class="result-panel" aria-live="polite">
+            <div class="converter-preview monster-preview">
+              <img
+                id="monster-preview"
+                src="assets/step-2-character.jpg"
+                alt="Sample generated monster character."
+              />
+            </div>
+            <div>
+              <span class="result-label">Monster preview</span>
+              <h3 id="converter-status">Upload a drawing to begin.</h3>
+              <p id="converter-note">
+                The finished converter will preserve the child's shape, colors,
+                and expression in the MonstersNOW style.
+              </p>
+              <div class="result-actions">
+                <button class="button secondary" id="download-coloring" type="button" disabled>
+                  Download Free Coloring Page
+                </button>
+                <button class="button primary" id="storybook-interest" type="button">
+                  Create Storybook
+                </button>
+              </div>
+              <form class="interest-form" id="storybook-interest-form" hidden>
+                <label for="interest-email">Storybook ordering is coming soon.</label>
+                <div>
+                  <input id="interest-email" type="email" placeholder="Email for storybook updates" autocomplete="email" />
+                  <button class="button secondary" type="submit">Notify Me</button>
+                </div>
+                <p id="interest-status" role="status"></p>
+              </form>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section class="steps-section" id="how-it-works" aria-labelledby="steps-title">
         <div class="section-heading centered">
           <h2 id="steps-title">It's Easy as 1, 2, 3!</h2>
@@ -77,8 +158,11 @@
             <span class="step-number">1</span>
             <h3>You Draw</h3>
             <p>Your child draws their monster on paper.</p>
-            <div class="step-art paper-art">
-              <span></span>
+            <div class="step-art image-art">
+              <img
+                src="assets/step-1-drawing.jpg"
+                alt="A child's green monster drawing on paper with crayons and a dotted arrow."
+              />
             </div>
           </article>
 
@@ -86,8 +170,11 @@
             <span class="step-number">2</span>
             <h3>We Bring It to Life</h3>
             <p>AI turns the drawing into a polished character.</p>
-            <div class="step-art character-art">
-              <span></span>
+            <div class="step-art image-art">
+              <img
+                src="assets/step-2-character.jpg"
+                alt="A polished green monster character waving with a dotted arrow."
+              />
             </div>
           </article>
 
@@ -95,8 +182,11 @@
             <span class="step-number">3</span>
             <h3>Into a Magical Storybook</h3>
             <p>Print a free coloring page or create a book.</p>
-            <div class="step-art book-art">
-              <span></span>
+            <div class="step-art image-art">
+              <img
+                src="assets/step-3-storybook.jpg"
+                alt="An open storybook showing a green monster in a magical landscape."
+              />
             </div>
           </article>
         </div>

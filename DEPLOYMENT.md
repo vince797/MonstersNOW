@@ -24,6 +24,21 @@ For production:
 vercel deploy --prod
 ```
 
+## AI environment variable
+
+The monster converter needs this Vercel environment variable:
+
+```text
+OPENAI_API_KEY
+```
+
+Add it in Vercel under Project Settings > Environment Variables for Production,
+Preview, and Development. Keep it server-side only; never add it to browser
+JavaScript.
+
+Without `OPENAI_API_KEY`, the API route intentionally returns demo artwork so
+the homepage still works.
+
 ## Add the domain in Vercel
 
 In the Vercel dashboard, open the project, then go to Settings > Domains and add:
