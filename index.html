@@ -8,7 +8,7 @@
       content="MonstersNOW turns a child's monster drawing into an AI-animated character, a free printable coloring page, or a custom storybook."
     />
     <title>MonstersNOW | Turn Drawings Into Storybooks</title>
-    <link rel="stylesheet" href="styles.css?v=20260515-footer-step2-consistent" />
+    <link rel="stylesheet" href="styles.css?v=20260515-preview-versions" />
   </head>
   <body>
     <header class="site-header">
@@ -127,7 +127,31 @@
                 The finished converter will preserve the child's shape, colors,
                 and expression in the MonstersNOW style.
               </p>
+              <div class="variation-controls" aria-label="Monster preview options">
+                <div>
+                  <span>Preview style</span>
+                  <p id="preview-count">3 free previews per drawing.</p>
+                </div>
+                <div class="style-options" role="group" aria-label="Choose a monster preview style">
+                  <button class="style-option is-active" type="button" data-monster-style="storybook" aria-pressed="true">
+                    Storybook
+                  </button>
+                  <button class="style-option" type="button" data-monster-style="cute" aria-pressed="false">
+                    Cute
+                  </button>
+                  <button class="style-option" type="button" data-monster-style="silly" aria-pressed="false">
+                    Silly
+                  </button>
+                  <button class="style-option" type="button" data-monster-style="adventure" aria-pressed="false">
+                    Adventure
+                  </button>
+                </div>
+              </div>
+              <div class="preview-history" id="preview-history" aria-label="Generated monster versions" hidden></div>
               <div class="result-actions">
+                <button class="button secondary" id="regenerate-monster" type="button" disabled>
+                  Try Another Version
+                </button>
                 <button class="button secondary" id="download-coloring" type="button" disabled>
                   Download Free Coloring Page
                 </button>
@@ -317,6 +341,6 @@
       <p>&copy; <span id="year"></span> MonstersNOW. All rights reserved.</p>
     </footer>
 
-    <script src="scripts/main.js?v=20260515-footer-step2"></script>
+    <script src="scripts/main.js?v=20260515-preview-versions"></script>
   </body>
 </html>

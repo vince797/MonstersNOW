@@ -8,13 +8,17 @@ const monsterUpload = document.querySelector("#monster-upload");
 const drawingPreview = document.querySelector("#drawing-preview");
 const monsterPreview = document.querySelector("#monster-preview");
 const convertButton = document.querySelector("#convert-button");
+const regenerateButton = document.querySelector("#regenerate-monster");
 const downloadColoringButton = document.querySelector("#download-coloring");
 const converterStatus = document.querySelector("#converter-status");
 const converterNote = document.querySelector("#converter-note");
+const previewCount = document.querySelector("#preview-count");
 const uploadError = document.querySelector("#upload-error");
 const uploadTitle = document.querySelector(".upload-drop strong");
 const uploadMeta = document.querySelector(".upload-drop small");
 const flowSteps = [...document.querySelectorAll(".converter-flow li")];
+const styleButtons = [...document.querySelectorAll("[data-monster-style]")];
+const previewHistory = document.querySelector("#preview-history");
 const storybookInterestButton = document.querySelector("#storybook-interest");
 const storybookInterestForm = document.querySelector("#storybook-interest-form");
 const interestEmail = document.querySelector("#interest-email");
@@ -22,10 +26,22 @@ const interestStatus = document.querySelector("#interest-status");
 
 const allowedUploadTypes = new Set(["image/png", "image/jpeg", "image/webp", "image/gif"]);
 const maxUploadBytes = 8 * 1024 * 1024;
+const maxFreePreviews = 3;
 const demoMonsterImage = "assets/step-2-character.jpg?v=20260515-horns";
+const previewStyleLabels = {
+  storybook: "Storybook",
+  cute: "Cute",
+  silly: "Silly",
+  adventure: "Adventure",
+};
 let drawingPreviewUrl;
 let selectedDrawingFile;
 let coloringPageUrl;
+let selectedMonsterStyle = "storybook";
+let previewsUsed = 0;
+let generatedPreviews = [];
+let selectedPreviewId;
+let isGeneratingPreview = false;
 
 if (monsterUpload && drawingPreview && monsterPreview && convertButton) {
   monsterUpload.addEventListener("change", () => {
@@ -49,10 +65,9 @@ if (monsterUpload && drawingPreview && monsterPreview && convertButton) {
 
     drawingPreviewUrl = URL.createObjectURL(file);
     selectedDrawingFile = file;
-    coloringPageUrl = undefined;
+    resetPreviewState();
     drawingPreview.src = drawingPreviewUrl;
     drawingPreview.alt = "Uploaded child monster drawing.";
-    convertButton.disabled = false;
     setConverterStage("preview");
     showUploadError("");
 
@@ -75,60 +90,12 @@ if (monsterUpload && drawingPreview && monsterPreview && convertButton) {
     if (converterNote) {
       converterNote.textContent = "Ready to create a MonstersNOW-style character preview.";
     }
+
+    syncPreviewControls();
   });
 
-  convertButton.addEventListener("click", async () => {
-    if (!selectedDrawingFile) {
-      return;
-    }
-
-    convertButton.disabled = true;
-    convertButton.textContent = "Creating...";
-
-    if (converterStatus) {
-      converterStatus.textContent = "Creating monster preview...";
-    }
-
-    if (converterNote) {
-      converterNote.textContent = "This usually takes a short moment. The free coloring page unlocks when the preview is ready.";
-    }
-
-    try {
-      const drawing = await prepareImageForUpload(selectedDrawingFile);
-      const result = await convertMonster(drawing);
-      const isDemo = result.mode === "demo";
-
-      monsterPreview.src = result.monsterImage || demoMonsterImage;
-      monsterPreview.alt = isDemo
-        ? "Demo generated monster character preview."
-        : "Generated monster character preview.";
-      coloringPageUrl = result.coloringPage;
-
-      if (downloadColoringButton) {
-        downloadColoringButton.disabled = false;
-      }
-
-      setConverterStage("download");
-
-      if (converterStatus) {
-        converterStatus.textContent = isDemo
-          ? "Demo monster preview ready."
-          : "Monster preview ready.";
-      }
-
-      if (converterNote) {
-        converterNote.textContent = isDemo
-          ? "The AI route is ready, but the API key is not configured here yet. The free coloring-page download still works as a prototype."
-          : "Download the free coloring page, or create a paid printed storybook when ready.";
-      }
-    } catch (error) {
-      console.error(error);
-      showDemoMonster();
-    } finally {
-      convertButton.disabled = false;
-      convertButton.textContent = "Create Monster";
-    }
-  });
+  convertButton.addEventListener("click", requestMonsterPreview);
+  regenerateButton?.addEventListener("click", requestMonsterPreview);
 
   if (downloadColoringButton) {
     downloadColoringButton.addEventListener("click", async () => {
@@ -161,6 +128,20 @@ if (monsterUpload && drawingPreview && monsterPreview && convertButton) {
       }
     });
   }
+
+  styleButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      selectedMonsterStyle = normalizePreviewStyle(button.dataset.monsterStyle);
+      updateStyleButtons();
+
+      if (selectedDrawingFile && previewsUsed < maxFreePreviews && converterNote) {
+        converterNote.textContent = `${previewStyleLabels[selectedMonsterStyle]} style selected. Create another version when ready.`;
+      }
+    });
+  });
+
+  updateStyleButtons();
+  syncPreviewControls();
 }
 
 if (storybookInterestButton && storybookInterestForm) {
@@ -197,6 +178,222 @@ if (storybookInterestButton && storybookInterestForm) {
   });
 }
 
+async function requestMonsterPreview() {
+  if (!selectedDrawingFile || isGeneratingPreview) {
+    return;
+  }
+
+  if (previewsUsed >= maxFreePreviews) {
+    if (converterStatus) {
+      converterStatus.textContent = "Choose a preview to continue.";
+    }
+
+    if (converterNote) {
+      converterNote.textContent = "This drawing has used its free preview versions. Pick the one you like for the coloring page or storybook.";
+    }
+
+    syncPreviewControls();
+    return;
+  }
+
+  isGeneratingPreview = true;
+  syncPreviewControls();
+
+  if (converterStatus) {
+    converterStatus.textContent = "Creating monster preview...";
+  }
+
+  if (converterNote) {
+    converterNote.textContent = "This usually takes a short moment. Try up to three versions before choosing one.";
+  }
+
+  try {
+    const drawing = await prepareImageForUpload(selectedDrawingFile);
+    const result = await convertMonster(drawing, selectedMonsterStyle, previewsUsed + 1);
+    applyMonsterResult(result);
+  } catch (error) {
+    console.error(error);
+    showDemoMonster();
+  } finally {
+    isGeneratingPreview = false;
+    syncPreviewControls();
+  }
+}
+
+function applyMonsterResult(result) {
+  const style = normalizePreviewStyle(result.style);
+  const isDemo = result.mode === "demo";
+  const preview = addGeneratedPreview({
+    image: result.monsterImage || demoMonsterImage,
+    coloringPage: result.coloringPage,
+    mode: isDemo ? "demo" : "ai",
+    style,
+  });
+  const remaining = maxFreePreviews - previewsUsed;
+
+  selectGeneratedPreview(preview.id);
+  setConverterStage("download");
+
+  if (downloadColoringButton) {
+    downloadColoringButton.disabled = false;
+  }
+
+  if (converterStatus) {
+    converterStatus.textContent = isDemo
+      ? `${previewStyleLabels[style]} demo preview ready.`
+      : `${previewStyleLabels[style]} monster preview ready.`;
+  }
+
+  if (converterNote) {
+    converterNote.textContent = isDemo
+      ? `The AI route is ready, but the API key is not configured here yet. ${describeRemainingPreviews(remaining)}`
+      : `Choose this version, download the free coloring page, or try another style. ${describeRemainingPreviews(remaining)}`;
+  }
+}
+
+function addGeneratedPreview({ image, coloringPage, mode, style }) {
+  previewsUsed += 1;
+
+  const preview = {
+    id: `monster-preview-${Date.now()}-${previewsUsed}`,
+    image,
+    coloringPage,
+    mode,
+    style: normalizePreviewStyle(style),
+  };
+
+  generatedPreviews.push(preview);
+  renderPreviewHistory();
+
+  return preview;
+}
+
+function renderPreviewHistory() {
+  if (!previewHistory) {
+    return;
+  }
+
+  previewHistory.innerHTML = "";
+  previewHistory.hidden = generatedPreviews.length === 0;
+
+  generatedPreviews.forEach((preview, index) => {
+    const button = document.createElement("button");
+    const image = document.createElement("img");
+    const label = document.createElement("span");
+    const styleLabel = previewStyleLabels[preview.style];
+
+    button.type = "button";
+    button.className = "preview-choice";
+    button.dataset.previewId = preview.id;
+    button.setAttribute("aria-pressed", preview.id === selectedPreviewId ? "true" : "false");
+    button.addEventListener("click", () => selectGeneratedPreview(preview.id, true));
+
+    image.src = preview.image;
+    image.alt = `${styleLabel} monster preview ${index + 1}.`;
+
+    label.textContent = `${index + 1}. ${styleLabel}`;
+
+    button.append(image, label);
+    previewHistory.append(button);
+  });
+}
+
+function selectGeneratedPreview(id, announce = false) {
+  const preview = generatedPreviews.find((item) => item.id === id);
+
+  if (!preview) {
+    return;
+  }
+
+  selectedPreviewId = preview.id;
+  monsterPreview.src = preview.image;
+  monsterPreview.alt = `${previewStyleLabels[preview.style]} generated monster character preview.`;
+  coloringPageUrl = preview.coloringPage;
+
+  previewHistory?.querySelectorAll(".preview-choice").forEach((button) => {
+    button.setAttribute("aria-pressed", button.dataset.previewId === id ? "true" : "false");
+  });
+
+  if (downloadColoringButton) {
+    downloadColoringButton.disabled = false;
+  }
+
+  if (announce && converterStatus) {
+    converterStatus.textContent = `${previewStyleLabels[preview.style]} preview selected.`;
+  }
+}
+
+function resetPreviewState() {
+  coloringPageUrl = undefined;
+  previewsUsed = 0;
+  generatedPreviews = [];
+  selectedPreviewId = undefined;
+  isGeneratingPreview = false;
+
+  if (previewHistory) {
+    previewHistory.innerHTML = "";
+    previewHistory.hidden = true;
+  }
+
+  if (downloadColoringButton) {
+    downloadColoringButton.disabled = true;
+  }
+
+  syncPreviewControls();
+}
+
+function updateStyleButtons() {
+  styleButtons.forEach((button) => {
+    const isActive = normalizePreviewStyle(button.dataset.monsterStyle) === selectedMonsterStyle;
+
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-pressed", isActive ? "true" : "false");
+  });
+}
+
+function syncPreviewControls() {
+  const remaining = Math.max(0, maxFreePreviews - previewsUsed);
+  const canGenerate = Boolean(selectedDrawingFile) && remaining > 0 && !isGeneratingPreview;
+  const primaryText = previewsUsed === 0 ? "Create Monster" : "Try Another Version";
+  const buttonText = isGeneratingPreview
+    ? "Creating..."
+    : remaining > 0
+      ? primaryText
+      : "Preview Limit Reached";
+
+  if (convertButton) {
+    convertButton.disabled = !canGenerate;
+    convertButton.textContent = buttonText;
+  }
+
+  if (regenerateButton) {
+    regenerateButton.disabled = !canGenerate || previewsUsed === 0;
+    regenerateButton.textContent = isGeneratingPreview
+      ? "Creating..."
+      : remaining > 0
+        ? "Try Another Version"
+        : "Preview Limit Reached";
+  }
+
+  if (previewCount) {
+    previewCount.textContent = selectedDrawingFile
+      ? describeRemainingPreviews(remaining)
+      : `${maxFreePreviews} free previews per drawing.`;
+  }
+}
+
+function normalizePreviewStyle(style) {
+  return Object.prototype.hasOwnProperty.call(previewStyleLabels, style) ? style : "storybook";
+}
+
+function describeRemainingPreviews(remaining) {
+  if (remaining <= 0) {
+    return "No free previews left for this drawing.";
+  }
+
+  return `${remaining} free preview${remaining === 1 ? "" : "s"} left for this drawing.`;
+}
+
 function validateDrawing(file) {
   if (!allowedUploadTypes.has(file.type)) {
     return "Please upload a PNG, JPG, WebP, or GIF image.";
@@ -211,9 +408,8 @@ function validateDrawing(file) {
 
 function resetUpload() {
   selectedDrawingFile = undefined;
-  coloringPageUrl = undefined;
+  resetPreviewState();
   monsterUpload.value = "";
-  convertButton.disabled = true;
 
   if (downloadColoringButton) {
     downloadColoringButton.disabled = true;
@@ -228,6 +424,7 @@ function resetUpload() {
   }
 
   setConverterStage("upload");
+  syncPreviewControls();
 }
 
 function showUploadError(message) {
@@ -302,13 +499,17 @@ function fileToDataUrl(file) {
   });
 }
 
-async function convertMonster(drawing) {
+async function convertMonster(drawing, style, variationNumber) {
   const response = await fetch("/api/convert-monster", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ drawing }),
+    body: JSON.stringify({
+      drawing,
+      style,
+      variationNumber,
+    }),
   });
 
   const result = await response.json();
@@ -321,22 +522,12 @@ async function convertMonster(drawing) {
 }
 
 function showDemoMonster() {
-  monsterPreview.src = demoMonsterImage;
-  monsterPreview.alt = "Demo generated monster character preview.";
-  coloringPageUrl = undefined;
-  setConverterStage("download");
-
-  if (downloadColoringButton) {
-    downloadColoringButton.disabled = false;
-  }
-
-  if (converterStatus) {
-    converterStatus.textContent = "Demo monster preview ready.";
-  }
-
-  if (converterNote) {
-    converterNote.textContent = "The local static server cannot run the AI route. On Vercel, this will call the AI converter after OPENAI_API_KEY is added.";
-  }
+  applyMonsterResult({
+    mode: "demo",
+    monsterImage: demoMonsterImage,
+    coloringPage: null,
+    style: selectedMonsterStyle,
+  });
 }
 
 function downloadImage(url, filename) {

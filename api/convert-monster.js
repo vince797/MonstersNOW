@@ -9,6 +9,13 @@ const referenceImages = [
   "assets/master-references/coloring-page-line-art.jpg",
 ];
 
+const previewStyles = {
+  storybook: "classic MonstersNOW storybook style with a warm, polished children's book character look",
+  cute: "extra cute and gentle, with rounder shapes, softer features, and a sweet friendly expression",
+  silly: "playful and goofy, with a bigger smile, lively pose, and funny kid-friendly personality",
+  adventure: "storybook adventure style, with a brave cheerful pose and slightly more energetic character design",
+};
+
 module.exports = async function handler(request, response) {
   if (request.method !== "POST") {
     response.setHeader("Allow", "POST");
@@ -24,6 +31,8 @@ module.exports = async function handler(request, response) {
   }
 
   const drawing = payload?.drawing;
+  const style = normalizePreviewStyle(payload?.style);
+  const variationNumber = normalizeVariationNumber(payload?.variationNumber);
 
   if (!isSafeDataUrl(drawing)) {
     return response.status(400).json({
@@ -34,21 +43,25 @@ module.exports = async function handler(request, response) {
   if (!process.env.OPENAI_API_KEY) {
     return response.status(200).json({
       mode: "demo",
-      monsterImage: "/assets/step-2-character.jpg",
+      monsterImage: "/assets/step-2-character.jpg?v=20260515-horns",
       coloringPage: null,
+      style,
+      variationNumber,
       message: "OPENAI_API_KEY is not configured yet. Returning demo artwork.",
     });
   }
 
   try {
     const references = await loadReferenceImages();
-    const monsterImage = await createMonsterImage(drawing, references);
+    const monsterImage = await createMonsterImage(drawing, references, style, variationNumber);
     const coloringPage = await createColoringPage(monsterImage, references);
 
     return response.status(200).json({
       mode: "ai",
       monsterImage,
       coloringPage,
+      style,
+      variationNumber,
       message: "Monster preview and coloring page created.",
     });
   } catch (error) {
@@ -91,6 +104,20 @@ function isSafeDataUrl(value) {
   return estimatedBytes <= MAX_IMAGE_BYTES;
 }
 
+function normalizePreviewStyle(style) {
+  return Object.prototype.hasOwnProperty.call(previewStyles, style) ? style : "storybook";
+}
+
+function normalizeVariationNumber(value) {
+  const parsed = Number.parseInt(value, 10);
+
+  if (Number.isNaN(parsed)) {
+    return 1;
+  }
+
+  return Math.min(3, Math.max(1, parsed));
+}
+
 async function loadReferenceImages() {
   return Promise.all(
     referenceImages.map(async (assetPath) => {
@@ -101,12 +128,14 @@ async function loadReferenceImages() {
   );
 }
 
-async function createMonsterImage(drawing, references) {
+async function createMonsterImage(drawing, references, style, variationNumber) {
   return createImageEdit({
     prompt: [
       "Transform the child's monster drawing into a friendly MonstersNOW children's book character.",
       "Preserve the drawing's main body shape, number of eyes, horns, limbs, colors, expression, and personality.",
       "Use the reference monster only for brand style: rounded friendly form, bright colors, soft storybook lighting, polished 3D children's illustration.",
+      `For this preview, use ${previewStyles[style]}.`,
+      `Make this version distinct from prior previews while staying faithful to the drawing. Preview number ${variationNumber} of 3.`,
       "White background. No text. No logo. No scary details. Kid-friendly.",
     ].join(" "),
     images: [drawing, references[0]],
