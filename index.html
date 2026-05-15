@@ -5,94 +5,226 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="MonstersNOW is a new website project ready for design, content, and development."
+      content="MonstersNOW turns a child's monster drawing into an AI-animated character, a free printable coloring page, or a custom storybook."
     />
-    <title>MonstersNOW</title>
+    <title>MonstersNOW | Turn Drawings Into Storybooks</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <header class="site-header">
       <a class="brand" href="#" aria-label="MonstersNOW home">
-        <span class="brand-mark" aria-hidden="true">M</span>
-        <span>MonstersNOW</span>
+        <img src="assets/monstersnow-logo.png" alt="" />
       </a>
 
       <nav class="site-nav" aria-label="Main navigation">
-        <a href="#work">Work</a>
-        <a href="#about">About</a>
-        <a href="#contact">Contact</a>
+        <a href="#how-it-works">How It Works</a>
+        <a href="#books">Books</a>
+        <a href="#about">About Us</a>
+        <a href="#reviews">Reviews</a>
+        <a href="#faq">FAQ</a>
       </nav>
+
+      <div class="header-actions">
+        <a class="button header-button" href="#start">Create Your Book</a>
+      </div>
     </header>
 
     <main>
       <section class="hero" aria-labelledby="hero-title">
-        <div class="hero-media" aria-hidden="true">
-          <div class="poster">
-            <div class="poster-grid"></div>
-            <div class="poster-panel panel-one"></div>
-            <div class="poster-panel panel-two"></div>
-            <div class="poster-panel panel-three"></div>
-          </div>
-        </div>
-
-        <div class="hero-content">
-          <p class="eyebrow">New website starter</p>
-          <h1 id="hero-title">MonstersNOW</h1>
+        <div class="hero-copy-wrap">
+          <p class="eyebrow">Personalized storybooks</p>
+          <h1 id="hero-title">
+            Turn Your Child's Drawing Into a <span>Real Storybook</span>
+          </h1>
           <p class="hero-copy">
-            A clean starting point for the site: structure, responsive styling,
-            and room for the real content to take shape.
+            Upload or photograph your child's monster drawing. We use AI to bring
+            it to life, create a free printable coloring page, and offer a custom
+            printed storybook when you are ready.
           </p>
+
+          <div class="mini-steps" aria-label="MonstersNOW summary">
+            <span><i>1</i>You Draw</span>
+            <span><i>2</i>AI Creates</span>
+            <span><i>3</i>They Star</span>
+          </div>
+
           <div class="hero-actions">
-            <a class="button primary" href="#work">View sections</a>
-            <a class="button secondary" href="mailto:hello@example.com">Contact</a>
+            <a class="button primary" href="#start">Create Your Book</a>
+            <a class="button secondary" href="#how-it-works">See How It Works</a>
+          </div>
+
+          <div class="rating-row" aria-label="Customer rating">
+            <span>★★★★★</span>
+            <p>Made for kids. Loved by parents.</p>
           </div>
         </div>
-      </section>
 
-      <section class="section" id="work" aria-labelledby="work-title">
-        <div class="section-heading">
-          <p class="eyebrow">Foundation</p>
-          <h2 id="work-title">Ready to customize</h2>
-        </div>
-        <div class="feature-grid">
-          <article class="feature-card">
-            <h3>Clear page structure</h3>
-            <p>Header, hero, content sections, and footer are already wired up.</p>
-          </article>
-          <article class="feature-card">
-            <h3>Responsive CSS</h3>
-            <p>The layout adapts across desktop and mobile without extra tooling.</p>
-          </article>
-          <article class="feature-card">
-            <h3>Simple JavaScript</h3>
-            <p>A small script handles footer year updates and future interactions.</p>
-          </article>
+        <div class="hero-scene">
+          <img
+            src="assets/hero-storybook.png"
+            alt="A friendly blue monster holding a crayon behind an open book showing a child's monster drawing transformed into a colorful storybook scene."
+          />
         </div>
       </section>
 
-      <section class="split-section" id="about" aria-labelledby="about-title">
+      <section class="steps-section" id="how-it-works" aria-labelledby="steps-title">
+        <div class="section-heading centered">
+          <h2 id="steps-title">It's Easy as 1, 2, 3!</h2>
+        </div>
+
+        <div class="steps-grid">
+          <article class="step-card">
+            <span class="step-number">1</span>
+            <h3>You Draw</h3>
+            <p>Your child draws their monster on paper.</p>
+            <div class="step-art paper-art">
+              <span></span>
+            </div>
+          </article>
+
+          <article class="step-card">
+            <span class="step-number">2</span>
+            <h3>We Bring It to Life</h3>
+            <p>AI turns the drawing into a polished character.</p>
+            <div class="step-art character-art">
+              <span></span>
+            </div>
+          </article>
+
+          <article class="step-card">
+            <span class="step-number">3</span>
+            <h3>Into a Magical Storybook</h3>
+            <p>Print a free coloring page or create a book.</p>
+            <div class="step-art book-art">
+              <span></span>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="books-section" id="books" aria-labelledby="books-title">
+        <div class="section-heading centered">
+          <h2 id="books-title">Books They'll Treasure Forever</h2>
+        </div>
+
+        <div class="book-grid">
+          <article class="book-card adventure">
+            <div class="book-cover">
+              <span>Max's Big Adventure</span>
+            </div>
+            <h3>Adventure Stories</h3>
+            <p>Ages 2-8</p>
+          </article>
+
+          <article class="book-card kindness">
+            <div class="book-cover">
+              <span>Olivia and the Magic of Kindness</span>
+            </div>
+            <h3>Values & Life Lessons</h3>
+            <p>Ages 2-8</p>
+          </article>
+
+          <article class="book-card abc">
+            <div class="book-cover">
+              <span>The ABC Monster Book</span>
+            </div>
+            <h3>Learning & ABC</h3>
+            <p>Ages 2-6</p>
+          </article>
+
+          <article class="book-card counting">
+            <div class="book-cover">
+              <span>123 with Milo Monster</span>
+            </div>
+            <h3>Numbers & Counting</h3>
+            <p>Ages 2-6</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="about-section" id="about" aria-labelledby="about-title">
         <div>
-          <p class="eyebrow">Next steps</p>
-          <h2 id="about-title">Bring in the real content</h2>
+          <p class="eyebrow">Start free</p>
+          <h2 id="about-title">Color first. Book when they love it.</h2>
         </div>
         <p>
-          Replace the placeholder copy with the site’s actual purpose, audience,
-          imagery, and calls to action. The current files are intentionally small
-          so iteration stays fast.
+          Every child can get a free printable monster coloring page. Families
+          who want a keepsake can turn the same character into a personalized
+          printed storybook, with print-on-demand fulfillment planned through Lulu.
         </p>
       </section>
 
-      <section class="contact-band" id="contact" aria-labelledby="contact-title">
-        <div>
-          <p class="eyebrow">Contact</p>
-          <h2 id="contact-title">Start shaping the site.</h2>
+      <section class="reviews-section" id="reviews" aria-labelledby="reviews-title">
+        <div class="section-heading centered">
+          <h2 id="reviews-title">Loved by Families Everywhere</h2>
         </div>
-        <a class="button primary" href="mailto:hello@example.com">Email us</a>
+
+        <div class="review-grid">
+          <article class="review-card">
+            <span>★★★★★</span>
+            <p>"The book brought my son to tears. Seeing his drawing turned into a real story is something we'll cherish forever."</p>
+            <strong>Jessica M.</strong>
+          </article>
+
+          <article class="review-card">
+            <span>★★★★★</span>
+            <p>"Amazing quality and such a unique idea. My daughter reads her book every single night."</p>
+            <strong>David R.</strong>
+          </article>
+
+          <article class="review-card">
+            <span>★★★★★</span>
+            <p>"Best personalized gift we've ever given. Worth every penny."</p>
+            <strong>Samantha L.</strong>
+          </article>
+        </div>
+
+        <div class="trust-row">
+          <span>100% Happiness Guarantee</span>
+          <span>Safe & Secure</span>
+          <span>Made with Love</span>
+          <span>Quick Print & Shipping</span>
+        </div>
+      </section>
+
+      <section class="faq-section" id="faq" aria-labelledby="faq-title">
+        <div class="section-heading centered">
+          <h2 id="faq-title">Questions Parents Ask</h2>
+        </div>
+
+        <div class="faq-grid">
+          <article>
+            <h3>What should my child draw?</h3>
+            <p>Any original monster works best: silly, friendly, colorful, or completely made up.</p>
+          </article>
+          <article>
+            <h3>Is there really a free option?</h3>
+            <p>Yes. The free path creates a printable coloring page from the monster drawing.</p>
+          </article>
+          <article>
+            <h3>How will books be printed?</h3>
+            <p>The planned book workflow uses Lulu for on-demand printing and shipping.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="cta-section" id="start" aria-labelledby="cta-title">
+        <h2 id="cta-title">Ready to create their monster?</h2>
+        <a class="button primary" href="mailto:hello@monstersnow.com">Create Your Book</a>
       </section>
     </main>
 
     <footer class="site-footer">
-      <span>&copy; <span id="year"></span> MonstersNOW</span>
+      <a class="footer-brand" href="#" aria-label="MonstersNOW home">
+        <img src="assets/monstersnow-logo.png" alt="" />
+      </a>
+      <nav aria-label="Footer navigation">
+        <a href="#books">All Books</a>
+        <a href="#how-it-works">How It Works</a>
+        <a href="#reviews">Reviews</a>
+        <a href="#faq">FAQ</a>
+      </nav>
+      <p>&copy; <span id="year"></span> MonstersNOW. All rights reserved.</p>
     </footer>
 
     <script src="scripts/main.js"></script>
