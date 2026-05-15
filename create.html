@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Upload a child's monster drawing to create a free MonstersNOW preview, printable coloring page, and personalized storybook."
+    />
+    <title>Create Your Monster | MonstersNOW</title>
+    <link rel="stylesheet" href="styles.css?v=20260515-monsters" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="index.html" aria-label="MonstersNOW home">
+        <img src="assets/monstersnow-logo.png" alt="" />
+      </a>
+
+      <nav class="site-nav" aria-label="Main navigation">
+        <a href="index.html#how-it-works">How It Works</a>
+        <a href="monsters.html">Monsters</a>
+        <a href="books.html">Books</a>
+        <a href="index.html#about">About Us</a>
+        <a href="index.html#reviews">Reviews</a>
+        <a href="index.html#pricing">Pricing</a>
+        <a href="index.html#faq">FAQ</a>
+      </nav>
+
+      <div class="header-actions">
+        <a class="button header-button" href="create.html" aria-current="page">Create Your Book</a>
+      </div>
+    </header>
+
+    <main>
+      <section class="create-flow-section" id="converter" aria-labelledby="converter-title">
+        <div class="create-flow-header">
+          <div class="create-flow-copy">
+            <p class="eyebrow">Create your monster</p>
+            <h1 id="converter-title">Upload their drawing.</h1>
+            <p>
+              Choose a clear photo, create up to three monster previews, then
+              download the free coloring page or join the print waitlist.
+            </p>
+          </div>
+          <div class="create-flow-meta">
+            <div class="free-includes" aria-label="Free MonstersNOW preview details">
+              <span><strong>3</strong> preview versions</span>
+              <span><strong>$0</strong> coloring page</span>
+            </div>
+            <ol class="converter-flow" aria-label="Creation progress">
+              <li class="is-active" data-flow-step="upload"><i>1</i>Upload</li>
+              <li data-flow-step="preview"><i>2</i>Preview</li>
+              <li data-flow-step="download"><i>3</i>Download</li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="converter-tool" data-converter>
+          <form class="upload-panel" novalidate>
+            <label class="upload-drop" for="monster-upload">
+              <span>Drawing</span>
+              <strong>Upload or take a picture</strong>
+              <small>PNG, JPG, WebP, or GIF under 8 MB</small>
+            </label>
+            <input id="monster-upload" type="file" accept="image/png,image/jpeg,image/webp,image/gif" />
+            <ul class="upload-tips" aria-label="Upload tips">
+              <li>Bright, straight-on photo</li>
+              <li>Drawing fills most of the frame</li>
+              <li>Artwork only when possible</li>
+            </ul>
+            <p class="privacy-note">We do not publish children's artwork without permission.</p>
+            <p class="converter-error" id="upload-error" role="alert" hidden></p>
+
+            <button class="button primary converter-button" id="convert-button" type="button" disabled>
+              Create Monster
+            </button>
+            <p class="upload-action-status" id="upload-action-status" role="status">
+              Upload a drawing to create the first preview.
+            </p>
+
+            <div class="converter-preview drawing-preview">
+              <img
+                id="drawing-preview"
+                src="assets/step-1-drawing.jpg"
+                alt="Sample child monster drawing."
+              />
+            </div>
+          </form>
+
+          <div class="result-panel is-example-preview" id="monster-result" aria-live="polite" tabindex="-1">
+            <div class="converter-preview monster-preview">
+              <span class="preview-badge" id="monster-preview-badge">Example preview</span>
+              <img
+                id="monster-preview"
+                src="assets/step-2-character.jpg?v=20260515-horns"
+                alt="Example generated monster character."
+              />
+            </div>
+            <div class="result-content">
+              <span class="result-label">Monster preview</span>
+              <h3 id="converter-status">Upload a drawing to begin.</h3>
+              <p id="converter-note">
+                The preview keeps the child's shape, colors, and expression in
+                the MonstersNOW style.
+              </p>
+              <div class="result-trust-points" aria-label="Preview benefits">
+                <span>Preview before buying</span>
+                <span>Free coloring page</span>
+                <span>Softcover or hardcover</span>
+              </div>
+              <div class="variation-controls" aria-label="Monster preview options">
+                <div>
+                  <span>Preview style</span>
+                  <p id="preview-count">3 free previews per drawing.</p>
+                </div>
+                <div class="style-options" role="group" aria-label="Choose a monster preview style">
+                  <button class="style-option is-active" type="button" data-monster-style="storybook" aria-pressed="true">
+                    Storybook
+                  </button>
+                  <button class="style-option" type="button" data-monster-style="cute" aria-pressed="false">
+                    Cute
+                  </button>
+                  <button class="style-option" type="button" data-monster-style="silly" aria-pressed="false">
+                    Silly
+                  </button>
+                  <button class="style-option" type="button" data-monster-style="adventure" aria-pressed="false">
+                    Adventure
+                  </button>
+                </div>
+              </div>
+              <div class="preview-history" id="preview-history" aria-label="Generated monster versions" hidden></div>
+              <div class="result-actions" hidden>
+                <button class="button secondary" id="regenerate-monster" type="button" disabled>
+                  Try Another Version
+                </button>
+                <button class="button secondary" id="download-coloring" type="button" disabled>
+                  Download Free Coloring Page
+                </button>
+              </div>
+              <section class="result-book-offer" id="result-book-offer" aria-labelledby="result-book-title" hidden>
+                <div class="book-offer-header">
+                  <span class="result-label">Printed storybook</span>
+                  <h4 id="result-book-title">Turn this monster into a real book.</h4>
+                  <p>Recommended launch pricing for a custom storybook starring the generated monster.</p>
+                </div>
+                <form class="interest-form" id="storybook-interest-form">
+                  <div class="storybook-format-options" role="radiogroup" aria-label="Preferred storybook format">
+                    <label class="storybook-format-choice is-featured">
+                      <input type="radio" name="storybook-format" value="softcover" checked />
+                      <span>
+                        <strong>Softcover <em>Recommended</em></strong>
+                        <small>$39.99 + shipping</small>
+                      </span>
+                    </label>
+                    <label class="storybook-format-choice">
+                      <input type="radio" name="storybook-format" value="hardcover" />
+                      <span>
+                        <strong>Hardcover Keepsake</strong>
+                        <small>$59.99 + shipping</small>
+                      </span>
+                    </label>
+                  </div>
+                  <ul class="print-proof-points" aria-label="Printed storybook details">
+                    <li>Cover and interior preview before print</li>
+                    <li>8.5 x 8.5 inch print-on-demand plan</li>
+                    <li>Shipping calculated when checkout opens</li>
+                  </ul>
+                  <section class="feature-permission" aria-labelledby="feature-permission-title">
+                    <div>
+                      <span class="result-label" id="feature-permission-title">Optional website feature</span>
+                      <p>Parent-approved monsters can appear on the Monsters page after review.</p>
+                    </div>
+                    <label class="feature-check">
+                      <input id="feature-monster" type="checkbox" />
+                      <span>
+                        I am the parent or guardian and give MonstersNOW permission to feature this finished monster.
+                      </span>
+                    </label>
+                    <div class="feature-permission-fields" id="feature-permission-fields" hidden>
+                      <label>
+                        Display name
+                        <input
+                          id="feature-display-name"
+                          type="text"
+                          maxlength="40"
+                          placeholder="Monster by first name"
+                          autocomplete="off"
+                        />
+                      </label>
+                      <label class="feature-check">
+                        <input id="feature-show-drawing" type="checkbox" />
+                        <span>Also show the original drawing as the before image.</span>
+                      </label>
+                    </div>
+                  </section>
+                  <div class="interest-email-row">
+                    <label class="sr-only" for="interest-email">Email for storybook updates</label>
+                    <input id="interest-email" type="email" placeholder="Email for print updates" autocomplete="email" />
+                    <button class="button primary" id="storybook-interest" type="submit" disabled>
+                      Join Print Waitlist
+                    </button>
+                  </div>
+                  <p id="interest-status" role="status"></p>
+                </form>
+              </section>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <a class="footer-brand" href="index.html" aria-label="MonstersNOW home">
+        <img src="assets/monstersnow-logo.png" alt="" />
+      </a>
+      <nav aria-label="Footer navigation">
+        <a href="books.html">Books</a>
+        <a href="monsters.html">Monsters</a>
+        <a href="index.html#pricing">Pricing</a>
+        <a href="index.html#how-it-works">How It Works</a>
+        <a href="index.html#faq">FAQ</a>
+      </nav>
+      <p>&copy; <span id="year"></span> MonstersNOW. All rights reserved.</p>
+    </footer>
+
+    <script src="scripts/main.js?v=20260515-monsters"></script>
+  </body>
+</html>

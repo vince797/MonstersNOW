@@ -8,24 +8,26 @@
       content="MonstersNOW turns a child's monster drawing into a free AI monster preview, printable coloring page, and personalized storybook."
     />
     <title>MonstersNOW | Turn Child Drawings Into Monster Storybooks</title>
-    <link rel="stylesheet" href="styles.css?v=20260515-generator-errors" />
+    <link rel="stylesheet" href="styles.css?v=20260515-monsters" />
   </head>
   <body>
     <header class="site-header">
-      <a class="brand" href="#" aria-label="MonstersNOW home">
+      <a class="brand" href="index.html" aria-label="MonstersNOW home">
         <img src="assets/monstersnow-logo.png" alt="" />
       </a>
 
       <nav class="site-nav" aria-label="Main navigation">
-        <a href="#">Home</a>
-        <a href="#converter">Create</a>
-        <a href="#examples">Examples</a>
+        <a href="#how-it-works">How It Works</a>
+        <a href="monsters.html">Monsters</a>
+        <a href="books.html">Books</a>
+        <a href="#about">About Us</a>
+        <a href="#reviews">Reviews</a>
         <a href="#pricing">Pricing</a>
         <a href="#faq">FAQ</a>
       </nav>
 
       <div class="header-actions">
-        <a class="button header-button" href="#converter">Start Free</a>
+        <a class="button header-button" href="create.html">Create Your Book</a>
       </div>
     </header>
 
@@ -49,8 +51,8 @@
           </div>
 
           <div class="hero-actions">
-            <a class="button primary" href="#converter">Start Free - Upload Drawing</a>
-            <a class="button secondary" href="#examples">See Examples</a>
+            <a class="button primary" href="create.html">Create Your Book</a>
+            <a class="button secondary" href="books.html">Browse Books</a>
           </div>
 
           <div class="rating-row" aria-label="Customer rating">
@@ -69,133 +71,9 @@
 
       <section class="proof-strip" aria-label="MonstersNOW launch details">
         <span><strong>$0</strong> Upload and coloring page</span>
-        <span><strong>3</strong> Preview versions per drawing</span>
-        <span><strong>Private</strong> No public gallery without permission</span>
-        <span><strong>Lulu</strong> Print-on-demand plan</span>
-      </section>
-
-      <section class="converter-section" id="converter" aria-labelledby="converter-title">
-        <div class="converter-copy">
-          <p class="eyebrow">Free monster preview</p>
-          <h2 id="converter-title">Start free with their drawing.</h2>
-          <p>
-            Upload a drawing or a clear photo, choose a preview style, and try
-            up to three monster versions before downloading the free coloring page.
-          </p>
-          <div class="free-includes" aria-label="Free MonstersNOW options">
-            <span>Free upload</span>
-            <span>Free monster preview</span>
-            <span>Free coloring page</span>
-          </div>
-          <ol class="converter-flow" aria-label="Converter progress">
-            <li class="is-active" data-flow-step="upload"><i>1</i>Upload</li>
-            <li data-flow-step="preview"><i>2</i>Preview</li>
-            <li data-flow-step="download"><i>3</i>Download</li>
-          </ol>
-        </div>
-
-        <div class="converter-tool" data-converter>
-          <form class="upload-panel" novalidate>
-            <label class="upload-drop" for="monster-upload">
-              <span>Drawing</span>
-              <strong>Upload or take a picture</strong>
-              <small>PNG, JPG, WebP, or GIF under 8 MB</small>
-            </label>
-            <input id="monster-upload" type="file" accept="image/png,image/jpeg,image/webp,image/gif" />
-            <p class="upload-guidance">Best results come from a bright, straight-on photo with the drawing filling most of the frame.</p>
-            <p class="privacy-note">Use drawing-only photos when possible. We do not publish children's artwork without permission.</p>
-            <p class="converter-error" id="upload-error" role="alert" hidden></p>
-
-            <div class="converter-preview drawing-preview">
-              <img
-                id="drawing-preview"
-                src="assets/step-1-drawing.jpg"
-                alt="Sample child monster drawing."
-              />
-            </div>
-
-            <button class="button primary converter-button" id="convert-button" type="button" disabled>
-              Create Monster
-            </button>
-            <p class="upload-action-status" id="upload-action-status" role="status">
-              Upload a drawing to unlock the free monster preview.
-            </p>
-          </form>
-
-          <div class="result-panel" id="monster-result" aria-live="polite" tabindex="-1">
-            <div class="converter-preview monster-preview">
-              <img
-                id="monster-preview"
-                src="assets/step-2-character.jpg?v=20260515-horns"
-                alt="Sample generated monster character."
-              />
-            </div>
-            <div>
-              <span class="result-label">Monster preview</span>
-              <h3 id="converter-status">Upload a drawing to begin.</h3>
-              <p id="converter-note">
-                The finished converter will preserve the child's shape, colors,
-                and expression in the MonstersNOW style.
-              </p>
-              <div class="variation-controls" aria-label="Monster preview options">
-                <div>
-                  <span>Preview style</span>
-                  <p id="preview-count">3 free previews per drawing.</p>
-                </div>
-                <div class="style-options" role="group" aria-label="Choose a monster preview style">
-                  <button class="style-option is-active" type="button" data-monster-style="storybook" aria-pressed="true">
-                    Storybook
-                  </button>
-                  <button class="style-option" type="button" data-monster-style="cute" aria-pressed="false">
-                    Cute
-                  </button>
-                  <button class="style-option" type="button" data-monster-style="silly" aria-pressed="false">
-                    Silly
-                  </button>
-                  <button class="style-option" type="button" data-monster-style="adventure" aria-pressed="false">
-                    Adventure
-                  </button>
-                </div>
-              </div>
-              <div class="preview-history" id="preview-history" aria-label="Generated monster versions" hidden></div>
-              <div class="result-actions">
-                <button class="button secondary" id="regenerate-monster" type="button" disabled>
-                  Try Another Version
-                </button>
-                <button class="button secondary" id="download-coloring" type="button" disabled>
-                  Download Free Coloring Page
-                </button>
-                <button class="button primary" id="storybook-interest" type="button">
-                  Create Storybook
-                </button>
-              </div>
-              <form class="interest-form" id="storybook-interest-form" hidden>
-                <label for="interest-email">Storybook ordering is coming soon.</label>
-                <div class="storybook-format-options" role="radiogroup" aria-label="Preferred storybook format">
-                  <label class="storybook-format-choice">
-                    <input type="radio" name="storybook-format" value="softcover" checked />
-                    <span>
-                      <strong>Softcover</strong>
-                      <small>$39.99 + shipping</small>
-                    </span>
-                  </label>
-                  <label class="storybook-format-choice">
-                    <input type="radio" name="storybook-format" value="hardcover" />
-                    <span>
-                      <strong>Hardcover</strong>
-                      <small>$59.99 + shipping</small>
-                    </span>
-                  </label>
-                </div>
-                <div>
-                  <input id="interest-email" type="email" placeholder="Email for storybook updates" autocomplete="email" />
-                  <button class="button secondary" type="submit">Notify Me</button>
-                </div>
-                <p id="interest-status" role="status"></p>
-              </form>
-            </div>
-          </div>
-        </div>
+        <span><strong>3</strong> Monster versions per drawing</span>
+        <span><strong>Preview</strong> Before buying</span>
+        <span><strong>Soft + hard</strong> Storybook formats</span>
       </section>
 
       <section class="steps-section" id="how-it-works" aria-labelledby="steps-title">
@@ -245,41 +123,60 @@
       <section class="books-section" id="examples" aria-labelledby="books-title">
         <div class="section-heading centered">
           <h2 id="books-title">Storybook Examples</h2>
-          <p>Use the same monster across adventure, learning, counting, and values-based books as the catalog grows.</p>
+          <p>Use the same monster across adventure, learning, coloring, and values-based books as the catalog grows.</p>
         </div>
 
         <div class="book-grid">
-          <article class="book-card adventure">
-            <div class="book-cover">
-              <span>Max's Big Adventure</span>
-            </div>
+          <article class="book-card">
+            <figure class="book-preview">
+              <img
+                src="assets/master-references/storybook-page-spread.jpg"
+                alt="A sample storybook page spread with a custom monster in a colorful scene."
+              />
+              <figcaption>Story spread</figcaption>
+            </figure>
             <h3>Adventure Stories</h3>
             <p>Ages 2-8</p>
           </article>
 
-          <article class="book-card kindness">
-            <div class="book-cover">
-              <span>Olivia and the Magic of Kindness</span>
-            </div>
-            <h3>Values & Life Lessons</h3>
+          <article class="book-card">
+            <figure class="book-preview">
+              <img
+                src="assets/step-3-storybook.jpg"
+                alt="An open storybook showing a friendly monster in a magical landscape."
+              />
+              <figcaption>Book preview</figcaption>
+            </figure>
+            <h3>Printed Keepsakes</h3>
             <p>Ages 2-8</p>
           </article>
 
-          <article class="book-card abc">
-            <div class="book-cover">
-              <span>The ABC Monster Book</span>
-            </div>
+          <article class="book-card">
+            <figure class="book-preview">
+              <img
+                src="assets/master-references/abc-page-character-style.jpg"
+                alt="A sample ABC page with a custom monster character."
+              />
+              <figcaption>Learning page</figcaption>
+            </figure>
             <h3>Learning & ABC</h3>
             <p>Ages 2-6</p>
           </article>
 
-          <article class="book-card counting">
-            <div class="book-cover">
-              <span>123 with Milo Monster</span>
-            </div>
-            <h3>Numbers & Counting</h3>
-            <p>Ages 2-6</p>
+          <article class="book-card">
+            <figure class="book-preview">
+              <img
+                src="assets/master-references/coloring-page-line-art.jpg"
+                alt="A sample printable monster coloring page in black and white."
+              />
+              <figcaption>Coloring page</figcaption>
+            </figure>
+            <h3>Free Coloring Pages</h3>
+            <p>$0 download</p>
           </article>
+        </div>
+        <div class="section-actions">
+          <a class="button secondary" href="books.html">View Story Catalog</a>
         </div>
       </section>
 
@@ -305,7 +202,7 @@
       <section class="pricing-section" id="pricing" aria-labelledby="pricing-title">
         <div class="section-heading centered">
           <p class="eyebrow">Free vs. paid</p>
-          <h2 id="pricing-title">Start with the free coloring page.</h2>
+          <h2 id="pricing-title">Start free, then choose a book.</h2>
           <p>Printed storybooks will be the paid keepsake option once ordering opens.</p>
         </div>
 
@@ -319,16 +216,17 @@
               <li>Try up to three preview versions.</li>
               <li>Download a printable coloring page.</li>
             </ul>
-            <a class="button primary" href="#converter">Start Free</a>
+            <a class="button primary" href="create.html">Start Free</a>
           </article>
 
           <article class="pricing-card">
-            <span>Paid</span>
+            <span>Launch pricing</span>
             <h3>Printed Storybook</h3>
             <p class="price">From $39.99</p>
+            <p class="pricing-note">Custom artwork from the child's drawing, not a template-only personalization flow.</p>
             <div class="storybook-price-list" aria-label="Storybook format prices">
               <div>
-                <strong>Softcover Storybook</strong>
+                <strong>Softcover Storybook <em>Recommended</em></strong>
                 <span>$39.99 + shipping</span>
               </div>
               <div>
@@ -341,7 +239,7 @@
               <li>Cover and interior page previews before printing.</li>
               <li>Lulu print-on-demand fulfillment with shipping at checkout.</li>
             </ul>
-            <a class="button secondary" href="#converter">Get Book Updates</a>
+            <a class="button secondary" href="create.html">Get Book Updates</a>
           </article>
         </div>
       </section>
@@ -418,16 +316,17 @@
 
       <section class="cta-section" id="start" aria-labelledby="cta-title">
         <h2 id="cta-title">Ready to create their monster?</h2>
-        <a class="button primary" href="#converter">Start Free - Upload Drawing</a>
+        <a class="button primary" href="create.html">Create Your Book</a>
       </section>
     </main>
 
     <footer class="site-footer">
-      <a class="footer-brand" href="#" aria-label="MonstersNOW home">
+      <a class="footer-brand" href="index.html" aria-label="MonstersNOW home">
         <img src="assets/monstersnow-logo.png" alt="" />
       </a>
       <nav aria-label="Footer navigation">
-        <a href="#examples">Examples</a>
+        <a href="books.html">Books</a>
+        <a href="monsters.html">Monsters</a>
         <a href="#pricing">Pricing</a>
         <a href="#how-it-works">How It Works</a>
         <a href="#faq">FAQ</a>
@@ -435,6 +334,6 @@
       <p>&copy; <span id="year"></span> MonstersNOW. All rights reserved.</p>
     </footer>
 
-    <script src="scripts/main.js?v=20260515-generator-errors"></script>
+    <script src="scripts/main.js?v=20260515-monsters"></script>
   </body>
 </html>

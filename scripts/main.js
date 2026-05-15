@@ -10,6 +10,7 @@ const monsterPreview = document.querySelector("#monster-preview");
 const convertButton = document.querySelector("#convert-button");
 const regenerateButton = document.querySelector("#regenerate-monster");
 const resultPanel = document.querySelector("#monster-result");
+const monsterPreviewBadge = document.querySelector("#monster-preview-badge");
 const downloadColoringButton = document.querySelector("#download-coloring");
 const converterStatus = document.querySelector("#converter-status");
 const converterNote = document.querySelector("#converter-note");
@@ -19,14 +20,20 @@ const uploadError = document.querySelector("#upload-error");
 const uploadDrop = document.querySelector(".upload-drop");
 const uploadTitle = document.querySelector(".upload-drop strong");
 const uploadMeta = document.querySelector(".upload-drop small");
+const resultActions = document.querySelector(".result-actions");
 const flowSteps = [...document.querySelectorAll(".converter-flow li")];
 const styleButtons = [...document.querySelectorAll("[data-monster-style]")];
 const previewHistory = document.querySelector("#preview-history");
+const resultBookOffer = document.querySelector("#result-book-offer");
 const storybookInterestButton = document.querySelector("#storybook-interest");
 const storybookInterestForm = document.querySelector("#storybook-interest-form");
 const interestEmail = document.querySelector("#interest-email");
 const interestStatus = document.querySelector("#interest-status");
 const storybookFormatInputs = [...document.querySelectorAll('input[name="storybook-format"]')];
+const featureMonster = document.querySelector("#feature-monster");
+const featureShowDrawing = document.querySelector("#feature-show-drawing");
+const featureDisplayName = document.querySelector("#feature-display-name");
+const featurePermissionFields = document.querySelector("#feature-permission-fields");
 
 const allowedUploadTypes = new Set(["image/png", "image/jpeg", "image/webp", "image/gif"]);
 const maxUploadBytes = 8 * 1024 * 1024;
@@ -110,16 +117,7 @@ if (monsterUpload && drawingPreview && monsterPreview && convertButton) {
   syncPreviewControls();
 }
 
-if (storybookInterestButton && storybookInterestForm) {
-  storybookInterestButton.addEventListener("click", () => {
-    storybookInterestForm.hidden = false;
-    interestEmail?.focus();
-
-    if (interestStatus) {
-      interestStatus.textContent = "Leave an email and we will follow up when storybook ordering opens.";
-    }
-  });
-
+if (storybookInterestForm) {
   storybookInterestForm.addEventListener("submit", (event) => {
     event.preventDefault();
     const email = interestEmail?.value.trim();
@@ -133,12 +131,15 @@ if (storybookInterestButton && storybookInterestForm) {
     }
 
     const selectedFormat = getSelectedStorybookFormat();
+    const featurePermission = getFeaturePermission();
 
     localStorage.setItem(
       "monstersnow_storybook_interest",
       JSON.stringify({
         email,
         format: selectedFormat.value,
+        previewId: selectedPreviewId || null,
+        featurePermission,
       }),
     );
 
@@ -149,9 +150,21 @@ if (storybookInterestButton && storybookInterestForm) {
     window.location.href = `mailto:hello@monstersnow.com?subject=${encodeURIComponent(
       "MonstersNOW storybook interest",
     )}&body=${encodeURIComponent(
-      `Please notify me when storybook ordering opens: ${email}\nPreferred format: ${selectedFormat.label}`,
+      [
+        `Please notify me when storybook ordering opens: ${email}`,
+        `Preferred format: ${selectedFormat.label}`,
+        `Feature finished monster: ${featurePermission.canFeatureMonster ? "Yes" : "No"}`,
+        `Feature original drawing: ${featurePermission.canFeatureDrawing ? "Yes" : "No"}`,
+        `Display name: ${featurePermission.displayName || "Not provided"}`,
+        `Consent recorded at: ${featurePermission.consentRecordedAt || "Not provided"}`,
+      ].join("\n"),
     )}`;
   });
+}
+
+if (featureMonster) {
+  featureMonster.addEventListener("change", syncFeaturePermissionFields);
+  syncFeaturePermissionFields();
 }
 
 function getSelectedStorybookFormat() {
@@ -162,6 +175,36 @@ function getSelectedStorybookFormat() {
     value,
     label: value === "hardcover" ? "Hardcover Keepsake ($59.99 + shipping)" : "Softcover Storybook ($39.99 + shipping)",
   };
+}
+
+function getFeaturePermission() {
+  const canFeatureMonster = Boolean(featureMonster?.checked);
+  const displayName = canFeatureMonster ? featureDisplayName?.value.trim() || "" : "";
+
+  return {
+    canFeatureMonster,
+    canFeatureDrawing: canFeatureMonster && Boolean(featureShowDrawing?.checked),
+    displayName,
+    consentRecordedAt: canFeatureMonster ? new Date().toISOString() : null,
+  };
+}
+
+function syncFeaturePermissionFields() {
+  const isEnabled = Boolean(featureMonster?.checked);
+
+  if (featurePermissionFields) {
+    featurePermissionFields.hidden = !isEnabled;
+  }
+
+  if (!isEnabled) {
+    if (featureDisplayName) {
+      featureDisplayName.value = "";
+    }
+
+    if (featureShowDrawing) {
+      featureShowDrawing.checked = false;
+    }
+  }
 }
 
 function bindUploadDropZone() {
@@ -254,7 +297,8 @@ function selectDrawingFile(file) {
   showUploadError("");
 
   if (uploadTitle) {
-    uploadTitle.textContent = file.name;
+    uploadTitle.textContent = formatUploadName(file.name);
+    uploadTitle.title = file.name;
   }
 
   if (uploadMeta) {
@@ -273,7 +317,7 @@ function selectDrawingFile(file) {
     converterNote.textContent = "Ready to create a MonstersNOW-style character preview.";
   }
 
-  setUploadActionStatus("Tap Create Monster. The preview will appear below.");
+  setUploadActionStatus("Choose a style, then create the first preview.");
   syncPreviewControls();
 }
 
@@ -339,6 +383,10 @@ function applyMonsterResult(result) {
 
   if (downloadColoringButton) {
     downloadColoringButton.disabled = false;
+  }
+
+  if (storybookInterestButton) {
+    storybookInterestButton.disabled = false;
   }
 
   if (converterStatus) {
@@ -411,6 +459,7 @@ function selectGeneratedPreview(id, announce = false) {
   monsterPreview.src = preview.image;
   monsterPreview.alt = `${previewStyleLabels[preview.style]} generated monster character preview.`;
   coloringPageUrl = preview.coloringPage;
+  updatePreviewPresentation(true);
 
   previewHistory?.querySelectorAll(".preview-choice").forEach((button) => {
     button.setAttribute("aria-pressed", button.dataset.previewId === id ? "true" : "false");
@@ -418,6 +467,10 @@ function selectGeneratedPreview(id, announce = false) {
 
   if (downloadColoringButton) {
     downloadColoringButton.disabled = false;
+  }
+
+  if (storybookInterestButton) {
+    storybookInterestButton.disabled = false;
   }
 
   if (announce && converterStatus) {
@@ -436,6 +489,13 @@ function resetPreviewState() {
   selectedPreviewId = undefined;
   isGeneratingPreview = false;
 
+  if (monsterPreview) {
+    monsterPreview.src = demoMonsterImage;
+    monsterPreview.alt = "Example generated monster character.";
+  }
+
+  updatePreviewPresentation(false);
+
   if (previewHistory) {
     previewHistory.innerHTML = "";
     previewHistory.hidden = true;
@@ -445,7 +505,20 @@ function resetPreviewState() {
     downloadColoringButton.disabled = true;
   }
 
-  setUploadActionStatus("Upload a drawing to unlock the free monster preview.");
+  if (storybookInterestButton) {
+    storybookInterestButton.disabled = true;
+  }
+
+  if (storybookInterestForm) {
+    storybookInterestForm.reset();
+    syncFeaturePermissionFields();
+  }
+
+  if (interestStatus) {
+    interestStatus.textContent = "";
+  }
+
+  setUploadActionStatus("Upload a drawing to create the first preview.");
   syncPreviewControls();
 }
 
@@ -461,6 +534,7 @@ function updateStyleButtons() {
 function syncPreviewControls() {
   const remaining = Math.max(0, maxFreePreviews - previewsUsed);
   const canGenerate = Boolean(selectedDrawingFile) && remaining > 0 && !isGeneratingPreview;
+  const hasPreview = generatedPreviews.length > 0;
   const primaryText = previewsUsed === 0 ? "Create Monster" : "Try Another Version";
   const buttonText = isGeneratingPreview
     ? "Creating..."
@@ -474,7 +548,8 @@ function syncPreviewControls() {
   }
 
   if (regenerateButton) {
-    regenerateButton.disabled = !canGenerate || previewsUsed === 0;
+    regenerateButton.hidden = !hasPreview;
+    regenerateButton.disabled = !canGenerate || !hasPreview;
     regenerateButton.textContent = isGeneratingPreview
       ? "Creating..."
       : remaining > 0
@@ -482,10 +557,39 @@ function syncPreviewControls() {
         : "Preview Limit Reached";
   }
 
+  if (resultActions) {
+    resultActions.hidden = !hasPreview;
+  }
+
+  if (resultBookOffer) {
+    resultBookOffer.hidden = !hasPreview;
+  }
+
+  if (downloadColoringButton) {
+    downloadColoringButton.hidden = !hasPreview;
+    downloadColoringButton.disabled = !hasPreview || !selectedPreviewId;
+  }
+
+  if (storybookInterestButton) {
+    storybookInterestButton.hidden = !hasPreview;
+    storybookInterestButton.disabled = !hasPreview;
+  }
+
+  updatePreviewPresentation(hasPreview);
+
   if (previewCount) {
     previewCount.textContent = selectedDrawingFile
       ? describeRemainingPreviews(remaining)
       : `${maxFreePreviews} free previews per drawing.`;
+  }
+}
+
+function updatePreviewPresentation(hasPreview) {
+  resultPanel?.classList.toggle("has-generated-preview", hasPreview);
+  resultPanel?.classList.toggle("is-example-preview", !hasPreview);
+
+  if (monsterPreviewBadge) {
+    monsterPreviewBadge.textContent = hasPreview ? "Your preview" : "Example preview";
   }
 }
 
@@ -524,13 +628,14 @@ function resetUpload() {
 
   if (uploadTitle) {
     uploadTitle.textContent = "Upload or take a picture";
+    uploadTitle.removeAttribute("title");
   }
 
   if (uploadMeta) {
     uploadMeta.textContent = "PNG, JPG, WebP, or GIF under 8 MB";
   }
 
-  setUploadActionStatus("Upload a drawing to unlock the free monster preview.");
+  setUploadActionStatus("Upload a drawing to create the first preview.");
   setConverterStage("upload");
   syncPreviewControls();
 }
@@ -584,6 +689,23 @@ function formatBytes(bytes) {
   }
 
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function formatUploadName(filename) {
+  const maxLength = 34;
+
+  if (typeof filename !== "string" || filename.length <= maxLength) {
+    return filename;
+  }
+
+  const dotIndex = filename.lastIndexOf(".");
+  const extension = dotIndex > 0 ? filename.slice(dotIndex) : "";
+  const basename = dotIndex > 0 ? filename.slice(0, dotIndex) : filename;
+  const available = Math.max(12, maxLength - extension.length - 3);
+  const leading = Math.ceil(available * 0.56);
+  const trailing = Math.floor(available * 0.44);
+
+  return `${basename.slice(0, leading)}...${basename.slice(-trailing)}${extension}`;
 }
 
 async function prepareImageForUpload(file) {
@@ -643,7 +765,9 @@ async function convertMonster(drawing, style, variationNumber) {
     }),
   });
 
-  const result = await response.json();
+  const result = await response.json().catch(() => ({
+    error: "The monster generator did not return a readable response.",
+  }));
 
   if (!response.ok) {
     throw new Error(result.error || "Could not create monster preview.");
@@ -657,16 +781,19 @@ async function convertMonster(drawing, style, variationNumber) {
 }
 
 function showMonsterGenerationError(error) {
-  const message = error?.message || "The monster generator is temporarily unavailable.";
+  const hasPreview = generatedPreviews.length > 0;
 
   if (converterStatus) {
-    converterStatus.textContent = "Monster preview could not be created.";
+    converterStatus.textContent = hasPreview ? "New version could not be created." : "Preview was not created.";
   }
 
   if (converterNote) {
-    converterNote.textContent = `${message} Your uploaded drawing is still selected, and this did not use one of your free previews.`;
+    converterNote.textContent = hasPreview
+      ? "Your existing preview is still available. Try another version again in a moment."
+      : "The generator could not finish. Your drawing is still selected, and this did not use one of your free previews.";
   }
 
+  syncPreviewControls();
   setUploadActionStatus("The generator could not finish. Try again in a moment.");
   setConverterStage(selectedDrawingFile ? "preview" : "upload");
   scrollToResultPanel({ focus: true, delay: 120 });

@@ -5,6 +5,7 @@ Starter website for MonstersNOW.
 ## Files
 
 - `index.html` - page structure and content
+- `monsters.html` - before and after monster gallery
 - `styles.css` - layout, responsive styling, and visual design
 - `scripts/main.js` - small browser behaviors
 - `api/convert-monster.js` - Vercel serverless AI converter endpoint
