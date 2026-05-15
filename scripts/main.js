@@ -118,12 +118,16 @@ if (monsterUpload && drawingPreview && monsterPreview && convertButton) {
       selectedMonsterStyle = normalizePreviewStyle(button.dataset.monsterStyle);
       updateStyleButtons();
 
-      if (selectedDrawingFile && previewsUsed < maxFreePreviews && converterNote) {
+      if (selectedDrawingFile && previewsUsed < maxFreePreviews && converterNote && !isGeneratingPreview) {
         converterNote.textContent = `${previewStyleLabels[selectedMonsterStyle]} style selected. Create another version when ready.`;
       }
 
-      if (selectedDrawingFile && previewsUsed < maxFreePreviews) {
-        setUploadActionStatus(`${previewStyleLabels[selectedMonsterStyle]} style selected. Tap the button to generate it.`);
+      if (isGeneratingPreview) {
+        setUploadActionStatus(`${previewStyleLabels[selectedMonsterStyle]} style selected for the next version.`);
+      } else if (selectedDrawingFile && previewsUsed < maxFreePreviews) {
+        setUploadActionStatus(`${previewStyleLabels[selectedMonsterStyle]} style selected. Try another version when ready.`);
+      } else if (!selectedDrawingFile) {
+        setUploadActionStatus(`${previewStyleLabels[selectedMonsterStyle]} style selected. Upload a drawing to start automatically.`);
       }
     });
   });
@@ -363,19 +367,20 @@ async function selectDrawingFile(file) {
   }
 
   if (converterStatus) {
-    converterStatus.textContent = "Drawing loaded.";
+    converterStatus.textContent = "Drawing ready. Creating preview...";
   }
 
   if (converterNote) {
     converterNote.textContent = shouldConvertHeic
-      ? "HEIC photo converted. Ready to create a MonstersNOW-style character preview."
-      : "Ready to create a MonstersNOW-style character preview.";
+      ? `HEIC photo converted. Creating a ${previewStyleLabels[selectedMonsterStyle].toLowerCase()} monster preview now.`
+      : `Creating a ${previewStyleLabels[selectedMonsterStyle].toLowerCase()} monster preview now.`;
   }
 
   setUploadActionStatus(
-    shouldConvertHeic ? "HEIC converted. Choose a style, then create the first preview." : "Choose a style, then create the first preview.",
+    shouldConvertHeic ? "HEIC converted. Creating your preview now." : "Drawing uploaded. Creating your preview now.",
   );
   syncPreviewControls();
+  requestMonsterPreview();
 }
 
 async function requestMonsterPreview() {
@@ -400,10 +405,10 @@ async function requestMonsterPreview() {
 
   isGeneratingPreview = true;
   syncPreviewControls();
-  setUploadActionStatus("Creating your monster preview. Watch the panel below.");
+  setUploadActionStatus(`Creating your ${previewStyleLabels[selectedMonsterStyle].toLowerCase()} monster preview.`);
 
   if (converterStatus) {
-    converterStatus.textContent = "Creating monster preview...";
+    converterStatus.textContent = `Creating ${previewStyleLabels[selectedMonsterStyle].toLowerCase()} preview...`;
   }
 
   if (converterNote) {
@@ -592,11 +597,13 @@ function syncPreviewControls() {
   const remaining = Math.max(0, maxFreePreviews - previewsUsed);
   const canGenerate = Boolean(selectedDrawingFile) && remaining > 0 && !isGeneratingPreview;
   const hasPreview = generatedPreviews.length > 0;
-  const primaryText = previewsUsed === 0 ? "Create Monster" : "Try Another Version";
+  const primaryText = previewsUsed === 0 ? "Create Preview" : "Try Another Version";
   const buttonText = isGeneratingPreview
     ? "Creating..."
-    : remaining > 0
-      ? primaryText
+    : !selectedDrawingFile
+      ? "Upload Drawing First"
+      : remaining > 0
+        ? primaryText
       : "Preview Limit Reached";
 
   if (convertButton) {

@@ -781,6 +781,10 @@ main > section {
   border-radius: 8px;
 }
 
+.upload-panel .variation-controls {
+  margin-top: 0;
+}
+
 .variation-controls span {
   display: block;
   margin-bottom: 4px;
