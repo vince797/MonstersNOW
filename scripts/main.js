@@ -53,6 +53,7 @@ const maxFreePreviews = 3;
 const heicConverterUrl = "https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js";
 const demoMonsterImage = "assets/step-2-character.jpg?v=20260515-horns";
 const defaultPreviewStyle = "storybook";
+const storybookInterestButtonText = "Start Halloween Checkout";
 const previewStyleLabels = {
   storybook: "Soft 3D Storybook Monster",
   cute: "Soft 3D Cute Monster",
@@ -138,53 +139,84 @@ if (monsterUpload && drawingPreview && monsterPreview && convertButton) {
 }
 
 if (storybookInterestForm) {
-  storybookInterestForm.addEventListener("submit", (event) => {
-    event.preventDefault();
-    const email = interestEmail?.value.trim();
-
-    if (!email || !interestEmail.checkValidity()) {
-      if (interestStatus) {
-        interestStatus.textContent = "Enter a valid email for storybook updates.";
-      }
-
-      return;
-    }
-
-    const selectedFormat = getSelectedStorybookFormat();
-    const featurePermission = getFeaturePermission();
-
-    localStorage.setItem(
-      "monstersnow_storybook_interest",
-      JSON.stringify({
-        email,
-        format: selectedFormat.value,
-        previewId: selectedPreviewId || null,
-        featurePermission,
-      }),
-    );
-
-    if (interestStatus) {
-      interestStatus.textContent = `Thanks. We will follow up about the ${selectedFormat.label.toLowerCase()} option.`;
-    }
-
-    window.location.href = `mailto:hello@monstersnow.com?subject=${encodeURIComponent(
-      "MonstersNOW storybook interest",
-    )}&body=${encodeURIComponent(
-      [
-        `Please notify me when storybook ordering opens: ${email}`,
-        `Preferred format: ${selectedFormat.label}`,
-        `Feature finished monster: ${featurePermission.canFeatureMonster ? "Yes" : "No"}`,
-        `Feature original drawing: ${featurePermission.canFeatureDrawing ? "Yes" : "No"}`,
-        `Display name: ${featurePermission.displayName || "Not provided"}`,
-        `Consent recorded at: ${featurePermission.consentRecordedAt || "Not provided"}`,
-      ].join("\n"),
-    )}`;
-  });
+  storybookInterestForm.addEventListener("submit", handleStorybookInterestSubmit);
 }
 
 if (featureMonster) {
   featureMonster.addEventListener("change", syncFeaturePermissionFields);
   syncFeaturePermissionFields();
+}
+
+async function handleStorybookInterestSubmit(event) {
+  event.preventDefault();
+  const email = interestEmail?.value.trim();
+
+  if (!email || !interestEmail.checkValidity()) {
+    if (interestStatus) {
+      interestStatus.textContent = "Enter a valid email for storybook updates.";
+    }
+
+    return;
+  }
+
+  const selectedFormat = getSelectedStorybookFormat();
+  const featurePermission = getFeaturePermission();
+  const selectedPreview = getSelectedPreview();
+  const submissionId = createClientSubmissionId();
+  const submission = {
+    submissionId,
+    source: "create-form",
+    email,
+    format: selectedFormat.value,
+    selectedPreviewId: selectedPreview?.id || selectedPreviewId || null,
+    style: selectedPreview?.style || selectedMonsterStyle,
+    monsterImage: selectedPreview?.image || null,
+    featurePermission,
+  };
+
+  persistStorybookInterest(submission, selectedFormat, featurePermission);
+
+  setStorybookSubmitState({ disabled: true, text: "Starting checkout..." });
+
+  try {
+    const checkout = await submitStorybookCheckout(submission);
+
+    if (checkout.checkoutUrl) {
+      if (interestStatus) {
+        interestStatus.textContent = "Opening secure checkout...";
+      }
+
+      window.location.href = checkout.checkoutUrl;
+      return;
+    }
+
+    throw new Error("Checkout did not return a redirect URL.");
+  } catch (checkoutError) {
+    console.warn(checkoutError);
+
+    if (interestStatus) {
+      interestStatus.textContent = "Checkout is not open yet. Sending your Halloween storybook request instead.";
+    }
+  }
+
+  try {
+    await submitStorybookInterest(submission);
+
+    if (interestStatus) {
+      interestStatus.textContent = `Thanks. We will follow up about the ${selectedFormat.label.toLowerCase()} option.`;
+    }
+
+    setStorybookSubmitState({ disabled: true, text: "Request Sent" });
+  } catch (interestError) {
+    console.error(interestError);
+
+    if (interestStatus) {
+      interestStatus.textContent = "Online ordering is not available yet. Opening an email draft instead.";
+    }
+
+    openStorybookInterestEmail(email, selectedFormat, featurePermission, selectedPreview);
+    setStorybookSubmitState({ disabled: false, text: storybookInterestButtonText });
+  }
 }
 
 function getSelectedStorybookFormat() {
@@ -195,6 +227,101 @@ function getSelectedStorybookFormat() {
     value,
     label: value === "hardcover" ? "Hardcover Keepsake ($59.99 + shipping)" : "Softcover Storybook ($39.99 + shipping)",
   };
+}
+
+function getSelectedPreview() {
+  return generatedPreviews.find((preview) => preview.id === selectedPreviewId);
+}
+
+function persistStorybookInterest(submission, selectedFormat, featurePermission) {
+  try {
+    localStorage.setItem(
+      "monstersnow_storybook_interest",
+      JSON.stringify({
+        submissionId: submission.submissionId,
+        email: submission.email,
+        format: selectedFormat.value,
+        previewId: submission.selectedPreviewId,
+        style: submission.style,
+        featurePermission,
+        submittedAt: new Date().toISOString(),
+      }),
+    );
+  } catch (error) {
+    console.warn("Storybook interest could not be saved locally.", error);
+  }
+}
+
+async function submitStorybookInterest(submission) {
+  const response = await fetch("/api/storybook-interest", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(submission),
+  });
+  const result = await response.json().catch(() => ({
+    error: "The storybook interest form did not return a readable response.",
+  }));
+
+  if (!response.ok) {
+    throw new Error(result.error || "Could not submit storybook interest.");
+  }
+
+  return result;
+}
+
+async function submitStorybookCheckout(submission) {
+  const response = await fetch("/api/storybook-checkout", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(submission),
+  });
+  const result = await response.json().catch(() => ({
+    error: "The checkout form did not return a readable response.",
+  }));
+
+  if (!response.ok) {
+    throw new Error(result.error || "Could not start checkout.");
+  }
+
+  return result;
+}
+
+function setStorybookSubmitState({ disabled, text }) {
+  if (!storybookInterestButton) {
+    return;
+  }
+
+  storybookInterestButton.disabled = disabled;
+  storybookInterestButton.textContent = text;
+}
+
+function openStorybookInterestEmail(email, selectedFormat, featurePermission, selectedPreview) {
+  window.location.href = `mailto:hello@monstersnow.com?subject=${encodeURIComponent(
+    "MonstersNOW Halloween storybook interest",
+  )}&body=${encodeURIComponent(
+    [
+      `Please notify me when Halloween storybook ordering opens: ${email}`,
+      `Preferred format: ${selectedFormat.label}`,
+      `Monster style: ${getPreviewStyleLabel(selectedPreview?.style || selectedMonsterStyle)}`,
+      `Selected preview ID: ${selectedPreview?.id || selectedPreviewId || "Not provided"}`,
+      `Feature finished monster: ${featurePermission.canFeatureMonster ? "Yes" : "No"}`,
+      `Feature original drawing: ${featurePermission.canFeatureDrawing ? "Yes" : "No"}`,
+      `Display name: ${featurePermission.displayName || "Not provided"}`,
+      `Consent recorded at: ${featurePermission.consentRecordedAt || "Not provided"}`,
+    ].join("\n"),
+  )}`;
+}
+
+function createClientSubmissionId() {
+  if (window.crypto?.randomUUID) {
+    return window.crypto.randomUUID();
+  }
+
+  return `mn-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
 function getFeaturePermission() {
@@ -450,6 +577,7 @@ function applyMonsterResult(result) {
 
   if (storybookInterestButton) {
     storybookInterestButton.disabled = false;
+    storybookInterestButton.textContent = storybookInterestButtonText;
   }
 
   if (converterStatus) {
@@ -534,6 +662,7 @@ function selectGeneratedPreview(id, announce = false) {
 
   if (storybookInterestButton) {
     storybookInterestButton.disabled = false;
+    storybookInterestButton.textContent = storybookInterestButtonText;
   }
 
   if (announce && converterStatus) {
@@ -570,6 +699,7 @@ function resetPreviewState() {
 
   if (storybookInterestButton) {
     storybookInterestButton.disabled = true;
+    storybookInterestButton.textContent = storybookInterestButtonText;
   }
 
   if (storybookInterestForm) {

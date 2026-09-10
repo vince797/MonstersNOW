@@ -40,6 +40,36 @@ Without `OPENAI_API_KEY`, the API route returns a configuration error. This
 prevents the UI from showing sample artwork as if it came from a customer's
 upload.
 
+## Halloween waitlist email variables
+
+The create flow starts with Stripe Checkout and falls back to a server-side
+interest email route before opening a prefilled mail draft.
+
+Add these Stripe variables for Production, Preview, and Development:
+
+```text
+STRIPE_SECRET_KEY
+STRIPE_STORYBOOK_SHIPPING_RATE_IDS
+STORYBOOK_CHECKOUT_ALLOWED_COUNTRIES
+STORYBOOK_CHECKOUT_SITE_URL
+```
+
+`STRIPE_STORYBOOK_SHIPPING_RATE_IDS` must contain one or more Stripe shipping
+rate IDs. `STORYBOOK_CHECKOUT_ALLOWED_COUNTRIES` defaults to `US` when omitted.
+Use the production domain for `STORYBOOK_CHECKOUT_SITE_URL` in Production.
+
+Add these Resend variables for Production, Preview, and Development:
+
+```text
+RESEND_API_KEY
+STORYBOOK_INTEREST_FROM_EMAIL
+STORYBOOK_INTEREST_TO_EMAIL
+```
+
+`STORYBOOK_INTEREST_FROM_EMAIL` must use a sender domain verified in Resend.
+`STORYBOOK_INTEREST_TO_EMAIL` can be a comma-separated list for internal order
+review recipients.
+
 ## Lulu sandbox environment variables
 
 The Lulu sandbox API routes are server-side only. Add these to Development and
