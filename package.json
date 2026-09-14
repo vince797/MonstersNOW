@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "heic-convert": "2.1.0"
+    "heic-convert": "2.1.0",
+    "mammoth": "1.12.3",
+    "pdf-parse": "2.4.5"
   }
 }

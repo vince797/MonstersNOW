@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex, nofollow" />
     <title>Dashboard | MonstersNOW Admin</title>
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="styles.css?v=20260914-manuscript-import" />
   </head>
   <body class="admin-page">
     <main>
@@ -119,11 +119,30 @@
               <p class="eyebrow">Story settings</p>
               <h2 id="story-editor-title">New master story</h2>
             </div>
-            <div class="story-editor-actions">
-              <button class="button secondary" id="save-draft" type="button">Save draft</button>
-              <button class="button primary" id="publish-story" type="button">Publish</button>
-            </div>
-          </div>
+                <div class="story-editor-actions">
+                  <button class="button secondary" id="show-manuscript-import" type="button">Import manuscript</button>
+                  <button class="button secondary" id="save-draft" type="button">Save draft</button>
+                  <button class="button primary" id="publish-story" type="button">Publish</button>
+                </div>
+              </div>
+
+              <section class="manuscript-import" id="manuscript-import" hidden>
+                <div>
+                  <p class="eyebrow">Start from a file</p>
+                  <h3>Import a manuscript</h3>
+                  <p>PDF, Word, text, or structured JSON · 3 MB maximum. Imported pages remain editable and are never published automatically.</p>
+                </div>
+                <label class="manuscript-drop" for="manuscript-file">
+                  <input id="manuscript-file" type="file" accept=".pdf,.docx,.txt,.json,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,application/json" />
+                  <strong>Choose manuscript</strong>
+                  <span id="manuscript-file-name">or drop a file here</span>
+                </label>
+                <div class="manuscript-import-actions">
+                  <button class="button secondary" id="cancel-manuscript-import" type="button">Cancel</button>
+                  <button class="button primary" id="import-manuscript" type="button" disabled>Import pages</button>
+                </div>
+                <p id="manuscript-import-status" role="status"></p>
+              </section>
 
           <div class="admin-field-grid">
             <label class="story-title-field">Title template<input id="story-title" type="text" maxlength="160" placeholder="{child_name} and {monster_name}'s Halloween Adventure" required /></label>
@@ -181,6 +200,6 @@
         </div>
       </section>
     </main>
-    <script src="scripts/admin.js"></script>
+    <script src="scripts/admin.js?v=20260914-manuscript-import"></script>
   </body>
 </html>

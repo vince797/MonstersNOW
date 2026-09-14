@@ -15,6 +15,7 @@ const editorStatus = document.querySelector("#story-editor-status");
 const pagesContainer = document.querySelector("#story-pages");
 let stories = [];
 let orders = [];
+let manuscriptFile = null;
 let adminPassword = sessionStorage.getItem("monstersnow_admin_password") || "";
 
 loginForm.addEventListener("submit", async (event) => {
@@ -33,6 +34,14 @@ document.querySelectorAll("[data-open-stories]").forEach((button) => button.addE
 document.querySelector("#add-page").addEventListener("click", () => addPage());
 document.querySelector("#save-draft").addEventListener("click", () => saveStory("draft"));
 document.querySelector("#publish-story").addEventListener("click", () => saveStory("published"));
+document.querySelector("#show-manuscript-import").addEventListener("click", () => setManuscriptImportOpen(true));
+document.querySelector("#cancel-manuscript-import").addEventListener("click", () => setManuscriptImportOpen(false));
+document.querySelector("#manuscript-file").addEventListener("change", updateManuscriptFile);
+document.querySelector("#import-manuscript").addEventListener("click", importManuscript);
+const manuscriptDrop = document.querySelector(".manuscript-drop");
+manuscriptDrop.addEventListener("dragover", (event) => { event.preventDefault(); manuscriptDrop.classList.add("is-dragging"); });
+manuscriptDrop.addEventListener("dragleave", () => manuscriptDrop.classList.remove("is-dragging"));
+manuscriptDrop.addEventListener("drop", handleManuscriptDrop);
 
 if (adminPassword) openLibrary();
 
@@ -152,7 +161,83 @@ function editStory(story = null) {
   document.querySelector("#story-editor-title").textContent = story ? story.title_template : "New master story";
   pagesContainer.replaceChildren();
   (story?.pages?.length ? story.pages : [{ text: "", illustrationPrompt: "" }]).forEach(addPage);
+  setManuscriptImportOpen(false);
   editorStatus.textContent = "";
+}
+
+function setManuscriptImportOpen(open) {
+  const panel = document.querySelector("#manuscript-import");
+  panel.hidden = !open;
+  document.querySelector("#show-manuscript-import").setAttribute("aria-expanded", String(open));
+  if (!open) {
+    manuscriptFile = null;
+    document.querySelector("#manuscript-file").value = "";
+    document.querySelector("#manuscript-file-name").textContent = "or drop a file here";
+    document.querySelector("#import-manuscript").disabled = true;
+    document.querySelector("#manuscript-import-status").textContent = "";
+  }
+}
+
+function updateManuscriptFile(event) {
+  const file = event.target.files?.[0];
+  manuscriptFile = file || null;
+  displayManuscriptFile(file);
+}
+
+function handleManuscriptDrop(event) {
+  event.preventDefault();
+  manuscriptDrop.classList.remove("is-dragging");
+  manuscriptFile = event.dataTransfer?.files?.[0] || null;
+  displayManuscriptFile(manuscriptFile);
+}
+
+function displayManuscriptFile(file) {
+  document.querySelector("#manuscript-file-name").textContent = file ? `${file.name} · ${formatFileSize(file.size)}` : "or drop a file here";
+  document.querySelector("#import-manuscript").disabled = !file;
+  document.querySelector("#manuscript-import-status").textContent = file?.size > 3 * 1024 * 1024 ? "Choose a file smaller than 3 MB." : "";
+}
+
+async function importManuscript() {
+  const file = manuscriptFile;
+  const status = document.querySelector("#manuscript-import-status");
+  const button = document.querySelector("#import-manuscript");
+  if (!file) return;
+  if (file.size > 3 * 1024 * 1024) {
+    status.textContent = "Choose a file smaller than 3 MB.";
+    return;
+  }
+  const hasCopy = [...pagesContainer.querySelectorAll("textarea")].some((area) => area.value.trim());
+  if (hasCopy && !window.confirm("Replace the current page text with the imported manuscript?")) return;
+
+  button.disabled = true;
+  status.textContent = "Reading manuscript...";
+  try {
+    const data = await readFileAsDataUrl(file);
+    const result = await apiRequest("?resource=manuscript", { method: "POST", body: { name: file.name, type: file.type, data } });
+    pagesContainer.replaceChildren();
+    result.pages.forEach(addPage);
+    if (result.title && !document.querySelector("#story-title").value.trim()) document.querySelector("#story-title").value = result.title;
+    if (result.description && !document.querySelector("#story-description").value.trim()) document.querySelector("#story-description").value = result.description;
+    renumberPages();
+    status.textContent = `${result.pages.length} page${result.pages.length === 1 ? "" : "s"} imported from ${result.fileName}.${result.truncated ? " Only the first 32 pages were included." : " Review every page before saving."}`;
+  } catch (error) {
+    status.textContent = error.message;
+  } finally {
+    button.disabled = false;
+  }
+}
+
+function readFileAsDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(new Error("The manuscript file could not be read."));
+    reader.readAsDataURL(file);
+  });
+}
+
+function formatFileSize(bytes) {
+  return bytes < 1024 * 1024 ? `${Math.max(1, Math.round(bytes / 1024))} KB` : `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 function addPage(page = {}) {

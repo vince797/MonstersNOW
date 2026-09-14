@@ -7,8 +7,21 @@ const {
 const { assertAdminRequest } = require("../lib/admin-auth");
 const { createStory, getStory, listStories, updateStory } = require("../lib/story-library");
 const { listOrders, updateOrder } = require("../lib/order-library");
+const { importManuscript } = require("../lib/manuscript-import");
 
 module.exports = async function handler(request, response) {
+  if (request.method === "POST" && firstQueryValue(request.query?.resource) === "manuscript") {
+    try {
+      assertAdminRequest(request);
+      return sendJson(response, 200, await importManuscript(await readJsonBody(request)));
+    } catch (error) {
+      return sendJson(response, error.status || 500, {
+        code: error.code || "manuscript_import_failed",
+        error: error.message || "The manuscript could not be imported.",
+      });
+    }
+  }
+
   if (["GET", "PUT", "PATCH"].includes(request.method)) {
     return handleAdminStories(request, response);
   }
