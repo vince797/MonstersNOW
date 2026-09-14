@@ -172,10 +172,10 @@ The sandbox storybook order route creates signed, public URLs for Lulu to fetch.
 The signed URLs point at:
 
 ```text
-/api/storybook-print-file
+/api/lulu-sandbox-storybook-order
 ```
 
-Do not hand-build those URLs. They include an HMAC signature and expiration time.
+Do not hand-build those GET URLs. They include an HMAC signature and expiration time.
 The endpoint generates:
 
 ```text
