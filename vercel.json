@@ -8,6 +8,9 @@
     },
     "api/convert-heic.js": {
       "maxDuration": 30
+    },
+    "api/lulu-sandbox-storybook-order.js": {
+      "maxDuration": 60
     }
   },
   "headers": [

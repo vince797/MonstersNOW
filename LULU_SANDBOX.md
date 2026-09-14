@@ -20,6 +20,7 @@ LULU_SANDBOX_CLIENT_KEY=your-sandbox-client-key
 LULU_SANDBOX_CLIENT_SECRET=your-sandbox-client-secret
 LULU_SANDBOX_CONTACT_EMAIL=ops@monstersnow.com
 LULU_SANDBOX_ENDPOINT_SECRET=choose-a-random-admin-secret
+STORYBOOK_PRINT_FILE_SECRET=optional-separate-signing-secret
 ```
 
 `LULU_SANDBOX_ENDPOINT_SECRET` protects the sandbox endpoints from public use.
@@ -30,6 +31,8 @@ x-lulu-sandbox-secret: your-random-admin-secret
 ```
 
 The print-job endpoint refuses to run unless this secret is configured and sent.
+`STORYBOOK_PRINT_FILE_SECRET` is optional. If omitted, the print-file URL
+signer uses `LULU_SANDBOX_ENDPOINT_SECRET`.
 
 ## Current Endpoints
 
@@ -42,8 +45,8 @@ curl -s http://localhost:3000/api/lulu-sandbox-products
 Configured storybook variants:
 
 ```text
-softcover: $39.99 + shipping, 0850X0850.FC.PRE.PB.080CW444.MXX
-hardcover: $59.99 + shipping, 0850X0850.FC.PRE.CW.080CW444.MXX
+softcover: $24.99 + shipping, 0850X0850.FC.PRE.PB.080CW444.MXX
+hardcover: $39.99 + shipping, 0850X0850.FC.PRE.CW.080CW444.MXX
 ```
 
 Both are 8.5 x 8.5 in, premium full color, 80# coated white paper, matte cover.
@@ -163,6 +166,71 @@ For cover validation, send:
 }
 ```
 
+### Generate Signed Storybook Print Files
+
+The sandbox storybook order route creates signed, public URLs for Lulu to fetch.
+The signed URLs point at:
+
+```text
+/api/storybook-print-file
+```
+
+Do not hand-build those URLs. They include an HMAC signature and expiration time.
+The endpoint generates:
+
+```text
+interior: 32-page 8.5 x 8.5 in PDF
+cover: single-page cover spread PDF using Lulu cover-dimensions output
+```
+
+The current PDFs are sandbox proof files for validating the Lulu pipeline. The
+next production step is replacing the proof artwork/text with the paid order's
+stored monster art and final story content.
+
+### Prepare a Storybook Sandbox Order
+
+This route asks Lulu for cover dimensions, generates signed interior and cover
+PDF URLs, starts Lulu file validations, and returns the print-job payload. Add
+`"submit_print_job": true` only when you are ready to create the sandbox print
+job.
+
+```bash
+curl -s https://www.monstersnow.com/api/lulu-sandbox-storybook-order \
+  -H "Content-Type: application/json" \
+  -H "x-lulu-sandbox-secret: your-random-admin-secret" \
+  -d '{
+    "submission_id": "monstersnow-sandbox-001",
+    "title": "My Monster Storybook",
+    "story_label": "My Monster Storybook",
+    "style_label": "Soft 3D Storybook Monster",
+    "cover_type": "softcover",
+    "page_count": 32,
+    "shipping_level": "MAIL",
+    "submit_print_job": false,
+    "shipping_address": {
+      "name": "Test Parent",
+      "street1": "101 Independence Ave SE",
+      "city": "Washington",
+      "state_code": "DC",
+      "country_code": "US",
+      "postcode": "20540",
+      "phone_number": "+1 206 555 0100",
+      "email": "test@example.com"
+    }
+  }'
+```
+
+If file validation succeeds, call the same endpoint again with:
+
+```json
+{
+  "submit_print_job": true
+}
+```
+
+Keep the same `submission_id` and shipping details so the sandbox print job is
+traceable.
+
 ### Create Sandbox Print Job
 
 Only call this after the cover and interior PDFs are hosted at URLs Lulu can
@@ -200,13 +268,14 @@ curl -s http://localhost:3000/api/lulu-sandbox-print-job \
 
 ## Next Implementation Step
 
-The sandbox API is now ready for credentials and Lulu calls. The next missing
-piece is print-ready PDF generation and hosting:
+The sandbox API now has credential checks, PDF generation, signed public file
+URLs, validation kickoff, and optional sandbox print-job submission. The next
+missing production pieces are:
 
-1. Choose the final `pod_package_id`.
-2. Generate an interior PDF that exactly matches that product trim/page specs.
-3. Use Lulu's cover dimensions endpoint to generate the cover PDF at the correct
-   spread size.
-4. Host both PDFs where Lulu can download them.
-5. Validate interior and cover.
-6. Submit the sandbox print job.
+1. Store the selected monster image and final generated story content after
+   checkout starts.
+2. Replace the proof PDF content with the stored monster art and final story.
+3. Add an idempotent Stripe webhook or order database record before automatic
+   paid-order submission.
+4. Poll/read Lulu validation results before switching from sandbox proofing to
+   real fulfillment.

@@ -81,12 +81,14 @@ LULU_SANDBOX_CLIENT_KEY
 LULU_SANDBOX_CLIENT_SECRET
 LULU_SANDBOX_CONTACT_EMAIL
 LULU_SANDBOX_ENDPOINT_SECRET
+STORYBOOK_PRINT_FILE_SECRET
 ```
 
 Do not add production Lulu credentials until the PDF generation and sandbox
 print-job flow have been validated. The sandbox integration supports softcover
 and hardcover storybook variants; both should be proofed before enabling paid
-checkout.
+checkout. `STORYBOOK_PRINT_FILE_SECRET` is optional; if omitted, signed Lulu
+print-file URLs use `LULU_SANDBOX_ENDPOINT_SECRET`.
 
 ## Add the domain in Vercel
 

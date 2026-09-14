@@ -12,6 +12,7 @@ Starter website for MonstersNOW.
 - `api/storybook-interest.js` - server-side print interest email endpoint
 - `api/storybook-checkout.js` - server-side Stripe Checkout endpoint for storybook orders
 - `api/lulu-sandbox-*.js` - server-side Lulu Print API sandbox endpoints
+- `api/storybook-print-file.js` - signed PDF file endpoint used by Lulu sandbox
 - `lib/` - shared server-side helpers for API routes, including the MonstersNOW image style prompt
 - `assets/` - images, icons, downloads, and other static files
 
@@ -73,3 +74,5 @@ See `LULU_SANDBOX.md` for the server-side Lulu Print API sandbox setup. The
 sandbox routes use `LULU_SANDBOX_CLIENT_KEY` and
 `LULU_SANDBOX_CLIENT_SECRET`, never browser-exposed keys. The configured
 storybook variants are an 8.5 x 8.5 in premium-color softcover and hardcover.
+The sandbox storybook order route can generate signed proof PDFs, start Lulu
+file validations, and optionally submit a sandbox print job.
