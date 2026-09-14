@@ -103,18 +103,19 @@
 
           <section class="story-admin" id="story-admin" hidden>
             <aside class="story-sidebar">
-          <div class="story-sidebar-heading">
-            <h2>Stories</h2>
-            <span id="story-count">0</span>
-          </div>
-          <button class="button primary story-new-button" id="new-story" type="button">New story</button>
-          <div id="story-list" class="story-list"></div>
-        </aside>
+              <div class="story-sidebar-heading">
+                <h2>Stories</h2>
+                <span id="story-count">0</span>
+              </div>
+              <p class="story-sidebar-copy">Master templates for every book theme.</p>
+              <button class="button primary story-new-button" id="new-story" type="button">New story</button>
+              <div id="story-list" class="story-list"></div>
+            </aside>
 
         <form class="story-editor" id="story-editor" hidden>
           <input id="story-id" type="hidden" />
           <div class="story-editor-heading">
-            <div>
+            <div class="story-editor-title">
               <p class="eyebrow">Story settings</p>
               <h2 id="story-editor-title">New master story</h2>
             </div>
@@ -125,12 +126,12 @@
           </div>
 
           <div class="admin-field-grid">
-            <label>Title template<input id="story-title" type="text" maxlength="160" placeholder="{child_name} and {monster_name}'s Halloween Adventure" required /></label>
-            <label>Slug<input id="story-slug" type="text" maxlength="100" placeholder="halloween-adventure" required /></label>
+            <label class="story-title-field">Title template<input id="story-title" type="text" maxlength="160" placeholder="{child_name} and {monster_name}'s Halloween Adventure" required /></label>
+            <label class="story-slug-field">Slug<input id="story-slug" type="text" maxlength="100" placeholder="halloween-adventure" required /></label>
             <label class="admin-field-wide">Description<textarea id="story-description" rows="2" maxlength="1000"></textarea></label>
             <label class="admin-check"><input id="story-seasonal" type="checkbox" /> Seasonal title</label>
-            <label>Available from<input id="story-from" type="date" /></label>
-            <label>Available until<input id="story-until" type="date" /></label>
+            <label class="story-date-field">Available from<input id="story-from" type="date" /></label>
+            <label class="story-date-field">Available until<input id="story-until" type="date" /></label>
           </div>
 
           <div class="story-pages-heading">
