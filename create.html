@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="Upload a child's monster drawing to create a free MonstersNOW preview, printable coloring page, and Halloween-ready personalized storybook."
+      content="Upload a child's monster drawing to create a free MonstersNOW preview, printable coloring page, and personalized storybook."
     />
     <title>Create Your Monster | MonstersNOW</title>
-    <link rel="stylesheet" href="styles.css?v=20260515-preview-size" />
+    <link rel="stylesheet" href="styles.css?v=20260914-create-polish" />
   </head>
   <body>
     <header class="site-header">
@@ -39,14 +39,14 @@
             <h1 id="converter-title">Upload their drawing.</h1>
             <p>
               Choose a clear photo, create up to three monster previews, then
-              download the free coloring page or join the Halloween print waitlist.
+              download the free coloring page or start the storybook print flow.
             </p>
           </div>
           <div class="create-flow-meta">
             <div class="free-includes" aria-label="Free MonstersNOW preview details">
               <span><strong>3</strong> preview versions</span>
               <span><strong>$0</strong> coloring page</span>
-              <span><strong>Halloween</strong> story ready</span>
+              <span><strong>Book</strong> story ready</span>
             </div>
             <ol class="converter-flow" aria-label="Creation progress">
               <li class="is-active" data-flow-step="upload"><i>1</i>Upload</li>
@@ -61,20 +61,24 @@
             <div class="variation-controls" aria-label="Monster preview options">
               <div>
                 <span>Monster style</span>
-                <p id="preview-count">Soft 3D Storybook Monster is the default. Upload to create the first preview automatically.</p>
+                <p id="preview-count">Choose a style. Upload once, then try up to three versions.</p>
               </div>
               <div class="style-options" role="group" aria-label="Choose a monster preview style">
                 <button class="style-option is-active" type="button" data-monster-style="storybook" aria-pressed="true">
-                  Soft 3D Storybook Monster
+                  <strong>Storybook</strong>
+                  <small>Soft 3D keepsake</small>
                 </button>
                 <button class="style-option" type="button" data-monster-style="cute" aria-pressed="false">
-                  Soft 3D Cute
+                  <strong>Cute</strong>
+                  <small>Softer face</small>
                 </button>
                 <button class="style-option" type="button" data-monster-style="silly" aria-pressed="false">
-                  Soft 3D Silly
+                  <strong>Silly</strong>
+                  <small>Goofy expression</small>
                 </button>
                 <button class="style-option" type="button" data-monster-style="adventure" aria-pressed="false">
-                  Soft 3D Adventure
+                  <strong>Adventure</strong>
+                  <small>Braver pose</small>
                 </button>
               </div>
             </div>
@@ -97,11 +101,11 @@
             <p class="privacy-note">We do not publish children's artwork without permission.</p>
             <p class="converter-error" id="upload-error" role="alert" hidden></p>
 
-            <button class="button primary converter-button" id="convert-button" type="button" disabled>
+            <button class="button primary converter-button" id="convert-button" type="button" disabled hidden>
               Create Monster
             </button>
             <p class="upload-action-status" id="upload-action-status" role="status">
-              Upload a drawing to create the first preview.
+              Upload a drawing and the first preview starts automatically.
             </p>
 
             <div class="converter-preview drawing-preview">
@@ -146,7 +150,7 @@
               <section class="result-book-offer" id="result-book-offer" aria-labelledby="result-book-title" hidden>
                 <div class="book-offer-header">
                   <span class="result-label">Printed storybook</span>
-                  <h4 id="result-book-title">Turn this monster into a Halloween book.</h4>
+                  <h4 id="result-book-title">Turn this monster into a printed storybook.</h4>
                   <p>Start checkout when ordering is open, or send the selected preview for review.</p>
                 </div>
                 <form class="interest-form" id="storybook-interest-form">
@@ -168,7 +172,7 @@
                   </div>
                   <ul class="print-proof-points" aria-label="Printed storybook details">
                     <li>Cover and interior preview before print</li>
-                    <li>Halloween Monster Night seasonal story option</li>
+                    <li>Personalized story option starring this monster</li>
                     <li>8.5 x 8.5 inch print-on-demand plan</li>
                     <li>Shipping address and rate handled in checkout</li>
                   </ul>
@@ -201,10 +205,10 @@
                     </div>
                   </section>
                   <div class="interest-email-row">
-                    <label class="sr-only" for="interest-email">Email for Halloween storybook updates</label>
+                    <label class="sr-only" for="interest-email">Email for storybook updates</label>
                     <input id="interest-email" type="email" placeholder="Email for print updates" autocomplete="email" />
                     <button class="button primary" id="storybook-interest" type="submit" disabled>
-                      Start Halloween Checkout
+                      Start Storybook Checkout
                     </button>
                   </div>
                   <p id="interest-status" role="status"></p>
@@ -230,6 +234,6 @@
       <p>&copy; <span id="year"></span> MonstersNOW. All rights reserved.</p>
     </footer>
 
-    <script src="scripts/main.js?v=20260515-upload-flow"></script>
+    <script src="scripts/main.js?v=20260914-create-polish"></script>
   </body>
 </html>

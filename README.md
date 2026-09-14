@@ -9,7 +9,7 @@ Starter website for MonstersNOW.
 - `styles.css` - layout, responsive styling, and visual design
 - `scripts/main.js` - small browser behaviors
 - `api/convert-monster.js` - Vercel serverless AI converter endpoint
-- `api/storybook-interest.js` - server-side Halloween print waitlist email endpoint
+- `api/storybook-interest.js` - server-side print interest email endpoint
 - `api/storybook-checkout.js` - server-side Stripe Checkout endpoint for storybook orders
 - `api/lulu-sandbox-*.js` - server-side Lulu Print API sandbox endpoints
 - `lib/` - shared server-side helpers for API routes, including the MonstersNOW image style prompt
@@ -36,10 +36,10 @@ The converter uses the uploaded child drawing as the source of truth and the
 Soft 3D Storybook Monster images in `assets/master-references/` as style references. The
 default brand direction is centralized as `Soft 3D Storybook Monster` in
 `lib/monster-style.js` so character previews, story scenes, book pages, product
-previews, approval/revision previews, and kid-safe Halloween scenes can reuse
+previews, approval/revision previews, and kid-safe story scenes can reuse
 the same prompt language.
 
-## Halloween print waitlist
+## Storybook checkout and interest
 
 The create flow first posts selected previews to `/api/storybook-checkout` to
 start Stripe Checkout. That checkout route validates payment configuration,

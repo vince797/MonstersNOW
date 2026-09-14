@@ -53,7 +53,7 @@ const maxFreePreviews = 3;
 const heicConverterUrl = "https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js";
 const demoMonsterImage = "assets/step-2-character.jpg?v=20260515-horns";
 const defaultPreviewStyle = "storybook";
-const storybookInterestButtonText = "Start Halloween Checkout";
+const storybookInterestButtonText = "Start Storybook Checkout";
 const previewStyleLabels = {
   storybook: "Soft 3D Storybook Monster",
   cute: "Soft 3D Cute Monster",
@@ -195,7 +195,7 @@ async function handleStorybookInterestSubmit(event) {
     console.warn(checkoutError);
 
     if (interestStatus) {
-      interestStatus.textContent = "Checkout is not open yet. Sending your Halloween storybook request instead.";
+      interestStatus.textContent = "Checkout is not open yet. Sending your storybook request instead.";
     }
   }
 
@@ -301,10 +301,10 @@ function setStorybookSubmitState({ disabled, text }) {
 
 function openStorybookInterestEmail(email, selectedFormat, featurePermission, selectedPreview) {
   window.location.href = `mailto:hello@monstersnow.com?subject=${encodeURIComponent(
-    "MonstersNOW Halloween storybook interest",
+    "MonstersNOW storybook interest",
   )}&body=${encodeURIComponent(
     [
-      `Please notify me when Halloween storybook ordering opens: ${email}`,
+      `Please notify me when storybook ordering opens: ${email}`,
       `Preferred format: ${selectedFormat.label}`,
       `Monster style: ${getPreviewStyleLabel(selectedPreview?.style || selectedMonsterStyle)}`,
       `Selected preview ID: ${selectedPreview?.id || selectedPreviewId || "Not provided"}`,
@@ -728,6 +728,7 @@ function syncPreviewControls() {
   const remaining = Math.max(0, maxFreePreviews - previewsUsed);
   const canGenerate = Boolean(selectedDrawingFile) && remaining > 0 && !isGeneratingPreview;
   const hasPreview = generatedPreviews.length > 0;
+  const shouldShowConvertButton = Boolean(selectedDrawingFile) && !hasPreview;
   const primaryText = previewsUsed === 0 ? "Create Preview" : "Try Another Version";
   const buttonText = isGeneratingPreview
     ? "Creating..."
@@ -738,6 +739,7 @@ function syncPreviewControls() {
       : "Preview Limit Reached";
 
   if (convertButton) {
+    convertButton.hidden = !shouldShowConvertButton;
     convertButton.disabled = !canGenerate;
     convertButton.textContent = buttonText;
   }
@@ -771,11 +773,13 @@ function syncPreviewControls() {
   }
 
   updatePreviewPresentation(hasPreview);
+  uploadDrop?.classList.toggle("has-file", Boolean(selectedDrawingFile));
+  resultPanel?.setAttribute("aria-busy", isGeneratingPreview ? "true" : "false");
 
   if (previewCount) {
     previewCount.textContent = selectedDrawingFile
       ? describeRemainingPreviews(remaining)
-      : `${maxFreePreviews} free ${getPreviewStyleLabel(defaultPreviewStyle)} previews per drawing.`;
+      : `Choose a style. Upload once, then try up to ${maxFreePreviews} versions.`;
   }
 }
 

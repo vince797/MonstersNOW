@@ -40,7 +40,7 @@ Without `OPENAI_API_KEY`, the API route returns a configuration error. This
 prevents the UI from showing sample artwork as if it came from a customer's
 upload.
 
-## Halloween waitlist email variables
+## Storybook checkout and interest variables
 
 The create flow starts with Stripe Checkout and falls back to a server-side
 interest email route before opening a prefilled mail draft.

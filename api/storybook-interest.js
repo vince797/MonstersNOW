@@ -30,7 +30,7 @@ module.exports = async function handler(request, response) {
       submissionId: submission.submissionId,
       emailId: result.emailId,
       warnings: submission.warnings,
-      message: "Halloween storybook interest submitted.",
+      message: "Storybook interest submitted.",
     });
   } catch (error) {
     const { status, payload } = storybookInterestErrorToResponse(error);

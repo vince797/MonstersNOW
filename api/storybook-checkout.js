@@ -43,7 +43,7 @@ module.exports = async function handler(request, response) {
       checkoutSessionId: checkoutSession.id,
       checkoutUrl: checkoutSession.url,
       warnings: submission.warnings,
-      message: "Halloween storybook checkout started.",
+      message: "Storybook checkout started.",
     });
   } catch (error) {
     const mapper =
