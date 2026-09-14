@@ -184,8 +184,10 @@ cover: single-page cover spread PDF using Lulu cover-dimensions output
 ```
 
 The current PDFs are sandbox proof files for validating the Lulu pipeline. The
-next production step is replacing the proof artwork/text with the paid order's
-stored monster art and final story content.
+proof PDFs are vector-only so they do not depend on embedded fonts. The next
+production step is replacing the proof artwork with the paid order's stored
+monster art and final story content using print-ready embedded fonts or
+rasterized page art.
 
 ### Prepare a Storybook Sandbox Order
 
