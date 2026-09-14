@@ -2,7 +2,10 @@ const login = document.querySelector("#admin-login");
 const loginForm = document.querySelector("#admin-login-form");
 const passwordInput = document.querySelector("#admin-password");
 const loginStatus = document.querySelector("#admin-login-status");
+const adminApp = document.querySelector("#admin-app");
+const dashboard = document.querySelector("#admin-dashboard");
 const admin = document.querySelector("#story-admin");
+const ordersAdmin = document.querySelector("#orders-admin");
 const newStoryButton = document.querySelector("#new-story");
 const storyList = document.querySelector("#story-list");
 const storyCount = document.querySelector("#story-count");
@@ -11,6 +14,7 @@ const empty = document.querySelector("#story-empty");
 const editorStatus = document.querySelector("#story-editor-status");
 const pagesContainer = document.querySelector("#story-pages");
 let stories = [];
+let orders = [];
 let adminPassword = sessionStorage.getItem("monstersnow_admin_password") || "";
 
 loginForm.addEventListener("submit", async (event) => {
@@ -19,6 +23,13 @@ loginForm.addEventListener("submit", async (event) => {
   await openLibrary();
 });
 newStoryButton.addEventListener("click", () => editStory());
+document.querySelector("#dashboard-new-story").addEventListener("click", () => { showView("stories"); editStory(); });
+document.querySelector("#halloween-story").addEventListener("click", () => { showView("stories"); editStory({ title_template: "{child_name} and {monster_name}'s Halloween Adventure", slug: "halloween-adventure", description: "A playful Halloween quest filled with costumes, pumpkins, and friendly surprises.", is_seasonal: true, available_from: "2026-09-15", available_until: "2026-10-31", pages: [] }); });
+document.querySelector("#toggle-admin-password").addEventListener("click", togglePassword);
+document.querySelector("#admin-sign-out").addEventListener("click", signOut);
+document.querySelector("#order-filter").addEventListener("change", renderOrders);
+document.querySelectorAll("[data-admin-view]").forEach((button) => button.addEventListener("click", () => showView(button.dataset.adminView)));
+document.querySelectorAll("[data-open-stories]").forEach((button) => button.addEventListener("click", () => showView("stories")));
 document.querySelector("#add-page").addEventListener("click", () => addPage());
 document.querySelector("#save-draft").addEventListener("click", () => saveStory("draft"));
 document.querySelector("#publish-story").addEventListener("click", () => saveStory("published"));
@@ -28,18 +39,54 @@ if (adminPassword) openLibrary();
 async function openLibrary() {
   loginStatus.textContent = "Opening story library...";
   try {
-    const result = await apiRequest();
-    stories = result.stories || [];
+    const [storyResult, orderResult] = await Promise.all([apiRequest(), apiRequest("?resource=orders")]);
+    stories = storyResult.stories || [];
+    orders = orderResult.orders || [];
     sessionStorage.setItem("monstersnow_admin_password", adminPassword);
     login.hidden = true;
-    admin.hidden = false;
-    newStoryButton.hidden = false;
+    adminApp.hidden = false;
     renderStoryList();
-    if (stories[0]) editStory(stories[0]);
+    renderDashboard();
+    renderOrders();
+    showView("dashboard");
   } catch (error) {
     sessionStorage.removeItem("monstersnow_admin_password");
     loginStatus.textContent = error.message;
   }
+}
+
+function showView(view) {
+  dashboard.hidden = view !== "dashboard";
+  admin.hidden = view !== "stories";
+  ordersAdmin.hidden = view !== "orders";
+  document.querySelector("#admin-view-title").textContent = view === "stories" ? "Stories" : view === "orders" ? "Orders" : "Dashboard";
+  document.querySelectorAll("[data-admin-view]").forEach((button) => button.classList.toggle("is-active", button.dataset.adminView === view));
+  if (view === "stories" && editor.hidden && stories[0]) editStory(stories[0]);
+}
+
+function renderDashboard() {
+  const productionStatuses = new Set(["proofing", "approved", "printing"]);
+  document.querySelector("#metric-orders").textContent = orders.length;
+  document.querySelector("#metric-production").textContent = orders.filter((order) => productionStatuses.has(order.status)).length;
+  document.querySelector("#metric-published").textContent = stories.filter((story) => story.status === "published").length;
+  document.querySelector("#metric-drafts").textContent = stories.filter((story) => story.status === "draft").length;
+  document.querySelector("#nav-story-count").textContent = stories.length;
+  document.querySelector("#nav-order-count").textContent = orders.length;
+  const recent = document.querySelector("#recent-stories");
+  if (!stories.length) {
+    recent.innerHTML = '<div class="admin-inline-empty"><strong>No stories yet</strong><span>Create the Halloween story to get started.</span></div>';
+    return;
+  }
+  recent.replaceChildren(...stories.slice(0, 4).map((story) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.innerHTML = '<span><strong></strong><small></small></span><em></em>';
+    button.querySelector("strong").textContent = story.title_template;
+    button.querySelector("small").textContent = `${(story.pages || []).length}/32 pages · Version ${story.version}`;
+    button.querySelector("em").textContent = story.status;
+    button.addEventListener("click", () => { showView("stories"); editStory(story); });
+    return button;
+  }));
 }
 
 function renderStoryList() {
@@ -55,6 +102,41 @@ function renderStoryList() {
     return button;
   }));
   empty.hidden = stories.length > 0;
+  renderDashboard();
+}
+
+function renderOrders() {
+  const filter = document.querySelector("#order-filter").value;
+  const visible = filter === "all" ? orders : orders.filter((order) => order.status === filter);
+  const body = document.querySelector("#orders-list");
+  document.querySelector("#orders-empty").hidden = visible.length > 0;
+  body.replaceChildren(...visible.map((order) => {
+    const row = document.createElement("tr");
+    row.innerHTML = '<td><strong></strong><small></small></td><td><strong></strong><small></small></td><td></td><td></td><td></td><td><select></select></td>';
+    const cells = row.children;
+    cells[0].querySelector("strong").textContent = order.customer_email;
+    cells[0].querySelector("small").textContent = `For ${order.child_name}`;
+    cells[1].querySelector("strong").textContent = order.monster_name;
+    cells[1].querySelector("small").textContent = order.story_label;
+    cells[2].textContent = order.format_id === "hardcover" ? "Hardcover" : "Softcover";
+    cells[3].textContent = new Intl.NumberFormat("en-US", { style: "currency", currency: order.currency }).format(order.amount_cents / 100);
+    cells[4].textContent = new Date(order.created_at).toLocaleDateString();
+    const select = cells[5].querySelector("select");
+    ["checkout_started", "paid", "proofing", "approved", "printing", "shipped", "completed", "cancelled"].forEach((status) => select.add(new Option(status.replaceAll("_", " "), status, false, status === order.status)));
+    select.addEventListener("change", () => updateOrderStatus(order, select.value));
+    return row;
+  }));
+}
+
+async function updateOrderStatus(order, status) {
+  const output = document.querySelector("#orders-status");
+  output.textContent = "Updating order...";
+  try {
+    const result = await apiRequest(`?resource=orders&id=${encodeURIComponent(order.id)}`, { method: "PATCH", body: { status } });
+    Object.assign(order, result.order);
+    output.textContent = `Order moved to ${status.replaceAll("_", " ")}.`;
+    renderOrders();
+  } catch (error) { output.textContent = error.message; }
 }
 
 function editStory(story = null) {
@@ -116,6 +198,23 @@ async function saveStory(status) {
   } catch (error) {
     editorStatus.textContent = error.message;
   }
+}
+
+function togglePassword() {
+  const showing = passwordInput.type === "text";
+  passwordInput.type = showing ? "password" : "text";
+  document.querySelector("#toggle-admin-password").textContent = showing ? "Show" : "Hide";
+  document.querySelector("#toggle-admin-password").setAttribute("aria-label", showing ? "Show password" : "Hide password");
+}
+
+function signOut() {
+  sessionStorage.removeItem("monstersnow_admin_password");
+  adminPassword = "";
+  passwordInput.value = "";
+  adminApp.hidden = true;
+  login.hidden = false;
+  loginStatus.textContent = "Signed out.";
+  passwordInput.focus();
 }
 
 async function apiRequest(query = "", options = {}) {

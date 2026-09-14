@@ -4,37 +4,110 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex, nofollow" />
-    <title>Story Library | MonstersNOW Admin</title>
+    <title>Dashboard | MonstersNOW Admin</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body class="admin-page">
-    <main class="admin-shell">
-      <header class="admin-header">
-        <div>
-          <p class="eyebrow">MonstersNOW Admin</p>
-          <h1>Master stories</h1>
-          <p>Create, schedule, proof, and publish the stories that power personalized books.</p>
+    <main>
+      <section class="admin-login-screen" id="admin-login">
+        <div class="admin-login-brand">
+          <a href="index.html" aria-label="Return to MonstersNOW">
+            <img src="assets/monstersnow-logo.png" alt="MonstersNOW" />
+          </a>
+          <div>
+            <p class="eyebrow">Creative operations</p>
+            <h1>Where little ideas become big stories.</h1>
+            <p>Manage the books, orders, and details behind every one-of-a-kind monster.</p>
+          </div>
+          <p class="admin-login-note">Private workspace · Authorized access only</p>
         </div>
-        <button class="button primary" id="new-story" type="button" hidden>New story</button>
-      </header>
-
-      <section class="admin-login" id="admin-login">
-        <h2>Admin sign in</h2>
-        <p>Use the admin password configured for this site.</p>
-        <form id="admin-login-form">
-          <label for="admin-password">Admin password</label>
-          <input id="admin-password" type="password" autocomplete="current-password" required />
-          <button class="button primary" type="submit">Open story library</button>
-        </form>
-        <p id="admin-login-status" role="status"></p>
+        <div class="admin-login-panel">
+          <section class="admin-login-card">
+            <span class="admin-login-mark">MN</span>
+            <p class="eyebrow">Welcome back</p>
+            <h2>Sign in to MonstersNOW</h2>
+            <p>Enter your admin password to open the operations dashboard.</p>
+            <form id="admin-login-form">
+              <label for="admin-password">Admin password</label>
+              <div class="admin-password-field">
+                <input id="admin-password" type="password" autocomplete="current-password" placeholder="Enter your password" required />
+                <button id="toggle-admin-password" type="button" aria-label="Show password">Show</button>
+              </div>
+              <button class="button primary" type="submit">Open dashboard</button>
+            </form>
+            <p id="admin-login-status" role="status"></p>
+            <a class="admin-return-link" href="index.html">← Return to the website</a>
+          </section>
+        </div>
       </section>
 
-      <section class="story-admin" id="story-admin" hidden>
-        <aside class="story-sidebar">
+      <section class="admin-app" id="admin-app" hidden>
+        <aside class="admin-rail">
+          <a class="admin-rail-brand" href="index.html" aria-label="MonstersNOW home">
+            <img src="assets/monstersnow-logo.png" alt="MonstersNOW" />
+          </a>
+          <nav class="admin-nav" aria-label="Admin navigation">
+            <button class="is-active" type="button" data-admin-view="dashboard"><span>⌂</span>Dashboard</button>
+            <button type="button" data-admin-view="stories"><span>▤</span>Stories <em id="nav-story-count">0</em></button>
+            <button type="button" data-admin-view="orders"><span>□</span>Orders <em id="nav-order-count">0</em></button>
+            <button type="button" disabled><span>♙</span>Customers <small>Soon</small></button>
+          </nav>
+          <div class="admin-rail-bottom">
+            <button type="button" disabled><span>⚙</span>Settings <small>Soon</small></button>
+            <button id="admin-sign-out" type="button"><span>↪</span>Sign out</button>
+          </div>
+        </aside>
+
+        <div class="admin-workspace">
+          <header class="admin-topbar">
+            <div>
+              <p class="eyebrow">MonstersNOW Admin</p>
+              <h1 id="admin-view-title">Dashboard</h1>
+            </div>
+            <div class="admin-topbar-actions">
+              <a href="index.html" target="_blank" rel="noopener">View website ↗</a>
+              <span class="admin-status"><i></i>Connected</span>
+            </div>
+          </header>
+
+          <section class="admin-dashboard" id="admin-dashboard">
+            <div class="admin-welcome-card">
+              <div>
+                <p class="eyebrow">Good to see you</p>
+                <h2>Your story studio is ready.</h2>
+                <p>Build the Halloween release, manage your evergreen catalog, and keep every master story organized in one place.</p>
+              </div>
+              <button class="button primary" id="dashboard-new-story" type="button">Create a story</button>
+            </div>
+
+            <div class="admin-metrics" aria-label="Operations summary">
+              <article><span>Total orders</span><strong id="metric-orders">0</strong><small>All checkout records</small></article>
+              <article><span>In production</span><strong id="metric-production">0</strong><small>Proofing through printing</small></article>
+              <article><span>Published stories</span><strong id="metric-published">0</strong><small>Available to customers</small></article>
+              <article><span>Story drafts</span><strong id="metric-drafts">0</strong><small>Still in progress</small></article>
+            </div>
+
+            <div class="admin-dashboard-grid">
+              <section class="admin-panel">
+                <div class="admin-panel-heading"><div><p class="eyebrow">Library</p><h2>Recent stories</h2></div><button type="button" data-open-stories>View all</button></div>
+                <div id="recent-stories" class="recent-stories"></div>
+              </section>
+              <aside class="admin-panel admin-next-panel">
+                <p class="eyebrow">Launch focus</p>
+                <h2>Halloween is next.</h2>
+                <p>Create the seasonal master story, set its availability dates, and complete all 32 pages before publishing.</p>
+                <button class="button secondary" type="button" id="halloween-story">Start Halloween story</button>
+              </aside>
+            </div>
+          </section>
+
+          <section class="story-admin" id="story-admin" hidden>
+            <aside class="story-sidebar">
           <div class="story-sidebar-heading">
             <h2>Stories</h2>
             <span id="story-count">0</span>
           </div>
+          <button class="button primary story-new-button" id="new-story" type="button">New story</button>
           <div id="story-list" class="story-list"></div>
         </aside>
 
@@ -71,6 +144,39 @@
         <div class="story-empty" id="story-empty">
           <h2>Create the first master story</h2>
           <p>Start with the Halloween adventure or the evergreen flagship story.</p>
+        </div>
+          </section>
+
+          <section class="orders-admin" id="orders-admin" hidden>
+            <div class="orders-toolbar">
+              <div>
+                <p class="eyebrow">Fulfillment</p>
+                <h2>Storybook orders</h2>
+                <p>Track each personalized book from checkout through delivery.</p>
+              </div>
+              <label>Filter status
+                <select id="order-filter">
+                  <option value="all">All orders</option>
+                  <option value="checkout_started">Checkout started</option>
+                  <option value="paid">Paid</option>
+                  <option value="proofing">Proofing</option>
+                  <option value="approved">Approved</option>
+                  <option value="printing">Printing</option>
+                  <option value="shipped">Shipped</option>
+                  <option value="completed">Completed</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+              </label>
+            </div>
+            <div class="orders-table-wrap">
+              <table class="orders-table">
+                <thead><tr><th>Customer</th><th>Book</th><th>Format</th><th>Total</th><th>Date</th><th>Status</th></tr></thead>
+                <tbody id="orders-list"></tbody>
+              </table>
+              <div class="orders-empty" id="orders-empty"><strong>No orders yet</strong><p>New storybook checkouts will appear here automatically.</p></div>
+            </div>
+            <p id="orders-status" role="status"></p>
+          </section>
         </div>
       </section>
     </main>

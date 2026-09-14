@@ -6,6 +6,7 @@ const {
 } = require("../lib/storybook-interest");
 const { assertAdminRequest } = require("../lib/admin-auth");
 const { createStory, getStory, listStories, updateStory } = require("../lib/story-library");
+const { listOrders, updateOrder } = require("../lib/order-library");
 
 module.exports = async function handler(request, response) {
   if (["GET", "PUT", "PATCH"].includes(request.method)) {
@@ -59,6 +60,17 @@ async function handleAdminStories(request, response) {
   try {
     assertAdminRequest(request);
     const id = firstQueryValue(request.query?.id);
+    const resource = firstQueryValue(request.query?.resource) || "stories";
+
+    if (resource === "orders") {
+      if (request.method === "GET") return sendJson(response, 200, { orders: await listOrders() });
+      if (request.method === "PATCH") {
+        const order = await updateOrder(id, await readJsonBody(request));
+        if (!order) return sendJson(response, 404, { error: "Order not found." });
+        return sendJson(response, 200, { order });
+      }
+      return rejectUnsupportedMethod(request, response, ["GET", "PATCH"]);
+    }
 
     if (request.method === "GET") {
       const data = id ? await getStory(id) : await listStories();

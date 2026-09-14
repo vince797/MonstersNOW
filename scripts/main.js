@@ -208,7 +208,7 @@ async function handleStorybookInterestSubmit(event) {
     console.warn(checkoutError);
 
     if (interestStatus) {
-      interestStatus.textContent = "Checkout is not open yet. Sending your storybook request instead.";
+        interestStatus.textContent = "Secure checkout is temporarily unavailable. Sending your book request instead.";
     }
   }
 
@@ -224,7 +224,7 @@ async function handleStorybookInterestSubmit(event) {
     console.error(interestError);
 
     if (interestStatus) {
-      interestStatus.textContent = "Online ordering is not available yet. Opening an email draft instead.";
+      interestStatus.textContent = "Secure checkout is temporarily unavailable. Opening an email draft instead.";
     }
 
     openStorybookInterestEmail(email, selectedFormat, featurePermission, selectedPreview);
@@ -320,7 +320,7 @@ function openStorybookInterestEmail(email, selectedFormat, featurePermission, se
     "MonstersNOW storybook interest",
   )}&body=${encodeURIComponent(
     [
-      `Please notify me when storybook ordering opens: ${email}`,
+      `Please contact me about completing my storybook order: ${email}`,
       `Preferred format: ${selectedFormat.label}`,
       `Child's first name: ${personalization.childName}`,
       `Monster's name: ${personalization.monsterName}`,

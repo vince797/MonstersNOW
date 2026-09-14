@@ -9,6 +9,7 @@ const {
   createStorybookCheckoutSession,
   storybookCheckoutErrorToResponse,
 } = require("../lib/stripe-checkout");
+const { recordCheckoutOrder } = require("../lib/order-library");
 
 module.exports = async function handler(request, response) {
   if (request.method !== "POST") {
@@ -35,6 +36,7 @@ module.exports = async function handler(request, response) {
 
     const intakeEmail = await sendStorybookInterestEmail(submission);
     const checkoutSession = await createStorybookCheckoutSession(submission, request);
+    const order = await recordCheckoutOrder(submission, checkoutSession.id);
 
     return sendJson(response, 200, {
       mode: "checkout",
@@ -42,6 +44,7 @@ module.exports = async function handler(request, response) {
       intakeEmailId: intakeEmail.emailId,
       checkoutSessionId: checkoutSession.id,
       checkoutUrl: checkoutSession.url,
+      orderId: order?.id || null,
       warnings: submission.warnings,
       message: "Storybook checkout started.",
     });
