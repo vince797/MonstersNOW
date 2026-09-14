@@ -154,26 +154,56 @@
                   <p>Start checkout when ordering is open, or send the selected preview for review.</p>
                 </div>
                 <form class="interest-form" id="storybook-interest-form">
+                  <fieldset class="storybook-personalization">
+                    <legend>Personalize the story</legend>
+                    <div class="storybook-name-fields">
+                      <label for="child-name">
+                        Child's first name
+                        <input
+                          id="child-name"
+                          name="child-name"
+                          type="text"
+                          maxlength="40"
+                          placeholder="Maya"
+                          autocomplete="off"
+                          required
+                        />
+                      </label>
+                      <label for="monster-name">
+                        Monster's name
+                        <input
+                          id="monster-name"
+                          name="monster-name"
+                          type="text"
+                          maxlength="40"
+                          placeholder="Bumbles"
+                          autocomplete="off"
+                          required
+                        />
+                      </label>
+                    </div>
+                    <p>These names will appear in the personalized story and book proof.</p>
+                  </fieldset>
                   <div class="storybook-format-options" role="radiogroup" aria-label="Preferred storybook format">
-                    <label class="storybook-format-choice is-featured">
+                    <label class="storybook-format-choice">
                       <input type="radio" name="storybook-format" value="softcover" checked />
                       <span>
-                        <strong>Softcover <em>Recommended</em></strong>
-                        <small>$39.99 + shipping</small>
+                        <strong>Softcover</strong>
+                        <small>$24.99 + shipping</small>
                       </span>
                     </label>
-                    <label class="storybook-format-choice">
+                    <label class="storybook-format-choice is-featured">
                       <input type="radio" name="storybook-format" value="hardcover" />
                       <span>
-                        <strong>Hardcover Keepsake</strong>
-                        <small>$59.99 + shipping</small>
+                        <strong>Hardcover Keepsake <em>Most popular</em></strong>
+                        <small>$39.99 + shipping</small>
                       </span>
                     </label>
                   </div>
                   <ul class="print-proof-points" aria-label="Printed storybook details">
                     <li>Cover and interior preview before print</li>
                     <li>Personalized story option starring this monster</li>
-                    <li>8.5 x 8.5 inch print-on-demand plan</li>
+                    <li>32-page, 8.5 x 8.5 inch picture-book format</li>
                     <li>Shipping address and rate handled in checkout</li>
                   </ul>
                   <section class="feature-permission" aria-labelledby="feature-permission-title">
@@ -221,9 +251,12 @@
     </main>
 
     <footer class="site-footer">
-      <a class="footer-brand" href="index.html" aria-label="MonstersNOW home">
-        <img src="assets/monstersnow-logo.png" alt="" />
-      </a>
+      <div class="footer-intro">
+        <a class="footer-brand" href="index.html" aria-label="MonstersNOW home">
+          <img src="assets/monstersnow-logo.png" alt="" />
+        </a>
+        <p>Big stories from little imaginations.</p>
+      </div>
       <nav aria-label="Footer navigation">
         <a href="books.html">Books</a>
         <a href="monsters.html">Monsters</a>
@@ -231,7 +264,10 @@
         <a href="index.html#how-it-works">How It Works</a>
         <a href="index.html#faq">FAQ</a>
       </nav>
-      <p>&copy; <span id="year"></span> MonstersNOW. All rights reserved.</p>
+      <div class="footer-meta">
+        <p>&copy; <span id="year"></span> MonstersNOW. All rights reserved.</p>
+        <a class="footer-admin" href="admin.html" rel="nofollow">Admin</a>
+      </div>
     </footer>
 
     <script src="scripts/main.js?v=20260914-create-polish"></script>

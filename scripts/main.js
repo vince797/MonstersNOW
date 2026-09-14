@@ -29,6 +29,8 @@ const storybookInterestButton = document.querySelector("#storybook-interest");
 const storybookInterestForm = document.querySelector("#storybook-interest-form");
 const interestEmail = document.querySelector("#interest-email");
 const interestStatus = document.querySelector("#interest-status");
+const childName = document.querySelector("#child-name");
+const monsterName = document.querySelector("#monster-name");
 const storybookFormatInputs = [...document.querySelectorAll('input[name="storybook-format"]')];
 const featureMonster = document.querySelector("#feature-monster");
 const featureShowDrawing = document.querySelector("#feature-show-drawing");
@@ -150,6 +152,16 @@ if (featureMonster) {
 async function handleStorybookInterestSubmit(event) {
   event.preventDefault();
   const email = interestEmail?.value.trim();
+  const personalization = getStorybookPersonalization();
+
+  if (!personalization.childName || !personalization.monsterName) {
+    if (interestStatus) {
+      interestStatus.textContent = "Enter the child's first name and the monster's name.";
+    }
+
+    (personalization.childName ? monsterName : childName)?.focus();
+    return;
+  }
 
   if (!email || !interestEmail.checkValidity()) {
     if (interestStatus) {
@@ -167,6 +179,7 @@ async function handleStorybookInterestSubmit(event) {
     submissionId,
     source: "create-form",
     email,
+    personalization,
     format: selectedFormat.value,
     selectedPreviewId: selectedPreview?.id || selectedPreviewId || null,
     style: selectedPreview?.style || selectedMonsterStyle,
@@ -225,7 +238,7 @@ function getSelectedStorybookFormat() {
 
   return {
     value,
-    label: value === "hardcover" ? "Hardcover Keepsake ($59.99 + shipping)" : "Softcover Storybook ($39.99 + shipping)",
+    label: value === "hardcover" ? "Hardcover Keepsake ($39.99 + shipping)" : "Softcover Storybook ($24.99 + shipping)",
   };
 }
 
@@ -240,6 +253,7 @@ function persistStorybookInterest(submission, selectedFormat, featurePermission)
       JSON.stringify({
         submissionId: submission.submissionId,
         email: submission.email,
+        personalization: submission.personalization,
         format: selectedFormat.value,
         previewId: submission.selectedPreviewId,
         style: submission.style,
@@ -300,12 +314,16 @@ function setStorybookSubmitState({ disabled, text }) {
 }
 
 function openStorybookInterestEmail(email, selectedFormat, featurePermission, selectedPreview) {
+  const personalization = getStorybookPersonalization();
+
   window.location.href = `mailto:hello@monstersnow.com?subject=${encodeURIComponent(
     "MonstersNOW storybook interest",
   )}&body=${encodeURIComponent(
     [
       `Please notify me when storybook ordering opens: ${email}`,
       `Preferred format: ${selectedFormat.label}`,
+      `Child's first name: ${personalization.childName}`,
+      `Monster's name: ${personalization.monsterName}`,
       `Monster style: ${getPreviewStyleLabel(selectedPreview?.style || selectedMonsterStyle)}`,
       `Selected preview ID: ${selectedPreview?.id || selectedPreviewId || "Not provided"}`,
       `Feature finished monster: ${featurePermission.canFeatureMonster ? "Yes" : "No"}`,
@@ -314,6 +332,13 @@ function openStorybookInterestEmail(email, selectedFormat, featurePermission, se
       `Consent recorded at: ${featurePermission.consentRecordedAt || "Not provided"}`,
     ].join("\n"),
   )}`;
+}
+
+function getStorybookPersonalization() {
+  return {
+    childName: childName?.value.trim() || "",
+    monsterName: monsterName?.value.trim() || "",
+  };
 }
 
 function createClientSubmissionId() {

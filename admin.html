@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Story Library | MonstersNOW Admin</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="admin-page">
+    <main class="admin-shell">
+      <header class="admin-header">
+        <div>
+          <p class="eyebrow">MonstersNOW Admin</p>
+          <h1>Master stories</h1>
+          <p>Create, schedule, proof, and publish the stories that power personalized books.</p>
+        </div>
+        <button class="button primary" id="new-story" type="button" hidden>New story</button>
+      </header>
+
+      <section class="admin-login" id="admin-login">
+        <h2>Admin sign in</h2>
+        <p>Use the admin password configured for this site.</p>
+        <form id="admin-login-form">
+          <label for="admin-password">Admin password</label>
+          <input id="admin-password" type="password" autocomplete="current-password" required />
+          <button class="button primary" type="submit">Open story library</button>
+        </form>
+        <p id="admin-login-status" role="status"></p>
+      </section>
+
+      <section class="story-admin" id="story-admin" hidden>
+        <aside class="story-sidebar">
+          <div class="story-sidebar-heading">
+            <h2>Stories</h2>
+            <span id="story-count">0</span>
+          </div>
+          <div id="story-list" class="story-list"></div>
+        </aside>
+
+        <form class="story-editor" id="story-editor" hidden>
+          <input id="story-id" type="hidden" />
+          <div class="story-editor-heading">
+            <div>
+              <p class="eyebrow">Story settings</p>
+              <h2 id="story-editor-title">New master story</h2>
+            </div>
+            <div class="story-editor-actions">
+              <button class="button secondary" id="save-draft" type="button">Save draft</button>
+              <button class="button primary" id="publish-story" type="button">Publish</button>
+            </div>
+          </div>
+
+          <div class="admin-field-grid">
+            <label>Title template<input id="story-title" type="text" maxlength="160" placeholder="{child_name} and {monster_name}'s Halloween Adventure" required /></label>
+            <label>Slug<input id="story-slug" type="text" maxlength="100" placeholder="halloween-adventure" required /></label>
+            <label class="admin-field-wide">Description<textarea id="story-description" rows="2" maxlength="1000"></textarea></label>
+            <label class="admin-check"><input id="story-seasonal" type="checkbox" /> Seasonal title</label>
+            <label>Available from<input id="story-from" type="date" /></label>
+            <label>Available until<input id="story-until" type="date" /></label>
+          </div>
+
+          <div class="story-pages-heading">
+            <div><h3>Book pages</h3><p>Use <code>{child_name}</code>, <code>{monster_name}</code>, and boy/girl wording tokens in the master copy.</p></div>
+            <button class="button secondary" id="add-page" type="button">Add page</button>
+          </div>
+          <div id="story-pages" class="story-pages"></div>
+          <p id="story-editor-status" role="status"></p>
+        </form>
+
+        <div class="story-empty" id="story-empty">
+          <h2>Create the first master story</h2>
+          <p>Start with the Halloween adventure or the evergreen flagship story.</p>
+        </div>
+      </section>
+    </main>
+    <script src="scripts/admin.js"></script>
+  </body>
+</html>
