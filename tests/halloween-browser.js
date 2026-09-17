@@ -22,9 +22,9 @@ global.fetch = async (url, options = {}) => {
   throw new Error(`Unexpected external request: ${url}`);
 };
 const routes = {
-  "/api/halloween-proof": require("../api/halloween-proof"),
-  "/api/halloween-test-checkout": require("../api/halloween-test-checkout"),
-  "/api/halloween-checkout-status": require("../api/halloween-checkout-status"),
+  "/api/halloween-proof": require("../lib/halloween-proof-handler"),
+  "/api/halloween-test-checkout": require("../lib/halloween-test-checkout-handler"),
+  "/api/halloween-checkout-status": require("../lib/halloween-checkout-status-handler"),
 };
 const server = http.createServer(async (req, res) => {
   const pathname = new URL(req.url, "http://localhost").pathname;

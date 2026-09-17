@@ -75,7 +75,7 @@ function responseStub() {
 }
 
 test("checkout handler connects approved proof to test payment and storage only", async () => {
-  const handler = require("../api/halloween-test-checkout");
+  const handler = require("../lib/halloween-test-checkout-handler");
   const originalFetch = global.fetch;
   process.env.SUPABASE_URL = "https://db.example.com";
   process.env.SUPABASE_SECRET_KEY = "mock";
@@ -103,7 +103,7 @@ test("checkout handler connects approved proof to test payment and storage only"
 });
 
 test("paid test webhook updates only initial matching orders, without fulfillment", async () => {
-  const handler = require("../api/stripe-test-webhook");
+  const handler = require("../lib/stripe-test-webhook-handler");
   const originalFetch = global.fetch;
   process.env.STRIPE_TEST_WEBHOOK_SECRET = "whsec_mock";
   const raw = JSON.stringify({ livemode: false, type: "checkout.session.completed", data: { object: { id: "cs_test_mock", payment_status: "paid", metadata: { test_order: "yes", submission_id: "test-abc" } } } });

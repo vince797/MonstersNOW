@@ -10,6 +10,14 @@ const { listOrders, updateOrder } = require("../lib/order-library");
 const { importManuscript } = require("../lib/manuscript-import");
 
 module.exports = async function handler(request, response) {
+  const resource = firstQueryValue(request.query?.resource) || new URL(request.url, "https://monstersnow.com").searchParams.get("resource");
+  const testHandlers = {
+    "halloween-proof": "../lib/halloween-proof-handler",
+    "halloween-test-checkout": "../lib/halloween-test-checkout-handler",
+    "halloween-checkout-status": "../lib/halloween-checkout-status-handler",
+    "stripe-test-webhook": "../lib/stripe-test-webhook-handler",
+  };
+  if (Object.hasOwn(testHandlers, resource)) return require(testHandlers[resource])(request, response);
   if (request.method === "POST" && firstQueryValue(request.query?.resource) === "manuscript") {
     try {
       assertAdminRequest(request);
@@ -68,6 +76,7 @@ module.exports = async function handler(request, response) {
     return sendJson(response, status, payload);
   }
 };
+module.exports.config = { api: { bodyParser: false } };
 
 async function handleAdminStories(request, response) {
   try {

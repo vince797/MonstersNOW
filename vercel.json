@@ -1,13 +1,16 @@
 {
   "cleanUrls": true,
   "trailingSlash": false,
-  "rewrites": [{ "source": "/lib/story-data/:path*", "destination": "/404.html" }],
+  "rewrites": [
+    { "source": "/lib/story-data/:path*", "destination": "/404.html" },
+    { "source": "/api/halloween-proof", "destination": "/api/storybook-interest?resource=halloween-proof" },
+    { "source": "/api/halloween-test-checkout", "destination": "/api/storybook-interest?resource=halloween-test-checkout" },
+    { "source": "/api/halloween-checkout-status", "destination": "/api/storybook-interest?resource=halloween-checkout-status" },
+    { "source": "/api/stripe-test-webhook", "destination": "/api/storybook-interest?resource=stripe-test-webhook" }
+  ],
   "functions": {
-    "api/halloween-proof.js": {
-      "includeFiles": "lib/story-data/halloween-monster-night.md"
-    },
-    "api/halloween-test-checkout.js": {
-      "includeFiles": "lib/story-data/halloween-monster-night.md"
+    "api/storybook-interest.js": {
+      "includeFiles": "lib/**"
     },
     "api/convert-monster.js": {
       "maxDuration": 60,
