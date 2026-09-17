@@ -1,6 +1,7 @@
 {
   "cleanUrls": true,
   "trailingSlash": false,
+  "redirects": [{ "source": "/lib/story-data/:path*", "destination": "/404.html", "permanent": false }],
   "rewrites": [
     { "source": "/lib/story-data/:path*", "destination": "/404.html" },
     { "source": "/api/halloween-proof", "destination": "/api/storybook-interest?resource=halloween-proof" },
