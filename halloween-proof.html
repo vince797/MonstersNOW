@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow"><title>Halloween Layout Proof | MonstersNOW</title>
+  <link rel="stylesheet" href="styles.css?v=20260917-halloween-test">
+  <link rel="stylesheet" href="halloween-proof.css?v=20260917-halloween-test">
+  <script src="scripts/halloween-proof.js?v=20260917-halloween-test" defer></script>
+</head>
+<body>
+  <header class="proof-toolbar">
+    <a href="create.html?test=halloween">← Change your monster</a>
+    <strong>Halloween Monster Night · Test layout proof</strong>
+    <button id="print-proof" class="button secondary" type="button">Print / Save PDF</button>
+  </header>
+  <main class="proof-main">
+    <section class="proof-intro">
+      <p class="eyebrow">Your monster. A whole Halloween adventure.</p>
+      <h1>Review your book before test checkout.</h1>
+      <p>All 32 interior pages use the approved story and your selected monster. This is a layout proof, with character vignettes—not the finished scene illustrations or Lulu-ready print files.</p>
+      <p>No real payment, shipping, or print order occurs in this test flow. Your proof is saved only in this browser tab until checkout; keep a PDF if you want a copy.</p>
+      <p id="proof-status" role="status"></p>
+    </section>
+    <div id="proof-pages" class="proof-pages"></div>
+    <form id="proof-checkout" class="proof-checkout" hidden>
+      <label><input id="proof-approved" type="checkbox" required> I reviewed the names, selected monster, and all 32 pages. I understand this is a test layout proof.</label>
+      <button class="button primary" type="submit">Continue to Stripe test checkout</button>
+      <p id="checkout-status" role="status"></p>
+    </form>
+  </main>
+</body>
+</html>

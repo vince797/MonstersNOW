@@ -1,7 +1,14 @@
 {
   "cleanUrls": true,
   "trailingSlash": false,
+  "rewrites": [{ "source": "/lib/story-data/:path*", "destination": "/404.html" }],
   "functions": {
+    "api/halloween-proof.js": {
+      "includeFiles": "lib/story-data/halloween-monster-night.md"
+    },
+    "api/halloween-test-checkout.js": {
+      "includeFiles": "lib/story-data/halloween-monster-night.md"
+    },
     "api/convert-monster.js": {
       "maxDuration": 60,
       "includeFiles": "assets/master-references/**"

@@ -55,7 +55,16 @@ const maxFreePreviews = 3;
 const heicConverterUrl = "https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js";
 const demoMonsterImage = "assets/step-2-character.jpg?v=20260515-horns";
 const defaultPreviewStyle = "storybook";
-const storybookInterestButtonText = "Start Storybook Checkout";
+const halloweenTestMode = new URLSearchParams(window.location.search).get("test") === "halloween";
+const storybookInterestButtonText = halloweenTestMode ? "Build Halloween Book Proof" : "Start Storybook Checkout";
+if (halloweenTestMode && storybookInterestButton) {
+  storybookInterestButton.textContent = storybookInterestButtonText;
+  const offerTitle = document.querySelector("#result-book-title");
+  const offerDescription = document.querySelector(".book-offer-header p");
+  if (offerTitle) offerTitle.textContent = "Preview Halloween Monster Night with this monster.";
+  if (offerDescription) offerDescription.textContent = "Build a 32-page layout proof, review it, then try checkout with no real charge or print order.";
+  if (interestStatus) interestStatus.textContent = "Halloween test flow: review your 32-page layout proof first. No real charge or print order.";
+}
 const previewStyleLabels = {
   storybook: "Soft 3D Storybook Monster",
   cute: "Soft 3D Cute Monster",
@@ -188,6 +197,21 @@ async function handleStorybookInterestSubmit(event) {
   };
 
   persistStorybookInterest(submission, selectedFormat, featurePermission);
+
+  if (halloweenTestMode) {
+    setStorybookSubmitState({ disabled: true, text: "Building your book proof…" });
+    try {
+      const response = await fetch("/api/halloween-proof", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(submission) });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Could not make your proof.");
+      sessionStorage.setItem("monstersnow_halloween_test_proof", JSON.stringify({ ...result, submission }));
+      window.location.assign("halloween-proof.html");
+    } catch (error) {
+      if (interestStatus) interestStatus.textContent = error.message;
+      setStorybookSubmitState({ disabled: false, text: storybookInterestButtonText });
+    }
+    return;
+  }
 
   setStorybookSubmitState({ disabled: true, text: "Starting checkout..." });
 

@@ -6,3 +6,9 @@ README.md
 deploy/
 assets/.gitkeep
 *Master_Manuscript*.md
+output/
+tmp/
+tests/
+docs/
+scripts/build_*.py
+scripts/__pycache__/
