@@ -3494,3 +3494,27 @@ main > section {
     transition-duration: 0.001ms !important;
   }
 }
+.admin-search { display: grid; gap: 7px; font-size: .8rem; color: #53657d; margin: 14px 0; }
+.admin-search input, .admin-search select, .sample-fields input, .order-detail select, .order-detail textarea { width: 100%; min-width: 0; padding: 12px; border: 1px solid #dce6ed; border-radius: 9px; background: white; color: #112746; font: inherit; }
+.story-list-item.is-active { background: #e8f8fa; border-color: #00a5b4; }
+#story-save-state { display: block; color: #65758b; margin-top: 12px; }
+.story-tools { display: grid; gap: 20px; padding: 20px; border: 1px solid #dce8ee; background: #f7fbfc; border-radius: 12px; }
+.story-tools p, .story-tools small { color: #65758b; font-size: .85rem; }
+#page-nav { display: flex; flex-wrap: wrap; gap: 7px; }
+#page-nav button { width: 36px; height: 36px; border: 1px solid #d5dfe8; border-radius: 8px; background: white; color: #243954; cursor: pointer; }
+#page-nav button.is-ready { background: #008d9b; border-color: #008d9b; color: white; }
+.story-tools summary { cursor: pointer; font-weight: 700; }
+.sample-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 16px; }
+#story-preview { max-height: 300px; overflow: auto; white-space: pre-wrap; }
+.story-page-card { scroll-margin-top: 100px; }
+.order-detail { width: min(680px, calc(100% - 28px)); max-height: 90vh; padding: 28px; border: 0; border-radius: 18px; color: #112746; box-shadow: 0 24px 100px #10233e40; }
+.order-detail::backdrop { background: #0a203d80; }
+.order-detail form { display: grid; gap: 18px; }
+.order-detail h2 { font-size: 1.6rem; margin: 0; }
+.order-detail label { display: grid; gap: 8px; }
+.order-detail dl { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 10px 16px; margin: 0; }
+.order-detail dt { color: #65758b; font-size: .85rem; }
+.order-detail dd { margin: 0; overflow-wrap: anywhere; }
+#order-detail-id { overflow-wrap: anywhere; font-size: .8rem; color: #65758b; }
+.order-payment-notice { background: #fff5e8; padding: 14px; border-radius: 10px; font-size: .85rem; }
+@media (max-width: 680px) { .sample-fields { grid-template-columns: 1fr; } .order-detail { padding: 20px; } .order-detail dl { grid-template-columns: 90px minmax(0, 1fr); } }

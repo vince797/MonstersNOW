@@ -16,6 +16,21 @@ const pagesContainer = document.querySelector("#story-pages");
 let stories = [];
 let orders = [];
 let manuscriptFile = null;
+let storyDirty = false;
+let loadingStory = false;
+let storyRevision = 0;
+let savingStory = false;
+let selectedOrder = null;
+const orderStatuses = ["checkout_started", "paid", "proofing", "approved", "printing", "shipped", "completed", "cancelled"];
+const orderDialog = document.querySelector("#order-detail");
+editor.addEventListener("submit", (event) => event.preventDefault());
+editor.addEventListener("input", (event) => { if (!event.target.id.startsWith("sample-")) markStoryDirty(); refreshPageTools(); });
+window.addEventListener("beforeunload", (event) => { if (storyDirty) { event.preventDefault(); event.returnValue = ""; } });
+["story-search", "story-filter"].forEach((id) => document.getElementById(id).addEventListener("input", renderStoryList));
+document.querySelector("#order-search").addEventListener("input", renderOrders);
+document.querySelector("#close-order-detail").addEventListener("click", closeOrderDetail);
+orderDialog.addEventListener("cancel", (event) => { event.preventDefault(); closeOrderDetail(); });
+document.querySelector("#order-detail-form").addEventListener("submit", saveOrderDetail);
 let adminPassword = sessionStorage.getItem("monstersnow_admin_password") || "";
 
 loginForm.addEventListener("submit", async (event) => {
@@ -100,28 +115,34 @@ function renderDashboard() {
 
 function renderStoryList() {
   storyCount.textContent = String(stories.length);
-  storyList.replaceChildren(...stories.map((story) => {
+  const query = document.querySelector("#story-search").value.trim().toLowerCase();
+  const filter = document.querySelector("#story-filter").value;
+  const visible = stories.filter((story) => (filter === "all" || story.status === filter) && `${story.title_template} ${story.slug} ${story.description}`.toLowerCase().includes(query));
+  storyList.replaceChildren(...visible.map((story) => {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "story-list-item";
+    button.classList.toggle("is-active", story.id === document.querySelector("#story-id").value);
     button.innerHTML = `<strong></strong><span></span>`;
     button.querySelector("strong").textContent = story.title_template;
-    button.querySelector("span").textContent = `${story.status} · v${story.version}`;
+    button.querySelector("span").textContent = `${story.status} · ${(story.pages || []).filter((page) => page.text?.trim() && page.illustrationPrompt?.trim()).length}/32 ready · v${story.version}`;
     button.addEventListener("click", () => editStory(story));
     return button;
   }));
+  if (!visible.length) storyList.textContent = "No matching stories.";
   empty.hidden = stories.length > 0;
   renderDashboard();
 }
 
 function renderOrders() {
   const filter = document.querySelector("#order-filter").value;
-  const visible = filter === "all" ? orders : orders.filter((order) => order.status === filter);
+  const query = document.querySelector("#order-search").value.trim().toLowerCase();
+  const visible = orders.filter((order) => (filter === "all" || order.status === filter) && [order.customer_email, order.child_name, order.monster_name, order.story_label, order.id].join(" ").toLowerCase().includes(query));
   const body = document.querySelector("#orders-list");
   document.querySelector("#orders-empty").hidden = visible.length > 0;
   body.replaceChildren(...visible.map((order) => {
     const row = document.createElement("tr");
-    row.innerHTML = '<td><strong></strong><small></small></td><td><strong></strong><small></small></td><td></td><td></td><td></td><td><select></select></td>';
+    row.innerHTML = '<td><strong></strong><small></small></td><td><strong></strong><small></small></td><td></td><td></td><td></td><td><button class="button secondary" type="button"></button></td>';
     const cells = row.children;
     cells[0].querySelector("strong").textContent = order.customer_email;
     cells[0].querySelector("small").textContent = `For ${order.child_name}`;
@@ -130,9 +151,10 @@ function renderOrders() {
     cells[2].textContent = order.format_id === "hardcover" ? "Hardcover" : "Softcover";
     cells[3].textContent = new Intl.NumberFormat("en-US", { style: "currency", currency: order.currency }).format(order.amount_cents / 100);
     cells[4].textContent = new Date(order.created_at).toLocaleDateString();
-    const select = cells[5].querySelector("select");
-    ["checkout_started", "paid", "proofing", "approved", "printing", "shipped", "completed", "cancelled"].forEach((status) => select.add(new Option(status.replaceAll("_", " "), status, false, status === order.status)));
-    select.addEventListener("change", () => updateOrderStatus(order, select.value));
+    const button = cells[5].querySelector("button");
+    button.textContent = `${order.status.replaceAll("_", " ")} →`;
+    button.setAttribute("aria-label", `Open order for ${order.child_name}`);
+    button.addEventListener("click", () => openOrderDetail(order));
     return row;
   }));
 }
@@ -149,6 +171,9 @@ async function updateOrderStatus(order, status) {
 }
 
 function editStory(story = null) {
+  if (savingStory) { editorStatus.textContent = "Wait for this story to finish saving before switching."; return; }
+  if (storyDirty && !window.confirm("Discard unsaved story changes?")) return;
+  loadingStory = true;
   empty.hidden = true;
   editor.hidden = false;
   document.querySelector("#story-id").value = story?.id || "";
@@ -163,6 +188,11 @@ function editStory(story = null) {
   (story?.pages?.length ? story.pages : [{ text: "", illustrationPrompt: "" }]).forEach(addPage);
   setManuscriptImportOpen(false);
   editorStatus.textContent = "";
+  loadingStory = false;
+  storyDirty = false;
+  document.querySelector("#story-save-state").textContent = story?.id ? "Saved" : "New draft · not saved";
+  refreshPageTools();
+  renderStoryList();
 }
 
 function setManuscriptImportOpen(open) {
@@ -219,6 +249,8 @@ async function importManuscript() {
     if (result.title && !document.querySelector("#story-title").value.trim()) document.querySelector("#story-title").value = result.title;
     if (result.description && !document.querySelector("#story-description").value.trim()) document.querySelector("#story-description").value = result.description;
     renumberPages();
+    markStoryDirty();
+    refreshPageTools();
     status.textContent = `${result.pages.length} page${result.pages.length === 1 ? "" : "s"} imported from ${result.fileName}.${result.truncated ? " Only the first 32 pages were included." : " Review every page before saving."}`;
   } catch (error) {
     status.textContent = error.message;
@@ -249,8 +281,9 @@ function addPage(page = {}) {
   const areas = card.querySelectorAll("textarea");
   areas[0].value = page.text || "";
   areas[1].value = page.illustrationPrompt || "";
-  card.querySelector("button").addEventListener("click", () => { card.remove(); renumberPages(); });
+  card.querySelector("button").addEventListener("click", () => { card.remove(); renumberPages(); markStoryDirty(); refreshPageTools(); });
   pagesContainer.append(card);
+  if (!loadingStory) { markStoryDirty(); refreshPageTools(); }
 }
 
 function renumberPages() {
@@ -258,6 +291,12 @@ function renumberPages() {
 }
 
 async function saveStory(status) {
+  if (savingStory) return;
+  if (!editor.reportValidity()) return;
+  if (status === "published" && (pagesContainer.children.length !== 32 || [...pagesContainer.querySelectorAll("textarea")].some((area) => !area.value.trim()))) {
+    editorStatus.textContent = "Complete all 32 pages with story text and illustration direction before publishing. You can save a draft at any time.";
+    return;
+  }
   const id = document.querySelector("#story-id").value;
   const payload = {
     title_template: document.querySelector("#story-title").value,
@@ -273,15 +312,29 @@ async function saveStory(status) {
     }),
   };
   editorStatus.textContent = status === "published" ? "Publishing..." : "Saving draft...";
+  const saveButtons = [document.querySelector("#save-draft"), document.querySelector("#publish-story")];
+  saveButtons.forEach((button) => { button.disabled = true; });
+  const submittedRevision = storyRevision;
+  savingStory = true;
   try {
     const result = await apiRequest(id ? `?id=${encodeURIComponent(id)}` : "", { method: id ? "PATCH" : "PUT", body: payload });
     const index = stories.findIndex((story) => story.id === result.story.id);
     if (index >= 0) stories[index] = result.story; else stories.unshift(result.story);
-    renderStoryList();
-    editStory(result.story);
-    editorStatus.textContent = status === "published" ? "Story published." : "Draft saved.";
+    savingStory = false;
+    if (storyRevision === submittedRevision) {
+      storyDirty = false;
+      editStory(result.story);
+      editorStatus.textContent = status === "published" ? "Story published." : "Draft saved.";
+    } else {
+      document.querySelector("#story-id").value = result.story.id;
+      renderStoryList();
+      editorStatus.textContent = "Saved. Your newer edits still need saving.";
+    }
   } catch (error) {
     editorStatus.textContent = error.message;
+  } finally {
+    savingStory = false;
+    saveButtons.forEach((button) => { button.disabled = false; });
   }
 }
 
@@ -293,6 +346,9 @@ function togglePassword() {
 }
 
 function signOut() {
+  if (savingStory) { editorStatus.textContent = "Wait for the story to finish saving before signing out."; return; }
+  if (storyDirty && !window.confirm("Sign out and discard unsaved story changes?")) return;
+  storyDirty = false;
   sessionStorage.removeItem("monstersnow_admin_password");
   adminPassword = "";
   passwordInput.value = "";
@@ -311,4 +367,80 @@ async function apiRequest(query = "", options = {}) {
   const result = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(result.error || "The story library could not be opened.");
   return result;
+}
+
+function markStoryDirty() {
+  if (loadingStory) return;
+  storyDirty = true;
+  storyRevision += 1;
+  document.querySelector("#story-save-state").textContent = "Unsaved changes";
+}
+
+function refreshPageTools() {
+  const cards = [...pagesContainer.children];
+  const ready = cards.filter((card) => [...card.querySelectorAll("textarea")].every((area) => area.value.trim())).length;
+  document.querySelector("#page-progress").textContent = `${ready} of 32 pages ready · ${cards.length} added`;
+  document.querySelector("#add-page").disabled = cards.length >= 32;
+  document.querySelector("#page-nav").replaceChildren(...cards.map((card, index) => {
+    card.id = `book-page-${index + 1}`;
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = index + 1;
+    const complete = [...card.querySelectorAll("textarea")].every((area) => area.value.trim());
+    button.className = complete ? "is-ready" : "";
+    button.setAttribute("aria-label", `Page ${index + 1}, ${complete ? "ready" : "incomplete"}`);
+    button.addEventListener("click", () => { card.scrollIntoView({ behavior: "smooth", block: "center" }); card.querySelector("textarea").focus({ preventScroll: true }); });
+    return button;
+  }));
+  const child = document.querySelector("#sample-child").value || "Alex";
+  const monster = document.querySelector("#sample-monster").value || "Milo";
+  const preview = document.querySelector("#story-preview");
+  preview.replaceChildren(...cards.map((card, index) => {
+    const paragraph = document.createElement("p");
+    paragraph.textContent = `Page ${index + 1}: ${card.querySelector("textarea").value.replaceAll("{child_name}", child).replaceAll("{monster_name}", monster) || "No story text yet."}`;
+    return paragraph;
+  }));
+}
+
+function openOrderDetail(order) {
+  selectedOrder = order;
+  document.querySelector("#order-detail-id").textContent = `Order ${order.id}`;
+  const fields = { Customer: order.customer_email, Child: order.child_name, Monster: order.monster_name, Story: order.story_label, Format: order.format_id, Style: order.monster_style, Created: new Date(order.created_at).toLocaleString(), "Stripe checkout": order.stripe_checkout_session_id || "Not recorded", "Preview ID": order.selected_preview_id || "Not recorded" };
+  const list = document.querySelector("#order-detail-fields");
+  list.replaceChildren();
+  Object.entries(fields).forEach(([label, value]) => { const term = document.createElement("dt"); const detail = document.createElement("dd"); term.textContent = label; detail.textContent = value || "—"; list.append(term, detail); });
+  const select = document.querySelector("#order-detail-status");
+  select.replaceChildren(...orderStatuses.map((status) => new Option(status === "paid" ? "Paid (manually verified)" : status.replaceAll("_", " "), status, false, status === order.status)));
+  document.querySelector("#order-detail-notes").value = order.notes || "";
+  document.querySelector("#order-detail-message").textContent = "";
+  orderDialog.showModal();
+}
+
+function closeOrderDetail() {
+  const notes = document.querySelector("#order-detail-notes").value;
+  const status = document.querySelector("#order-detail-status").value;
+  if (selectedOrder && (notes !== (selectedOrder.notes || "") || status !== selectedOrder.status) && !window.confirm("Discard unsaved order changes?")) return;
+  orderDialog.close();
+  selectedOrder = null;
+}
+
+async function saveOrderDetail(event) {
+  event.preventDefault();
+  if (!selectedOrder) return;
+  const order = selectedOrder;
+  const button = document.querySelector("#save-order-detail");
+  const message = document.querySelector("#order-detail-message");
+  const status = document.querySelector("#order-detail-status").value;
+  if (status === "paid" && order.status !== "paid" && !window.confirm("Have you verified this payment in Stripe? This does not charge the customer.")) return;
+  button.disabled = true;
+  message.textContent = "Saving order…";
+  try {
+    const result = await apiRequest(`?resource=orders&id=${encodeURIComponent(order.id)}`, { method: "PATCH", body: { status, notes: document.querySelector("#order-detail-notes").value } });
+    if (!result.order) throw new Error("This order no longer exists. Refresh the dashboard.");
+    Object.assign(order, result.order);
+    renderOrders();
+    renderDashboard();
+    message.textContent = "Order saved.";
+  } catch (error) { message.textContent = error.message; }
+  finally { button.disabled = false; }
 }
