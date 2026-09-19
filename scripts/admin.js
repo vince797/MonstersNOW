@@ -6,6 +6,7 @@ const adminApp = document.querySelector("#admin-app");
 const dashboard = document.querySelector("#admin-dashboard");
 const admin = document.querySelector("#story-admin");
 const ordersAdmin = document.querySelector("#orders-admin");
+const customersAdmin = document.querySelector("#customers-admin");
 const newStoryButton = document.querySelector("#new-story");
 const storyList = document.querySelector("#story-list");
 const storyCount = document.querySelector("#story-count");
@@ -21,6 +22,7 @@ let loadingStory = false;
 let storyRevision = 0;
 let savingStory = false;
 let selectedOrder = null;
+let orderView = "board";
 const orderStatuses = ["checkout_started", "paid", "proofing", "approved", "printing", "shipped", "completed", "cancelled"];
 const orderDialog = document.querySelector("#order-detail");
 editor.addEventListener("submit", (event) => event.preventDefault());
@@ -28,6 +30,8 @@ editor.addEventListener("input", (event) => { if (!event.target.id.startsWith("s
 window.addEventListener("beforeunload", (event) => { if (storyDirty) { event.preventDefault(); event.returnValue = ""; } });
 ["story-search", "story-filter"].forEach((id) => document.getElementById(id).addEventListener("input", renderStoryList));
 document.querySelector("#order-search").addEventListener("input", renderOrders);
+document.querySelector("#customer-search").addEventListener("input", renderCustomers);
+document.querySelectorAll("[data-order-view]").forEach((button) => button.addEventListener("click", () => { orderView = button.dataset.orderView; renderOrders(); }));
 document.querySelector("#close-order-detail").addEventListener("click", closeOrderDetail);
 orderDialog.addEventListener("cancel", (event) => { event.preventDefault(); closeOrderDetail(); });
 document.querySelector("#order-detail-form").addEventListener("submit", saveOrderDetail);
@@ -46,6 +50,7 @@ document.querySelector("#admin-sign-out").addEventListener("click", signOut);
 document.querySelector("#order-filter").addEventListener("change", renderOrders);
 document.querySelectorAll("[data-admin-view]").forEach((button) => button.addEventListener("click", () => showView(button.dataset.adminView)));
 document.querySelectorAll("[data-open-stories]").forEach((button) => button.addEventListener("click", () => showView("stories")));
+document.querySelectorAll("[data-open-orders]").forEach((button) => button.addEventListener("click", () => showView("orders")));
 document.querySelector("#add-page").addEventListener("click", () => addPage());
 document.querySelector("#save-draft").addEventListener("click", () => saveStory("draft"));
 document.querySelector("#publish-story").addEventListener("click", () => saveStory("published"));
@@ -72,6 +77,7 @@ async function openLibrary() {
     renderStoryList();
     renderDashboard();
     renderOrders();
+    renderCustomers();
     showView("dashboard");
   } catch (error) {
     sessionStorage.removeItem("monstersnow_admin_password");
@@ -83,7 +89,8 @@ function showView(view) {
   dashboard.hidden = view !== "dashboard";
   admin.hidden = view !== "stories";
   ordersAdmin.hidden = view !== "orders";
-  document.querySelector("#admin-view-title").textContent = view === "stories" ? "Stories" : view === "orders" ? "Orders" : "Dashboard";
+  customersAdmin.hidden = view !== "customers";
+  document.querySelector("#admin-view-title").textContent = view === "stories" ? "Stories" : view === "orders" ? "Orders" : view === "customers" ? "Customers" : "Dashboard";
   document.querySelectorAll("[data-admin-view]").forEach((button) => button.classList.toggle("is-active", button.dataset.adminView === view));
   if (view === "stories" && editor.hidden && stories[0]) editStory(stories[0]);
 }
@@ -96,9 +103,11 @@ function renderDashboard() {
   document.querySelector("#metric-drafts").textContent = stories.filter((story) => story.status === "draft").length;
   document.querySelector("#nav-story-count").textContent = stories.length;
   document.querySelector("#nav-order-count").textContent = orders.length;
+  document.querySelector("#nav-customer-count").textContent = new Set(orders.map((order) => order.customer_email?.toLowerCase()).filter(Boolean)).size;
   const recent = document.querySelector("#recent-stories");
   if (!stories.length) {
     recent.innerHTML = '<div class="admin-inline-empty"><strong>No stories yet</strong><span>Create the Halloween story to get started.</span></div>';
+    renderAttentionList();
     return;
   }
   recent.replaceChildren(...stories.slice(0, 4).map((story) => {
@@ -109,6 +118,28 @@ function renderDashboard() {
     button.querySelector("small").textContent = `${(story.pages || []).length}/32 pages · Version ${story.version}`;
     button.querySelector("em").textContent = story.status;
     button.addEventListener("click", () => { showView("stories"); editStory(story); });
+    return button;
+  }));
+  renderAttentionList();
+}
+
+function renderAttentionList() {
+  const attention = [];
+  orders.filter((order) => order.status === "paid").forEach((order) => attention.push({ type: "order", title: `${order.child_name}'s book is paid`, detail: "Ready to begin proofing", order }));
+  orders.filter((order) => order.status === "checkout_started" && Date.now() - new Date(order.created_at).getTime() > 24 * 60 * 60 * 1000).forEach((order) => attention.push({ type: "order", title: `Checkout not completed`, detail: `${order.customer_email} · ${relativeAge(order.created_at)}`, order }));
+  stories.filter((story) => story.status === "draft").forEach((story) => {
+    const ready = (story.pages || []).filter((page) => page.text?.trim() && page.illustrationPrompt?.trim()).length;
+    if (ready < 32) attention.push({ type: "story", title: story.title_template, detail: `${ready}/32 pages ready`, story });
+  });
+  const list = document.querySelector("#attention-list");
+  if (!attention.length) { list.innerHTML = '<div class="admin-inline-empty"><strong>Nothing urgent</strong><span>Orders and story checks will appear here.</span></div>'; return; }
+  list.replaceChildren(...attention.slice(0, 8).map((item) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.innerHTML = "<span><strong></strong><small></small></span><em>Review →</em>";
+    button.querySelector("strong").textContent = item.title;
+    button.querySelector("small").textContent = item.detail;
+    button.addEventListener("click", () => item.type === "order" ? (showView("orders"), openOrderDetail(item.order)) : (showView("stories"), editStory(item.story)));
     return button;
   }));
 }
@@ -139,6 +170,11 @@ function renderOrders() {
   const query = document.querySelector("#order-search").value.trim().toLowerCase();
   const visible = orders.filter((order) => (filter === "all" || order.status === filter) && [order.customer_email, order.child_name, order.monster_name, order.story_label, order.id].join(" ").toLowerCase().includes(query));
   const body = document.querySelector("#orders-list");
+  const board = document.querySelector("#orders-board");
+  const table = document.querySelector(".orders-table-wrap");
+  board.hidden = orderView !== "board";
+  table.hidden = orderView !== "table";
+  document.querySelectorAll("[data-order-view]").forEach((button) => button.classList.toggle("is-active", button.dataset.orderView === orderView));
   document.querySelector("#orders-empty").hidden = visible.length > 0;
   body.replaceChildren(...visible.map((order) => {
     const row = document.createElement("tr");
@@ -157,6 +193,80 @@ function renderOrders() {
     button.addEventListener("click", () => openOrderDetail(order));
     return row;
   }));
+  renderOrderBoard(visible);
+}
+
+function renderOrderBoard(visible) {
+  const columns = [
+    { key: "intake", title: "Intake", statuses: ["checkout_started"] },
+    { key: "proof", title: "Proof", statuses: ["paid", "proofing"] },
+    { key: "production", title: "Production", statuses: ["approved", "printing"] },
+    { key: "delivery", title: "Delivery", statuses: ["shipped", "completed"] },
+    { key: "exceptions", title: "Exceptions", statuses: ["cancelled"] },
+  ];
+  const board = document.querySelector("#orders-board");
+  board.replaceChildren(...columns.map((column) => {
+    const section = document.createElement("section");
+    const matching = visible.filter((order) => column.statuses.includes(order.status));
+    section.className = "order-board-column";
+    section.innerHTML = '<header><strong></strong><span></span></header><div></div>';
+    section.querySelector("strong").textContent = column.title;
+    section.querySelector("span").textContent = matching.length;
+    const list = section.querySelector("div");
+    if (!matching.length) list.innerHTML = '<p class="board-empty">No orders</p>';
+    else list.replaceChildren(...matching.map((order) => {
+      const card = document.createElement("button");
+      card.type = "button";
+      card.className = "order-board-card";
+      card.innerHTML = '<span></span><strong></strong><small></small><em></em>';
+      card.querySelector("span").textContent = order.status.replaceAll("_", " ");
+      card.querySelector("strong").textContent = `${order.child_name} + ${order.monster_name}`;
+      card.querySelector("small").textContent = `${order.story_label} · ${order.format_id === "hardcover" ? "Hardcover" : "Softcover"}`;
+      card.querySelector("em").textContent = `${relativeAge(order.created_at)} · Review →`;
+      card.addEventListener("click", () => openOrderDetail(order));
+      return card;
+    }));
+    return section;
+  }));
+}
+
+function renderCustomers() {
+  const query = document.querySelector("#customer-search").value.trim().toLowerCase();
+  const groups = new Map();
+  orders.forEach((order) => {
+    const key = (order.customer_email || "Unknown customer").toLowerCase();
+    if (!groups.has(key)) groups.set(key, { email: order.customer_email || "Unknown customer", orders: [] });
+    groups.get(key).orders.push(order);
+  });
+  const visible = [...groups.values()].filter((customer) => [customer.email, ...customer.orders.flatMap((order) => [order.child_name, order.monster_name])].join(" ").toLowerCase().includes(query));
+  document.querySelector("#customers-empty").hidden = visible.length > 0;
+  document.querySelector("#customer-list").replaceChildren(...visible.map((customer) => {
+    const article = document.createElement("article");
+    const monsters = [...new Set(customer.orders.map((order) => order.monster_name).filter(Boolean))];
+    const children = [...new Set(customer.orders.map((order) => order.child_name).filter(Boolean))];
+    const spent = customer.orders.reduce((sum, order) => sum + (Number(order.amount_cents) || 0), 0);
+    article.className = "customer-card";
+    article.innerHTML = '<header><div><strong></strong><small></small></div><span></span></header><div class="customer-monsters"></div><footer><span></span><button class="button secondary" type="button">View latest order</button></footer>';
+    article.querySelector("strong").textContent = customer.email;
+    article.querySelector("small").textContent = `${children.join(", ") || "No child name"} · ${customer.orders.length} order${customer.orders.length === 1 ? "" : "s"}`;
+    article.querySelector("header > span").textContent = formatMoney(spent, customer.orders[0]?.currency || "USD");
+    article.querySelector(".customer-monsters").replaceChildren(...monsters.map((monster) => { const span = document.createElement("span"); span.textContent = monster; return span; }));
+    article.querySelector("footer span").textContent = `Last activity ${relativeAge(customer.orders[0]?.updated_at || customer.orders[0]?.created_at)}`;
+    article.querySelector("button").addEventListener("click", () => { showView("orders"); openOrderDetail(customer.orders[0]); });
+    return article;
+  }));
+}
+
+function relativeAge(value) {
+  const hours = Math.max(0, Math.floor((Date.now() - new Date(value).getTime()) / 3600000));
+  if (hours < 1) return "Just now";
+  if (hours < 24) return `${hours}h ago`;
+  return `${Math.floor(hours / 24)}d ago`;
+}
+
+function formatMoney(cents, currency = "USD") {
+  try { return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(cents / 100); }
+  catch { return `$${(cents / 100).toFixed(2)}`; }
 }
 
 async function updateOrderStatus(order, status) {
@@ -392,13 +502,36 @@ function refreshPageTools() {
     button.addEventListener("click", () => { card.scrollIntoView({ behavior: "smooth", block: "center" }); card.querySelector("textarea").focus({ preventScroll: true }); });
     return button;
   }));
+  const settings = {
+    title: document.querySelector("#story-title").value.trim(),
+    slug: document.querySelector("#story-slug").value.trim(),
+    seasonal: document.querySelector("#story-seasonal").checked,
+    from: document.querySelector("#story-from").value,
+    until: document.querySelector("#story-until").value,
+  };
+  const allText = cards.map((card) => [...card.querySelectorAll("textarea")].map((area) => area.value).join(" ")).join(" ");
+  const unresolved = [...new Set(allText.match(/\{[^}]+\}/g) || [])].filter((token) => !["{child_name}", "{monster_name}"].includes(token));
+  const checks = [
+    { ok: Boolean(settings.title && settings.slug), label: "Title and slug are complete" },
+    { ok: cards.length === 32, label: `${cards.length}/32 pages added` },
+    { ok: ready === cards.length && cards.length > 0, label: "Every page has story text and art direction" },
+    { ok: !unresolved.length, label: unresolved.length ? `Unknown tokens: ${unresolved.join(", ")}` : "No unknown personalization tokens" },
+    { ok: !settings.seasonal || Boolean(settings.from && settings.until), label: settings.seasonal ? "Seasonal availability dates are set" : "Evergreen availability" },
+    { ok: !cards.some((card) => card.querySelector("textarea").value.length > 1200), label: "Page text is within review length" },
+  ];
+  document.querySelector("#story-readiness-list").replaceChildren(...checks.map((check) => {
+    const item = document.createElement("li"); item.className = check.ok ? "is-ready" : "needs-work"; item.textContent = `${check.ok ? "✓" : "!"} ${check.label}`; return item;
+  }));
   const child = document.querySelector("#sample-child").value || "Alex";
   const monster = document.querySelector("#sample-monster").value || "Milo";
   const preview = document.querySelector("#story-preview");
-  preview.replaceChildren(...cards.map((card, index) => {
-    const paragraph = document.createElement("p");
-    paragraph.textContent = `Page ${index + 1}: ${card.querySelector("textarea").value.replaceAll("{child_name}", child).replaceAll("{monster_name}", monster) || "No story text yet."}`;
-    return paragraph;
+  const pages = cards.map((card, index) => ({ number: index + 1, text: card.querySelector("textarea").value.replaceAll("{child_name}", child).replaceAll("{monster_name}", monster) || "No story text yet." }));
+  const spreads = [];
+  for (let index = 0; index < pages.length; index += 2) spreads.push(pages.slice(index, index + 2));
+  preview.replaceChildren(...spreads.map((spread) => {
+    const article = document.createElement("article");
+    spread.forEach((page) => { const section = document.createElement("section"); section.innerHTML = "<small></small><p></p>"; section.querySelector("small").textContent = `Page ${page.number}`; section.querySelector("p").textContent = page.text; article.append(section); });
+    return article;
   }));
 }
 
@@ -440,6 +573,7 @@ async function saveOrderDetail(event) {
     Object.assign(order, result.order);
     renderOrders();
     renderDashboard();
+    renderCustomers();
     message.textContent = "Order saved.";
   } catch (error) { message.textContent = error.message; }
   finally { button.disabled = false; }
