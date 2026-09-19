@@ -23,6 +23,7 @@ let storyRevision = 0;
 let savingStory = false;
 let selectedOrder = null;
 let orderView = "board";
+let selectedPageIndex = 0;
 const orderStatuses = ["checkout_started", "paid", "proofing", "approved", "printing", "shipped", "completed", "cancelled"];
 const orderDialog = document.querySelector("#order-detail");
 editor.addEventListener("submit", (event) => event.preventDefault());
@@ -79,6 +80,10 @@ document.querySelectorAll("[data-admin-view]").forEach((button) => button.addEve
 document.querySelectorAll("[data-open-stories]").forEach((button) => button.addEventListener("click", () => showView("stories")));
 document.querySelectorAll("[data-open-orders]").forEach((button) => button.addEventListener("click", () => showView("orders")));
 document.querySelector("#add-page").addEventListener("click", () => addPage());
+document.querySelector("#previous-page").addEventListener("click", () => selectPage(selectedPageIndex - 1, true));
+document.querySelector("#next-page").addEventListener("click", () => selectPage(selectedPageIndex + 1, true));
+document.querySelector("#sample-child").addEventListener("input", () => renderSelectedSpread());
+document.querySelector("#sample-monster").addEventListener("input", () => renderSelectedSpread());
 document.querySelector("#save-draft").addEventListener("click", () => saveStory("draft"));
 document.querySelector("#publish-story").addEventListener("click", () => saveStory("published"));
 document.querySelector("#show-manuscript-import").addEventListener("click", () => setManuscriptImportOpen(true));
@@ -141,9 +146,10 @@ function renderDashboard() {
     const button = document.createElement("button");
     button.type = "button";
     button.innerHTML = '<span><strong></strong><small></small></span><em></em>';
+    const ready = (story.pages || []).filter((page) => page.text?.trim() && page.illustrationPrompt?.trim()).length;
     button.querySelector("strong").textContent = story.title_template;
-    button.querySelector("small").textContent = `${(story.pages || []).length}/32 pages · Version ${story.version}`;
-    button.querySelector("em").textContent = story.status;
+    button.querySelector("small").textContent = `${ready}/32 pages ready · Version ${story.version}`;
+    button.querySelector("em").textContent = storyStage(story, ready);
     button.addEventListener("click", () => { showView("stories"); editStory(story); });
     return button;
   }));
@@ -181,9 +187,13 @@ function renderStoryList() {
     button.type = "button";
     button.className = "story-list-item";
     button.classList.toggle("is-active", story.id === document.querySelector("#story-id").value);
-    button.innerHTML = `<strong></strong><span></span>`;
+    const ready = (story.pages || []).filter((page) => page.text?.trim() && page.illustrationPrompt?.trim()).length;
+    button.innerHTML = `<span class="story-book-cover"><i></i><b></b></span><span class="story-book-meta"><strong></strong><small></small><em></em></span>`;
+    button.querySelector(".story-book-cover i").textContent = story.is_seasonal ? "Seasonal" : "Master";
+    button.querySelector(".story-book-cover b").textContent = story.is_seasonal ? "🎃" : "★";
     button.querySelector("strong").textContent = story.title_template;
-    button.querySelector("span").textContent = `${story.status} · ${(story.pages || []).filter((page) => page.text?.trim() && page.illustrationPrompt?.trim()).length}/32 ready · v${story.version}`;
+    button.querySelector("small").textContent = `${ready}/32 pages ready · v${story.version}`;
+    button.querySelector("em").textContent = storyStage(story, ready);
     button.addEventListener("click", () => editStory(story));
     return button;
   }));
@@ -296,6 +306,10 @@ function formatMoney(cents, currency = "USD") {
   catch { return `$${(cents / 100).toFixed(2)}`; }
 }
 
+function escapeHtml(value = "") {
+  return String(value).replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[character]);
+}
+
 async function updateOrderStatus(order, status) {
   const output = document.querySelector("#orders-status");
   output.textContent = "Updating order...";
@@ -321,6 +335,7 @@ function editStory(story = null) {
   document.querySelector("#story-from").value = story?.available_from || "";
   document.querySelector("#story-until").value = story?.available_until || "";
   document.querySelector("#story-editor-title").textContent = story ? story.title_template : "New master story";
+  selectedPageIndex = 0;
   pagesContainer.replaceChildren();
   (story?.pages?.length ? story.pages : [{ text: "", illustrationPrompt: "" }]).forEach(addPage);
   setManuscriptImportOpen(false);
@@ -413,14 +428,23 @@ function addPage(page = {}) {
   if (pagesContainer.children.length >= 32) return;
   const card = document.createElement("section");
   card.className = "story-page-card";
-  card.innerHTML = `<div><strong>Page <span></span></strong><button type="button">Remove</button></div><label>Story text<textarea rows="3" maxlength="2000"></textarea></label><label>Illustration direction<textarea rows="3" maxlength="3000"></textarea></label>`;
+  card.innerHTML = `<div><span><small>Editing</small><strong>Page <span></span></strong></span><button type="button">Remove page</button></div><label>Story text<textarea rows="10" maxlength="2000" placeholder="Write the words the child will read on this page…"></textarea><small><span data-text-count>0</span>/2,000 characters</small></label><label>Illustration direction<textarea rows="10" maxlength="3000" placeholder="Describe the scene, characters, action, lighting, and composition…"></textarea><small><span data-art-count>0</span>/3,000 characters</small></label>`;
   card.querySelector("span").textContent = String(pagesContainer.children.length + 1);
   const areas = card.querySelectorAll("textarea");
   areas[0].value = page.text || "";
   areas[1].value = page.illustrationPrompt || "";
-  card.querySelector("button").addEventListener("click", () => { card.remove(); renumberPages(); markStoryDirty(); refreshPageTools(); });
+  const updateCounts = () => {
+    card.querySelector("[data-text-count]").textContent = areas[0].value.length;
+    card.querySelector("[data-art-count]").textContent = areas[1].value.length;
+  };
+  areas.forEach((area) => area.addEventListener("input", updateCounts));
+  updateCounts();
+  card.querySelector("button").addEventListener("click", () => {
+    if (pagesContainer.children.length === 1) return;
+    card.remove(); selectedPageIndex = Math.min(selectedPageIndex, pagesContainer.children.length - 1); renumberPages(); markStoryDirty(); refreshPageTools();
+  });
   pagesContainer.append(card);
-  if (!loadingStory) { markStoryDirty(); refreshPageTools(); }
+  if (!loadingStory) { selectedPageIndex = pagesContainer.children.length - 1; markStoryDirty(); refreshPageTools(); selectPage(selectedPageIndex, true); }
 }
 
 function renumberPages() {
@@ -513,6 +537,49 @@ function markStoryDirty() {
   document.querySelector("#story-save-state").textContent = "Unsaved changes";
 }
 
+function storyStage(story, ready = null) {
+  const complete = ready ?? (story?.pages || []).filter((page) => page.text?.trim() && page.illustrationPrompt?.trim()).length;
+  if (story?.status === "published") return "Published";
+  if (complete === 32) return "Content ready";
+  if (complete > 0) return "In progress";
+  return "Draft";
+}
+
+function selectPage(index, focus = false) {
+  const cards = [...pagesContainer.children];
+  if (!cards.length) return;
+  selectedPageIndex = Math.max(0, Math.min(index, cards.length - 1));
+  cards.forEach((card, cardIndex) => {
+    const active = cardIndex === selectedPageIndex;
+    card.hidden = !active;
+    card.classList.toggle("is-active", active);
+  });
+  [...document.querySelector("#page-nav").children].forEach((button, buttonIndex) => button.classList.toggle("is-selected", buttonIndex === selectedPageIndex));
+  document.querySelector("#selected-page-title").textContent = `Page ${selectedPageIndex + 1}`;
+  document.querySelector("#previous-page").disabled = selectedPageIndex === 0;
+  document.querySelector("#next-page").disabled = selectedPageIndex === cards.length - 1;
+  if (focus) cards[selectedPageIndex].querySelector("textarea")?.focus();
+  renderSelectedSpread(cards);
+}
+
+function renderSelectedSpread(cards = [...pagesContainer.children]) {
+  const child = document.querySelector("#sample-child").value || "Alex";
+  const monster = document.querySelector("#sample-monster").value || "Milo";
+  const firstIndex = selectedPageIndex % 2 === 0 ? selectedPageIndex : selectedPageIndex - 1;
+  const spread = cards.slice(firstIndex, firstIndex + 2);
+  const preview = document.querySelector("#story-preview");
+  const article = document.createElement("article");
+  spread.forEach((card, offset) => {
+    const section = document.createElement("section");
+    section.classList.toggle("is-selected", firstIndex + offset === selectedPageIndex);
+    section.innerHTML = "<small></small><p></p>";
+    section.querySelector("small").textContent = `Page ${firstIndex + offset + 1}`;
+    section.querySelector("p").textContent = card.querySelector("textarea").value.replaceAll("{child_name}", child).replaceAll("{monster_name}", monster) || "No story text yet.";
+    article.append(section);
+  });
+  preview.replaceChildren(article);
+}
+
 function refreshPageTools() {
   const cards = [...pagesContainer.children];
   const ready = cards.filter((card) => [...card.querySelectorAll("textarea")].every((area) => area.value.trim())).length;
@@ -522,11 +589,11 @@ function refreshPageTools() {
     card.id = `book-page-${index + 1}`;
     const button = document.createElement("button");
     button.type = "button";
-    button.textContent = index + 1;
     const complete = [...card.querySelectorAll("textarea")].every((area) => area.value.trim());
+    button.innerHTML = `<span>${index + 1}</span><small>${complete ? "Ready" : "Needs work"}</small>`;
     button.className = complete ? "is-ready" : "";
     button.setAttribute("aria-label", `Page ${index + 1}, ${complete ? "ready" : "incomplete"}`);
-    button.addEventListener("click", () => { card.scrollIntoView({ behavior: "smooth", block: "center" }); card.querySelector("textarea").focus({ preventScroll: true }); });
+    button.addEventListener("click", () => selectPage(index, true));
     return button;
   }));
   const settings = {
@@ -549,17 +616,10 @@ function refreshPageTools() {
   document.querySelector("#story-readiness-list").replaceChildren(...checks.map((check) => {
     const item = document.createElement("li"); item.className = check.ok ? "is-ready" : "needs-work"; item.textContent = `${check.ok ? "✓" : "!"} ${check.label}`; return item;
   }));
-  const child = document.querySelector("#sample-child").value || "Alex";
-  const monster = document.querySelector("#sample-monster").value || "Milo";
-  const preview = document.querySelector("#story-preview");
-  const pages = cards.map((card, index) => ({ number: index + 1, text: card.querySelector("textarea").value.replaceAll("{child_name}", child).replaceAll("{monster_name}", monster) || "No story text yet." }));
-  const spreads = [];
-  for (let index = 0; index < pages.length; index += 2) spreads.push(pages.slice(index, index + 2));
-  preview.replaceChildren(...spreads.map((spread) => {
-    const article = document.createElement("article");
-    spread.forEach((page) => { const section = document.createElement("section"); section.innerHTML = "<small></small><p></p>"; section.querySelector("small").textContent = `Page ${page.number}`; section.querySelector("p").textContent = page.text; article.append(section); });
-    return article;
-  }));
+  const stage = storyStage({ status: stories.find((story) => story.id === document.querySelector("#story-id").value)?.status, pages: [] }, ready);
+  document.querySelector("#story-stage").textContent = stage;
+  document.querySelector("#story-stage").className = `is-${stage.toLowerCase().replaceAll(" ", "-")}`;
+  selectPage(selectedPageIndex);
 }
 
 function openOrderDetail(order) {

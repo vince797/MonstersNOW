@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex, nofollow" />
     <title>Dashboard | MonstersNOW Admin</title>
-    <link rel="stylesheet" href="styles.css?v=20260918-preflight" />
+    <link rel="stylesheet" href="styles.css?v=20260918-book-editor" />
   </head>
   <body class="admin-page">
     <main>
@@ -115,13 +115,13 @@
           <section class="story-admin" id="story-admin" hidden>
             <aside class="story-sidebar">
               <div class="story-sidebar-heading">
-                <h2>Stories</h2>
+                <h2>Master books</h2>
                 <span id="story-count">0</span>
               </div>
-              <p class="story-sidebar-copy">Master templates for every book theme.</p>
-              <button class="button primary story-new-button" id="new-story" type="button">New story</button>
-              <label class="admin-search">Find a story<input id="story-search" type="search" placeholder="Search title or theme" /></label>
-              <label class="admin-search">Status<select id="story-filter"><option value="all">All stories</option><option value="draft">Drafts</option><option value="published">Published</option><option value="archived">Archived</option></select></label>
+              <p class="story-sidebar-copy">Open a book to edit its settings, copy, and art direction.</p>
+              <button class="button primary story-new-button" id="new-story" type="button">New master book</button>
+              <label class="admin-search">Find a book<input id="story-search" type="search" placeholder="Search title or theme" /></label>
+              <label class="admin-search">Status<select id="story-filter"><option value="all">All books</option><option value="draft">Drafts</option><option value="published">Published</option><option value="archived">Archived</option></select></label>
               <div id="story-list" class="story-list"></div>
             </aside>
 
@@ -129,7 +129,7 @@
           <input id="story-id" type="hidden" />
           <div class="story-editor-heading">
             <div class="story-editor-title">
-              <p class="eyebrow">Story settings</p>
+              <div class="story-editor-kicker"><p class="eyebrow">Master book</p><span id="story-stage">Draft</span></div>
               <h2 id="story-editor-title">New master story</h2>
               <small id="story-save-state" role="status">Saved</small>
             </div>
@@ -158,25 +158,41 @@
                 <p id="manuscript-import-status" role="status"></p>
               </section>
 
-          <div class="admin-field-grid">
-            <label class="story-title-field">Title template<input id="story-title" type="text" maxlength="160" placeholder="{child_name} and {monster_name}'s Halloween Adventure" required /></label>
-            <label class="story-slug-field">Slug<input id="story-slug" type="text" maxlength="100" placeholder="halloween-adventure" required /></label>
-            <label class="admin-field-wide">Description<textarea id="story-description" rows="2" maxlength="1000"></textarea></label>
-            <label class="admin-check"><input id="story-seasonal" type="checkbox" /> Seasonal title</label>
-            <label class="story-date-field">Available from<input id="story-from" type="date" /></label>
-            <label class="story-date-field">Available until<input id="story-until" type="date" /></label>
-          </div>
+          <details class="book-settings">
+            <summary><span><strong>Book settings</strong><small>Title, description, slug, and availability</small></span><span>Manage</span></summary>
+            <div class="admin-field-grid">
+              <label class="story-title-field">Title template<input id="story-title" type="text" maxlength="160" placeholder="{child_name} and {monster_name}'s Halloween Adventure" required /></label>
+              <label class="story-slug-field">Slug<input id="story-slug" type="text" maxlength="100" placeholder="halloween-adventure" required /></label>
+              <label class="admin-field-wide">Description<textarea id="story-description" rows="2" maxlength="1000"></textarea></label>
+              <label class="admin-check"><input id="story-seasonal" type="checkbox" /> Seasonal title</label>
+              <label class="story-date-field">Available from<input id="story-from" type="date" /></label>
+              <label class="story-date-field">Available until<input id="story-until" type="date" /></label>
+            </div>
+          </details>
 
-          <div class="story-pages-heading">
-            <div><h3>Book pages</h3><p>Use <code>{child_name}</code>, <code>{monster_name}</code>, and boy/girl wording tokens in the master copy.</p></div>
-            <button class="button secondary" id="add-page" type="button">Add page</button>
+          <div class="page-editor-heading">
+            <div><p class="eyebrow">Page editor</p><h3 id="selected-page-title">Page 1</h3></div>
+            <div class="page-step-actions"><button class="button secondary" id="previous-page" type="button">← Previous</button><button class="button secondary" id="next-page" type="button">Next →</button></div>
           </div>
-          <section class="story-tools" aria-label="Page navigation and preview">
-            <div><strong id="page-progress">0 of 32 pages ready</strong><p>Ready means story text and illustration direction are both filled in.</p><nav id="page-nav" aria-label="Jump to book page"></nav></div>
-            <section class="story-readiness"><strong>Publishing checks</strong><ul id="story-readiness-list"></ul></section>
-            <details><summary>Visual spread preview</summary><div class="sample-fields"><label>Child name<input id="sample-child" value="Alex" /></label><label>Monster name<input id="sample-monster" value="Milo" /></label></div><div id="story-preview" class="story-spread-preview"></div><small>Text layout preview only. Final artwork and typography are reviewed separately.</small></details>
-          </section>
-          <div id="story-pages" class="story-pages"></div>
+          <div class="page-editor-layout">
+            <aside class="page-browser">
+              <div><strong id="page-progress">0 of 32 pages ready</strong><p>Green pages have copy and art direction.</p></div>
+              <nav id="page-nav" aria-label="Jump to book page"></nav>
+              <button class="button secondary" id="add-page" type="button">Add page</button>
+            </aside>
+            <section class="page-editing-stage">
+              <div id="story-pages" class="story-pages"></div>
+              <section class="selected-spread-preview">
+                <div class="selected-preview-heading"><div><strong>Spread preview</strong><small>Personalization and page pacing</small></div><div class="sample-fields"><label>Child<input id="sample-child" value="Alex" /></label><label>Monster<input id="sample-monster" value="Milo" /></label></div></div>
+                <div id="story-preview" class="story-spread-preview"></div>
+              </section>
+            </section>
+            <aside class="book-checks-panel">
+              <strong>Book checks</strong>
+              <ul id="story-readiness-list"></ul>
+              <p>Publishing stays locked until all required checks pass.</p>
+            </aside>
+          </div>
           <p id="story-editor-status" role="status"></p>
         </form>
 
@@ -229,6 +245,6 @@
       </section>
     </main>
     <dialog id="order-detail" class="order-detail"><form id="order-detail-form"><div class="admin-panel-heading"><h2>Order details</h2><button type="button" id="close-order-detail" class="button secondary">Close</button></div><p id="order-detail-id"></p><dl id="order-detail-fields"></dl><p class="order-payment-notice">Statuses are manually managed. A checkout record is not proof of payment; verify payment in Stripe before starting production.</p><label>Operational status<select id="order-detail-status"></select></label><label>Production notes<textarea id="order-detail-notes" rows="6" maxlength="2000" placeholder="Proof review, printing updates, shipping follow-up…"></textarea></label><button class="button primary" id="save-order-detail" type="submit">Save order</button><p id="order-detail-message" role="status"></p></form></dialog>
-    <script src="scripts/admin.js?v=20260918-preflight"></script>
+    <script src="scripts/admin.js?v=20260918-book-editor"></script>
   </body>
 </html>
