@@ -81,6 +81,9 @@ def number(c, page):
 
 
 def spread_asset(start):
+    print_asset = ART / 'print' / f'pages-{start:02d}-{start+1:02d}-print-v1.jpg'
+    if print_asset.exists():
+        return print_asset
     version = 'v2' if start in {10,12,14,18} else 'v1'
     path = ART / f'pages-{start:02d}-{start+1:02d}-master-{version}.png'
     assert path.exists(), path

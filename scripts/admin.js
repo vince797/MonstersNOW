@@ -45,6 +45,33 @@ loginForm.addEventListener("submit", async (event) => {
 newStoryButton.addEventListener("click", () => editStory());
 document.querySelector("#dashboard-new-story").addEventListener("click", () => { showView("stories"); editStory(); });
 document.querySelector("#halloween-story").addEventListener("click", () => { showView("stories"); editStory({ title_template: "{child_name} and {monster_name}'s Halloween Adventure", slug: "halloween-adventure", description: "A playful Halloween quest filled with costumes, pumpkins, and friendly surprises.", is_seasonal: true, available_from: "2026-09-15", available_until: "2026-10-31", pages: [] }); });
+
+async function loadProductionReadiness() {
+  const overall = document.querySelector("#production-overall");
+  const checks = document.querySelector("#production-checks");
+  try {
+    const response = await fetch("assets/storybook/halloween-monster-night/production-status.json", { cache: "no-store" });
+    if (!response.ok) throw new Error("Production status is unavailable");
+    const report = await response.json();
+    overall.textContent = report.status === "ready" ? "Ready for Lulu" : "Blocked";
+    overall.className = `production-overall is-${report.status}`;
+    document.querySelector("#production-format").textContent = report.format;
+    document.querySelector("#production-updated").textContent = `Preflight updated ${report.updated}`;
+    document.querySelector("#production-next-action").textContent = report.next_action;
+    checks.replaceChildren(...report.checks.map((check) => {
+      const item = document.createElement("article");
+      item.className = `production-check is-${check.status}`;
+      item.innerHTML = `<span aria-hidden="true">${check.status === "pass" ? "✓" : "!"}</span><div><strong>${escapeHtml(check.label)}</strong><small>${escapeHtml(check.detail)}</small></div>`;
+      return item;
+    }));
+  } catch (error) {
+    overall.textContent = "Unavailable";
+    overall.className = "production-overall is-blocked";
+    checks.innerHTML = `<p class="admin-inline-empty">${escapeHtml(error.message)}</p>`;
+  }
+}
+
+loadProductionReadiness();
 document.querySelector("#toggle-admin-password").addEventListener("click", togglePassword);
 document.querySelector("#admin-sign-out").addEventListener("click", signOut);
 document.querySelector("#order-filter").addEventListener("change", renderOrders);

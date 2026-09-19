@@ -1,0 +1,44 @@
+{
+  "title": "Halloween Monster Night",
+  "status": "blocked",
+  "updated": "2026-09-18",
+  "format": "8.5 \u00d7 8.5 in, full color, 32 pages",
+  "checks": [
+    {
+      "label": "Interior pagination",
+      "status": "pass",
+      "detail": "32 of 32 pages"
+    },
+    {
+      "label": "Interior size and bleed",
+      "status": "pass",
+      "detail": "8.75 \u00d7 8.75 in media; 8.5 \u00d7 8.5 in trim"
+    },
+    {
+      "label": "Illustration dimensions",
+      "status": "pass",
+      "detail": "300 PPI effective; 300 PPI required"
+    },
+    {
+      "label": "Print-art quality review",
+      "status": "blocked",
+      "detail": "Approve sharpened print derivatives at 100% zoom"
+    },
+    {
+      "label": "Softcover package cover",
+      "status": "blocked",
+      "detail": "Awaiting exact Lulu cover dimensions"
+    },
+    {
+      "label": "Hardcover package cover",
+      "status": "blocked",
+      "detail": "Awaiting exact Lulu cover dimensions"
+    },
+    {
+      "label": "Lulu file validation",
+      "status": "blocked",
+      "detail": "Run after final-resolution art and covers exist"
+    }
+  ],
+  "next_action": "Review the 14 print-art derivatives at 100% zoom, then retrieve Lulu cover dimensions for both bindings."
+}

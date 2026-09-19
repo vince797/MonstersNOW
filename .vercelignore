@@ -5,6 +5,7 @@ DEPLOYMENT.md
 README.md
 deploy/
 assets/.gitkeep
+assets/storybook/halloween-monster-night/print/
 *Master_Manuscript*.md
 output/
 tmp/

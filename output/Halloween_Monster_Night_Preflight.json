@@ -1,0 +1,173 @@
+{
+  "title": "Halloween Monster Night",
+  "status": "blocked",
+  "updated": "2026-09-18",
+  "format": "8.5 \u00d7 8.5 in, full color, 32 pages",
+  "checks": [
+    {
+      "label": "Interior pagination",
+      "status": "pass",
+      "detail": "32 of 32 pages"
+    },
+    {
+      "label": "Interior size and bleed",
+      "status": "pass",
+      "detail": "8.75 \u00d7 8.75 in media; 8.5 \u00d7 8.5 in trim"
+    },
+    {
+      "label": "Illustration dimensions",
+      "status": "pass",
+      "detail": "300 PPI effective; 300 PPI required"
+    },
+    {
+      "label": "Print-art quality review",
+      "status": "blocked",
+      "detail": "Approve sharpened print derivatives at 100% zoom"
+    },
+    {
+      "label": "Softcover package cover",
+      "status": "blocked",
+      "detail": "Awaiting exact Lulu cover dimensions"
+    },
+    {
+      "label": "Hardcover package cover",
+      "status": "blocked",
+      "detail": "Awaiting exact Lulu cover dimensions"
+    },
+    {
+      "label": "Lulu file validation",
+      "status": "blocked",
+      "detail": "Run after final-resolution art and covers exist"
+    }
+  ],
+  "artwork": [
+    {
+      "file": "pages-04-05-print-v1.jpg",
+      "pixels": [
+        5250,
+        2625
+      ],
+      "effective_ppi": 300.0,
+      "passes_300_ppi": true
+    },
+    {
+      "file": "pages-06-07-print-v1.jpg",
+      "pixels": [
+        5250,
+        2625
+      ],
+      "effective_ppi": 300.0,
+      "passes_300_ppi": true
+    },
+    {
+      "file": "pages-08-09-print-v1.jpg",
+      "pixels": [
+        5250,
+        2625
+      ],
+      "effective_ppi": 300.0,
+      "passes_300_ppi": true
+    },
+    {
+      "file": "pages-10-11-print-v1.jpg",
+      "pixels": [
+        5250,
+        2625
+      ],
+      "effective_ppi": 300.0,
+      "passes_300_ppi": true
+    },
+    {
+      "file": "pages-12-13-print-v1.jpg",
+      "pixels": [
+        5250,
+        2625
+      ],
+      "effective_ppi": 300.0,
+      "passes_300_ppi": true
+    },
+    {
+      "file": "pages-14-15-print-v1.jpg",
+      "pixels": [
+        5250,
+        2625
+      ],
+      "effective_ppi": 300.0,
+      "passes_300_ppi": true
+    },
+    {
+      "file": "pages-16-17-print-v1.jpg",
+      "pixels": [
+        5250,
+        2625
+      ],
+      "effective_ppi": 300.0,
+      "passes_300_ppi": true
+    },
+    {
+      "file": "pages-18-19-print-v1.jpg",
+      "pixels": [
+        5250,
+        2625
+      ],
+      "effective_ppi": 300.0,
+      "passes_300_ppi": true
+    },
+    {
+      "file": "pages-20-21-print-v1.jpg",
+      "pixels": [
+        5250,
+        2625
+      ],
+      "effective_ppi": 300.0,
+      "passes_300_ppi": true
+    },
+    {
+      "file": "pages-22-23-print-v1.jpg",
+      "pixels": [
+        5250,
+        2625
+      ],
+      "effective_ppi": 300.0,
+      "passes_300_ppi": true
+    },
+    {
+      "file": "pages-24-25-print-v1.jpg",
+      "pixels": [
+        5250,
+        2625
+      ],
+      "effective_ppi": 300.0,
+      "passes_300_ppi": true
+    },
+    {
+      "file": "pages-26-27-print-v1.jpg",
+      "pixels": [
+        5250,
+        2625
+      ],
+      "effective_ppi": 300.0,
+      "passes_300_ppi": true
+    },
+    {
+      "file": "pages-28-29-print-v1.jpg",
+      "pixels": [
+        5250,
+        2625
+      ],
+      "effective_ppi": 300.0,
+      "passes_300_ppi": true
+    },
+    {
+      "file": "pages-30-31-print-v1.jpg",
+      "pixels": [
+        5250,
+        2625
+      ],
+      "effective_ppi": 300.0,
+      "passes_300_ppi": true
+    }
+  ],
+  "unused_art_files": 4,
+  "next_action": "Review the 14 print-art derivatives at 100% zoom, then retrieve Lulu cover dimensions for both bindings."
+}
