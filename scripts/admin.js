@@ -27,11 +27,13 @@ let selectedOrder = null;
 let orderView = "board";
 let orderQuickFilter = "all";
 let selectedPageIndex = 0;
+let artworkFilter = "all";
 let productionReport = null;
 const orderStatuses = ["checkout_started", "paid", "proofing", "approved", "printing", "shipped", "completed", "cancelled"];
 const orderDialog = document.querySelector("#order-detail");
+const artworkDialog = document.querySelector("#artwork-overview");
 editor.addEventListener("submit", (event) => event.preventDefault());
-editor.addEventListener("input", (event) => { if (!event.target.id.startsWith("sample-")) markStoryDirty(); refreshPageTools(); });
+editor.addEventListener("input", (event) => { if (!event.target.id.startsWith("sample-") && !event.target.matches("[data-artwork-file]")) markStoryDirty(); refreshPageTools(); });
 window.addEventListener("beforeunload", (event) => { if (storyDirty) { event.preventDefault(); event.returnValue = ""; } });
 ["story-search", "story-filter"].forEach((id) => document.getElementById(id).addEventListener("input", renderStoryList));
 document.querySelector("#order-search").addEventListener("input", renderOrders);
@@ -42,6 +44,13 @@ document.querySelector("#close-order-detail").addEventListener("click", closeOrd
 orderDialog.addEventListener("cancel", (event) => { event.preventDefault(); closeOrderDetail(); });
 document.querySelector("#order-detail-form").addEventListener("submit", saveOrderDetail);
 document.querySelector("#advance-order").addEventListener("click", advanceSelectedOrder);
+document.querySelector("#open-artwork-overview").addEventListener("click", openArtworkOverview);
+document.querySelector("#close-artwork-overview").addEventListener("click", () => artworkDialog.close());
+artworkDialog.addEventListener("cancel", (event) => { event.preventDefault(); artworkDialog.close(); });
+document.querySelectorAll("[data-artwork-filter]").forEach((button) => button.addEventListener("click", () => {
+  artworkFilter = button.dataset.artworkFilter;
+  renderArtworkOverview();
+}));
 let adminPassword = sessionStorage.getItem("monstersnow_admin_password") || "";
 
 loginForm.addEventListener("submit", async (event) => {
@@ -195,13 +204,14 @@ function renderProductionHub(error = null) {
   const story = stories.find((item) => item.is_seasonal) || stories[0];
   const pages = story?.pages || [];
   const contentReady = pages.filter((page) => page.text?.trim() && page.illustrationPrompt?.trim()).length;
+  const artworkReady = pages.filter((page) => page.artworkUrl && ["approved", "final"].includes(page.artworkStatus)).length;
   const reportChecks = report?.checks || [];
   const check = (label) => reportChecks.find((item) => item.label === label);
   const passed = (label) => check(label)?.status === "pass";
   const coverReady = passed("Softcover package cover") && passed("Hardcover package cover");
   const pipeline = [
     { title: "Master copy", detail: `${contentReady}/32 pages complete`, ready: contentReady === 32, action: "Edit book", run: openProductionBook },
-    { title: "Artwork", detail: passed("Illustration dimensions") ? "Dimensions pass · quality review remains" : "Print dimensions need work", ready: passed("Illustration dimensions") && passed("Print-art quality review") },
+    { title: "Artwork", detail: `${artworkReady}/32 page illustrations approved`, ready: artworkReady === 32 && passed("Illustration dimensions") && passed("Print-art quality review"), action: "Review artwork", run: openProductionBook },
     { title: "Print files", detail: coverReady ? "Interior and both covers ready" : "Interior prepared · covers pending", ready: passed("Interior pagination") && passed("Interior size and bleed") && coverReady },
     { title: "Lulu validation", detail: passed("Lulu file validation") ? "Files accepted" : "Waiting on final files", ready: passed("Lulu file validation") },
     { title: "Fulfillment", detail: `${orders.filter((order) => !["completed", "cancelled"].includes(order.status)).length} active orders`, ready: true, action: "View orders", run: () => showView("orders") },
@@ -248,7 +258,8 @@ function renderAttentionList() {
   orders.filter((order) => order.status === "checkout_started" && Date.now() - new Date(order.created_at).getTime() > 24 * 60 * 60 * 1000).forEach((order) => attention.push({ type: "order", title: `Checkout not completed`, detail: `${order.customer_email} · ${relativeAge(order.created_at)}`, order }));
   stories.filter((story) => story.status === "draft").forEach((story) => {
     const ready = (story.pages || []).filter((page) => page.text?.trim() && page.illustrationPrompt?.trim()).length;
-    if (ready < 32) attention.push({ type: "story", title: story.title_template, detail: `${ready}/32 pages ready`, story });
+    const artworkReady = (story.pages || []).filter((page) => page.artworkUrl && ["approved", "final"].includes(page.artworkStatus)).length;
+    if (ready < 32 || artworkReady < 32) attention.push({ type: "story", title: story.title_template, detail: `${ready}/32 copy · ${artworkReady}/32 artwork`, story });
   });
   const list = document.querySelector("#attention-list");
   if (!attention.length) { list.innerHTML = '<div class="admin-inline-empty"><strong>Nothing urgent</strong><span>Orders and story checks will appear here.</span></div>'; return; }
@@ -274,11 +285,12 @@ function renderStoryList() {
     button.className = "story-list-item";
     button.classList.toggle("is-active", story.id === document.querySelector("#story-id").value);
     const ready = (story.pages || []).filter((page) => page.text?.trim() && page.illustrationPrompt?.trim()).length;
+    const artworkReady = (story.pages || []).filter((page) => page.artworkUrl && ["approved", "final"].includes(page.artworkStatus)).length;
     button.innerHTML = `<span class="story-book-cover"><i></i><b></b></span><span class="story-book-meta"><strong></strong><small></small><em></em></span>`;
     button.querySelector(".story-book-cover i").textContent = story.is_seasonal ? "Seasonal" : "Master";
     button.querySelector(".story-book-cover b").textContent = story.is_seasonal ? "🎃" : "★";
     button.querySelector("strong").textContent = story.title_template;
-    button.querySelector("small").textContent = `${ready}/32 pages ready · v${story.version}`;
+    button.querySelector("small").textContent = `${ready}/32 copy · ${artworkReady}/32 art · v${story.version}`;
     button.querySelector("em").textContent = storyStage(story, ready);
     button.addEventListener("click", () => editStory(story));
     return button;
@@ -529,7 +541,12 @@ function addPage(page = {}) {
   if (pagesContainer.children.length >= 32) return;
   const card = document.createElement("section");
   card.className = "story-page-card";
-  card.innerHTML = `<header class="page-card-header"><span><small data-page-role>Story page</small><strong>Page <span data-page-number></span></strong></span><div class="page-card-actions"><button type="button" data-page-action="up" aria-label="Move page up" title="Move page up">↑</button><button type="button" data-page-action="down" aria-label="Move page down" title="Move page down">↓</button><button type="button" data-page-action="duplicate">Duplicate</button><button type="button" data-page-action="remove">Remove</button></div></header><label class="page-copy-field"><span>Story text</span><span class="token-toolbar" aria-label="Insert personalization"><button type="button" data-insert-token="{child_name}">+ Child name</button><button type="button" data-insert-token="{monster_name}">+ Monster name</button></span><textarea rows="10" maxlength="2000" placeholder="Write the words the child will read on this page…"></textarea><small><span data-text-words>0 words</span> · <span data-text-count>0</span>/2,000 characters</small></label><label>Illustration direction<textarea rows="10" maxlength="3000" placeholder="Describe the scene, characters, action, lighting, and composition…"></textarea><small><span data-art-words>0 words</span> · <span data-art-count>0</span>/3,000 characters</small></label>`;
+  card.innerHTML = `<header class="page-card-header"><span><small data-page-role>Story page</small><strong>Page <span data-page-number></span></strong></span><div class="page-card-actions"><button type="button" data-page-action="up" aria-label="Move page up" title="Move page up">↑</button><button type="button" data-page-action="down" aria-label="Move page down" title="Move page down">↓</button><button type="button" data-page-action="duplicate">Duplicate</button><button type="button" data-page-action="remove">Remove</button></div></header><label class="page-copy-field"><span>Story text</span><span class="token-toolbar" aria-label="Insert personalization"><button type="button" data-insert-token="{child_name}">+ Child name</button><button type="button" data-insert-token="{monster_name}">+ Monster name</button></span><textarea rows="10" maxlength="2000" placeholder="Write the words the child will read on this page…"></textarea><small><span data-text-words>0 words</span> · <span data-text-count>0</span>/2,000 characters</small></label><label>Illustration direction<textarea rows="10" maxlength="3000" placeholder="Describe the scene, characters, action, lighting, and composition…"></textarea><small><span data-art-words>0 words</span> · <span data-art-count>0</span>/3,000 characters</small></label><section class="page-artwork-panel"><div class="page-artwork-visual"><img alt="" data-artwork-image hidden /><div data-artwork-empty><span>◇</span><strong>No artwork uploaded</strong><small>JPG, PNG, or WebP · 3 MB maximum</small></div></div><div class="page-artwork-controls"><div><strong>Page artwork</strong><small data-artwork-name>Upload the current illustration for this page.</small></div><label class="button secondary artwork-upload-button"><input type="file" accept="image/jpeg,image/png,image/webp" data-artwork-file /> <span data-artwork-upload-label>Upload artwork</span></label><label class="artwork-status-label">Review status<select data-artwork-review><option value="missing">Missing</option><option value="draft">Draft</option><option value="approved">Approved</option><option value="final">Final</option></select></label><button class="button secondary" type="button" data-remove-artwork hidden>Remove from page</button><p data-artwork-message role="status"></p></div></section>`;
+  card.dataset.artworkUrl = page.artworkUrl || "";
+  card.dataset.artworkPath = page.artworkPath || "";
+  card.dataset.artworkName = page.artworkName || "";
+  card.dataset.artworkStatus = page.artworkStatus || (page.artworkUrl ? "draft" : "missing");
+  card.dataset.artworkUpdatedAt = page.artworkUpdatedAt || "";
   const areas = card.querySelectorAll("textarea");
   areas[0].value = page.text || "";
   areas[1].value = page.illustrationPrompt || "";
@@ -543,6 +560,15 @@ function addPage(page = {}) {
   updateCounts();
   card.querySelectorAll("[data-insert-token]").forEach((button) => button.addEventListener("click", () => insertToken(areas[0], button.dataset.insertToken)));
   card.querySelectorAll("[data-page-action]").forEach((button) => button.addEventListener("click", () => handlePageAction(card, button.dataset.pageAction)));
+  card.querySelector("[data-artwork-file]").addEventListener("change", (event) => uploadPageArtwork(card, event.target.files?.[0]));
+  card.querySelector("[data-artwork-review]").addEventListener("change", (event) => {
+    card.dataset.artworkStatus = event.target.value;
+    markStoryDirty();
+    renderArtwork(card);
+    refreshPageTools();
+  });
+  card.querySelector("[data-remove-artwork]").addEventListener("click", () => removePageArtwork(card));
+  renderArtwork(card);
   pagesContainer.append(card);
   if (!loadingStory) { selectedPageIndex = pagesContainer.children.length - 1; markStoryDirty(); refreshPageTools(); selectPage(selectedPageIndex, true); }
 }
@@ -590,10 +616,9 @@ function handlePageAction(card, action) {
     selectedPageIndex = Math.min(index, pagesContainer.children.length - 1);
   } else if (action === "duplicate") {
     if (cards.length >= 32) return;
-    const areas = card.querySelectorAll("textarea");
     const wasLoading = loadingStory;
     loadingStory = true;
-    addPage({ text: areas[0].value, illustrationPrompt: areas[1].value });
+    addPage(pageData(card));
     const duplicate = pagesContainer.lastElementChild;
     card.after(duplicate);
     loadingStory = wasLoading;
@@ -611,6 +636,129 @@ function handlePageAction(card, action) {
   selectPage(selectedPageIndex, true);
 }
 
+function pageData(card) {
+  const areas = card.querySelectorAll("textarea");
+  return {
+    text: areas[0].value,
+    illustrationPrompt: areas[1].value,
+    artworkUrl: card.dataset.artworkUrl || "",
+    artworkPath: card.dataset.artworkPath || "",
+    artworkName: card.dataset.artworkName || "",
+    artworkStatus: card.dataset.artworkStatus || "missing",
+    artworkUpdatedAt: card.dataset.artworkUpdatedAt || null,
+  };
+}
+
+function renderArtwork(card) {
+  const image = card.querySelector("[data-artwork-image]");
+  const emptyState = card.querySelector("[data-artwork-empty]");
+  const remove = card.querySelector("[data-remove-artwork]");
+  const status = card.querySelector("[data-artwork-review]");
+  const name = card.querySelector("[data-artwork-name]");
+  const uploadLabel = card.querySelector("[data-artwork-upload-label]");
+  const hasArtwork = Boolean(card.dataset.artworkUrl);
+  image.hidden = !hasArtwork;
+  emptyState.hidden = hasArtwork;
+  remove.hidden = !hasArtwork;
+  status.disabled = !hasArtwork;
+  status.value = hasArtwork ? card.dataset.artworkStatus || "draft" : "missing";
+  uploadLabel.textContent = hasArtwork ? "Replace artwork" : "Upload artwork";
+  name.textContent = hasArtwork ? `${card.dataset.artworkName || "Uploaded artwork"} · ${artworkStatusLabel(status.value)}` : "Upload the current illustration for this page.";
+  if (hasArtwork && image.src !== card.dataset.artworkUrl) image.src = card.dataset.artworkUrl;
+}
+
+async function uploadPageArtwork(card, file) {
+  const input = card.querySelector("[data-artwork-file]");
+  const message = card.querySelector("[data-artwork-message]");
+  if (!file) return;
+  if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > 3 * 1024 * 1024) {
+    message.textContent = "Choose a JPG, PNG, or WebP image smaller than 3 MB.";
+    input.value = "";
+    return;
+  }
+  input.disabled = true;
+  message.textContent = "Uploading artwork…";
+  try {
+    const data = await readFileAsDataUrl(file);
+    const storyId = document.querySelector("#story-id").value || document.querySelector("#story-slug").value || "unsaved-story";
+    const page = [...pagesContainer.children].indexOf(card) + 1;
+    const result = await apiRequest("?resource=artwork", { method: "POST", body: { storyId, page, name: file.name, data } });
+    card.dataset.artworkUrl = result.artwork.url;
+    card.dataset.artworkPath = result.artwork.path;
+    card.dataset.artworkName = result.artwork.name;
+    card.dataset.artworkStatus = "draft";
+    card.dataset.artworkUpdatedAt = new Date().toISOString();
+    message.textContent = "Artwork uploaded. Mark it approved or final after review.";
+    renderArtwork(card);
+    markStoryDirty();
+    refreshPageTools();
+  } catch (error) {
+    message.textContent = error.message;
+  } finally {
+    input.disabled = false;
+    input.value = "";
+  }
+}
+
+function removePageArtwork(card) {
+  card.dataset.artworkUrl = "";
+  card.dataset.artworkPath = "";
+  card.dataset.artworkName = "";
+  card.dataset.artworkStatus = "missing";
+  card.dataset.artworkUpdatedAt = "";
+  card.querySelector("[data-artwork-message]").textContent = "Artwork removed from this page. The stored source file was preserved.";
+  renderArtwork(card);
+  markStoryDirty();
+  refreshPageTools();
+}
+
+function artworkStatusLabel(status) {
+  return ({ missing: "Missing", draft: "Draft review", approved: "Approved", final: "Final artwork" })[status] || "Missing";
+}
+
+function openArtworkOverview() {
+  artworkFilter = "all";
+  renderArtworkOverview();
+  artworkDialog.showModal();
+}
+
+function renderArtworkOverview() {
+  const cards = [...pagesContainer.children];
+  const counts = { missing: 0, draft: 0, approved: 0, final: 0 };
+  cards.forEach((card) => { counts[card.dataset.artworkStatus || "missing"] += 1; });
+  document.querySelector("#artwork-overview-summary").textContent = `${counts.approved + counts.final}/32 approved or final · ${counts.draft} awaiting review · ${counts.missing} missing`;
+  document.querySelectorAll("[data-artwork-filter]").forEach((button) => {
+    const filter = button.dataset.artworkFilter;
+    button.classList.toggle("is-active", filter === artworkFilter);
+    const count = filter === "all" ? cards.length : counts[filter];
+    button.textContent = `${filter.charAt(0).toUpperCase() + filter.slice(1)} · ${count}`;
+  });
+  const visible = cards.map((card, index) => ({ card, index })).filter(({ card }) => artworkFilter === "all" || (card.dataset.artworkStatus || "missing") === artworkFilter);
+  const grid = document.querySelector("#artwork-overview-grid");
+  grid.replaceChildren(...visible.map(({ card, index }) => {
+    const button = document.createElement("button");
+    const status = card.dataset.artworkStatus || "missing";
+    const copyReady = [...card.querySelectorAll("textarea")].every((area) => area.value.trim());
+    button.type = "button";
+    button.className = `artwork-overview-card is-${status}`;
+    button.innerHTML = `<span class="artwork-overview-image"></span><span class="artwork-overview-meta"><small></small><strong></strong><em></em></span>`;
+    const visual = button.querySelector(".artwork-overview-image");
+    if (card.dataset.artworkUrl) {
+      const image = document.createElement("img");
+      image.src = card.dataset.artworkUrl;
+      image.alt = "";
+      visual.append(image);
+    } else visual.textContent = "◇";
+    button.querySelector("small").textContent = `Page ${index + 1} · ${pageRole(index, cards.length)}`;
+    button.querySelector("strong").textContent = artworkStatusLabel(status);
+    button.querySelector("em").textContent = copyReady ? "Copy ready" : "Copy needs work";
+    button.setAttribute("aria-label", `Edit page ${index + 1}, artwork ${artworkStatusLabel(status)}`);
+    button.addEventListener("click", () => { artworkDialog.close(); selectPage(index, true); });
+    return button;
+  }));
+  if (!visible.length) grid.innerHTML = '<div class="artwork-overview-empty"><strong>No pages in this group</strong><span>Choose another artwork status.</span></div>';
+}
+
 function storyPayload(status) {
   return {
     title_template: document.querySelector("#story-title").value,
@@ -620,10 +768,7 @@ function storyPayload(status) {
     is_seasonal: document.querySelector("#story-seasonal").checked,
     available_from: document.querySelector("#story-from").value || null,
     available_until: document.querySelector("#story-until").value || null,
-    pages: [...pagesContainer.children].map((card) => {
-      const areas = card.querySelectorAll("textarea");
-      return { text: areas[0].value, illustrationPrompt: areas[1].value };
-    }),
+    pages: [...pagesContainer.children].map(pageData),
   };
 }
 
@@ -631,8 +776,9 @@ async function saveStory(status, { silent = false } = {}) {
   if (savingStory) return;
   clearTimeout(storyAutosaveTimer);
   if (!silent && !editor.reportValidity()) return;
-  if (status === "published" && (pagesContainer.children.length !== 32 || [...pagesContainer.querySelectorAll("textarea")].some((area) => !area.value.trim()))) {
-    editorStatus.textContent = "Complete all 32 pages with story text and illustration direction before publishing. You can save a draft at any time.";
+  const artIncomplete = [...pagesContainer.children].some((card) => !card.dataset.artworkUrl || !["approved", "final"].includes(card.dataset.artworkStatus));
+  if (status === "published" && (pagesContainer.children.length !== 32 || [...pagesContainer.querySelectorAll("textarea")].some((area) => !area.value.trim()) || artIncomplete)) {
+    editorStatus.textContent = "Complete all 32 pages, upload artwork, and mark every illustration approved or final before publishing. You can save a draft at any time.";
     return;
   }
   const id = document.querySelector("#story-id").value;
@@ -756,8 +902,15 @@ function renderSelectedSpread(cards = [...pagesContainer.children]) {
   spread.forEach((card, offset) => {
     const section = document.createElement("section");
     section.classList.toggle("is-selected", firstIndex + offset === selectedPageIndex);
-    section.innerHTML = "<small></small><p></p>";
+    section.innerHTML = "<small></small><div data-preview-art></div><p></p>";
     section.querySelector("small").textContent = `Page ${firstIndex + offset + 1}`;
+    const art = section.querySelector("[data-preview-art]");
+    if (card.dataset.artworkUrl) {
+      const image = document.createElement("img");
+      image.src = card.dataset.artworkUrl;
+      image.alt = `Artwork for page ${firstIndex + offset + 1}`;
+      art.append(image);
+    } else art.textContent = "Artwork pending";
     section.querySelector("p").textContent = card.querySelector("textarea").value.replaceAll("{child_name}", child).replaceAll("{monster_name}", monster) || "No story text yet.";
     article.append(section);
   });
@@ -767,16 +920,18 @@ function renderSelectedSpread(cards = [...pagesContainer.children]) {
 function refreshPageTools() {
   const cards = [...pagesContainer.children];
   const ready = cards.filter((card) => [...card.querySelectorAll("textarea")].every((area) => area.value.trim())).length;
-  document.querySelector("#page-progress").textContent = `${ready} of 32 pages ready · ${cards.length} added`;
+  const artworkReady = cards.filter((card) => card.dataset.artworkUrl && ["approved", "final"].includes(card.dataset.artworkStatus)).length;
+  document.querySelector("#page-progress").textContent = `${ready}/32 copy · ${artworkReady}/32 artwork approved`;
   document.querySelector("#add-page").disabled = cards.length >= 32;
   document.querySelector("#page-nav").replaceChildren(...cards.map((card, index) => {
     card.id = `book-page-${index + 1}`;
     const button = document.createElement("button");
     button.type = "button";
     const complete = [...card.querySelectorAll("textarea")].every((area) => area.value.trim());
-    button.innerHTML = `<span>${index + 1}</span><small>${escapeHtml(pageRole(index, cards.length))}</small><em>${complete ? "Ready" : "Needs work"}</em>`;
-    button.className = complete ? "is-ready" : "";
-    button.setAttribute("aria-label", `Page ${index + 1}, ${pageRole(index, cards.length)}, ${complete ? "ready" : "incomplete"}`);
+    const artStatus = card.dataset.artworkStatus || "missing";
+    button.innerHTML = `<span>${index + 1}</span><small>${escapeHtml(pageRole(index, cards.length))}</small><em>${complete ? "Copy ready" : "Copy needed"} · ${escapeHtml(artworkStatusLabel(artStatus))}</em>`;
+    button.className = `${complete ? "is-ready" : ""} is-art-${artStatus}`;
+    button.setAttribute("aria-label", `Page ${index + 1}, ${pageRole(index, cards.length)}, ${complete ? "copy ready" : "copy incomplete"}, artwork ${artworkStatusLabel(artStatus)}`);
     button.addEventListener("click", () => selectPage(index, true));
     return button;
   }));
@@ -794,6 +949,7 @@ function refreshPageTools() {
     { ok: Boolean(settings.title && settings.slug), label: "Title and slug are complete" },
     { ok: cards.length === 32, label: `${cards.length}/32 pages added` },
     { ok: ready === cards.length && cards.length > 0, label: "Every page has story text and art direction" },
+    { ok: artworkReady === cards.length && cards.length === 32, label: `${artworkReady}/32 page illustrations approved or final` },
     { ok: !unresolved.length, label: unresolved.length ? `Unknown tokens: ${unresolved.join(", ")}` : "No unknown personalization tokens" },
     { ok: !settings.seasonal || Boolean(settings.from && settings.until), label: settings.seasonal ? "Seasonal availability dates are set" : "Evergreen availability" },
     { ok: !cards.some((card) => card.querySelector("textarea").value.length > 1200), label: "Page text is within review length" },
@@ -804,6 +960,7 @@ function refreshPageTools() {
   const stage = storyStage({ status: stories.find((story) => story.id === document.querySelector("#story-id").value)?.status, pages: [] }, ready);
   document.querySelector("#story-stage").textContent = stage;
   document.querySelector("#story-stage").className = `is-${stage.toLowerCase().replaceAll(" ", "-")}`;
+  if (artworkDialog.open) renderArtworkOverview();
   selectPage(selectedPageIndex);
 }
 

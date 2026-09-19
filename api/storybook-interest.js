@@ -8,6 +8,7 @@ const { assertAdminRequest } = require("../lib/admin-auth");
 const { createStory, getStory, listStories, updateStory } = require("../lib/story-library");
 const { listOrders, updateOrder } = require("../lib/order-library");
 const { importManuscript } = require("../lib/manuscript-import");
+const { uploadStoryArtwork } = require("../lib/story-artwork");
 
 module.exports = async function handler(request, response) {
   const resource = firstQueryValue(request.query?.resource) || new URL(request.url, "https://monstersnow.com").searchParams.get("resource");
@@ -26,6 +27,17 @@ module.exports = async function handler(request, response) {
       return sendJson(response, error.status || 500, {
         code: error.code || "manuscript_import_failed",
         error: error.message || "The manuscript could not be imported.",
+      });
+    }
+  }
+  if (request.method === "POST" && resource === "artwork") {
+    try {
+      assertAdminRequest(request);
+      return sendJson(response, 201, { artwork: await uploadStoryArtwork(await readJsonBody(request)) });
+    } catch (error) {
+      return sendJson(response, error.status || 500, {
+        code: error.code || "artwork_upload_failed",
+        error: error.message || "Artwork could not be uploaded.",
       });
     }
   }
