@@ -4,6 +4,22 @@ if (year) {
   year.textContent = new Date().getFullYear();
 }
 
+const navToggle = document.querySelector(".nav-toggle");
+const siteNavigation = document.querySelector("#site-navigation");
+if (navToggle && siteNavigation) {
+  const closeNavigation = () => {
+    navToggle.setAttribute("aria-expanded", "false");
+    siteNavigation.classList.remove("is-open");
+  };
+  navToggle.addEventListener("click", () => {
+    const open = navToggle.getAttribute("aria-expanded") !== "true";
+    navToggle.setAttribute("aria-expanded", String(open));
+    siteNavigation.classList.toggle("is-open", open);
+  });
+  siteNavigation.addEventListener("click", (event) => { if (event.target.closest("a")) closeNavigation(); });
+  document.addEventListener("keydown", (event) => { if (event.key === "Escape") { closeNavigation(); navToggle.focus(); } });
+}
+
 const monsterUpload = document.querySelector("#monster-upload");
 const drawingPreview = document.querySelector("#drawing-preview");
 const monsterPreview = document.querySelector("#monster-preview");

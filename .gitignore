@@ -6,3 +6,5 @@
 deploy/
 .vercel
 node_modules/
+tmp/
+scripts/__pycache__/

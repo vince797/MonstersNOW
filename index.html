@@ -8,15 +8,18 @@
       content="MonstersNOW turns a child's monster drawing into a free AI monster preview, printable coloring page, and personalized storybook."
     />
     <title>MonstersNOW | Turn Child Drawings Into Monster Storybooks</title>
-    <link rel="stylesheet" href="styles.css?v=20260914-pricing-polish" />
+    <link rel="stylesheet" href="styles.css?v=20260918-public-polish" />
   </head>
   <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    <aside class="seasonal-banner"><strong>Halloween story spotlight</strong><span>Turn their monster into a cozy 32-page adventure.</span><a href="books.html#halloween">Explore the story →</a></aside>
     <header class="site-header">
       <a class="brand" href="index.html" aria-label="MonstersNOW home">
         <img src="assets/monstersnow-logo.png" alt="" />
       </a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-navigation"><span></span><span></span><span></span><b>Menu</b></button>
 
-      <nav class="site-nav" aria-label="Main navigation">
+      <nav class="site-nav" id="site-navigation" aria-label="Main navigation">
         <a href="#how-it-works">How It Works</a>
         <a href="monsters.html">Monsters</a>
         <a href="books.html">Books</a>
@@ -31,7 +34,7 @@
       </div>
     </header>
 
-    <main>
+    <main id="main-content">
       <section class="hero" aria-labelledby="hero-title">
         <div class="hero-copy-wrap">
           <p class="eyebrow">Free to create</p>
@@ -435,10 +438,10 @@
         <a href="#faq">FAQ</a>
       </nav>
       <div class="footer-meta">
-        <p>&copy; <span id="year"></span> MonstersNOW. All rights reserved.</p>
+        <p>&copy; <span id="year"></span> MonstersNOW. All rights reserved.</p><a class="footer-admin" href="admin.html">Admin</a>
       </div>
     </footer>
 
-    <script src="scripts/main.js?v=20260515-upload-flow"></script>
+    <script src="scripts/main.js?v=20260918-public-polish"></script>
   </body>
 </html>

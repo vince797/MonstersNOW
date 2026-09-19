@@ -8,15 +8,17 @@
       content="Return to MonstersNOW to keep editing your storybook preview."
     />
     <title>Checkout Paused | MonstersNOW</title>
-    <link rel="stylesheet" href="styles.css?v=20260914-pricing-polish" />
+    <link rel="stylesheet" href="styles.css?v=20260918-public-polish" />
   </head>
   <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
     <header class="site-header">
       <a class="brand" href="index.html" aria-label="MonstersNOW home">
         <img src="assets/monstersnow-logo.png" alt="" />
       </a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-navigation"><span></span><span></span><span></span><b>Menu</b></button>
 
-      <nav class="site-nav" aria-label="Main navigation">
+      <nav class="site-nav" id="site-navigation" aria-label="Main navigation">
         <a href="index.html#how-it-works">How It Works</a>
         <a href="monsters.html">Monsters</a>
         <a href="books.html">Books</a>
@@ -29,7 +31,7 @@
       </div>
     </header>
 
-    <main>
+    <main id="main-content">
       <section class="checkout-status-section" aria-labelledby="checkout-cancel-title">
         <div class="checkout-status-panel">
           <p class="eyebrow">Checkout paused</p>
@@ -38,6 +40,7 @@
             You can return to the create page to pick a preview, download the
             free coloring page, or start checkout again when ready.
           </p>
+          <div class="checkout-reassurance"><strong>Your work is still yours.</strong><span>No charge was made. Return to Create whenever you’re ready.</span></div>
           <div class="checkout-status-actions">
             <a class="button primary" href="create.html">Back to Create</a>
             <a class="button secondary" href="books.html">View Story Catalog</a>
@@ -60,10 +63,10 @@
         <a href="index.html#faq">FAQ</a>
       </nav>
       <div class="footer-meta">
-        <p>&copy; <span id="year"></span> MonstersNOW. All rights reserved.</p>
+        <p>&copy; <span id="year"></span> MonstersNOW. All rights reserved.</p><a class="footer-admin" href="admin.html">Admin</a>
       </div>
     </footer>
 
-    <script src="scripts/main.js?v=20260515-preview-size" defer></script>
+    <script src="scripts/main.js?v=20260918-public-polish" defer></script>
   </body>
 </html>

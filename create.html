@@ -8,15 +8,18 @@
       content="Upload a child's monster drawing to create a free MonstersNOW preview, printable coloring page, and personalized storybook."
     />
     <title>Create Your Monster | MonstersNOW</title>
-    <link rel="stylesheet" href="styles.css?v=20260914-pricing-polish" />
+    <link rel="stylesheet" href="styles.css?v=20260918-public-polish" />
   </head>
   <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    <aside class="seasonal-banner"><strong>Start free</strong><span>Create up to three previews and a printable coloring page before buying.</span><a href="books.html#formats">See book options →</a></aside>
     <header class="site-header">
       <a class="brand" href="index.html" aria-label="MonstersNOW home">
         <img src="assets/monstersnow-logo.png" alt="" />
       </a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-navigation"><span></span><span></span><span></span><b>Menu</b></button>
 
-      <nav class="site-nav" aria-label="Main navigation">
+      <nav class="site-nav" id="site-navigation" aria-label="Main navigation">
         <a href="index.html#how-it-works">How It Works</a>
         <a href="monsters.html">Monsters</a>
         <a href="books.html">Books</a>
@@ -31,7 +34,7 @@
       </div>
     </header>
 
-    <main>
+    <main id="main-content">
       <section class="create-flow-section" id="converter" aria-labelledby="converter-title">
         <div class="create-flow-header">
           <div class="create-flow-copy">
@@ -265,10 +268,10 @@
         <a href="index.html#faq">FAQ</a>
       </nav>
       <div class="footer-meta">
-        <p>&copy; <span id="year"></span> MonstersNOW. All rights reserved.</p>
+        <p>&copy; <span id="year"></span> MonstersNOW. All rights reserved.</p><a class="footer-admin" href="admin.html">Admin</a>
       </div>
     </footer>
 
-    <script src="scripts/main.js?v=20260917-halloween-test"></script>
+    <script src="scripts/main.js?v=20260918-public-polish"></script>
   </body>
 </html>

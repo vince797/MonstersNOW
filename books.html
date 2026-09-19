@@ -8,15 +8,18 @@
       content="Explore MonstersNOW storybook options, from bedtime and adventure stories to ABC, counting, kindness, seasonal, and birthday books."
     />
     <title>Books | MonstersNOW Story Catalog</title>
-    <link rel="stylesheet" href="styles.css?v=20260914-pricing-polish" />
+    <link rel="stylesheet" href="styles.css?v=20260918-public-polish" />
   </head>
   <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    <aside class="seasonal-banner"><strong>Halloween story spotlight</strong><span>A cozy adventure starring the monster they imagined.</span><a href="#halloween">See the featured story →</a></aside>
     <header class="site-header">
       <a class="brand" href="index.html" aria-label="MonstersNOW home">
         <img src="assets/monstersnow-logo.png" alt="" />
       </a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-navigation"><span></span><span></span><span></span><b>Menu</b></button>
 
-      <nav class="site-nav" aria-label="Main navigation">
+      <nav class="site-nav" id="site-navigation" aria-label="Main navigation">
         <a href="index.html#how-it-works">How It Works</a>
         <a href="monsters.html">Monsters</a>
         <a href="books.html" aria-current="page">Books</a>
@@ -31,7 +34,7 @@
       </div>
     </header>
 
-    <main>
+    <main id="main-content">
       <section class="books-hero" aria-labelledby="books-hero-title">
         <div class="books-hero-copy">
           <p class="eyebrow">Story catalog</p>
@@ -106,6 +109,7 @@
               <span>Ages 2-8</span>
               <span>Seasonal</span>
             </div>
+            <a class="story-card-action" href="create.html">Create this story →</a>
           </article>
 
           <article class="story-card">
@@ -283,10 +287,10 @@
         <a href="index.html#faq">FAQ</a>
       </nav>
       <div class="footer-meta">
-        <p>&copy; <span id="year"></span> MonstersNOW. All rights reserved.</p>
+        <p>&copy; <span id="year"></span> MonstersNOW. All rights reserved.</p><a class="footer-admin" href="admin.html">Admin</a>
       </div>
     </footer>
 
-    <script src="scripts/main.js?v=20260515-upload-flow"></script>
+    <script src="scripts/main.js?v=20260918-public-polish"></script>
   </body>
 </html>
