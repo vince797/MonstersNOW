@@ -22,8 +22,10 @@ let storyDirty = false;
 let loadingStory = false;
 let storyRevision = 0;
 let savingStory = false;
+let storyAutosaveTimer = null;
 let selectedOrder = null;
 let orderView = "board";
+let orderQuickFilter = "all";
 let selectedPageIndex = 0;
 let productionReport = null;
 const orderStatuses = ["checkout_started", "paid", "proofing", "approved", "printing", "shipped", "completed", "cancelled"];
@@ -35,9 +37,11 @@ window.addEventListener("beforeunload", (event) => { if (storyDirty) { event.pre
 document.querySelector("#order-search").addEventListener("input", renderOrders);
 document.querySelector("#customer-search").addEventListener("input", renderCustomers);
 document.querySelectorAll("[data-order-view]").forEach((button) => button.addEventListener("click", () => { orderView = button.dataset.orderView; renderOrders(); }));
+document.querySelectorAll("[data-order-quick-filter]").forEach((button) => button.addEventListener("click", () => { orderQuickFilter = button.dataset.orderQuickFilter; renderOrders(); }));
 document.querySelector("#close-order-detail").addEventListener("click", closeOrderDetail);
 orderDialog.addEventListener("cancel", (event) => { event.preventDefault(); closeOrderDetail(); });
 document.querySelector("#order-detail-form").addEventListener("submit", saveOrderDetail);
+document.querySelector("#advance-order").addEventListener("click", advanceSelectedOrder);
 let adminPassword = sessionStorage.getItem("monstersnow_admin_password") || "";
 
 loginForm.addEventListener("submit", async (event) => {
@@ -98,6 +102,15 @@ document.querySelector("#show-manuscript-import").addEventListener("click", () =
 document.querySelector("#cancel-manuscript-import").addEventListener("click", () => setManuscriptImportOpen(false));
 document.querySelector("#manuscript-file").addEventListener("change", updateManuscriptFile);
 document.querySelector("#import-manuscript").addEventListener("click", importManuscript);
+document.addEventListener("keydown", (event) => {
+  if (editor.hidden) return;
+  if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "s") {
+    event.preventDefault();
+    saveStory("draft");
+  }
+  if (event.altKey && event.key === "ArrowLeft") selectPage(selectedPageIndex - 1, true);
+  if (event.altKey && event.key === "ArrowRight") selectPage(selectedPageIndex + 1, true);
+});
 const manuscriptDrop = document.querySelector(".manuscript-drop");
 manuscriptDrop.addEventListener("dragover", (event) => { event.preventDefault(); manuscriptDrop.classList.add("is-dragging"); });
 manuscriptDrop.addEventListener("dragleave", () => manuscriptDrop.classList.remove("is-dragging"));
@@ -278,7 +291,13 @@ function renderStoryList() {
 function renderOrders() {
   const filter = document.querySelector("#order-filter").value;
   const query = document.querySelector("#order-search").value.trim().toLowerCase();
-  const visible = orders.filter((order) => (filter === "all" || order.status === filter) && [order.customer_email, order.child_name, order.monster_name, order.story_label, order.id].join(" ").toLowerCase().includes(query));
+  const matchesQuickFilter = (order) => orderQuickFilter === "all" || (orderQuickFilter === "attention" ? orderNeedsAttention(order) : order.status === orderQuickFilter);
+  const visible = orders.filter((order) => matchesQuickFilter(order) && (filter === "all" || order.status === filter) && [order.customer_email, order.child_name, order.monster_name, order.story_label, order.id].join(" ").toLowerCase().includes(query));
+  document.querySelector("#queue-all").textContent = orders.length;
+  document.querySelector("#queue-attention").textContent = orders.filter(orderNeedsAttention).length;
+  document.querySelector("#queue-paid").textContent = orders.filter((order) => order.status === "paid").length;
+  document.querySelector("#queue-printing").textContent = orders.filter((order) => order.status === "printing").length;
+  document.querySelectorAll("[data-order-quick-filter]").forEach((button) => button.classList.toggle("is-active", button.dataset.orderQuickFilter === orderQuickFilter));
   const body = document.querySelector("#orders-list");
   const board = document.querySelector("#orders-board");
   const table = document.querySelector(".orders-table-wrap");
@@ -289,6 +308,7 @@ function renderOrders() {
   body.replaceChildren(...visible.map((order) => {
     const row = document.createElement("tr");
     row.innerHTML = '<td><strong></strong><small></small></td><td><strong></strong><small></small></td><td></td><td></td><td></td><td><button class="button secondary" type="button"></button></td>';
+    row.classList.toggle("needs-attention", orderNeedsAttention(order));
     const cells = row.children;
     cells[0].querySelector("strong").textContent = order.customer_email;
     cells[0].querySelector("small").textContent = `For ${order.child_name}`;
@@ -328,16 +348,23 @@ function renderOrderBoard(visible) {
       const card = document.createElement("button");
       card.type = "button";
       card.className = "order-board-card";
+      card.classList.toggle("needs-attention", orderNeedsAttention(order));
       card.innerHTML = '<span></span><strong></strong><small></small><em></em>';
       card.querySelector("span").textContent = order.status.replaceAll("_", " ");
       card.querySelector("strong").textContent = `${order.child_name} + ${order.monster_name}`;
       card.querySelector("small").textContent = `${order.story_label} · ${order.format_id === "hardcover" ? "Hardcover" : "Softcover"}`;
-      card.querySelector("em").textContent = `${relativeAge(order.created_at)} · Review →`;
+      card.querySelector("em").textContent = `${orderNeedsAttention(order) ? "Needs follow-up · " : ""}${relativeAge(order.updated_at || order.created_at)} · Review →`;
       card.addEventListener("click", () => openOrderDetail(order));
       return card;
     }));
     return section;
   }));
+}
+
+function orderNeedsAttention(order) {
+  const ageHours = Math.max(0, (Date.now() - new Date(order.updated_at || order.created_at).getTime()) / 3600000);
+  const limits = { checkout_started: 24, paid: 24, proofing: 48, approved: 24, printing: 168, shipped: 168 };
+  return Number.isFinite(ageHours) && limits[order.status] !== undefined && ageHours >= limits[order.status];
 }
 
 function renderCustomers() {
@@ -398,6 +425,7 @@ function editStory(story = null) {
   if (savingStory) { editorStatus.textContent = "Wait for this story to finish saving before switching."; return; }
   if (storyDirty && !window.confirm("Discard unsaved story changes?")) return;
   loadingStory = true;
+  clearTimeout(storyAutosaveTimer);
   empty.hidden = true;
   editor.hidden = false;
   document.querySelector("#story-id").value = story?.id || "";
@@ -501,38 +529,90 @@ function addPage(page = {}) {
   if (pagesContainer.children.length >= 32) return;
   const card = document.createElement("section");
   card.className = "story-page-card";
-  card.innerHTML = `<div><span><small>Editing</small><strong>Page <span></span></strong></span><button type="button">Remove page</button></div><label>Story text<textarea rows="10" maxlength="2000" placeholder="Write the words the child will read on this page…"></textarea><small><span data-text-count>0</span>/2,000 characters</small></label><label>Illustration direction<textarea rows="10" maxlength="3000" placeholder="Describe the scene, characters, action, lighting, and composition…"></textarea><small><span data-art-count>0</span>/3,000 characters</small></label>`;
-  card.querySelector("span").textContent = String(pagesContainer.children.length + 1);
+  card.innerHTML = `<header class="page-card-header"><span><small data-page-role>Story page</small><strong>Page <span data-page-number></span></strong></span><div class="page-card-actions"><button type="button" data-page-action="up" aria-label="Move page up" title="Move page up">↑</button><button type="button" data-page-action="down" aria-label="Move page down" title="Move page down">↓</button><button type="button" data-page-action="duplicate">Duplicate</button><button type="button" data-page-action="remove">Remove</button></div></header><label class="page-copy-field"><span>Story text</span><span class="token-toolbar" aria-label="Insert personalization"><button type="button" data-insert-token="{child_name}">+ Child name</button><button type="button" data-insert-token="{monster_name}">+ Monster name</button></span><textarea rows="10" maxlength="2000" placeholder="Write the words the child will read on this page…"></textarea><small><span data-text-words>0 words</span> · <span data-text-count>0</span>/2,000 characters</small></label><label>Illustration direction<textarea rows="10" maxlength="3000" placeholder="Describe the scene, characters, action, lighting, and composition…"></textarea><small><span data-art-words>0 words</span> · <span data-art-count>0</span>/3,000 characters</small></label>`;
   const areas = card.querySelectorAll("textarea");
   areas[0].value = page.text || "";
   areas[1].value = page.illustrationPrompt || "";
   const updateCounts = () => {
     card.querySelector("[data-text-count]").textContent = areas[0].value.length;
     card.querySelector("[data-art-count]").textContent = areas[1].value.length;
+    card.querySelector("[data-text-words]").textContent = `${wordCount(areas[0].value)} words`;
+    card.querySelector("[data-art-words]").textContent = `${wordCount(areas[1].value)} words`;
   };
   areas.forEach((area) => area.addEventListener("input", updateCounts));
   updateCounts();
-  card.querySelector("button").addEventListener("click", () => {
-    if (pagesContainer.children.length === 1) return;
-    card.remove(); selectedPageIndex = Math.min(selectedPageIndex, pagesContainer.children.length - 1); renumberPages(); markStoryDirty(); refreshPageTools();
-  });
+  card.querySelectorAll("[data-insert-token]").forEach((button) => button.addEventListener("click", () => insertToken(areas[0], button.dataset.insertToken)));
+  card.querySelectorAll("[data-page-action]").forEach((button) => button.addEventListener("click", () => handlePageAction(card, button.dataset.pageAction)));
   pagesContainer.append(card);
   if (!loadingStory) { selectedPageIndex = pagesContainer.children.length - 1; markStoryDirty(); refreshPageTools(); selectPage(selectedPageIndex, true); }
 }
 
 function renumberPages() {
-  [...pagesContainer.children].forEach((card, index) => { card.querySelector("span").textContent = String(index + 1); });
+  const cards = [...pagesContainer.children];
+  cards.forEach((card, index) => {
+    card.querySelector("[data-page-number]").textContent = String(index + 1);
+    card.querySelector("[data-page-role]").textContent = pageRole(index, cards.length);
+    card.querySelector('[data-page-action="up"]').disabled = index === 0;
+    card.querySelector('[data-page-action="down"]').disabled = index === cards.length - 1;
+    card.querySelector('[data-page-action="duplicate"]').disabled = cards.length >= 32;
+    card.querySelector('[data-page-action="remove"]').disabled = cards.length === 1;
+  });
 }
 
-async function saveStory(status) {
-  if (savingStory) return;
-  if (!editor.reportValidity()) return;
-  if (status === "published" && (pagesContainer.children.length !== 32 || [...pagesContainer.querySelectorAll("textarea")].some((area) => !area.value.trim()))) {
-    editorStatus.textContent = "Complete all 32 pages with story text and illustration direction before publishing. You can save a draft at any time.";
-    return;
-  }
-  const id = document.querySelector("#story-id").value;
-  const payload = {
+function pageRole(index, total = 32) {
+  if (index === 0) return "Title page";
+  if (index === 1) return "Ownership page";
+  if (index === 2) return "Copyright page";
+  if (index === total - 1 && total === 32) return "Meet the monster";
+  return "Story page";
+}
+
+function wordCount(value = "") {
+  return value.trim() ? value.trim().split(/\s+/).length : 0;
+}
+
+function insertToken(textarea, token) {
+  const start = textarea.selectionStart ?? textarea.value.length;
+  const end = textarea.selectionEnd ?? start;
+  const prefix = start > 0 && !/\s/.test(textarea.value[start - 1]) ? " " : "";
+  const suffix = end < textarea.value.length && !/\s/.test(textarea.value[end]) ? " " : "";
+  textarea.setRangeText(`${prefix}${token}${suffix}`, start, end, "end");
+  textarea.focus();
+  textarea.dispatchEvent(new Event("input", { bubbles: true }));
+}
+
+function handlePageAction(card, action) {
+  const cards = [...pagesContainer.children];
+  const index = cards.indexOf(card);
+  if (action === "remove") {
+    if (cards.length === 1) return;
+    card.remove();
+    selectedPageIndex = Math.min(index, pagesContainer.children.length - 1);
+  } else if (action === "duplicate") {
+    if (cards.length >= 32) return;
+    const areas = card.querySelectorAll("textarea");
+    const wasLoading = loadingStory;
+    loadingStory = true;
+    addPage({ text: areas[0].value, illustrationPrompt: areas[1].value });
+    const duplicate = pagesContainer.lastElementChild;
+    card.after(duplicate);
+    loadingStory = wasLoading;
+    selectedPageIndex = index + 1;
+  } else if (action === "up" && index > 0) {
+    card.parentElement.insertBefore(card, cards[index - 1]);
+    selectedPageIndex = index - 1;
+  } else if (action === "down" && index < cards.length - 1) {
+    card.parentElement.insertBefore(cards[index + 1], card);
+    selectedPageIndex = index + 1;
+  } else return;
+  renumberPages();
+  markStoryDirty();
+  refreshPageTools();
+  selectPage(selectedPageIndex, true);
+}
+
+function storyPayload(status) {
+  return {
     title_template: document.querySelector("#story-title").value,
     slug: document.querySelector("#story-slug").value,
     description: document.querySelector("#story-description").value,
@@ -545,7 +625,21 @@ async function saveStory(status) {
       return { text: areas[0].value, illustrationPrompt: areas[1].value };
     }),
   };
-  editorStatus.textContent = status === "published" ? "Publishing..." : "Saving draft...";
+}
+
+async function saveStory(status, { silent = false } = {}) {
+  if (savingStory) return;
+  clearTimeout(storyAutosaveTimer);
+  if (!silent && !editor.reportValidity()) return;
+  if (status === "published" && (pagesContainer.children.length !== 32 || [...pagesContainer.querySelectorAll("textarea")].some((area) => !area.value.trim()))) {
+    editorStatus.textContent = "Complete all 32 pages with story text and illustration direction before publishing. You can save a draft at any time.";
+    return;
+  }
+  const id = document.querySelector("#story-id").value;
+  if (silent && (!id || !document.querySelector("#story-title").value.trim() || !document.querySelector("#story-slug").value.trim())) return;
+  const payload = storyPayload(status);
+  if (!silent) editorStatus.textContent = status === "published" ? "Publishing..." : "Saving draft...";
+  else document.querySelector("#story-save-state").textContent = "Autosaving…";
   const saveButtons = [document.querySelector("#save-draft"), document.querySelector("#publish-story")];
   saveButtons.forEach((button) => { button.disabled = true; });
   const submittedRevision = storyRevision;
@@ -557,15 +651,22 @@ async function saveStory(status) {
     savingStory = false;
     if (storyRevision === submittedRevision) {
       storyDirty = false;
-      editStory(result.story);
-      editorStatus.textContent = status === "published" ? "Story published." : "Draft saved.";
+      if (silent) {
+        document.querySelector("#story-save-state").textContent = "Autosaved just now";
+        renderStoryList();
+      } else {
+        editStory(result.story);
+        editorStatus.textContent = status === "published" ? "Story published." : "Draft saved.";
+      }
     } else {
       document.querySelector("#story-id").value = result.story.id;
       renderStoryList();
       editorStatus.textContent = "Saved. Your newer edits still need saving.";
     }
   } catch (error) {
-    editorStatus.textContent = error.message;
+    if (silent) {
+      document.querySelector("#story-save-state").textContent = "Autosave paused · save manually";
+    } else editorStatus.textContent = error.message;
   } finally {
     savingStory = false;
     saveButtons.forEach((button) => { button.disabled = false; });
@@ -583,6 +684,7 @@ function signOut() {
   if (savingStory) { editorStatus.textContent = "Wait for the story to finish saving before signing out."; return; }
   if (storyDirty && !window.confirm("Sign out and discard unsaved story changes?")) return;
   storyDirty = false;
+  clearTimeout(storyAutosaveTimer);
   sessionStorage.removeItem("monstersnow_admin_password");
   adminPassword = "";
   passwordInput.value = "";
@@ -608,6 +710,15 @@ function markStoryDirty() {
   storyDirty = true;
   storyRevision += 1;
   document.querySelector("#story-save-state").textContent = "Unsaved changes";
+  scheduleStoryAutosave();
+}
+
+function scheduleStoryAutosave() {
+  clearTimeout(storyAutosaveTimer);
+  const id = document.querySelector("#story-id").value;
+  const current = stories.find((story) => story.id === id);
+  if (!id || current?.status === "published") return;
+  storyAutosaveTimer = setTimeout(() => saveStory("draft", { silent: true }), 2500);
 }
 
 function storyStage(story, ready = null) {
@@ -628,7 +739,7 @@ function selectPage(index, focus = false) {
     card.classList.toggle("is-active", active);
   });
   [...document.querySelector("#page-nav").children].forEach((button, buttonIndex) => button.classList.toggle("is-selected", buttonIndex === selectedPageIndex));
-  document.querySelector("#selected-page-title").textContent = `Page ${selectedPageIndex + 1}`;
+  document.querySelector("#selected-page-title").textContent = `Page ${selectedPageIndex + 1} · ${pageRole(selectedPageIndex, cards.length)}`;
   document.querySelector("#previous-page").disabled = selectedPageIndex === 0;
   document.querySelector("#next-page").disabled = selectedPageIndex === cards.length - 1;
   if (focus) cards[selectedPageIndex].querySelector("textarea")?.focus();
@@ -663,12 +774,13 @@ function refreshPageTools() {
     const button = document.createElement("button");
     button.type = "button";
     const complete = [...card.querySelectorAll("textarea")].every((area) => area.value.trim());
-    button.innerHTML = `<span>${index + 1}</span><small>${complete ? "Ready" : "Needs work"}</small>`;
+    button.innerHTML = `<span>${index + 1}</span><small>${escapeHtml(pageRole(index, cards.length))}</small><em>${complete ? "Ready" : "Needs work"}</em>`;
     button.className = complete ? "is-ready" : "";
-    button.setAttribute("aria-label", `Page ${index + 1}, ${complete ? "ready" : "incomplete"}`);
+    button.setAttribute("aria-label", `Page ${index + 1}, ${pageRole(index, cards.length)}, ${complete ? "ready" : "incomplete"}`);
     button.addEventListener("click", () => selectPage(index, true));
     return button;
   }));
+  renumberPages();
   const settings = {
     title: document.querySelector("#story-title").value.trim(),
     slug: document.querySelector("#story-slug").value.trim(),
@@ -698,6 +810,7 @@ function refreshPageTools() {
 function openOrderDetail(order) {
   selectedOrder = order;
   document.querySelector("#order-detail-id").textContent = `Order ${order.id}`;
+  document.querySelector("#order-detail-age").textContent = `${orderNeedsAttention(order) ? "Needs follow-up · " : "Updated "}${relativeAge(order.updated_at || order.created_at)}`;
   const fields = { Customer: order.customer_email, Child: order.child_name, Monster: order.monster_name, Story: order.story_label, Format: order.format_id, Style: order.monster_style, Created: new Date(order.created_at).toLocaleString(), "Stripe checkout": order.stripe_checkout_session_id || "Not recorded", "Preview ID": order.selected_preview_id || "Not recorded" };
   const list = document.querySelector("#order-detail-fields");
   list.replaceChildren();
@@ -706,7 +819,50 @@ function openOrderDetail(order) {
   select.replaceChildren(...orderStatuses.map((status) => new Option(status === "paid" ? "Paid (manually verified)" : status.replaceAll("_", " "), status, false, status === order.status)));
   document.querySelector("#order-detail-notes").value = order.notes || "";
   document.querySelector("#order-detail-message").textContent = "";
+  renderOrderProgress(order);
   orderDialog.showModal();
+}
+
+function renderOrderProgress(order) {
+  const flow = ["checkout_started", "paid", "proofing", "approved", "printing", "shipped", "completed"];
+  const current = flow.indexOf(order.status);
+  document.querySelector("#order-progress").replaceChildren(...flow.map((status, index) => {
+    const item = document.createElement("li");
+    item.className = order.status === "cancelled" ? "is-cancelled" : index < current ? "is-complete" : index === current ? "is-current" : "";
+    item.innerHTML = `<span>${index < current ? "✓" : index + 1}</span><small></small>`;
+    item.querySelector("small").textContent = status === "checkout_started" ? "Checkout" : status.charAt(0).toUpperCase() + status.slice(1);
+    return item;
+  }));
+  const advance = document.querySelector("#advance-order");
+  const next = flow[current + 1];
+  advance.hidden = !next || order.status === "cancelled";
+  advance.textContent = next ? `Advance to ${next.replaceAll("_", " ")} →` : "Order complete";
+  if (order.status === "checkout_started") {
+    advance.hidden = false;
+    advance.disabled = true;
+    advance.textContent = "Verify Stripe payment first";
+  } else advance.disabled = false;
+}
+
+async function advanceSelectedOrder() {
+  if (!selectedOrder) return;
+  const flow = ["checkout_started", "paid", "proofing", "approved", "printing", "shipped", "completed"];
+  const next = flow[flow.indexOf(selectedOrder.status) + 1];
+  if (!next || selectedOrder.status === "checkout_started") return;
+  const button = document.querySelector("#advance-order");
+  const message = document.querySelector("#order-detail-message");
+  button.disabled = true;
+  message.textContent = `Moving order to ${next.replaceAll("_", " ")}…`;
+  try {
+    const result = await apiRequest(`?resource=orders&id=${encodeURIComponent(selectedOrder.id)}`, { method: "PATCH", body: { status: next, notes: document.querySelector("#order-detail-notes").value } });
+    Object.assign(selectedOrder, result.order);
+    document.querySelector("#order-detail-status").value = selectedOrder.status;
+    document.querySelector("#order-detail-age").textContent = "Updated just now";
+    renderOrderProgress(selectedOrder);
+    renderOrders(); renderDashboard(); renderProductionHub();
+    message.textContent = `Order advanced to ${next.replaceAll("_", " ")}.`;
+  } catch (error) { message.textContent = error.message; }
+  finally { button.disabled = false; }
 }
 
 function closeOrderDetail() {
@@ -734,6 +890,9 @@ async function saveOrderDetail(event) {
     renderOrders();
     renderDashboard();
     renderCustomers();
+    renderProductionHub();
+    renderOrderProgress(order);
+    document.querySelector("#order-detail-age").textContent = "Updated just now";
     message.textContent = "Order saved.";
   } catch (error) { message.textContent = error.message; }
   finally { button.disabled = false; }
