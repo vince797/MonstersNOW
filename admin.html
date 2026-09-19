@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex, nofollow" />
     <title>Dashboard | MonstersNOW Admin</title>
-    <link rel="stylesheet" href="styles.css?v=20260918-book-editor" />
+    <link rel="stylesheet" href="styles.css?v=20260918-production-hub" />
   </head>
   <body class="admin-page">
     <main>
@@ -49,6 +49,7 @@
           <nav class="admin-nav" aria-label="Admin navigation">
             <button class="is-active" type="button" data-admin-view="dashboard"><span>⌂</span>Dashboard</button>
             <button type="button" data-admin-view="stories"><span>▤</span>Stories <em id="nav-story-count">0</em></button>
+            <button type="button" data-admin-view="production"><span>◆</span>Production <em id="nav-production-count">0</em></button>
             <button type="button" data-admin-view="orders"><span>□</span>Orders <em id="nav-order-count">0</em></button>
             <button type="button" data-admin-view="customers"><span>♙</span>Customers <em id="nav-customer-count">0</em></button>
           </nav>
@@ -202,6 +203,53 @@
         </div>
           </section>
 
+          <section class="production-admin" id="production-admin" hidden>
+            <div class="production-hero">
+              <div>
+                <p class="eyebrow">Release command center</p>
+                <h2>Halloween Monster Night</h2>
+                <p>One place to move the book from master copy through artwork, print files, validation, and customer fulfillment.</p>
+              </div>
+              <span class="production-overall" id="production-hub-status">Checking…</span>
+            </div>
+
+            <div class="production-hub-actions">
+              <button class="button primary" type="button" id="production-open-book">Edit master book</button>
+              <button class="button secondary" type="button" id="production-open-orders">Manage orders</button>
+              <a class="button secondary" href="create.html?test=halloween" target="_blank" rel="noopener">Run test order ↗</a>
+            </div>
+
+            <section class="production-section">
+              <div class="admin-panel-heading"><div><p class="eyebrow">Release pipeline</p><h2>What is ready—and what is next</h2></div><small id="production-hub-updated"></small></div>
+              <div class="release-pipeline" id="release-pipeline"></div>
+            </section>
+
+            <div class="production-hub-grid">
+              <section class="production-section">
+                <div class="admin-panel-heading"><div><p class="eyebrow">Products</p><h2>Book formats</h2></div></div>
+                <div class="format-operations">
+                  <article><span>Softcover</span><strong>$24.99</strong><small>8.5 × 8.5 in · Full color · 32 pages</small><em id="softcover-status">Cover pending</em></article>
+                  <article><span>Hardcover</span><strong>$39.99</strong><small>8.5 × 8.5 in · Full color · 32 pages</small><em id="hardcover-status">Cover pending</em></article>
+                </div>
+              </section>
+              <section class="production-section">
+                <div class="admin-panel-heading"><div><p class="eyebrow">Fulfillment</p><h2>Active workload</h2></div><button type="button" id="production-view-orders">View board</button></div>
+                <div class="production-workload">
+                  <article><strong id="workload-paid">0</strong><span>Paid</span><small>Awaiting proofing</small></article>
+                  <article><strong id="workload-proofing">0</strong><span>Proofing</span><small>Needs approval</small></article>
+                  <article><strong id="workload-printing">0</strong><span>Printing</span><small>With printer</small></article>
+                  <article><strong id="workload-shipped">0</strong><span>Shipped</span><small>In transit</small></article>
+                </div>
+              </section>
+            </div>
+
+            <section class="production-section">
+              <div class="admin-panel-heading"><div><p class="eyebrow">Preflight detail</p><h2>Print checks</h2></div><span id="production-hub-progress">0/0 complete</span></div>
+              <div class="production-checks" id="production-hub-checks"></div>
+              <div class="production-next"><strong>Next action</strong><p id="production-hub-next">Loading…</p></div>
+            </section>
+          </section>
+
           <section class="orders-admin" id="orders-admin" hidden>
             <label class="admin-search">Find an order<input id="order-search" type="search" placeholder="Email, child, monster, story, or order ID" /></label>
             <div class="orders-toolbar">
@@ -245,6 +293,6 @@
       </section>
     </main>
     <dialog id="order-detail" class="order-detail"><form id="order-detail-form"><div class="admin-panel-heading"><h2>Order details</h2><button type="button" id="close-order-detail" class="button secondary">Close</button></div><p id="order-detail-id"></p><dl id="order-detail-fields"></dl><p class="order-payment-notice">Statuses are manually managed. A checkout record is not proof of payment; verify payment in Stripe before starting production.</p><label>Operational status<select id="order-detail-status"></select></label><label>Production notes<textarea id="order-detail-notes" rows="6" maxlength="2000" placeholder="Proof review, printing updates, shipping follow-up…"></textarea></label><button class="button primary" id="save-order-detail" type="submit">Save order</button><p id="order-detail-message" role="status"></p></form></dialog>
-    <script src="scripts/admin.js?v=20260918-book-editor"></script>
+    <script src="scripts/admin.js?v=20260918-production-hub"></script>
   </body>
 </html>

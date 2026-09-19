@@ -5,6 +5,7 @@ const loginStatus = document.querySelector("#admin-login-status");
 const adminApp = document.querySelector("#admin-app");
 const dashboard = document.querySelector("#admin-dashboard");
 const admin = document.querySelector("#story-admin");
+const productionAdmin = document.querySelector("#production-admin");
 const ordersAdmin = document.querySelector("#orders-admin");
 const customersAdmin = document.querySelector("#customers-admin");
 const newStoryButton = document.querySelector("#new-story");
@@ -24,6 +25,7 @@ let savingStory = false;
 let selectedOrder = null;
 let orderView = "board";
 let selectedPageIndex = 0;
+let productionReport = null;
 const orderStatuses = ["checkout_started", "paid", "proofing", "approved", "printing", "shipped", "completed", "cancelled"];
 const orderDialog = document.querySelector("#order-detail");
 editor.addEventListener("submit", (event) => event.preventDefault());
@@ -46,6 +48,9 @@ loginForm.addEventListener("submit", async (event) => {
 newStoryButton.addEventListener("click", () => editStory());
 document.querySelector("#dashboard-new-story").addEventListener("click", () => { showView("stories"); editStory(); });
 document.querySelector("#halloween-story").addEventListener("click", () => { showView("stories"); editStory({ title_template: "{child_name} and {monster_name}'s Halloween Adventure", slug: "halloween-adventure", description: "A playful Halloween quest filled with costumes, pumpkins, and friendly surprises.", is_seasonal: true, available_from: "2026-09-15", available_until: "2026-10-31", pages: [] }); });
+document.querySelector("#production-open-book").addEventListener("click", openProductionBook);
+document.querySelector("#production-open-orders").addEventListener("click", () => showView("orders"));
+document.querySelector("#production-view-orders").addEventListener("click", () => showView("orders"));
 
 async function loadProductionReadiness() {
   const overall = document.querySelector("#production-overall");
@@ -54,6 +59,7 @@ async function loadProductionReadiness() {
     const response = await fetch("assets/storybook/halloween-monster-night/production-status.json", { cache: "no-store" });
     if (!response.ok) throw new Error("Production status is unavailable");
     const report = await response.json();
+    productionReport = report;
     overall.textContent = report.status === "ready" ? "Ready for Lulu" : "Blocked";
     overall.className = `production-overall is-${report.status}`;
     document.querySelector("#production-format").textContent = report.format;
@@ -65,10 +71,12 @@ async function loadProductionReadiness() {
       item.innerHTML = `<span aria-hidden="true">${check.status === "pass" ? "✓" : "!"}</span><div><strong>${escapeHtml(check.label)}</strong><small>${escapeHtml(check.detail)}</small></div>`;
       return item;
     }));
+    renderProductionHub();
   } catch (error) {
     overall.textContent = "Unavailable";
     overall.className = "production-overall is-blocked";
     checks.innerHTML = `<p class="admin-inline-empty">${escapeHtml(error.message)}</p>`;
+    renderProductionHub(error);
   }
 }
 
@@ -110,6 +118,7 @@ async function openLibrary() {
     renderDashboard();
     renderOrders();
     renderCustomers();
+    renderProductionHub();
     showView("dashboard");
   } catch (error) {
     sessionStorage.removeItem("monstersnow_admin_password");
@@ -120,11 +129,13 @@ async function openLibrary() {
 function showView(view) {
   dashboard.hidden = view !== "dashboard";
   admin.hidden = view !== "stories";
+  productionAdmin.hidden = view !== "production";
   ordersAdmin.hidden = view !== "orders";
   customersAdmin.hidden = view !== "customers";
-  document.querySelector("#admin-view-title").textContent = view === "stories" ? "Stories" : view === "orders" ? "Orders" : view === "customers" ? "Customers" : "Dashboard";
+  document.querySelector("#admin-view-title").textContent = view === "stories" ? "Stories" : view === "production" ? "Production" : view === "orders" ? "Orders" : view === "customers" ? "Customers" : "Dashboard";
   document.querySelectorAll("[data-admin-view]").forEach((button) => button.classList.toggle("is-active", button.dataset.adminView === view));
   if (view === "stories" && editor.hidden && stories[0]) editStory(stories[0]);
+  if (view === "production") renderProductionHub();
 }
 
 function renderDashboard() {
@@ -136,6 +147,7 @@ function renderDashboard() {
   document.querySelector("#nav-story-count").textContent = stories.length;
   document.querySelector("#nav-order-count").textContent = orders.length;
   document.querySelector("#nav-customer-count").textContent = new Set(orders.map((order) => order.customer_email?.toLowerCase()).filter(Boolean)).size;
+  document.querySelector("#nav-production-count").textContent = productionReport?.checks?.filter((check) => check.status !== "pass").length || 0;
   const recent = document.querySelector("#recent-stories");
   if (!stories.length) {
     recent.innerHTML = '<div class="admin-inline-empty"><strong>No stories yet</strong><span>Create the Halloween story to get started.</span></div>';
@@ -154,6 +166,67 @@ function renderDashboard() {
     return button;
   }));
   renderAttentionList();
+}
+
+function openProductionBook() {
+  const story = stories.find((item) => item.is_seasonal) || stories[0];
+  if (story) editStory(story);
+  else editStory({ title_template: "{child_name} and {monster_name}'s Halloween Monster Night", slug: "halloween-monster-night", description: "A friendly Halloween adventure.", is_seasonal: true, available_from: "2026-09-15", available_until: "2026-10-31", pages: [] });
+  showView("stories");
+}
+
+function renderProductionHub(error = null) {
+  const report = productionReport;
+  const status = document.querySelector("#production-hub-status");
+  const checksContainer = document.querySelector("#production-hub-checks");
+  const story = stories.find((item) => item.is_seasonal) || stories[0];
+  const pages = story?.pages || [];
+  const contentReady = pages.filter((page) => page.text?.trim() && page.illustrationPrompt?.trim()).length;
+  const reportChecks = report?.checks || [];
+  const check = (label) => reportChecks.find((item) => item.label === label);
+  const passed = (label) => check(label)?.status === "pass";
+  const coverReady = passed("Softcover package cover") && passed("Hardcover package cover");
+  const pipeline = [
+    { title: "Master copy", detail: `${contentReady}/32 pages complete`, ready: contentReady === 32, action: "Edit book", run: openProductionBook },
+    { title: "Artwork", detail: passed("Illustration dimensions") ? "Dimensions pass · quality review remains" : "Print dimensions need work", ready: passed("Illustration dimensions") && passed("Print-art quality review") },
+    { title: "Print files", detail: coverReady ? "Interior and both covers ready" : "Interior prepared · covers pending", ready: passed("Interior pagination") && passed("Interior size and bleed") && coverReady },
+    { title: "Lulu validation", detail: passed("Lulu file validation") ? "Files accepted" : "Waiting on final files", ready: passed("Lulu file validation") },
+    { title: "Fulfillment", detail: `${orders.filter((order) => !["completed", "cancelled"].includes(order.status)).length} active orders`, ready: true, action: "View orders", run: () => showView("orders") },
+  ];
+
+  status.textContent = error ? "Unavailable" : report?.status === "ready" ? "Ready for Lulu" : "Action needed";
+  status.className = `production-overall ${report?.status === "ready" ? "is-ready" : "is-blocked"}`;
+  document.querySelector("#production-hub-updated").textContent = report?.updated ? `Preflight updated ${report.updated}` : "Waiting for preflight data";
+  document.querySelector("#production-hub-next").textContent = report?.next_action || error?.message || "Complete the master book and run preflight.";
+  document.querySelector("#production-hub-progress").textContent = `${reportChecks.filter((item) => item.status === "pass").length}/${reportChecks.length} complete`;
+  document.querySelector("#nav-production-count").textContent = reportChecks.filter((item) => item.status !== "pass").length;
+  document.querySelector("#softcover-status").textContent = passed("Softcover package cover") ? "Cover ready" : "Cover pending";
+  document.querySelector("#hardcover-status").textContent = passed("Hardcover package cover") ? "Cover ready" : "Cover pending";
+
+  document.querySelector("#release-pipeline").replaceChildren(...pipeline.map((stage, index) => {
+    const article = document.createElement("article");
+    article.className = stage.ready ? "is-ready" : "needs-work";
+    article.innerHTML = `<span>${stage.ready ? "✓" : index + 1}</span><div><strong></strong><small></small></div>`;
+    article.querySelector("strong").textContent = stage.title;
+    article.querySelector("small").textContent = stage.detail;
+    if (stage.action) {
+      const button = document.createElement("button");
+      button.type = "button"; button.textContent = `${stage.action} →`; button.addEventListener("click", stage.run); article.append(button);
+    }
+    return article;
+  }));
+  checksContainer.replaceChildren(...reportChecks.map((item) => {
+    const article = document.createElement("article");
+    article.className = `production-check is-${item.status}`;
+    article.innerHTML = `<span aria-hidden="true">${item.status === "pass" ? "✓" : "!"}</span><div><strong></strong><small></small></div>`;
+    article.querySelector("strong").textContent = item.label;
+    article.querySelector("small").textContent = item.detail;
+    return article;
+  }));
+  if (!reportChecks.length) checksContainer.innerHTML = '<div class="admin-inline-empty"><strong>Preflight data unavailable</strong><span>Run the production preflight to refresh this section.</span></div>';
+  ["paid", "proofing", "printing", "shipped"].forEach((orderStatus) => {
+    document.querySelector(`#workload-${orderStatus}`).textContent = orders.filter((order) => order.status === orderStatus).length;
+  });
 }
 
 function renderAttentionList() {
