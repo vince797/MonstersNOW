@@ -1,6 +1,6 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const { decorateOrder, encodeApprovalNotes, parseApprovalNotes } = require("../lib/order-library");
+const { assertAllowedStatusChange, decorateOrder, encodeApprovalNotes, parseApprovalNotes } = require("../lib/order-library");
 
 test("proof approval audit survives operator note edits without a schema migration", () => {
   const approval = {
@@ -25,4 +25,12 @@ test("proof approval audit survives operator note edits without a schema migrati
 test("revoking approval removes only the audit marker", () => {
   const stored = encodeApprovalNotes("Keep this note.", { proofFingerprint: "b".repeat(64) });
   assert.equal(encodeApprovalNotes(stored, null), "Keep this note.");
+});
+
+test("production statuses cannot bypass approval and Lulu submission", () => {
+  assert.doesNotThrow(() => assertAllowedStatusChange({ status: "paid" }, "proofing"));
+  assert.throws(() => assertAllowedStatusChange({ status: "proofing" }, "approved"), /proof approval/i);
+  assert.throws(() => assertAllowedStatusChange({ status: "approved" }, "printing"), /Lulu/i);
+  assert.throws(() => assertAllowedStatusChange({ status: "printing" }, "shipped"), /print job/i);
+  assert.doesNotThrow(() => assertAllowedStatusChange({ status: "printing", lulu_print_job_id: "job-1" }, "shipped"));
 });

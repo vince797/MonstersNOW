@@ -144,7 +144,7 @@ async function handleAdminStories(request, response) {
     if (resource === "orders") {
       if (request.method === "GET") return sendJson(response, 200, { orders: await listOrders() });
       if (request.method === "PATCH") {
-        const order = await updateOrder(id, await readJsonBody(request));
+        const order = await updateOrder(id, await readJsonBody(request), { request });
         if (!order) return sendJson(response, 404, { error: "Order not found." });
         return sendJson(response, 200, { order });
       }
