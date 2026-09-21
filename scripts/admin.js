@@ -61,6 +61,8 @@ document.querySelector("#close-order-detail").addEventListener("click", closeOrd
 orderDialog.addEventListener("cancel", (event) => { event.preventDefault(); closeOrderDetail(); });
 document.querySelector("#order-detail-form").addEventListener("submit", saveOrderDetail);
 document.querySelector("#advance-order").addEventListener("click", advanceSelectedOrder);
+document.querySelector("#approve-order-proof").addEventListener("click", approveSelectedOrderProof);
+document.querySelector("#revoke-order-proof").addEventListener("click", revokeSelectedOrderProof);
 document.querySelector("#open-artwork-overview").addEventListener("click", openArtworkOverview);
 document.querySelector("#close-artwork-overview").addEventListener("click", () => artworkDialog.close());
 artworkDialog.addEventListener("cancel", (event) => { event.preventDefault(); artworkDialog.close(); });
@@ -1149,12 +1151,70 @@ function openOrderDetail(order) {
   list.replaceChildren();
   Object.entries(fields).forEach(([label, value]) => { const term = document.createElement("dt"); const detail = document.createElement("dd"); term.textContent = label; detail.textContent = value || "—"; list.append(term, detail); });
   renderOrderArtwork(order.monster_assets);
+  renderProofApproval(order);
   const select = document.querySelector("#order-detail-status");
   select.replaceChildren(...orderStatuses.map((status) => new Option(status === "paid" ? "Paid (manually verified)" : status.replaceAll("_", " "), status, false, status === order.status)));
   document.querySelector("#order-detail-notes").value = order.notes || "";
   document.querySelector("#order-detail-message").textContent = "";
   renderOrderProgress(order);
   orderDialog.showModal();
+}
+
+function renderProofApproval(order) {
+  const approved = Boolean(order.proof_fingerprint && order.proof_approved_at);
+  const submitted = Boolean(order.lulu_print_job_id);
+  const state = document.querySelector("#proof-approval-state");
+  const approve = document.querySelector("#approve-order-proof");
+  const revoke = document.querySelector("#revoke-order-proof");
+  const send = document.querySelector("#send-order-lulu");
+  const help = document.querySelector("#proof-approval-help");
+  if (submitted) {
+    state.textContent = `Sent to Lulu · job ${order.lulu_print_job_id}`;
+    help.textContent = order.lulu_submitted_at ? `Submitted ${new Date(order.lulu_submitted_at).toLocaleString()}.` : "The print job has been submitted.";
+  } else if (approved) {
+    state.textContent = `Approved ${new Date(order.proof_approved_at).toLocaleString()} by ${order.proof_approved_by || "MonstersNOW admin"}.`;
+    help.textContent = `Master v${order.master_story_version || "?"} · fingerprint ${order.proof_fingerprint.slice(0, 12)}… Final PDFs must pass Lulu validation before sending.`;
+  } else {
+    state.textContent = "This order has not been approved for printing.";
+    help.textContent = "Approval verifies all 32 final backgrounds, the selected monster, names, and the exact master version.";
+  }
+  approve.hidden = approved || submitted;
+  approve.disabled = !["paid", "proofing", "approved"].includes(order.status);
+  revoke.hidden = !approved || submitted;
+  const packageReady = Boolean(order.print_package_ready);
+  send.disabled = !approved || submitted || !packageReady;
+  send.title = approved ? "Final Lulu submission unlocks after the production PDFs pass validation and shipping is selected." : "Approve the proof first.";
+}
+
+async function approveSelectedOrderProof() {
+  if (!selectedOrder || !window.confirm("Approve this exact personalized book for printing? The saved master version, names, monster, and all 32 final illustrations will be fingerprinted.")) return;
+  const button = document.querySelector("#approve-order-proof");
+  const message = document.querySelector("#order-detail-message");
+  button.disabled = true;
+  message.textContent = "Checking and fingerprinting the personalized proof…";
+  try {
+    const result = await apiRequest(`?resource=orders&id=${encodeURIComponent(selectedOrder.id)}`, { method: "PATCH", body: { action: "approve_proof", approvedBy: "MonstersNOW admin" } });
+    Object.assign(selectedOrder, result.order);
+    renderProofApproval(selectedOrder);
+    renderOrderProgress(selectedOrder);
+    renderOrders(); renderDashboard(); renderProductionHub();
+    message.textContent = "Proof approved and locked. Lulu submission remains a separate action.";
+  } catch (error) { message.textContent = error.message; }
+  finally { button.disabled = false; }
+}
+
+async function revokeSelectedOrderProof() {
+  if (!selectedOrder || !window.confirm("Revoke this proof approval? The order will return to proofing.")) return;
+  const message = document.querySelector("#order-detail-message");
+  message.textContent = "Revoking approval…";
+  try {
+    const result = await apiRequest(`?resource=orders&id=${encodeURIComponent(selectedOrder.id)}`, { method: "PATCH", body: { action: "revoke_proof_approval" } });
+    Object.assign(selectedOrder, result.order);
+    renderProofApproval(selectedOrder);
+    renderOrderProgress(selectedOrder);
+    renderOrders(); renderDashboard(); renderProductionHub();
+    message.textContent = "Approval revoked. Review and approve a new proof before printing.";
+  } catch (error) { message.textContent = error.message; }
 }
 
 function renderOrderArtwork(assets) {
@@ -1215,6 +1275,7 @@ async function advanceSelectedOrder() {
     document.querySelector("#order-detail-status").value = selectedOrder.status;
     document.querySelector("#order-detail-age").textContent = "Updated just now";
     renderOrderProgress(selectedOrder);
+    renderProofApproval(selectedOrder);
     renderOrders(); renderDashboard(); renderProductionHub();
     message.textContent = `Order advanced to ${next.replaceAll("_", " ")}.`;
   } catch (error) { message.textContent = error.message; }
