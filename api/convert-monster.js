@@ -1,6 +1,5 @@
 const fs = require("node:fs/promises");
 const path = require("node:path");
-const crypto = require("node:crypto");
 const { Blob } = require("node:buffer");
 const {
   MONSTERSNOW_COLORING_PAGE_NEGATIVE_PROMPT,
@@ -14,6 +13,7 @@ const {
   failMonsterPreview,
   startMonsterPreview,
 } = require("../lib/monster-submissions");
+const { readJsonBody } = require("../lib/http");
 
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 const IMAGE_MODEL = process.env.OPENAI_IMAGE_MODEL || "gpt-image-1.5";
@@ -41,9 +41,9 @@ module.exports = async function handler(request, response) {
   let payload;
 
   try {
-    payload = await readJsonBody(request);
-  } catch {
-    return response.status(400).json({ error: "Invalid JSON body" });
+    payload = await readJsonBody(request, { maxBytes: 12 * 1024 * 1024 });
+  } catch (error) {
+    return response.status(error.status || 400).json({ code: error.code || "invalid_json", error: error.status === 413 ? error.message : "Invalid JSON body" });
   }
 
   const drawing = payload?.drawing;
@@ -58,6 +58,13 @@ module.exports = async function handler(request, response) {
     });
   }
 
+  if (!submissionId || !submissionToken) {
+    return response.status(403).json({
+      code: "monster_submission_required",
+      error: "Save the drawing before generating a monster preview.",
+    });
+  }
+
   if (!process.env.OPENAI_API_KEY) {
     return response.status(503).json({
       code: "missing_openai_api_key",
@@ -68,18 +75,14 @@ module.exports = async function handler(request, response) {
   }
 
   let previewRecord;
-  const persistPreview = Boolean(submissionId && submissionToken);
-
   try {
-    previewRecord = persistPreview
-      ? await startMonsterPreview({
-          submissionId,
-          token: submissionToken,
-          variationNumber,
-          styleId: style,
-          model: IMAGE_MODEL,
-        })
-      : { id: crypto.randomUUID() };
+    previewRecord = await startMonsterPreview({
+      submissionId,
+      token: submissionToken,
+      variationNumber,
+      styleId: style,
+      model: IMAGE_MODEL,
+    });
     const startedAt = Date.now();
     const references = await loadReferenceImages();
     const monsterImage = await createMonsterImage(
@@ -95,15 +98,13 @@ module.exports = async function handler(request, response) {
       getRemainingRequestBudget(startedAt),
     );
 
-    const persistedPreview = persistPreview
-      ? await completeMonsterPreview({
-          submissionId,
-          token: submissionToken,
-          previewId: previewRecord.id,
-          monsterImage,
-          coloringPage,
-        })
-      : previewRecord;
+    const persistedPreview = await completeMonsterPreview({
+      submissionId,
+      token: submissionToken,
+      previewId: previewRecord.id,
+      monsterImage,
+      coloringPage,
+    });
 
     return response.status(200).json({
       mode: "ai",
@@ -120,7 +121,7 @@ module.exports = async function handler(request, response) {
         : "Monster preview created. Coloring page will be prepared in the browser.",
     });
   } catch (error) {
-    if (persistPreview) await failMonsterPreview({ submissionId, previewId: previewRecord?.id, code: error?.code });
+    await failMonsterPreview({ submissionId, previewId: previewRecord?.id, code: error?.code });
     console.error("Monster preview generation failed", formatErrorForLog(error));
 
     return response.status(error.status >= 400 && error.status < 500 ? error.status : 502).json({
@@ -129,20 +130,6 @@ module.exports = async function handler(request, response) {
     });
   }
 };
-
-async function readJsonBody(request) {
-  if (request.body && typeof request.body === "object") {
-    return request.body;
-  }
-
-  const chunks = [];
-
-  for await (const chunk of request) {
-    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
-  }
-
-  return JSON.parse(Buffer.concat(chunks).toString("utf8"));
-}
 
 function isSafeDataUrl(value) {
   if (typeof value !== "string") {

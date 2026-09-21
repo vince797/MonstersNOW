@@ -11,9 +11,9 @@ module.exports = async function handler(request, response) {
   let payload;
 
   try {
-    payload = await readJsonBody(request);
-  } catch {
-    return sendJson(response, 400, { error: "Invalid JSON body" });
+    payload = await readJsonBody(request, { maxBytes: 12 * 1024 * 1024 });
+  } catch (error) {
+    return sendJson(response, error.status || 400, { code: error.code || "invalid_json", error: error.status === 413 ? error.message : "Invalid JSON body" });
   }
 
   const image = payload?.image;
