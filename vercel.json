@@ -8,6 +8,7 @@
     { "source": "/api/halloween-test-checkout", "destination": "/api/storybook-interest?resource=halloween-test-checkout" },
     { "source": "/api/halloween-checkout-status", "destination": "/api/storybook-interest?resource=halloween-checkout-status" },
     { "source": "/api/stripe-test-webhook", "destination": "/api/storybook-interest?resource=stripe-test-webhook" }
+    ,{ "source": "/api/monster-submissions", "destination": "/api/storybook-interest?resource=monster-submissions" }
   ],
   "functions": {
     "api/storybook-interest.js": {
