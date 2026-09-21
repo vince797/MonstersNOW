@@ -112,11 +112,20 @@
   }
 
   .home-cover-grid .book-card:nth-child(even) {
-    transform: translateY(8px);
+    transform: none;
+  }
+
+  .home-cover-grid .book-card:nth-child(even):hover {
+    transform: translateY(-2px);
   }
 
   .home-cover-grid .book-card-content {
+    grid-template-rows: auto 1fr auto;
     padding: 11px;
+  }
+
+  .home-cover-grid .book-card-meta {
+    align-self: end;
   }
 
   .home-cover-grid .book-card h3 {
