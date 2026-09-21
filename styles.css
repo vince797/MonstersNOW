@@ -582,6 +582,11 @@ body {
   margin-top: 14px;
 }
 
+.story-library-actions { display: grid; gap: 8px; margin-top: 14px; }
+.story-library-actions .story-new-button { margin-top: 0; }
+.story-library-actions .button { width: 100%; }
+.catalog-setup-status { min-height: 1.2em; margin: 7px 0 -2px; color: var(--muted); font-size: .7rem; line-height: 1.35; }
+
 .story-sidebar-heading span {
   display: inline-grid;
   place-items: center;
@@ -3276,6 +3281,14 @@ main > section {
 .story-card-action { display: inline-flex; margin-top: 16px; color: #007f8a; font-weight: 900; text-decoration: none; }
 .story-card-action:hover, .story-card-action:focus-visible { color: var(--orange-dark); }
 
+.order-artwork-panel { display: grid; gap: 12px; padding: 16px; border: 1px solid var(--line); border-radius: 12px; background: #f5fafb; }
+.order-artwork-panel[hidden] { display: none; }
+.order-artwork-panel h3 { margin-top: 2px; }
+.order-artwork-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.order-artwork-grid figure { margin: 0; overflow: hidden; border: 1px solid var(--line); border-radius: 10px; background: #fff; }
+.order-artwork-grid img { width: 100%; aspect-ratio: 1; object-fit: contain; background: #fff; }
+.order-artwork-grid figcaption { padding: 8px 10px; color: var(--navy); font-size: .76rem; font-weight: 850; }
+
 /* Collapse the full navigation before it competes with the logo and CTA on
    laptop-width screens. */
 @media (max-width: 1320px) {
@@ -3634,8 +3647,9 @@ main > section {
 /* Visual master-book workspace */
 .story-list { gap: 10px; }
 .story-list-item { grid-template-columns: 52px minmax(0, 1fr); align-items: stretch; gap: 10px; padding: 8px; border-radius: 12px; }
-.story-list-item .story-book-cover { display: grid; align-content: space-between; min-height: 70px; padding: 7px; border-radius: 7px; color: #fff; background: linear-gradient(155deg, #09395c, #008d9b); box-shadow: inset -4px 0 rgba(255,255,255,.1); }
+.story-list-item .story-book-cover { display: grid; min-height: 70px; padding: 0; overflow: hidden; border-radius: 7px; color: #fff; background: #e9f3f5; box-shadow: inset -4px 0 rgba(255,255,255,.1); }
 .story-list-item:nth-child(even) .story-book-cover { background: linear-gradient(155deg, #5e3778, #994f9d); }
+.story-book-cover img { width: 100%; height: 100%; object-fit: cover; }
 .story-book-cover i { color: rgba(255,255,255,.78); font-size: .48rem; font-style: normal; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
 .story-book-cover b { font-size: 1.2rem; line-height: 1; }
 .story-book-meta { display: grid; align-content: center; gap: 4px; min-width: 0; }
@@ -3656,7 +3670,12 @@ main > section {
 .book-settings summary small { color: var(--muted); font-weight: 500; }
 .book-settings summary > span:last-child { color: var(--teal-dark); font-size: .78rem; font-weight: 900; }
 .book-settings[open] summary { border-bottom: 1px solid var(--line); }
-.book-settings .admin-field-grid { padding: 18px; }
+.book-settings-layout { display: grid; grid-template-columns: 150px minmax(0,1fr); gap: 22px; align-items: start; padding: 18px; }
+.book-settings .admin-field-grid { padding: 0; }
+.admin-cover-preview { margin: 0; }
+.admin-cover-preview img { display: block; width: 100%; aspect-ratio: 1; border-radius: 12px; object-fit: cover; box-shadow: 0 12px 28px rgba(6,27,59,.16); }
+.admin-cover-preview img.is-placeholder { padding: 24px; object-fit: contain; background: #f1f7f8; }
+.admin-cover-preview figcaption { margin-top: 8px; color: var(--muted); font-size: .68rem; font-weight: 750; text-align: center; }
 .page-editor-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; }
 .page-editor-heading h3 { margin: 3px 0 0; font-size: 1.65rem; }
 .page-step-actions { display: flex; gap: 8px; }
@@ -3753,7 +3772,7 @@ main > section {
 @media (max-width: 1300px) { .story-editor-heading { display: grid; grid-template-columns: minmax(0,1fr); } .story-editor-actions { justify-content: flex-start; padding-top: 12px; } .story-editor-title h2 { max-width: none; font-size: clamp(1.65rem,3vw,2.25rem); } }
 @media (max-width: 1180px) { .page-editor-layout { grid-template-columns: 130px minmax(0,1fr); } .book-checks-panel { position: static; grid-column: 1 / -1; } .book-checks-panel ul { grid-template-columns: repeat(2,minmax(0,1fr)); } }
 @media (max-width: 860px) { .story-admin { grid-template-columns: 1fr; } .story-sidebar { position: static; } .story-list { grid-template-columns: repeat(2,minmax(0,1fr)); } .page-editor-layout { grid-template-columns: 110px minmax(0,1fr); } .artwork-overview-grid { grid-template-columns: repeat(3,minmax(0,1fr)); } }
-@media (max-width: 680px) { .story-list { grid-template-columns: 1fr; } .story-editor-heading, .page-editor-heading, .selected-preview-heading { align-items: stretch; flex-direction: column; } .manuscript-import, .book-settings, .page-editor-heading, .page-editor-layout, #story-editor-status { margin-inline: 14px; } .page-editor-layout { grid-template-columns: 1fr; } .page-browser { position: static; max-height: none; } #page-nav { grid-template-columns: repeat(4,minmax(0,1fr)); } .story-page-card { grid-template-columns: 1fr; } .story-page-card > .page-card-header { align-items: flex-start; flex-direction: column; } .story-page-card textarea { min-height: 180px; } .token-toolbar { justify-content: flex-start; margin: 0 0 7px; } .page-artwork-panel { grid-template-columns: 1fr; } .page-artwork-visual { min-height: 180px; } .book-checks-panel { grid-column: auto; } .book-checks-panel ul { grid-template-columns: 1fr; } .selected-preview-heading .sample-fields { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media (max-width: 680px) { .story-list { grid-template-columns: 1fr; } .story-editor-heading, .page-editor-heading, .selected-preview-heading { align-items: stretch; flex-direction: column; } .manuscript-import, .book-settings, .page-editor-heading, .page-editor-layout, #story-editor-status { margin-inline: 14px; } .book-settings-layout { grid-template-columns: 1fr; } .admin-cover-preview { width: min(180px,60vw); margin-inline: auto; } .page-editor-layout { grid-template-columns: 1fr; } .page-browser { position: static; max-height: none; } #page-nav { grid-template-columns: repeat(4,minmax(0,1fr)); } .story-page-card { grid-template-columns: 1fr; } .story-page-card > .page-card-header { align-items: flex-start; flex-direction: column; } .story-page-card textarea { min-height: 180px; } .token-toolbar { justify-content: flex-start; margin: 0 0 7px; } .page-artwork-panel { grid-template-columns: 1fr; } .page-artwork-visual { min-height: 180px; } .book-checks-panel { grid-column: auto; } .book-checks-panel ul { grid-template-columns: 1fr; } .selected-preview-heading .sample-fields { grid-template-columns: repeat(2,minmax(0,1fr)); } }
 @media (max-width: 560px) { .artwork-overview { width: calc(100% - 16px); } .artwork-overview header { padding: 18px; } .artwork-filters { padding: 12px 18px; } .artwork-overview-grid { grid-template-columns: repeat(2,minmax(0,1fr)); padding: 14px 18px 20px; } .artwork-overview-image { height: 120px; } }
 
 /* Production command center */
@@ -3828,4 +3847,4 @@ main > section {
 .order-detail-actions { display: flex; justify-content: flex-end; gap: 9px; }
 .order-detail-actions .button { min-width: 150px; }
 @media (max-width: 900px) { .order-queue-summary { grid-template-columns: repeat(2,minmax(0,1fr)); } }
-@media (max-width: 680px) { .order-queue-summary { grid-template-columns: 1fr; } .orders-controls { align-items: stretch; flex-direction: column; } .orders-controls .admin-search { max-width: none; width: 100%; } .orders-controls p { margin: 0; } .order-progress { overflow-x: auto; grid-template-columns: repeat(7,72px); padding: 4px; } .order-detail-actions { flex-direction: column; } .order-detail-actions .button { width: 100%; } }
+@media (max-width: 680px) { .order-queue-summary { grid-template-columns: 1fr; } .orders-controls { align-items: stretch; flex-direction: column; } .orders-controls .admin-search { max-width: none; width: 100%; } .orders-controls p { margin: 0; } .order-progress { overflow-x: auto; grid-template-columns: repeat(7,72px); padding: 4px; } .order-artwork-grid { grid-template-columns: 1fr; } .order-detail-actions { flex-direction: column; } .order-detail-actions .button { width: 100%; } }

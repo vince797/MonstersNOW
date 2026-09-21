@@ -37,6 +37,18 @@
   box-shadow: inset 0 0 0 3px color-mix(in srgb, var(--cover-accent) 72%, transparent), inset 0 0 32px rgba(3, 16, 40, .5);
 }
 
+.series-cover-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 0 !important;
+  object-fit: cover;
+}
+
+.personalized-cover:has(> .series-cover-image)::after {
+  display: none;
+}
+
 .cover-adventure {
   --cover-glow: rgba(255, 207, 80, .28);
   --cover-title: #fff3bf;

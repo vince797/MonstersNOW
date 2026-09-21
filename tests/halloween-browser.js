@@ -26,11 +26,17 @@ const routes = {
   "/api/halloween-test-checkout": require("../lib/halloween-test-checkout-handler"),
   "/api/halloween-checkout-status": require("../lib/halloween-checkout-status-handler"),
 };
+const mockSubmissionId = "11111111-1111-4111-8111-111111111111";
+const mockPreviewId = "22222222-2222-4222-8222-222222222222";
 const server = http.createServer(async (req, res) => {
   const pathname = new URL(req.url, "http://localhost").pathname;
+  if (pathname === "/api/monster-submissions") {
+    req.resume(); res.setHeader("Content-Type", "application/json");
+    return res.end(JSON.stringify({ submission: req.method === "POST" ? { id: mockSubmissionId, token: "mock-submission-token-that-is-long-enough", status: "draft" } : { id: mockSubmissionId, selectedPreviewId: mockPreviewId, status: "ready" } }));
+  }
   if (pathname === "/api/convert-monster") {
     req.resume(); res.setHeader("Content-Type", "application/json");
-    return res.end(JSON.stringify({ monsterImage: image, style: "storybook" }));
+    return res.end(JSON.stringify({ monsterImage: image, style: "storybook", submissionId: mockSubmissionId, previewId: mockPreviewId }));
   }
   if (routes[pathname]) {
     res.status = (code) => { res.statusCode = code; return res; };

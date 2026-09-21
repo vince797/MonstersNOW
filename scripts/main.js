@@ -94,6 +94,7 @@ let selectedMonsterStyle = defaultPreviewStyle;
 let previewsUsed = 0;
 let generatedPreviews = [];
 let selectedPreviewId;
+let monsterSubmission;
 let isGeneratingPreview = false;
 let uploadDragDepth = 0;
 let uploadSelectionId = 0;
@@ -211,6 +212,21 @@ async function handleStorybookInterestSubmit(event) {
     monsterImage: selectedPreview?.image || null,
     featurePermission,
   };
+
+  try {
+    const savedMonster = await finalizeSavedMonster({
+      email,
+      personalization,
+      selectedPreviewId: submission.selectedPreviewId,
+      format: selectedFormat.value,
+      featurePermission,
+    });
+    submission.monsterSubmissionId = savedMonster.id;
+  } catch (error) {
+    console.error(error);
+    if (interestStatus) interestStatus.textContent = error.message || "Your monster could not be saved. Please try again.";
+    return;
+  }
 
   persistStorybookInterest(submission, selectedFormat, featurePermission);
 
@@ -612,7 +628,8 @@ async function requestMonsterPreview() {
 
   try {
     const drawing = await prepareImageForUpload(selectedDrawingFile);
-    const result = await convertMonster(drawing, selectedMonsterStyle, previewsUsed + 1);
+    const savedSubmission = await ensureMonsterSubmission(drawing);
+    const result = await convertMonster(drawing, selectedMonsterStyle, previewsUsed + 1, savedSubmission);
     applyMonsterResult(result);
   } catch (error) {
     console.error(error);
@@ -626,6 +643,7 @@ async function requestMonsterPreview() {
 function applyMonsterResult(result) {
   const style = normalizePreviewStyle(result.style);
   const preview = addGeneratedPreview({
+    id: result.previewId,
     image: result.monsterImage,
     coloringPage: result.coloringPage,
     mode: "ai",
@@ -657,11 +675,11 @@ function applyMonsterResult(result) {
   scrollToResultPanel({ focus: true, delay: 120 });
 }
 
-function addGeneratedPreview({ image, coloringPage, mode, style }) {
+function addGeneratedPreview({ id, image, coloringPage, mode, style }) {
   previewsUsed += 1;
 
   const preview = {
-    id: `monster-preview-${Date.now()}-${previewsUsed}`,
+    id: id || `monster-preview-${Date.now()}-${previewsUsed}`,
     image,
     coloringPage,
     mode,
@@ -744,6 +762,8 @@ function resetPreviewState() {
   previewsUsed = 0;
   generatedPreviews = [];
   selectedPreviewId = undefined;
+  monsterSubmission = undefined;
+  try { sessionStorage.removeItem("monstersnow_monster_submission"); } catch {}
   isGeneratingPreview = false;
 
   if (monsterPreview) {
@@ -1170,7 +1190,43 @@ function fileToDataUrl(file) {
   });
 }
 
-async function convertMonster(drawing, style, variationNumber) {
+async function ensureMonsterSubmission(drawing) {
+  if (monsterSubmission?.id && monsterSubmission?.token) return monsterSubmission;
+  const response = await fetch("/api/monster-submissions", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ drawing, filename: selectedDrawingFile?.name || "monster-drawing.jpg" }),
+  });
+  const result = await response.json().catch(() => ({ error: "The upload service did not return a readable response." }));
+  if (!response.ok || !result.submission?.id || !result.submission?.token) throw new Error(result.error || "Your drawing could not be saved safely.");
+  monsterSubmission = result.submission;
+  try { sessionStorage.setItem("monstersnow_monster_submission", JSON.stringify(monsterSubmission)); } catch {}
+  return monsterSubmission;
+}
+
+async function finalizeSavedMonster({ email, personalization, selectedPreviewId: previewId, format, featurePermission }) {
+  if (!monsterSubmission?.id || !monsterSubmission?.token || !previewId) throw new Error("Create and choose a monster preview before continuing.");
+  const response = await fetch("/api/monster-submissions", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      submissionId: monsterSubmission.id,
+      token: monsterSubmission.token,
+      selectedPreviewId: previewId,
+      email,
+      childName: personalization.childName,
+      monsterName: personalization.monsterName,
+      storyId: halloweenTestMode ? "halloween-monster-night" : "personalized-monster-storybook",
+      format,
+      featurePermission,
+    }),
+  });
+  const result = await response.json().catch(() => ({ error: "The monster save did not return a readable response." }));
+  if (!response.ok || !result.submission?.id) throw new Error(result.error || "Your monster could not be saved.");
+  return result.submission;
+}
+
+async function convertMonster(drawing, style, variationNumber, savedSubmission) {
   const response = await fetch("/api/convert-monster", {
     method: "POST",
     headers: {
@@ -1180,6 +1236,8 @@ async function convertMonster(drawing, style, variationNumber) {
       drawing,
       style,
       variationNumber,
+      submissionId: savedSubmission.id,
+      submissionToken: savedSubmission.token,
     }),
   });
 

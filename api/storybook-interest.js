@@ -5,7 +5,7 @@ const {
   storybookInterestErrorToResponse,
 } = require("../lib/storybook-interest");
 const { assertAdminRequest } = require("../lib/admin-auth");
-const { createStory, getStory, listStories, updateStory } = require("../lib/story-library");
+const { createStory, ensureCatalogStories, getStory, listStories, updateStory } = require("../lib/story-library");
 const { listOrders, updateOrder } = require("../lib/order-library");
 const { importManuscript } = require("../lib/manuscript-import");
 const { uploadStoryArtwork } = require("../lib/story-artwork");
@@ -38,6 +38,17 @@ module.exports = async function handler(request, response) {
       return sendJson(response, error.status || 500, {
         code: error.code || "artwork_upload_failed",
         error: error.message || "Artwork could not be uploaded.",
+      });
+    }
+  }
+  if (request.method === "POST" && resource === "catalog-setup") {
+    try {
+      assertAdminRequest(request);
+      return sendJson(response, 200, await ensureCatalogStories());
+    } catch (error) {
+      return sendJson(response, error.status || 500, {
+        code: error.code || "catalog_setup_failed",
+        error: error.message || "The catalog books could not be created.",
       });
     }
   }

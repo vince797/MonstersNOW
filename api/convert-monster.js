@@ -8,6 +8,11 @@ const {
   getMonsterStyleLabel,
   normalizeMonsterStyleId,
 } = require("../lib/monster-style");
+const {
+  completeMonsterPreview,
+  failMonsterPreview,
+  startMonsterPreview,
+} = require("../lib/monster-submissions");
 
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 const IMAGE_MODEL = process.env.OPENAI_IMAGE_MODEL || "gpt-image-1.5";
@@ -43,6 +48,8 @@ module.exports = async function handler(request, response) {
   const drawing = payload?.drawing;
   const style = normalizePreviewStyle(payload?.style);
   const variationNumber = normalizeVariationNumber(payload?.variationNumber);
+  const submissionId = payload?.submissionId;
+  const submissionToken = payload?.submissionToken;
 
   if (!isSafeDataUrl(drawing)) {
     return response.status(400).json({
@@ -59,7 +66,16 @@ module.exports = async function handler(request, response) {
     });
   }
 
+  let previewRecord;
+
   try {
+    previewRecord = await startMonsterPreview({
+      submissionId,
+      token: submissionToken,
+      variationNumber,
+      styleId: style,
+      model: IMAGE_MODEL,
+    });
     const startedAt = Date.now();
     const references = await loadReferenceImages();
     const monsterImage = await createMonsterImage(
@@ -75,8 +91,18 @@ module.exports = async function handler(request, response) {
       getRemainingRequestBudget(startedAt),
     );
 
+    const persistedPreview = await completeMonsterPreview({
+      submissionId,
+      token: submissionToken,
+      previewId: previewRecord.id,
+      monsterImage,
+      coloringPage,
+    });
+
     return response.status(200).json({
       mode: "ai",
+      submissionId,
+      previewId: persistedPreview.id,
       monsterImage,
       coloringPage,
       warnings,
@@ -88,11 +114,12 @@ module.exports = async function handler(request, response) {
         : "Monster preview created. Coloring page will be prepared in the browser.",
     });
   } catch (error) {
+    await failMonsterPreview({ submissionId, previewId: previewRecord?.id, code: error?.code });
     console.error("Monster preview generation failed", formatErrorForLog(error));
 
-    return response.status(502).json({
-      code: "monster_generator_unavailable",
-      error: "The monster generator is temporarily unavailable.",
+    return response.status(error.status >= 400 && error.status < 500 ? error.status : 502).json({
+      code: error.code || "monster_generator_unavailable",
+      error: error.status >= 400 && error.status < 500 ? error.message : "The monster generator is temporarily unavailable.",
     });
   }
 };

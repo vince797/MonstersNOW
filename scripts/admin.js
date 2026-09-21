@@ -32,8 +32,24 @@ let productionReport = null;
 const orderStatuses = ["checkout_started", "paid", "proofing", "approved", "printing", "shipped", "completed", "cancelled"];
 const orderDialog = document.querySelector("#order-detail");
 const artworkDialog = document.querySelector("#artwork-overview");
+const CATALOG_COVERS = {
+  "halloween-monster-night": "assets/storybook/cover-series/minimal-concepts/halloween-monster-night-v1-web.jpg",
+  "big-adventure": "assets/storybook/cover-series/minimal-concepts/big-adventure-v1-web.jpg",
+  "bedtime-monster": "assets/storybook/cover-series/minimal-concepts/bedtime-monster-v1-web.jpg",
+  "abc-monster-book": "assets/storybook/cover-series/minimal-concepts/abc-monster-book-v1-web.jpg",
+  "counting-with-my-monster": "assets/storybook/cover-series/minimal-concepts/counting-with-my-monster-v1-web.jpg",
+  "the-monster-who-lost-their-glow": "assets/storybook/cover-series/minimal-concepts/the-monster-who-lost-their-glow-v1-web.jpg",
+  "birthday-monster-adventure": "assets/storybook/cover-series/minimal-concepts/birthday-monster-adventure-v1-web.jpg",
+};
 editor.addEventListener("submit", (event) => event.preventDefault());
-editor.addEventListener("input", (event) => { if (!event.target.id.startsWith("sample-") && !event.target.matches("[data-artwork-file]")) markStoryDirty(); refreshPageTools(); });
+editor.addEventListener("input", (event) => {
+  if (!event.target.id.startsWith("sample-") && !event.target.matches("[data-artwork-file]")) markStoryDirty();
+  if (event.target.id === "story-slug" || event.target.id === "story-title") {
+    document.querySelector("#story-editor-title").textContent = document.querySelector("#story-title").value || "New master story";
+    updateCoverPreview(document.querySelector("#story-slug").value);
+  }
+  refreshPageTools();
+});
 window.addEventListener("beforeunload", (event) => { if (storyDirty) { event.preventDefault(); event.returnValue = ""; } });
 ["story-search", "story-filter"].forEach((id) => document.getElementById(id).addEventListener("input", renderStoryList));
 document.querySelector("#order-search").addEventListener("input", renderOrders);
@@ -59,6 +75,7 @@ loginForm.addEventListener("submit", async (event) => {
   await openLibrary();
 });
 newStoryButton.addEventListener("click", () => editStory());
+document.querySelector("#setup-catalog").addEventListener("click", () => setupCatalog({ announce: true }));
 document.querySelector("#dashboard-new-story").addEventListener("click", () => { showView("stories"); editStory(); });
 document.querySelector("#halloween-story").addEventListener("click", () => { showView("stories"); editStory({ title_template: "{child_name} and {monster_name}'s Halloween Adventure", slug: "halloween-adventure", description: "A playful Halloween quest filled with costumes, pumpkins, and friendly surprises.", is_seasonal: true, available_from: "2026-09-15", available_until: "2026-10-31", pages: [] }); });
 document.querySelector("#production-open-book").addEventListener("click", openProductionBook);
@@ -133,6 +150,10 @@ async function openLibrary() {
     const [storyResult, orderResult] = await Promise.all([apiRequest(), apiRequest("?resource=orders")]);
     stories = storyResult.stories || [];
     orders = orderResult.orders || [];
+    if (Object.keys(CATALOG_COVERS).some((slug) => !stories.some((story) => story.slug === slug))) {
+      const catalogResult = await setupCatalog();
+      stories = catalogResult?.stories || stories;
+    }
     sessionStorage.setItem("monstersnow_admin_password", adminPassword);
     login.hidden = true;
     adminApp.hidden = false;
@@ -286,9 +307,10 @@ function renderStoryList() {
     button.classList.toggle("is-active", story.id === document.querySelector("#story-id").value);
     const ready = (story.pages || []).filter((page) => page.text?.trim() && page.illustrationPrompt?.trim()).length;
     const artworkReady = (story.pages || []).filter((page) => page.artworkUrl && ["approved", "final"].includes(page.artworkStatus)).length;
-    button.innerHTML = `<span class="story-book-cover"><i></i><b></b></span><span class="story-book-meta"><strong></strong><small></small><em></em></span>`;
-    button.querySelector(".story-book-cover i").textContent = story.is_seasonal ? "Seasonal" : "Master";
-    button.querySelector(".story-book-cover b").textContent = story.is_seasonal ? "🎃" : "★";
+    button.innerHTML = `<span class="story-book-cover"><img alt="" /></span><span class="story-book-meta"><strong></strong><small></small><em></em></span>`;
+    const cover = button.querySelector(".story-book-cover img");
+    cover.src = catalogCover(story.slug);
+    cover.hidden = !CATALOG_COVERS[story.slug];
     button.querySelector("strong").textContent = story.title_template;
     button.querySelector("small").textContent = `${ready}/32 copy · ${artworkReady}/32 art · v${story.version}`;
     button.querySelector("em").textContent = storyStage(story, ready);
@@ -448,6 +470,7 @@ function editStory(story = null) {
   document.querySelector("#story-from").value = story?.available_from || "";
   document.querySelector("#story-until").value = story?.available_until || "";
   document.querySelector("#story-editor-title").textContent = story ? story.title_template : "New master story";
+  updateCoverPreview(story?.slug || "");
   selectedPageIndex = 0;
   pagesContainer.replaceChildren();
   (story?.pages?.length ? story.pages : [{ text: "", illustrationPrompt: "" }]).forEach(addPage);
@@ -458,6 +481,38 @@ function editStory(story = null) {
   document.querySelector("#story-save-state").textContent = story?.id ? "Saved" : "New draft · not saved";
   refreshPageTools();
   renderStoryList();
+}
+
+async function setupCatalog({ announce = false } = {}) {
+  const status = document.querySelector("#catalog-setup-status");
+  const button = document.querySelector("#setup-catalog");
+  if (announce) status.textContent = "Checking the seven-book catalog…";
+  button.disabled = true;
+  try {
+    const result = await apiRequest("?resource=catalog-setup", { method: "POST", body: {} });
+    stories = result.stories || stories;
+    if (announce) status.textContent = result.created?.length ? `${result.created.length} missing book${result.created.length === 1 ? "" : "s"} added.` : "All seven master books are already set up.";
+    if (!editor.hidden) updateCoverPreview(document.querySelector("#story-slug").value);
+    renderStoryList();
+    return result;
+  } catch (error) {
+    if (announce) status.textContent = error.message;
+    throw error;
+  } finally {
+    button.disabled = false;
+  }
+}
+
+function catalogCover(slug) {
+  return CATALOG_COVERS[slug] || "assets/monstersnow-logo.png";
+}
+
+function updateCoverPreview(slug) {
+  const image = document.querySelector("#story-cover-preview");
+  const cover = CATALOG_COVERS[slug];
+  image.src = cover || "assets/monstersnow-logo.png";
+  image.alt = cover ? `Current cover for ${document.querySelector("#story-title").value || "this book"}` : "No catalog cover assigned yet";
+  image.classList.toggle("is-placeholder", !cover);
 }
 
 function setManuscriptImportOpen(open) {
@@ -972,12 +1027,35 @@ function openOrderDetail(order) {
   const list = document.querySelector("#order-detail-fields");
   list.replaceChildren();
   Object.entries(fields).forEach(([label, value]) => { const term = document.createElement("dt"); const detail = document.createElement("dd"); term.textContent = label; detail.textContent = value || "—"; list.append(term, detail); });
+  renderOrderArtwork(order.monster_assets);
   const select = document.querySelector("#order-detail-status");
   select.replaceChildren(...orderStatuses.map((status) => new Option(status === "paid" ? "Paid (manually verified)" : status.replaceAll("_", " "), status, false, status === order.status)));
   document.querySelector("#order-detail-notes").value = order.notes || "";
   document.querySelector("#order-detail-message").textContent = "";
   renderOrderProgress(order);
   orderDialog.showModal();
+}
+
+function renderOrderArtwork(assets) {
+  const panel = document.querySelector("#order-artwork-panel");
+  const grid = document.querySelector("#order-artwork-grid");
+  grid.replaceChildren();
+  const files = [
+    ["Original drawing", assets?.originalUrl],
+    ["Selected monster", assets?.selectedPreviewUrl],
+    ["Coloring page", assets?.coloringPageUrl],
+  ].filter(([, url]) => url);
+  panel.hidden = files.length === 0;
+  files.forEach(([label, url]) => {
+    const figure = document.createElement("figure");
+    const image = document.createElement("img");
+    const caption = document.createElement("figcaption");
+    image.src = url;
+    image.alt = label;
+    caption.textContent = label;
+    figure.append(image, caption);
+    grid.append(figure);
+  });
 }
 
 function renderOrderProgress(order) {
