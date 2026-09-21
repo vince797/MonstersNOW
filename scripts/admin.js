@@ -665,12 +665,18 @@ function addPage(page = {}) {
   if (pagesContainer.children.length >= 32) return;
   const card = document.createElement("section");
   card.className = "story-page-card";
-  card.innerHTML = `<header class="page-card-header"><span><small data-page-role>Story page</small><strong>Page <span data-page-number></span></strong></span><div class="page-card-actions"><button type="button" data-page-action="up" aria-label="Move page up" title="Move page up">↑</button><button type="button" data-page-action="down" aria-label="Move page down" title="Move page down">↓</button><button type="button" data-page-action="duplicate">Duplicate</button><button type="button" data-page-action="remove">Remove</button></div></header><label class="page-copy-field"><span>Story text</span><span class="token-toolbar" aria-label="Insert personalization"><button type="button" data-insert-token="{child_name}">+ Child name</button><button type="button" data-insert-token="{monster_name}">+ Monster name</button></span><textarea rows="10" maxlength="2000" placeholder="Write the words the child will read on this page…"></textarea><small><span data-text-words>0 words</span> · <span data-text-count>0</span>/2,000 characters</small></label><label>Illustration direction<textarea rows="10" maxlength="3000" placeholder="Describe the scene, characters, action, lighting, and composition…"></textarea><small><span data-art-words>0 words</span> · <span data-art-count>0</span>/3,000 characters</small></label><section class="page-artwork-panel"><div class="page-artwork-visual"><img alt="" data-artwork-image hidden /><div data-artwork-empty><span>◇</span><strong>No artwork uploaded</strong><small>JPG, PNG, or WebP · 3 MB maximum</small></div></div><div class="page-artwork-controls"><div><strong>Page artwork</strong><small data-artwork-name>Upload the current illustration for this page.</small></div><label class="button secondary artwork-upload-button"><input type="file" accept="image/jpeg,image/png,image/webp" data-artwork-file /> <span data-artwork-upload-label>Upload artwork</span></label><label class="artwork-status-label">Review status<select data-artwork-review><option value="missing">Missing</option><option value="draft">Draft</option><option value="approved">Approved</option><option value="final">Final</option></select></label><button class="button secondary" type="button" data-remove-artwork hidden>Remove from page</button><p data-artwork-message role="status"></p></div></section>`;
+  card.innerHTML = `<header class="page-card-header"><span><small data-page-role>Story page</small><strong>Page <span data-page-number></span></strong></span><div class="page-card-actions"><button type="button" data-page-action="up" aria-label="Move page up" title="Move page up">↑</button><button type="button" data-page-action="down" aria-label="Move page down" title="Move page down">↓</button><button type="button" data-page-action="duplicate">Duplicate</button><button type="button" data-page-action="remove">Remove</button></div></header><label class="page-copy-field"><span>Story text</span><span class="token-toolbar" aria-label="Insert personalization"><button type="button" data-insert-token="{child_name}">+ Child name</button><button type="button" data-insert-token="{monster_name}">+ Monster name</button></span><textarea rows="10" maxlength="2000" placeholder="Write the words the child will read on this page…"></textarea><small><span data-text-words>0 words</span> · <span data-text-count>0</span>/2,000 characters</small></label><label>Illustration direction<textarea rows="10" maxlength="3000" placeholder="Describe the scene, characters, action, lighting, and composition…"></textarea><small><span data-art-words>0 words</span> · <span data-art-count>0</span>/3,000 characters</small></label><section class="page-artwork-panel"><div class="page-artwork-visual"><img alt="" data-artwork-image hidden /><div data-artwork-empty><span>◇</span><strong>No artwork uploaded</strong><small>JPG, PNG, or WebP · 3 MB maximum</small></div><div class="monster-zone" data-monster-zone aria-label="Admin-only personalized monster placement"><span>MONSTER</span></div></div><div class="page-artwork-controls"><div><strong>Page artwork</strong><small data-artwork-name>Upload the background illustration without a monster.</small></div><label class="button secondary artwork-upload-button"><input type="file" accept="image/jpeg,image/png,image/webp" data-artwork-file /> <span data-artwork-upload-label>Upload artwork</span></label><label class="artwork-status-label">Review status<select data-artwork-review><option value="missing">Missing</option><option value="draft">Draft</option><option value="approved">Approved</option><option value="final">Final</option></select></label><fieldset class="monster-placement-controls"><legend>Personalized monster zone <small>Admin preview only</small></legend><label>Horizontal <input type="range" min="5" max="95" data-placement="x" /><output data-placement-output="x"></output></label><label>Baseline <input type="range" min="10" max="95" data-placement="y" /><output data-placement-output="y"></output></label><label>Size <input type="range" min="15" max="70" data-placement="scale" /><output data-placement-output="scale"></output></label><div><label>Facing<select data-placement="facing"><option value="left">Left</option><option value="right">Right</option><option value="neutral">Neutral</option></select></label><label>Layer<select data-placement="layer"><option value="front">In front</option><option value="behind">Behind foreground</option></select></label></div><p>The guide is never included in customer previews or print files.</p></fieldset><button class="button secondary" type="button" data-remove-artwork hidden>Remove from page</button><p data-artwork-message role="status"></p></div></section>`;
   card.dataset.artworkUrl = page.artworkUrl || "";
   card.dataset.artworkPath = page.artworkPath || "";
   card.dataset.artworkName = page.artworkName || "";
   card.dataset.artworkStatus = page.artworkStatus || (page.artworkUrl ? "draft" : "missing");
   card.dataset.artworkUpdatedAt = page.artworkUpdatedAt || "";
+  const placement = page.monsterPlacement || {};
+  card.dataset.monsterX = String(placement.x ?? 68);
+  card.dataset.monsterY = String(placement.y ?? 72);
+  card.dataset.monsterScale = String(placement.scale ?? 36);
+  card.dataset.monsterFacing = placement.facing || "left";
+  card.dataset.monsterLayer = placement.layer || "front";
   const areas = card.querySelectorAll("textarea");
   areas[0].value = page.text || "";
   areas[1].value = page.illustrationPrompt || "";
@@ -692,6 +698,7 @@ function addPage(page = {}) {
     refreshPageTools();
   });
   card.querySelector("[data-remove-artwork]").addEventListener("click", () => removePageArtwork(card));
+  card.querySelectorAll("[data-placement]").forEach((control) => control.addEventListener("input", () => updateMonsterPlacement(card, control)));
   renderArtwork(card);
   pagesContainer.append(card);
   if (!loadingStory) { selectedPageIndex = pagesContainer.children.length - 1; markStoryDirty(); refreshPageTools(); selectPage(selectedPageIndex, true); }
@@ -770,7 +777,42 @@ function pageData(card) {
     artworkName: card.dataset.artworkName || "",
     artworkStatus: card.dataset.artworkStatus || "missing",
     artworkUpdatedAt: card.dataset.artworkUpdatedAt || null,
+    monsterPlacement: {
+      x: Number(card.dataset.monsterX),
+      y: Number(card.dataset.monsterY),
+      scale: Number(card.dataset.monsterScale),
+      facing: card.dataset.monsterFacing,
+      layer: card.dataset.monsterLayer,
+    },
   };
+}
+
+function updateMonsterPlacement(card, control) {
+  const key = control.dataset.placement;
+  const datasetKey = `monster${key.charAt(0).toUpperCase()}${key.slice(1)}`;
+  card.dataset[datasetKey] = control.value;
+  renderMonsterPlacement(card);
+  markStoryDirty();
+  renderSelectedSpread();
+}
+
+function renderMonsterPlacement(card) {
+  const values = {
+    x: card.dataset.monsterX || "68",
+    y: card.dataset.monsterY || "72",
+    scale: card.dataset.monsterScale || "36",
+    facing: card.dataset.monsterFacing || "left",
+    layer: card.dataset.monsterLayer || "front",
+  };
+  card.querySelectorAll("[data-placement]").forEach((control) => { control.value = values[control.dataset.placement]; });
+  ["x", "y", "scale"].forEach((key) => { card.querySelector(`[data-placement-output="${key}"]`).textContent = `${values[key]}%`; });
+  const zone = card.querySelector("[data-monster-zone]");
+  zone.style.left = `${values.x}%`;
+  zone.style.top = `${values.y}%`;
+  zone.style.width = `${values.scale}%`;
+  zone.style.transform = `translate(-50%, -100%) scaleX(${values.facing === "right" ? -1 : 1})`;
+  zone.dataset.layer = values.layer;
+  zone.dataset.facing = values.facing;
 }
 
 function renderArtwork(card) {
@@ -789,6 +831,7 @@ function renderArtwork(card) {
   uploadLabel.textContent = hasArtwork ? "Replace artwork" : "Upload artwork";
   name.textContent = hasArtwork ? `${card.dataset.artworkName || "Uploaded artwork"} · ${artworkStatusLabel(status.value)}` : "Upload the current illustration for this page.";
   if (hasArtwork && image.src !== card.dataset.artworkUrl) image.src = card.dataset.artworkUrl;
+  renderMonsterPlacement(card);
 }
 
 async function uploadPageArtwork(card, file) {
@@ -1035,6 +1078,15 @@ function renderSelectedSpread(cards = [...pagesContainer.children]) {
       image.alt = `Artwork for page ${firstIndex + offset + 1}`;
       art.append(image);
     } else art.textContent = "Artwork pending";
+    const zone = document.createElement("span");
+    zone.className = "monster-zone monster-zone-preview";
+    zone.textContent = "MONSTER";
+    zone.style.left = `${card.dataset.monsterX || 68}%`;
+    zone.style.top = `${card.dataset.monsterY || 72}%`;
+    zone.style.width = `${card.dataset.monsterScale || 36}%`;
+    zone.style.transform = `translate(-50%, -100%) scaleX(${card.dataset.monsterFacing === "right" ? -1 : 1})`;
+    zone.dataset.layer = card.dataset.monsterLayer || "front";
+    art.append(zone);
     section.querySelector("p").textContent = card.querySelector("textarea").value.replaceAll("{child_name}", child).replaceAll("{monster_name}", monster) || "No story text yet.";
     article.append(section);
   });

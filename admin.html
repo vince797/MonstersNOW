@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex, nofollow" />
     <title>Dashboard | MonstersNOW Admin</title>
-    <link rel="stylesheet" href="styles.css?v=20260921-production-workflow" />
+    <link rel="stylesheet" href="styles.css?v=20260921-monster-placement" />
   </head>
   <body class="admin-page">
     <main>
@@ -319,6 +319,6 @@
     </main>
     <dialog id="artwork-overview" class="artwork-overview"><div class="artwork-overview-shell"><header><div><p class="eyebrow">Visual production</p><h2>Artwork overview</h2><p id="artwork-overview-summary">Review all 32 pages at a glance.</p></div><button class="button secondary" id="close-artwork-overview" type="button">Close</button></header><nav class="artwork-filters" aria-label="Filter artwork"><button class="is-active" type="button" data-artwork-filter="all">All</button><button type="button" data-artwork-filter="missing">Missing</button><button type="button" data-artwork-filter="draft">Draft</button><button type="button" data-artwork-filter="approved">Approved</button><button type="button" data-artwork-filter="final">Final</button></nav><div id="artwork-overview-grid" class="artwork-overview-grid"></div></div></dialog>
     <dialog id="order-detail" class="order-detail"><form id="order-detail-form"><div class="admin-panel-heading"><div><p class="eyebrow">Fulfillment record</p><h2>Order details</h2></div><button type="button" id="close-order-detail" class="button secondary">Close</button></div><div class="order-detail-summary"><p id="order-detail-id"></p><span id="order-detail-age"></span></div><ol class="order-progress" id="order-progress" aria-label="Order progress"></ol><dl id="order-detail-fields"></dl><section class="order-artwork-panel" id="order-artwork-panel" hidden><div><p class="eyebrow">Customer artwork</p><h3>Saved monster files</h3></div><div class="order-artwork-grid" id="order-artwork-grid"></div></section><p class="order-payment-notice">Statuses are manually managed. A checkout record is not proof of payment; verify payment in Stripe before starting production.</p><label>Operational status<select id="order-detail-status"></select></label><label>Production notes<textarea id="order-detail-notes" rows="6" maxlength="2000" placeholder="Proof review, approval details, printer updates, tracking follow-up…"></textarea></label><div class="order-detail-actions"><button class="button secondary" id="advance-order" type="button">Advance order</button><button class="button primary" id="save-order-detail" type="submit">Save changes</button></div><p id="order-detail-message" role="status"></p></form></dialog>
-    <script src="scripts/admin.js?v=20260921-production-workflow"></script>
+    <script src="scripts/admin.js?v=20260921-monster-placement"></script>
   </body>
 </html>
