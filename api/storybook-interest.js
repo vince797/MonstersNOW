@@ -10,6 +10,7 @@ const { listOrders, updateOrder } = require("../lib/order-library");
 const { importManuscript } = require("../lib/manuscript-import");
 const { uploadStoryArtwork } = require("../lib/story-artwork");
 const { createMonsterSubmission, finalizeMonsterSubmission } = require("../lib/monster-submissions");
+const { createAdminStoryProof } = require("../lib/admin-story-proof");
 
 module.exports = async function handler(request, response) {
   const resource = firstQueryValue(request.query?.resource) || new URL(request.url, "https://monstersnow.com").searchParams.get("resource");
@@ -33,6 +34,23 @@ module.exports = async function handler(request, response) {
         code: error.code || "monster_submission_failed",
         error: error.message || "The monster submission could not be saved.",
       });
+    }
+  }
+  if (resource === "story-proof" && request.method === "GET") {
+    try {
+      assertAdminRequest(request);
+      const story = await getStory(firstQueryValue(request.query?.id));
+      if (!story) return sendJson(response, 404, { error: "Story not found." });
+      const pdf = createAdminStoryProof(story, {
+        childName: firstQueryValue(request.query?.child_name),
+        monsterName: firstQueryValue(request.query?.monster_name),
+      });
+      response.setHeader("Content-Type", "application/pdf");
+      response.setHeader("Content-Disposition", `attachment; filename="${story.slug}-editorial-proof.pdf"`);
+      response.setHeader("Cache-Control", "private, no-store");
+      return response.status(200).send(pdf);
+    } catch (error) {
+      return sendJson(response, error.status || 500, { error: error.message || "The editorial proof could not be generated." });
     }
   }
   if (request.method === "POST" && firstQueryValue(request.query?.resource) === "manuscript") {

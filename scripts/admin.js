@@ -29,6 +29,7 @@ let orderQuickFilter = "all";
 let selectedPageIndex = 0;
 let artworkFilter = "all";
 let productionReport = null;
+let productionStoryId = null;
 const orderStatuses = ["checkout_started", "paid", "proofing", "approved", "printing", "shipped", "completed", "cancelled"];
 const orderDialog = document.querySelector("#order-detail");
 const artworkDialog = document.querySelector("#artwork-overview");
@@ -81,6 +82,9 @@ document.querySelector("#halloween-story").addEventListener("click", () => { sho
 document.querySelector("#production-open-book").addEventListener("click", openProductionBook);
 document.querySelector("#production-open-orders").addEventListener("click", () => showView("orders"));
 document.querySelector("#production-view-orders").addEventListener("click", () => showView("orders"));
+document.querySelector("#download-story-proof").addEventListener("click", downloadCurrentStoryProof);
+document.querySelector("#production-download-proof").addEventListener("click", downloadProductionStoryProof);
+document.querySelector("#open-story-production").addEventListener("click", openCurrentStoryProduction);
 
 async function loadProductionReadiness() {
   const overall = document.querySelector("#production-overall");
@@ -212,17 +216,74 @@ function renderDashboard() {
 }
 
 function openProductionBook() {
-  const story = stories.find((item) => item.is_seasonal) || stories[0];
+  const story = stories.find((item) => item.id === productionStoryId) || stories.find((item) => item.is_seasonal) || stories[0];
   if (story) editStory(story);
   else editStory({ title_template: "{child_name} and {monster_name}'s Halloween Monster Night", slug: "halloween-monster-night", description: "A friendly Halloween adventure.", is_seasonal: true, available_from: "2026-09-15", available_until: "2026-10-31", pages: [] });
   showView("stories");
 }
 
+function openCurrentStoryProduction() {
+  const story = currentStory();
+  if (!story) {
+    editorStatus.textContent = "Save this master book before opening Production.";
+    return;
+  }
+  if (storyDirty) {
+    editorStatus.textContent = "Save your changes before opening Production so the proof matches the editor.";
+    return;
+  }
+  productionStoryId = story.id;
+  showView("production");
+}
+
+function currentStory() {
+  const id = document.querySelector("#story-id").value;
+  return stories.find((story) => story.id === id) || null;
+}
+
+async function downloadCurrentStoryProof() {
+  const story = currentStory();
+  if (!story) { editorStatus.textContent = "Save this master book before generating a proof."; return; }
+  if (storyDirty) { editorStatus.textContent = "Save your latest changes before generating the review PDF."; return; }
+  await downloadStoryProof(story, editorStatus);
+}
+
+async function downloadProductionStoryProof() {
+  const story = stories.find((item) => item.id === productionStoryId) || stories.find((item) => item.is_seasonal) || stories[0];
+  if (story) await downloadStoryProof(story, document.querySelector("#production-hub-next"));
+}
+
+async function downloadStoryProof(story, status) {
+  const childName = document.querySelector("#sample-child")?.value || "Alex";
+  const monsterName = document.querySelector("#sample-monster")?.value || "Milo";
+  const button = document.querySelector("#story-id").value === story.id ? document.querySelector("#download-story-proof") : document.querySelector("#production-download-proof");
+  button.disabled = true;
+  status.textContent = "Building the 32-page editorial proof…";
+  try {
+    const query = new URLSearchParams({ resource: "story-proof", id: story.id, child_name: childName, monster_name: monsterName });
+    const response = await fetch(`/api/storybook-interest?${query}`, { headers: { "x-admin-password": adminPassword } });
+    if (!response.ok) {
+      const result = await response.json().catch(() => ({}));
+      throw new Error(result.error || "The editorial proof could not be generated.");
+    }
+    const url = URL.createObjectURL(await response.blob());
+    const link = document.createElement("a");
+    link.href = url; link.download = `${story.slug}-editorial-proof.pdf`; link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    status.textContent = "Editorial proof downloaded. It is for review only—not a Lulu print file.";
+  } catch (error) {
+    status.textContent = error.message;
+  } finally {
+    button.disabled = false;
+  }
+}
+
 function renderProductionHub(error = null) {
-  const report = productionReport;
+  const story = stories.find((item) => item.id === productionStoryId) || stories.find((item) => item.is_seasonal) || stories[0];
+  if (story && !productionStoryId) productionStoryId = story.id;
+  const report = story?.slug === "halloween-monster-night" ? productionReport : null;
   const status = document.querySelector("#production-hub-status");
   const checksContainer = document.querySelector("#production-hub-checks");
-  const story = stories.find((item) => item.is_seasonal) || stories[0];
   const pages = story?.pages || [];
   const contentReady = pages.filter((page) => page.text?.trim() && page.illustrationPrompt?.trim()).length;
   const artworkReady = pages.filter((page) => page.artworkUrl && ["approved", "final"].includes(page.artworkStatus)).length;
@@ -230,6 +291,7 @@ function renderProductionHub(error = null) {
   const check = (label) => reportChecks.find((item) => item.label === label);
   const passed = (label) => check(label)?.status === "pass";
   const coverReady = passed("Softcover package cover") && passed("Hardcover package cover");
+  const packageReady = contentReady === 32 && artworkReady === 32 && coverReady && passed("Lulu file validation");
   const pipeline = [
     { title: "Master copy", detail: `${contentReady}/32 pages complete`, ready: contentReady === 32, action: "Edit book", run: openProductionBook },
     { title: "Artwork", detail: `${artworkReady}/32 page illustrations approved`, ready: artworkReady === 32 && passed("Illustration dimensions") && passed("Print-art quality review"), action: "Review artwork", run: openProductionBook },
@@ -237,6 +299,13 @@ function renderProductionHub(error = null) {
     { title: "Lulu validation", detail: passed("Lulu file validation") ? "Files accepted" : "Waiting on final files", ready: passed("Lulu file validation") },
     { title: "Fulfillment", detail: `${orders.filter((order) => !["completed", "cancelled"].includes(order.status)).length} active orders`, ready: true, action: "View orders", run: () => showView("orders") },
   ];
+
+  document.querySelector("#production-book-title").textContent = story?.title_template || "Select a master book";
+  document.querySelector("#production-book-summary").textContent = story?.description || "Complete the master story before preparing print files.";
+  document.querySelector("#editorial-proof-state").textContent = story?.id ? "Ready to generate from the latest saved story text." : "Save the master book to generate a review PDF.";
+  document.querySelector("#print-package-state").textContent = packageReady ? "Interior and cover package ready." : `${contentReady}/32 pages complete · ${artworkReady}/32 illustrations approved.`;
+  document.querySelector("#lulu-gate-state").textContent = packageReady ? "Ready for final sandbox validation and proof ordering." : "Locked until real interior and cover files pass preflight.";
+  document.querySelector("#production-gate").classList.toggle("is-ready", packageReady);
 
   status.textContent = error ? "Unavailable" : report?.status === "ready" ? "Ready for Lulu" : "Action needed";
   status.className = `production-overall ${report?.status === "ready" ? "is-ready" : "is-blocked"}`;
