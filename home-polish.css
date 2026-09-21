@@ -1,0 +1,135 @@
+.books-section {
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 7% 10%, rgba(255, 143, 67, .13), transparent 25%),
+    radial-gradient(circle at 94% 86%, rgba(0, 169, 179, .13), transparent 28%),
+    #fffaf4;
+}
+
+.books-section .section-heading h2 {
+  font-family: "Fredoka", "Arial Rounded MT Bold", system-ui, sans-serif;
+  font-variation-settings: "wdth" 108, "wght" 700;
+}
+
+.home-cover-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(14px, 2vw, 24px);
+  max-width: 1180px;
+  margin-inline: auto;
+}
+
+.home-cover-grid .book-card {
+  border-radius: 16px;
+  box-shadow: 0 18px 42px rgba(6, 27, 59, .12);
+}
+
+.home-cover-grid .book-card:nth-child(even) {
+  transform: translateY(16px);
+}
+
+.home-cover-grid .book-card:nth-child(even):hover {
+  transform: translateY(10px);
+}
+
+.series-book-preview {
+  aspect-ratio: 1;
+  border-bottom: 0;
+}
+
+.series-book-preview .personalized-cover-background {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  object-fit: cover;
+  mix-blend-mode: normal;
+}
+
+.series-book-preview .personalized-cover-monster {
+  position: absolute;
+  right: 18%;
+  bottom: 5.5%;
+  width: 64%;
+  height: 64%;
+  padding: 0;
+  object-fit: contain;
+  mix-blend-mode: normal;
+  filter: drop-shadow(0 6px 3px rgba(255, 202, 72, .28)) drop-shadow(0 18px 14px rgba(2, 13, 31, .68));
+}
+
+.series-book-preview.cover-halloween .personalized-cover-monster {
+  right: 20%;
+  bottom: 4%;
+  width: 60%;
+  height: 64%;
+}
+
+.series-book-preview.cover-adventure .personalized-cover-monster {
+  right: 14%;
+  bottom: 4%;
+  width: 72%;
+  height: 65%;
+}
+
+.series-book-preview.cover-bedtime .personalized-cover-monster {
+  right: 19.5%;
+  width: 61%;
+  height: 61%;
+}
+
+.series-book-preview.cover-abc .personalized-cover-monster {
+  right: 17%;
+  bottom: 4%;
+  width: 66%;
+  height: 65%;
+}
+
+.home-cover-grid .book-card-content {
+  padding: 15px;
+}
+
+.home-cover-grid .book-card h3 {
+  font-family: "Fredoka", "Arial Rounded MT Bold", system-ui, sans-serif;
+  font-size: 1.12rem;
+}
+
+.books-section .section-actions {
+  margin-top: 46px;
+}
+
+@media (max-width: 980px) {
+  .home-cover-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .home-cover-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .home-cover-grid .book-card:nth-child(even) {
+    transform: translateY(8px);
+  }
+
+  .home-cover-grid .book-card-content {
+    padding: 11px;
+  }
+
+  .home-cover-grid .book-card h3 {
+    font-size: .92rem;
+  }
+
+  .home-cover-grid .book-card-content p {
+    font-size: .74rem;
+  }
+
+  .home-cover-grid .book-card-meta {
+    min-height: 24px;
+    padding: 3px 7px;
+    font-size: .68rem;
+  }
+}

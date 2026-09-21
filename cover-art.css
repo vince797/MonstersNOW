@@ -6,6 +6,22 @@
   src: url("assets/fonts/fredoka/Fredoka-Variable.ttf") format("truetype-variations");
 }
 
+@font-face {
+  font-family: "Chewy";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("assets/fonts/chewy/Chewy-Regular.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Lilita One";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("assets/fonts/lilita-one/LilitaOne-Regular.ttf") format("truetype");
+}
+
 .personalized-cover {
   --cover-glow: rgba(255, 198, 63, .2);
   --cover-title: #fff8da;
@@ -27,6 +43,14 @@
   --cover-title-edge: #175581;
   --cover-title-shadow: rgba(3, 32, 74, .78);
   --cover-accent: #ffd96f;
+}
+
+.cover-halloween {
+  --cover-glow: rgba(255, 157, 57, .3);
+  --cover-title: #fff1b8;
+  --cover-title-edge: #a4451d;
+  --cover-title-shadow: rgba(62, 17, 25, .84);
+  --cover-accent: #ffc863;
 }
 
 .cover-bedtime {
@@ -124,6 +148,39 @@
   text-shadow: 0 2px 0 var(--cover-title-edge), 0 5px 0 var(--cover-title-shadow), 0 9px 22px rgba(3, 15, 38, .9);
 }
 
+.cover-halloween .personalized-cover-title,
+.cover-counting .personalized-cover-title {
+  font-family: "Chewy", "Fredoka", system-ui, sans-serif;
+  font-variation-settings: normal;
+  font-weight: 400;
+  letter-spacing: -.015em;
+}
+
+.cover-adventure .personalized-cover-title,
+.cover-abc .personalized-cover-title,
+.cover-birthday .personalized-cover-title {
+  font-family: "Lilita One", "Fredoka", system-ui, sans-serif;
+  font-variation-settings: normal;
+  font-weight: 400;
+  letter-spacing: .005em;
+  text-transform: uppercase;
+}
+
+.cover-bedtime .personalized-cover-title,
+.cover-kindness .personalized-cover-title {
+  font-family: "Fredoka", "Arial Rounded MT Bold", system-ui, sans-serif;
+  font-variation-settings: "wdth" 118, "wght" 650;
+  letter-spacing: -.025em;
+}
+
+.cover-halloween .personalized-cover-title { transform: rotate(-1.2deg); }
+.cover-adventure .personalized-cover-title { transform: skew(-4deg) rotate(-.5deg); }
+.cover-bedtime .personalized-cover-title { transform: rotate(.7deg); }
+.cover-abc .personalized-cover-title { letter-spacing: .025em; }
+.cover-counting .personalized-cover-title { transform: rotate(-.8deg); }
+.cover-kindness .personalized-cover-title { transform: rotate(.5deg); }
+.cover-birthday .personalized-cover-title { transform: rotate(-1deg); }
+
 .story-card .personalized-cover-monster {
   position: absolute;
   right: 18%;
@@ -136,6 +193,20 @@
   filter: drop-shadow(0 6px 3px rgba(255, 202, 72, .28)) drop-shadow(0 18px 14px rgba(2, 13, 31, .68));
 }
 
+.cover-halloween .personalized-cover-monster {
+  right: 20%;
+  bottom: 4%;
+  width: 60%;
+  height: 64%;
+}
+
+.cover-adventure .personalized-cover-monster {
+  right: 14%;
+  bottom: 4%;
+  width: 72%;
+  height: 65%;
+}
+
 .cover-bedtime .personalized-cover-monster,
 .cover-kindness .personalized-cover-monster {
   width: 61%;
@@ -143,8 +214,25 @@
   right: 19.5%;
 }
 
+.cover-abc .personalized-cover-monster {
+  right: 17%;
+  bottom: 4%;
+  width: 66%;
+  height: 65%;
+}
+
+.cover-counting .personalized-cover-monster {
+  right: 14%;
+  bottom: 3.5%;
+  width: 72%;
+  height: 66%;
+}
+
 .cover-birthday .personalized-cover-monster {
-  bottom: 4.5%;
+  right: 14%;
+  bottom: 3.5%;
+  width: 72%;
+  height: 66%;
 }
 
 .personalized-cover-credit {
