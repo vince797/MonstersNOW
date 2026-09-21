@@ -3489,6 +3489,54 @@ main > section {
   .hero {
     min-height: auto;
     padding-top: 28px;
+    padding-bottom: 30px;
+  }
+
+  .hero .button.secondary {
+    border-color: rgba(125, 229, 228, 0.62);
+    background: rgba(7, 31, 61, 0.32);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  }
+
+  .hero .rating-row {
+    display: grid;
+    justify-items: start;
+    gap: 9px;
+    margin-top: 16px;
+  }
+
+  .hero .rating-row p {
+    max-width: 34rem;
+    font-size: 0.95rem;
+    line-height: 1.45;
+  }
+
+  .hero + .proof-strip {
+    gap: 8px;
+    padding: 14px 16px 22px;
+    border: 0;
+    background: linear-gradient(180deg, #08717b 0%, #075262 100%);
+  }
+
+  .hero + .proof-strip span {
+    min-height: 74px;
+    padding: 12px 14px;
+    border: 1px solid rgba(125, 229, 228, 0.2);
+    border-radius: 11px;
+    background: rgba(5, 40, 62, 0.58);
+    color: rgba(255, 255, 255, 0.72);
+    box-shadow: 0 8px 18px rgba(3, 26, 46, 0.12);
+  }
+
+  .hero + .proof-strip strong {
+    color: #fff;
+  }
+
+  .hero + .proof-strip + .transformation-section {
+    padding-top: 42px;
+    background:
+      radial-gradient(circle at 92% 12%, rgba(0, 169, 179, 0.1), transparent 28%),
+      linear-gradient(180deg, #f4fbfb 0%, #fff 86%);
   }
 
   .steps-section,
@@ -3650,6 +3698,11 @@ main > section {
 
   .proof-strip {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .hero + .proof-strip span {
+    min-height: 74px;
+    padding: 12px 14px;
   }
 
   .book-hero-stack {
