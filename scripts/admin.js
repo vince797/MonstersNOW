@@ -33,6 +33,8 @@ let productionStoryId = null;
 const orderStatuses = ["checkout_started", "paid", "proofing", "approved", "printing", "shipped", "completed", "cancelled"];
 const orderDialog = document.querySelector("#order-detail");
 const artworkDialog = document.querySelector("#artwork-overview");
+const storyReviewDialog = document.querySelector("#story-review");
+let reviewSpreadIndex = 0;
 const CATALOG_COVERS = {
   "halloween-monster-night": "assets/storybook/cover-series/minimal-concepts/halloween-monster-night-v1-web.jpg",
   "big-adventure": "assets/storybook/cover-series/minimal-concepts/big-adventure-v1-web.jpg",
@@ -64,8 +66,15 @@ document.querySelector("#advance-order").addEventListener("click", advanceSelect
 document.querySelector("#approve-order-proof").addEventListener("click", approveSelectedOrderProof);
 document.querySelector("#revoke-order-proof").addEventListener("click", revokeSelectedOrderProof);
 document.querySelector("#open-artwork-overview").addEventListener("click", openArtworkOverview);
+document.querySelector("#open-story-review").addEventListener("click", openStoryReview);
 document.querySelector("#close-artwork-overview").addEventListener("click", () => artworkDialog.close());
+document.querySelector("#close-story-review").addEventListener("click", () => storyReviewDialog.close());
 artworkDialog.addEventListener("cancel", (event) => { event.preventDefault(); artworkDialog.close(); });
+storyReviewDialog.addEventListener("cancel", (event) => { event.preventDefault(); storyReviewDialog.close(); });
+document.querySelector("#review-previous").addEventListener("click", () => { reviewSpreadIndex -= 1; renderStoryReview(); });
+document.querySelector("#review-next").addEventListener("click", () => { reviewSpreadIndex += 1; renderStoryReview(); });
+["review-child", "review-monster"].forEach((id) => document.querySelector(`#${id}`).addEventListener("input", renderStoryReview));
+document.querySelector("#approve-master-story").addEventListener("click", approveMasterStory);
 document.querySelectorAll("[data-artwork-filter]").forEach((button) => button.addEventListener("click", () => {
   artworkFilter = button.dataset.artworkFilter;
   renderArtworkOverview();
@@ -928,6 +937,119 @@ function renderArtworkOverview() {
   if (!visible.length) grid.innerHTML = '<div class="artwork-overview-empty"><strong>No pages in this group</strong><span>Choose another artwork status.</span></div>';
 }
 
+function openStoryReview() {
+  const cards = [...pagesContainer.children];
+  if (!cards.length) { editorStatus.textContent = "Add a page before opening book review."; return; }
+  document.querySelector("#review-child").value = document.querySelector("#sample-child").value || "Alex";
+  document.querySelector("#review-monster").value = document.querySelector("#sample-monster").value || "Milo";
+  reviewSpreadIndex = Math.floor(selectedPageIndex / 2);
+  renderStoryReview();
+  storyReviewDialog.showModal();
+}
+
+function storyReviewState(cards = [...pagesContainer.children]) {
+  const issues = [];
+  if (!document.querySelector("#story-title").value.trim()) issues.push({ page: null, label: "Book title is missing" });
+  if (!document.querySelector("#story-slug").value.trim()) issues.push({ page: null, label: "Book slug is missing" });
+  if (cards.length !== 32) issues.push({ page: null, label: `${cards.length}/32 pages added` });
+  cards.forEach((card, index) => {
+    const areas = card.querySelectorAll("textarea");
+    if (!areas[0].value.trim()) issues.push({ page: index, label: `Page ${index + 1}: story text is missing` });
+    if (!areas[1].value.trim()) issues.push({ page: index, label: `Page ${index + 1}: illustration direction is missing` });
+    if (!card.dataset.artworkUrl) issues.push({ page: index, label: `Page ${index + 1}: artwork is missing` });
+    else if (!["approved", "final"].includes(card.dataset.artworkStatus)) issues.push({ page: index, label: `Page ${index + 1}: artwork needs approval` });
+    const unknown = `${areas[0].value} ${areas[1].value}`.match(/\{[^}]+\}/g) || [];
+    [...new Set(unknown)].filter((token) => !["{child_name}", "{monster_name}"].includes(token)).forEach((token) => issues.push({ page: index, label: `Page ${index + 1}: unknown token ${token}` }));
+    if (areas[0].value.length > 1200) issues.push({ page: index, label: `Page ${index + 1}: story text needs a length review` });
+  });
+  return { issues, ready: cards.length === 32 && issues.length === 0 };
+}
+
+function renderStoryReview() {
+  const cards = [...pagesContainer.children];
+  if (!cards.length) return;
+  const spreadCount = Math.ceil(cards.length / 2);
+  reviewSpreadIndex = Math.max(0, Math.min(reviewSpreadIndex, spreadCount - 1));
+  const firstPage = reviewSpreadIndex * 2;
+  const child = document.querySelector("#review-child").value.trim() || "Alex";
+  const monster = document.querySelector("#review-monster").value.trim() || "Milo";
+  const state = storyReviewState(cards);
+  document.querySelector("#story-review-title").textContent = (document.querySelector("#story-title").value || "Untitled master book")
+    .replaceAll("{child_name}", child)
+    .replaceAll("{monster_name}", monster);
+  document.querySelector("#story-review-summary").textContent = `Reviewing with ${child} and ${monster} · ${cards.length} pages`;
+  document.querySelector("#review-spread-label").textContent = `Spread ${reviewSpreadIndex + 1} of ${spreadCount} · Pages ${firstPage + 1}${cards[firstPage + 1] ? `–${firstPage + 2}` : ""}`;
+  document.querySelector("#review-previous").disabled = reviewSpreadIndex === 0;
+  document.querySelector("#review-next").disabled = reviewSpreadIndex === spreadCount - 1;
+
+  const spread = document.querySelector("#story-review-spread");
+  spread.replaceChildren(...cards.slice(firstPage, firstPage + 2).map((card, offset) => buildReviewPage(card, firstPage + offset, child, monster)));
+  document.querySelector("#story-review-spread-nav").replaceChildren(...Array.from({ length: spreadCount }, (_, index) => {
+    const button = document.createElement("button");
+    const pageIssues = state.issues.some((issue) => issue.page === index * 2 || issue.page === index * 2 + 1);
+    button.type = "button";
+    button.textContent = String(index + 1);
+    button.className = `${index === reviewSpreadIndex ? "is-current" : ""} ${pageIssues ? "has-issue" : "is-ready"}`;
+    button.setAttribute("aria-label", `Spread ${index + 1}${pageIssues ? ", needs attention" : ", ready"}`);
+    button.addEventListener("click", () => { reviewSpreadIndex = index; renderStoryReview(); });
+    return button;
+  }));
+
+  document.querySelector("#review-readiness-title").textContent = state.ready ? "Ready for approval" : "Review required";
+  document.querySelector("#review-readiness-count").textContent = state.ready ? "All 32 pages passed" : `${state.issues.length} issue${state.issues.length === 1 ? "" : "s"}`;
+  const issues = document.querySelector("#story-review-issues");
+  if (!state.issues.length) issues.innerHTML = "<li class=\"is-ready\">✓ Copy, artwork, personalization, and page count passed.</li>";
+  else issues.replaceChildren(...state.issues.map((issue) => {
+    const item = document.createElement("li");
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = issue.label;
+    if (issue.page !== null) button.addEventListener("click", () => { storyReviewDialog.close(); selectPage(issue.page, true); });
+    else button.disabled = true;
+    item.append(button);
+    return item;
+  }));
+  const approve = document.querySelector("#approve-master-story");
+  approve.disabled = !state.ready || savingStory;
+  approve.textContent = state.ready ? "Approve & publish master" : "Resolve issues to approve";
+}
+
+function buildReviewPage(card, index, child, monster) {
+  const section = document.createElement("section");
+  section.className = "review-page";
+  section.innerHTML = '<header><span></span><button type="button">Edit page</button></header><div class="review-page-art"></div><p></p><footer><span></span><span></span></footer>';
+  section.querySelector("header span").textContent = `Page ${index + 1} · ${pageRole(index, pagesContainer.children.length)}`;
+  section.querySelector("header button").addEventListener("click", () => { storyReviewDialog.close(); selectPage(index, true); });
+  const art = section.querySelector(".review-page-art");
+  if (card.dataset.artworkUrl) {
+    const image = document.createElement("img"); image.src = card.dataset.artworkUrl; image.alt = `Artwork for page ${index + 1}`; art.append(image);
+  } else art.innerHTML = "<span>Artwork missing</span>";
+  const zone = document.createElement("i");
+  zone.className = "monster-zone monster-zone-preview";
+  zone.style.left = `${card.dataset.monsterX || 68}%`;
+  zone.style.top = `${card.dataset.monsterY || 72}%`;
+  zone.style.width = `${card.dataset.monsterScale || 36}%`;
+  zone.style.transform = `translate(-50%, -100%) scaleX(${card.dataset.monsterFacing === "right" ? -1 : 1})`;
+  art.append(zone);
+  section.querySelector("p").textContent = card.querySelectorAll("textarea")[0].value.replaceAll("{child_name}", child).replaceAll("{monster_name}", monster) || "No story text yet.";
+  const footer = section.querySelectorAll("footer span");
+  footer[0].textContent = artworkStatusLabel(card.dataset.artworkStatus || "missing");
+  footer[1].textContent = `${wordCount(card.querySelectorAll("textarea")[0].value)} words`;
+  return section;
+}
+
+async function approveMasterStory() {
+  const state = storyReviewState();
+  if (!state.ready || !window.confirm("Approve and publish this master book? Future personalized orders will use this saved version.")) return;
+  const status = document.querySelector("#story-review-status");
+  status.textContent = "Saving and approving the master book…";
+  const saved = await saveStory("published");
+  if (saved) {
+    storyReviewDialog.close();
+    editorStatus.textContent = `Master book approved and published as version ${saved.version}.`;
+  } else status.textContent = editorStatus.textContent || "The master book could not be approved.";
+}
+
 function storyPayload(status) {
   return {
     title_template: document.querySelector("#story-title").value,
@@ -942,16 +1064,16 @@ function storyPayload(status) {
 }
 
 async function saveStory(status, { silent = false } = {}) {
-  if (savingStory) return;
+  if (savingStory) return null;
   clearTimeout(storyAutosaveTimer);
-  if (!silent && !editor.reportValidity()) return;
+  if (!silent && !editor.reportValidity()) return null;
   const artIncomplete = [...pagesContainer.children].some((card) => !card.dataset.artworkUrl || !["approved", "final"].includes(card.dataset.artworkStatus));
   if (status === "published" && (pagesContainer.children.length !== 32 || [...pagesContainer.querySelectorAll("textarea")].some((area) => !area.value.trim()) || artIncomplete)) {
     editorStatus.textContent = "Complete all 32 pages, upload artwork, and mark every illustration approved or final before publishing. You can save a draft at any time.";
-    return;
+    return null;
   }
   const id = document.querySelector("#story-id").value;
-  if (silent && (!id || !document.querySelector("#story-title").value.trim() || !document.querySelector("#story-slug").value.trim())) return;
+  if (silent && (!id || !document.querySelector("#story-title").value.trim() || !document.querySelector("#story-slug").value.trim())) return null;
   const payload = storyPayload(status);
   if (!silent) editorStatus.textContent = status === "published" ? "Publishing..." : "Saving draft...";
   else document.querySelector("#story-save-state").textContent = "Autosaving…";
@@ -978,10 +1100,12 @@ async function saveStory(status, { silent = false } = {}) {
       renderStoryList();
       editorStatus.textContent = "Saved. Your newer edits still need saving.";
     }
+    return result.story;
   } catch (error) {
     if (silent) {
       document.querySelector("#story-save-state").textContent = "Autosave paused · save manually";
     } else editorStatus.textContent = error.message;
+    return null;
   } finally {
     savingStory = false;
     saveButtons.forEach((button) => { button.disabled = false; });
