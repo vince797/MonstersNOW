@@ -1,5 +1,6 @@
 const fs = require("node:fs/promises");
 const path = require("node:path");
+const crypto = require("node:crypto");
 const { Blob } = require("node:buffer");
 const {
   MONSTERSNOW_COLORING_PAGE_NEGATIVE_PROMPT,
@@ -67,15 +68,18 @@ module.exports = async function handler(request, response) {
   }
 
   let previewRecord;
+  const persistPreview = Boolean(submissionId && submissionToken);
 
   try {
-    previewRecord = await startMonsterPreview({
-      submissionId,
-      token: submissionToken,
-      variationNumber,
-      styleId: style,
-      model: IMAGE_MODEL,
-    });
+    previewRecord = persistPreview
+      ? await startMonsterPreview({
+          submissionId,
+          token: submissionToken,
+          variationNumber,
+          styleId: style,
+          model: IMAGE_MODEL,
+        })
+      : { id: crypto.randomUUID() };
     const startedAt = Date.now();
     const references = await loadReferenceImages();
     const monsterImage = await createMonsterImage(
@@ -91,13 +95,15 @@ module.exports = async function handler(request, response) {
       getRemainingRequestBudget(startedAt),
     );
 
-    const persistedPreview = await completeMonsterPreview({
-      submissionId,
-      token: submissionToken,
-      previewId: previewRecord.id,
-      monsterImage,
-      coloringPage,
-    });
+    const persistedPreview = persistPreview
+      ? await completeMonsterPreview({
+          submissionId,
+          token: submissionToken,
+          previewId: previewRecord.id,
+          monsterImage,
+          coloringPage,
+        })
+      : previewRecord;
 
     return response.status(200).json({
       mode: "ai",
@@ -114,7 +120,7 @@ module.exports = async function handler(request, response) {
         : "Monster preview created. Coloring page will be prepared in the browser.",
     });
   } catch (error) {
-    await failMonsterPreview({ submissionId, previewId: previewRecord?.id, code: error?.code });
+    if (persistPreview) await failMonsterPreview({ submissionId, previewId: previewRecord?.id, code: error?.code });
     console.error("Monster preview generation failed", formatErrorForLog(error));
 
     return response.status(error.status >= 400 && error.status < 500 ? error.status : 502).json({

@@ -221,7 +221,7 @@ async function handleStorybookInterestSubmit(event) {
       format: selectedFormat.value,
       featurePermission,
     });
-    submission.monsterSubmissionId = savedMonster.id;
+    if (savedMonster?.id) submission.monsterSubmissionId = savedMonster.id;
   } catch (error) {
     console.error(error);
     if (interestStatus) interestStatus.textContent = error.message || "Your monster could not be saved. Please try again.";
@@ -1198,6 +1198,10 @@ async function ensureMonsterSubmission(drawing) {
     body: JSON.stringify({ drawing, filename: selectedDrawingFile?.name || "monster-drawing.jpg" }),
   });
   const result = await response.json().catch(() => ({ error: "The upload service did not return a readable response." }));
+  if (!response.ok && (response.status >= 500 || result.code === "PGRST205" || result.code === "story_database_error")) {
+    console.warn("Private monster persistence is unavailable; continuing with the existing in-session preview flow.");
+    return null;
+  }
   if (!response.ok || !result.submission?.id || !result.submission?.token) throw new Error(result.error || "Your drawing could not be saved safely.");
   monsterSubmission = result.submission;
   try { sessionStorage.setItem("monstersnow_monster_submission", JSON.stringify(monsterSubmission)); } catch {}
@@ -1205,7 +1209,8 @@ async function ensureMonsterSubmission(drawing) {
 }
 
 async function finalizeSavedMonster({ email, personalization, selectedPreviewId: previewId, format, featurePermission }) {
-  if (!monsterSubmission?.id || !monsterSubmission?.token || !previewId) throw new Error("Create and choose a monster preview before continuing.");
+  if (!previewId) throw new Error("Create and choose a monster preview before continuing.");
+  if (!monsterSubmission?.id || !monsterSubmission?.token) return null;
   const response = await fetch("/api/monster-submissions", {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
@@ -1236,8 +1241,8 @@ async function convertMonster(drawing, style, variationNumber, savedSubmission) 
       drawing,
       style,
       variationNumber,
-      submissionId: savedSubmission.id,
-      submissionToken: savedSubmission.token,
+      submissionId: savedSubmission?.id || null,
+      submissionToken: savedSubmission?.token || null,
     }),
   });
 
