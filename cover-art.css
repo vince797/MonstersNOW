@@ -1,11 +1,72 @@
+@font-face {
+  font-family: "Fredoka";
+  font-style: normal;
+  font-weight: 300 700;
+  font-display: swap;
+  src: url("assets/fonts/fredoka/Fredoka-Variable.ttf") format("truetype-variations");
+}
+
 .personalized-cover {
+  --cover-glow: rgba(255, 198, 63, .2);
+  --cover-title: #fff8da;
+  --cover-title-edge: #9a4d14;
+  --cover-title-shadow: rgba(72, 28, 10, .78);
+  --cover-accent: #ffe9a7;
   position: relative;
   isolation: isolate;
   aspect-ratio: 1;
   margin: 0;
   overflow: hidden;
   background: #082544;
-  box-shadow: inset 0 0 0 3px rgba(255, 213, 104, .7), inset 0 0 32px rgba(3, 16, 40, .6);
+  box-shadow: inset 0 0 0 3px color-mix(in srgb, var(--cover-accent) 72%, transparent), inset 0 0 32px rgba(3, 16, 40, .5);
+}
+
+.cover-adventure {
+  --cover-glow: rgba(255, 207, 80, .28);
+  --cover-title: #fff3bf;
+  --cover-title-edge: #175581;
+  --cover-title-shadow: rgba(3, 32, 74, .78);
+  --cover-accent: #ffd96f;
+}
+
+.cover-bedtime {
+  --cover-glow: rgba(193, 156, 255, .3);
+  --cover-title: #fff4c9;
+  --cover-title-edge: #6e3b96;
+  --cover-title-shadow: rgba(31, 13, 68, .82);
+  --cover-accent: #dec5ff;
+}
+
+.cover-abc {
+  --cover-glow: rgba(255, 207, 77, .26);
+  --cover-title: #fff8d9;
+  --cover-title-edge: #087d8d;
+  --cover-title-shadow: rgba(4, 62, 77, .72);
+  --cover-accent: #ffda67;
+}
+
+.cover-counting {
+  --cover-glow: rgba(255, 221, 93, .25);
+  --cover-title: #fff8c9;
+  --cover-title-edge: #236948;
+  --cover-title-shadow: rgba(12, 54, 33, .82);
+  --cover-accent: #ffe16d;
+}
+
+.cover-kindness {
+  --cover-glow: rgba(255, 176, 178, .3);
+  --cover-title: #fff7d7;
+  --cover-title-edge: #a94c6d;
+  --cover-title-shadow: rgba(94, 28, 58, .72);
+  --cover-accent: #ffd0cb;
+}
+
+.cover-birthday {
+  --cover-glow: rgba(255, 213, 83, .28);
+  --cover-title: #fff6cf;
+  --cover-title-edge: #046b79;
+  --cover-title-shadow: rgba(2, 45, 66, .82);
+  --cover-accent: #ffdc72;
 }
 
 .story-card .personalized-cover-background {
@@ -25,8 +86,8 @@
   inset: 0;
   z-index: -1;
   background:
-    radial-gradient(circle at 50% 67%, rgba(255, 198, 63, .18), transparent 35%),
-    linear-gradient(180deg, rgba(4, 20, 52, .78) 0%, rgba(4, 20, 52, .18) 34%, rgba(4, 20, 52, .02) 61%, rgba(4, 20, 52, .8) 100%);
+    radial-gradient(circle at 50% 67%, var(--cover-glow), transparent 35%),
+    linear-gradient(180deg, rgba(4, 20, 52, .76) 0%, rgba(4, 20, 52, .2) 33%, rgba(4, 20, 52, .03) 60%, rgba(4, 20, 52, .8) 100%);
   pointer-events: none;
 }
 
@@ -35,7 +96,7 @@
   top: 2.4%;
   right: 0;
   left: 0;
-  color: #ffe9a7;
+  color: var(--cover-accent);
   font-size: clamp(.55rem, .85vw, .72rem);
   font-weight: 900;
   letter-spacing: .18em;
@@ -49,13 +110,18 @@
   top: 7%;
   left: 10%;
   right: 10%;
-  color: #fff8da;
+  color: var(--cover-title);
+  font-family: "Fredoka", "Arial Rounded MT Bold", system-ui, sans-serif;
   font-size: clamp(1.45rem, 2.7vw, 2.5rem);
-  font-weight: 950;
-  line-height: .91;
-  letter-spacing: -.045em;
+  font-stretch: 112%;
+  font-variation-settings: "wdth" 112, "wght" 700;
+  font-weight: 700;
+  line-height: .88;
+  letter-spacing: -.035em;
   text-align: center;
-  text-shadow: 0 2px 0 #9a4d14, 0 5px 0 rgba(72, 28, 10, .75), 0 9px 22px rgba(3, 15, 38, .95);
+  text-wrap: balance;
+  -webkit-text-stroke: 1px color-mix(in srgb, var(--cover-title-edge) 72%, transparent);
+  text-shadow: 0 2px 0 var(--cover-title-edge), 0 5px 0 var(--cover-title-shadow), 0 9px 22px rgba(3, 15, 38, .9);
 }
 
 .story-card .personalized-cover-monster {
@@ -68,6 +134,17 @@
   padding: 0;
   mix-blend-mode: normal;
   filter: drop-shadow(0 6px 3px rgba(255, 202, 72, .28)) drop-shadow(0 18px 14px rgba(2, 13, 31, .68));
+}
+
+.cover-bedtime .personalized-cover-monster,
+.cover-kindness .personalized-cover-monster {
+  width: 61%;
+  height: 61%;
+  right: 19.5%;
+}
+
+.cover-birthday .personalized-cover-monster {
+  bottom: 4.5%;
 }
 
 .personalized-cover-credit {
@@ -85,6 +162,6 @@
 }
 
 @media (max-width: 760px) {
-  .personalized-cover-title { font-size: clamp(1.6rem, 8vw, 2.35rem); }
+  .personalized-cover-title { font-size: clamp(1.55rem, 7.7vw, 2.3rem); }
   .personalized-cover-credit { font-size: clamp(.7rem, 3.1vw, .88rem); }
 }
