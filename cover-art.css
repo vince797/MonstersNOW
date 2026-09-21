@@ -1,0 +1,73 @@
+.personalized-cover {
+  position: relative;
+  isolation: isolate;
+  aspect-ratio: 1;
+  margin: 0;
+  overflow: hidden;
+  background: #082544;
+}
+
+.story-card .personalized-cover-background {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  padding: 0;
+  mix-blend-mode: normal;
+}
+
+.personalized-cover::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(180deg, rgba(4, 23, 53, .78) 0%, rgba(4, 23, 53, .12) 40%, rgba(4, 23, 53, .18) 68%, rgba(4, 23, 53, .82) 100%);
+  pointer-events: none;
+}
+
+.personalized-cover-title {
+  position: absolute;
+  top: 12%;
+  left: 10%;
+  right: 10%;
+  color: #fff;
+  font-size: clamp(1.45rem, 2.7vw, 2.5rem);
+  font-weight: 950;
+  line-height: .91;
+  letter-spacing: -.045em;
+  text-align: center;
+  text-shadow: 0 3px 18px rgba(3, 15, 38, .9);
+}
+
+.story-card .personalized-cover-monster {
+  position: absolute;
+  right: 19%;
+  bottom: 7%;
+  width: 62%;
+  height: 62%;
+  object-fit: contain;
+  padding: 0;
+  mix-blend-mode: normal;
+  filter: drop-shadow(0 14px 12px rgba(2, 13, 31, .5));
+}
+
+.personalized-cover-credit {
+  position: absolute;
+  right: 0;
+  bottom: 3.5%;
+  left: 0;
+  color: #fff7dd;
+  font-size: clamp(.68rem, 1.1vw, .9rem);
+  font-weight: 900;
+  letter-spacing: .08em;
+  text-align: center;
+  text-shadow: 0 2px 7px rgba(2, 13, 31, .95);
+  text-transform: uppercase;
+}
+
+@media (max-width: 760px) {
+  .personalized-cover-title { font-size: clamp(1.6rem, 8vw, 2.35rem); }
+  .personalized-cover-credit { font-size: clamp(.7rem, 3.1vw, .88rem); }
+}
