@@ -8,6 +8,7 @@
     { "source": "/api/halloween-test-checkout", "destination": "/api/storybook-interest?resource=halloween-test-checkout" },
     { "source": "/api/halloween-checkout-status", "destination": "/api/storybook-interest?resource=halloween-checkout-status" },
     { "source": "/api/stripe-test-webhook", "destination": "/api/storybook-interest?resource=stripe-test-webhook" },
+    { "source": "/api/stripe-webhook", "destination": "/api/storybook-interest?resource=stripe-webhook" },
     { "source": "/api/monster-submissions", "destination": "/api/storybook-interest?resource=monster-submissions" },
     { "source": "/api/lulu-sandbox-cost", "destination": "/api/lulu-sandbox-products?resource=cost" },
     { "source": "/api/lulu-sandbox-cover-dimensions", "destination": "/api/lulu-sandbox-products?resource=cover-dimensions" }
@@ -28,6 +29,53 @@
     }
   },
   "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self'; connect-src 'self'; worker-src 'self' blob:; manifest-src 'self'; upgrade-insecure-requests"
+        },
+        {
+          "key": "Cross-Origin-Opener-Policy",
+          "value": "same-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), geolocation=(), microphone=(), payment=(), usb=()"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        }
+      ]
+    },
+    {
+      "source": "/admin",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "private, no-store"
+        }
+      ]
+    },
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "private, no-store"
+        }
+      ]
+    },
     {
       "source": "/assets/(.*)",
       "headers": [

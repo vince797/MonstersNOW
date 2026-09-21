@@ -49,12 +49,17 @@ Stripe-hosted checkout URL. Configure these Vercel environment variables:
 ```text
 STRIPE_SECRET_KEY
 STRIPE_STORYBOOK_SHIPPING_RATE_IDS
+STRIPE_WEBHOOK_SECRET
 STORYBOOK_CHECKOUT_ALLOWED_COUNTRIES
 STORYBOOK_CHECKOUT_SITE_URL
 ```
 
 `STRIPE_STORYBOOK_SHIPPING_RATE_IDS` is a comma-separated list of Stripe
-shipping rate IDs. If checkout is not configured, the browser posts to
+shipping rate IDs. Register `https://www.monstersnow.com/api/stripe-webhook`
+as a Stripe webhook for `checkout.session.completed`,
+`checkout.session.async_payment_succeeded`, `checkout.session.async_payment_failed`,
+`checkout.session.expired`, `refund.created`, and `charge.dispute.created`, then store its signing secret in
+`STRIPE_WEBHOOK_SECRET`. If checkout is not configured, the browser posts to
 `/api/storybook-interest` instead. Configure these variables to send that
 request by email through Resend:
 

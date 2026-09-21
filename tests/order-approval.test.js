@@ -33,4 +33,5 @@ test("production statuses cannot bypass approval and Lulu submission", () => {
   assert.throws(() => assertAllowedStatusChange({ status: "approved" }, "printing"), /Lulu/i);
   assert.throws(() => assertAllowedStatusChange({ status: "printing" }, "shipped"), /print job/i);
   assert.doesNotThrow(() => assertAllowedStatusChange({ status: "printing", lulu_print_job_id: "job-1" }, "shipped"));
+  assert.throws(() => assertAllowedStatusChange({ status: "paid", payment_issue: "refund_created" }, "proofing"), /payment issue/i);
 });

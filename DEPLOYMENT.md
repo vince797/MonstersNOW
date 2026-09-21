@@ -50,6 +50,7 @@ Add these Stripe variables for Production, Preview, and Development:
 ```text
 STRIPE_SECRET_KEY
 STRIPE_STORYBOOK_SHIPPING_RATE_IDS
+STRIPE_WEBHOOK_SECRET
 STORYBOOK_CHECKOUT_ALLOWED_COUNTRIES
 STORYBOOK_CHECKOUT_SITE_URL
 ```
@@ -57,6 +58,15 @@ STORYBOOK_CHECKOUT_SITE_URL
 `STRIPE_STORYBOOK_SHIPPING_RATE_IDS` must contain one or more Stripe shipping
 rate IDs. `STORYBOOK_CHECKOUT_ALLOWED_COUNTRIES` defaults to `US` when omitted.
 Use the production domain for `STORYBOOK_CHECKOUT_SITE_URL` in Production.
+Create a live Stripe webhook destination at
+`https://www.monstersnow.com/api/stripe-webhook`, subscribe it to
+`checkout.session.completed`, `checkout.session.async_payment_succeeded`,
+`checkout.session.async_payment_failed`, `checkout.session.expired`,
+`refund.created`, and `charge.dispute.created`, then
+store its signing secret as `STRIPE_WEBHOOK_SECRET`. Successful events move only
+the matching initial order to paid and save its final totals and shipping details.
+Failed or expired sessions are cancelled. Refunds and disputes place a visible
+fulfillment block on the matching PaymentIntent.
 
 Add these Resend variables for Production, Preview, and Development:
 

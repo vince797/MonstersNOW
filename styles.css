@@ -4071,6 +4071,8 @@ main > section {
 .order-next-action span { color: var(--teal-dark); font-size: .66rem; font-weight: 900; letter-spacing: .06em; text-transform: uppercase; }
 .order-next-action strong { font-size: 1rem; }
 .order-next-action small { color: var(--muted); line-height: 1.4; }
+.order-next-action.is-blocked { border-left-color: #c4511c; background: #fff4ed; }
+.order-next-action.is-blocked span, .order-next-action.is-blocked strong { color: #9b4319; }
 .order-progress { display: grid; grid-template-columns: repeat(7,minmax(0,1fr)); gap: 4px; margin: 0; padding: 0; list-style: none; }
 .order-progress li { position: relative; display: grid; justify-items: center; gap: 5px; color: #91a0af; text-align: center; }
 .order-progress li::after { position: absolute; top: 13px; left: calc(50% + 16px); width: calc(100% - 28px); height: 2px; background: #dde6eb; content: ""; }

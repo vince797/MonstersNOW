@@ -20,11 +20,11 @@ module.exports = async function handler(request, response) {
   let submission;
 
   try {
-    body = await readJsonBody(request);
-  } catch {
-    return sendJson(response, 400, {
-      code: "invalid_json",
-      error: "Invalid JSON body.",
+    body = await readJsonBody(request, { maxBytes: 8 * 1024 * 1024 });
+  } catch (error) {
+    return sendJson(response, error.status || 400, {
+      code: error.code || "invalid_json",
+      error: error.status === 413 ? error.message : "Invalid JSON body.",
     });
   }
 
@@ -34,14 +34,21 @@ module.exports = async function handler(request, response) {
     // unconfigured checkout path does not create duplicate operations work.
     buildStorybookCheckoutSessionPayload(submission, request);
 
-    const intakeEmail = await sendStorybookInterestEmail(submission);
     const checkoutSession = await createStorybookCheckoutSession(submission, request);
     const order = await recordCheckoutOrder(submission, checkoutSession.id);
+    let intakeEmailId = null;
+    try {
+      const intakeEmail = await sendStorybookInterestEmail(submission);
+      intakeEmailId = intakeEmail.emailId;
+    } catch (emailError) {
+      console.warn("Checkout created without an intake email", { code: emailError.code, service: emailError.service });
+      submission.warnings.push("The operations email could not be sent; the order is still available in Admin.");
+    }
 
     return sendJson(response, 200, {
       mode: "checkout",
       submissionId: submission.submissionId,
-      intakeEmailId: intakeEmail.emailId,
+      intakeEmailId,
       checkoutSessionId: checkoutSession.id,
       checkoutUrl: checkoutSession.url,
       orderId: order?.id || null,

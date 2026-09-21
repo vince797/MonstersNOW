@@ -430,7 +430,7 @@ function renderOrders() {
     cells[1].querySelector("strong").textContent = order.monster_name;
     cells[1].querySelector("small").textContent = order.story_label;
     cells[2].textContent = order.format_id === "hardcover" ? "Hardcover" : "Softcover";
-    cells[3].textContent = new Intl.NumberFormat("en-US", { style: "currency", currency: order.currency }).format(order.amount_cents / 100);
+    cells[3].textContent = formatMoney(order.stripe_total_cents ?? order.amount_cents, order.currency || "USD");
     cells[4].textContent = new Date(order.created_at).toLocaleDateString();
     const button = cells[5].querySelector("button");
     button.textContent = `${order.status.replaceAll("_", " ")} →`;
@@ -468,7 +468,7 @@ function renderOrderBoard(visible) {
       card.querySelector("span").textContent = order.status.replaceAll("_", " ");
       card.querySelector("strong").textContent = `${order.child_name} + ${order.monster_name}`;
       card.querySelector("small").textContent = `${order.story_label} · ${order.format_id === "hardcover" ? "Hardcover" : "Softcover"}`;
-      card.querySelector("em").textContent = `${orderNeedsAttention(order) ? "Needs follow-up · " : ""}${relativeAge(order.updated_at || order.created_at)} · Review →`;
+      card.querySelector("em").textContent = `${order.payment_issue ? `${order.payment_issue.replaceAll("_", " ")} · ` : orderNeedsAttention(order) ? "Needs follow-up · " : ""}${relativeAge(order.updated_at || order.created_at)} · Review →`;
       card.addEventListener("click", () => openOrderDetail(order));
       return card;
     }));
@@ -477,6 +477,7 @@ function renderOrderBoard(visible) {
 }
 
 function orderNeedsAttention(order) {
+  if (order.payment_issue) return true;
   const ageHours = Math.max(0, (Date.now() - new Date(order.updated_at || order.created_at).getTime()) / 3600000);
   const limits = { checkout_started: 24, paid: 24, proofing: 48, approved: 24, printing: 168, shipped: 168 };
   return Number.isFinite(ageHours) && limits[order.status] !== undefined && ageHours >= limits[order.status];
@@ -496,7 +497,7 @@ function renderCustomers() {
     const article = document.createElement("article");
     const monsters = [...new Set(customer.orders.map((order) => order.monster_name).filter(Boolean))];
     const children = [...new Set(customer.orders.map((order) => order.child_name).filter(Boolean))];
-    const spent = customer.orders.reduce((sum, order) => sum + (Number(order.amount_cents) || 0), 0);
+    const spent = customer.orders.reduce((sum, order) => sum + (Number(order.stripe_total_cents ?? order.amount_cents) || 0), 0);
     article.className = "customer-card";
     article.innerHTML = '<header><div><strong></strong><small></small></div><span></span></header><div class="customer-monsters"></div><footer><span></span><button class="button secondary" type="button">View latest order</button></footer>';
     article.querySelector("strong").textContent = customer.email;
@@ -1271,13 +1272,19 @@ function openOrderDetail(order) {
   selectedOrder = order;
   document.querySelector("#order-detail-id").textContent = `Order ${order.id}`;
   document.querySelector("#order-detail-age").textContent = `${orderNeedsAttention(order) ? "Needs follow-up · " : "Updated "}${relativeAge(order.updated_at || order.created_at)}`;
-  const fields = { Customer: order.customer_email, Child: order.child_name, Monster: order.monster_name, Story: order.story_label, Format: order.format_id, Style: order.monster_style, Created: new Date(order.created_at).toLocaleString(), "Stripe checkout": order.stripe_checkout_session_id || "Not recorded", "Preview ID": order.selected_preview_id || "Not recorded" };
+  const fields = { Customer: order.customer_email, Child: order.child_name, Monster: order.monster_name, Story: order.story_label, Format: order.format_id, Style: order.monster_style, Total: formatMoney(order.stripe_total_cents ?? order.amount_cents, order.currency || "USD"), Created: new Date(order.created_at).toLocaleString(), Paid: order.stripe_paid_at ? new Date(order.stripe_paid_at).toLocaleString() : "Not verified", "Stripe checkout": order.stripe_checkout_session_id || "Not recorded", "Payment intent": order.stripe_payment_intent_id || "Not recorded", "Payment issue": order.payment_issue?.replaceAll("_", " ") || "None", "Preview ID": order.selected_preview_id || "Not recorded" };
   const list = document.querySelector("#order-detail-fields");
   list.replaceChildren();
   Object.entries(fields).forEach(([label, value]) => { const term = document.createElement("dt"); const detail = document.createElement("dd"); term.textContent = label; detail.textContent = value || "—"; list.append(term, detail); });
   renderOrderArtwork(order.monster_assets);
-  ["lulu-recipient-name", "lulu-phone", "lulu-street", "lulu-city", "lulu-state", "lulu-postcode"].forEach((id) => { document.querySelector(`#${id}`).value = ""; });
-  document.querySelector("#lulu-country").value = "US";
+  const savedAddress = order.shipping_address || {};
+  document.querySelector("#lulu-recipient-name").value = order.shipping_name || "";
+  document.querySelector("#lulu-phone").value = order.shipping_phone || "";
+  document.querySelector("#lulu-street").value = savedAddress.line1 || "";
+  document.querySelector("#lulu-city").value = savedAddress.city || "";
+  document.querySelector("#lulu-state").value = savedAddress.state || "";
+  document.querySelector("#lulu-postcode").value = savedAddress.postal_code || "";
+  document.querySelector("#lulu-country").value = savedAddress.country || "US";
   document.querySelector("#lulu-shipping-level").value = "MAIL";
   renderProofApproval(order);
   syncOrderStatusOptions(order);
@@ -1291,10 +1298,12 @@ function openOrderDetail(order) {
 function syncOrderStatusOptions(order) {
   const select = document.querySelector("#order-detail-status");
   const editableStatuses = new Set([order.status, "cancelled"]);
-  if (order.status === "checkout_started") editableStatuses.add("paid");
-  if (order.status === "paid") editableStatuses.add("proofing");
-  if (order.status === "printing" && order.lulu_print_job_id) editableStatuses.add("shipped");
-  if (order.status === "shipped") editableStatuses.add("completed");
+  if (!order.payment_issue) {
+    if (order.status === "checkout_started") editableStatuses.add("paid");
+    if (order.status === "paid") editableStatuses.add("proofing");
+    if (order.status === "printing" && order.lulu_print_job_id) editableStatuses.add("shipped");
+    if (order.status === "shipped") editableStatuses.add("completed");
+  }
   select.replaceChildren(...orderStatuses.filter((status) => editableStatuses.has(status)).map((status) => new Option(status === "paid" ? "Paid (manually verified)" : status.replaceAll("_", " "), status, false, status === order.status)));
 }
 
@@ -1309,7 +1318,10 @@ function renderOrderNextAction(order) {
     completed: ["No action required", "This order is complete."],
     cancelled: ["No action required", "This order was cancelled."],
   };
-  const [title, help] = actions[order.status] || ["Review this order", "Confirm the current fulfillment state."];
+  const [title, help] = order.payment_issue
+    ? ["Resolve the Stripe payment issue", `Fulfillment is blocked: ${order.payment_issue.replaceAll("_", " ")}. Review the payment in Stripe.`]
+    : actions[order.status] || ["Review this order", "Confirm the current fulfillment state."];
+  document.querySelector(".order-next-action").classList.toggle("is-blocked", Boolean(order.payment_issue));
   document.querySelector("#order-next-action").textContent = title;
   document.querySelector("#order-next-help").textContent = help;
 }
@@ -1322,6 +1334,7 @@ function renderProofApproval(order) {
   const revoke = document.querySelector("#revoke-order-proof");
   const send = document.querySelector("#send-order-lulu");
   const help = document.querySelector("#proof-approval-help");
+  const blocked = Boolean(order.payment_issue);
   if (submitted) {
     state.textContent = `Sent to Lulu · job ${order.lulu_print_job_id}`;
     help.textContent = order.lulu_submitted_at ? `Submitted ${new Date(order.lulu_submitted_at).toLocaleString()}.` : "The print job has been submitted.";
@@ -1333,11 +1346,11 @@ function renderProofApproval(order) {
     help.textContent = "Approval verifies all 32 final backgrounds, the selected monster, names, and the exact master version.";
   }
   approve.hidden = approved || submitted;
-  approve.disabled = !["proofing", "approved"].includes(order.status);
+  approve.disabled = blocked || !["proofing", "approved"].includes(order.status);
   revoke.hidden = !approved || submitted;
   document.querySelector("#lulu-shipping-fields").hidden = !approved || submitted;
-  send.disabled = !approved || submitted;
-  send.title = approved ? "Validate the production PDFs and create the Lulu Sandbox print job." : "Approve the proof first.";
+  send.disabled = blocked || !approved || submitted;
+  send.title = blocked ? "Resolve the Stripe payment issue first." : approved ? "Validate the production PDFs and create the Lulu Sandbox print job." : "Approve the proof first.";
 }
 
 async function approveSelectedOrderProof() {

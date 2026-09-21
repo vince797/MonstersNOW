@@ -19,6 +19,7 @@ module.exports = async function handler(request, response) {
     "halloween-test-checkout": "../lib/halloween-test-checkout-handler",
     "halloween-checkout-status": "../lib/halloween-checkout-status-handler",
     "stripe-test-webhook": "../lib/stripe-test-webhook-handler",
+    "stripe-webhook": "../lib/stripe-webhook-handler",
   };
   if (Object.hasOwn(testHandlers, resource)) return require(testHandlers[resource])(request, response);
   if (resource === "monster-submissions" && ["POST", "PATCH"].includes(request.method)) {
@@ -98,11 +99,11 @@ module.exports = async function handler(request, response) {
   let body;
 
   try {
-    body = await readJsonBody(request);
-  } catch {
-    return sendJson(response, 400, {
-      code: "invalid_json",
-      error: "Invalid JSON body.",
+    body = await readJsonBody(request, { maxBytes: 8 * 1024 * 1024 });
+  } catch (error) {
+    return sendJson(response, error.status || 400, {
+      code: error.code || "invalid_json",
+      error: error.status === 413 ? error.message : "Invalid JSON body.",
     });
   }
 
