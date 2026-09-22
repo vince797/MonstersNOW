@@ -14,21 +14,19 @@
 .home-cover-grid {
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: clamp(14px, 2vw, 24px);
+  align-items: stretch;
   max-width: 1180px;
   margin-inline: auto;
 }
 
 .home-cover-grid .book-card {
+  height: 100%;
   border-radius: 16px;
   box-shadow: 0 18px 42px rgba(6, 27, 59, .12);
 }
 
-.home-cover-grid .book-card:nth-child(even) {
-  transform: translateY(16px);
-}
-
-.home-cover-grid .book-card:nth-child(even):hover {
-  transform: translateY(10px);
+.home-cover-grid .book-card:hover {
+  transform: translateY(-2px);
 }
 
 .series-book-preview {
@@ -87,6 +85,7 @@
 }
 
 .home-cover-grid .book-card-content {
+  grid-template-rows: auto 1fr auto;
   padding: 15px;
 }
 
@@ -111,16 +110,7 @@
     gap: 10px;
   }
 
-  .home-cover-grid .book-card:nth-child(even) {
-    transform: none;
-  }
-
-  .home-cover-grid .book-card:nth-child(even):hover {
-    transform: translateY(-2px);
-  }
-
   .home-cover-grid .book-card-content {
-    grid-template-rows: auto 1fr auto;
     padding: 11px;
   }
 
