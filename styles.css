@@ -1564,18 +1564,18 @@ main > section {
   margin: 0;
   place-items: center;
   overflow: hidden;
-  background: #b96d32 url("assets/master-references/warm-wood-desk-background-v1-web.jpg") center / cover no-repeat;
+  background: #b96d32;
   border: 1px solid rgba(112, 62, 25, 0.34);
   border-radius: 8px;
   box-shadow: 0 18px 34px rgba(6, 27, 59, 0.1);
 }
 
 .seasonal-art img {
-  width: min(370px, 92%);
+  width: 100%;
   aspect-ratio: 1;
   object-fit: contain;
-  filter: drop-shadow(0 18px 24px rgba(6, 27, 59, 0.14));
-  mix-blend-mode: multiply;
+  filter: none;
+  mix-blend-mode: normal;
 }
 
 .seasonal-art figcaption {
@@ -2451,8 +2451,6 @@ main > section {
   align-items: center;
   justify-self: stretch;
   overflow: hidden;
-  background: #b96d32 url("assets/master-references/warm-wood-desk-background-v1-web.jpg") center / cover no-repeat;
-  border-radius: 10px;
 }
 
 .step-art img {
@@ -2663,7 +2661,7 @@ main > section {
   min-width: 0;
   margin: 0;
   overflow: hidden;
-  background: #b96d32 url("assets/master-references/warm-wood-desk-background-v1-web.jpg") center / cover no-repeat;
+  background: #f8fdfe;
   border: 1px solid var(--line);
   border-radius: 12px;
 }
@@ -2673,7 +2671,7 @@ main > section {
   width: 100%;
   aspect-ratio: 1;
   object-fit: contain;
-  mix-blend-mode: multiply;
+  mix-blend-mode: normal;
 }
 
 .transformation-images span,
