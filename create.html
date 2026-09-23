@@ -153,7 +153,7 @@
                   Try Another Version
                 </button>
                 <button class="button secondary" id="download-coloring" type="button" disabled>
-                  Download Free Coloring Page
+                  View / Download Free Coloring Page
                 </button>
               </div>
               <section class="result-book-offer" id="result-book-offer" aria-labelledby="result-book-title" hidden>
@@ -270,6 +270,24 @@
       </section>
     </main>
 
+    <dialog class="coloring-page-dialog" id="coloring-page-dialog" aria-labelledby="coloring-page-title">
+      <div class="coloring-page-dialog-header">
+        <div>
+          <span class="result-label">Free printable</span>
+          <h2 id="coloring-page-title">Your monster coloring page</h2>
+        </div>
+        <button class="coloring-page-close" id="coloring-page-close" type="button" aria-label="Close coloring page preview">×</button>
+      </div>
+      <div class="coloring-page-sheet">
+        <img id="coloring-page-preview" alt="Printable MonstersNOW monster coloring page." />
+      </div>
+      <p class="coloring-page-help">On iPhone or iPad, touch and hold the coloring page to save it to Photos. You can also use the button below to open or download the full-size PNG.</p>
+      <div class="coloring-page-actions">
+        <a class="button primary" id="coloring-page-download-link" href="#" download="monstersnow-coloring-page.png" target="_blank" rel="noopener">Open / Save Full-Size Page</a>
+        <button class="button secondary" id="coloring-page-done" type="button">Done</button>
+      </div>
+    </dialog>
+
     <footer class="site-footer">
       <div class="footer-intro">
         <a class="footer-brand" href="index.html" aria-label="MonstersNOW home">
@@ -289,6 +307,6 @@
       </div>
     </footer>
 
-    <script src="scripts/main.js?v=20260922-drawing-check"></script>
+    <script src="scripts/main.js?v=20260923-coloring-preview"></script>
   </body>
 </html>

@@ -63,6 +63,11 @@ const server = http.createServer(async (req, res) => {
     await page.goto(`${base}/create.html?test=halloween`);
     await page.locator("#monster-upload").setInputFiles(path.join(root, "assets/step-2-character.jpg"));
     await page.locator("#storybook-interest").waitFor({ state: "visible" });
+    await page.locator("#download-coloring").click();
+    await page.locator("#coloring-page-dialog[open]").waitFor({ state: "visible" });
+    assert.match(await page.locator("#coloring-page-preview").getAttribute("src"), /^data:image\/png;base64,/);
+    assert.match(await page.locator("#coloring-page-download-link").getAttribute("href"), /^data:image\/png;base64,/);
+    await page.locator("#coloring-page-done").click();
     await page.locator("#child-name").fill("Alexandria");
     await page.locator("#monster-name").fill("Noodle");
     await page.locator("#interest-email").fill("parent@example.com");
@@ -95,7 +100,7 @@ const server = http.createServer(async (req, res) => {
     await page.getByRole("heading", { name: "Your test checkout is complete." }).waitFor();
     assert.deepEqual(errors, []);
     assert.ok(external.every((call) => !/lulu|resend/.test(call.url)));
-    console.log("PASS: upload → selected preview → 32-page proof → approval → mocked test checkout → verified success; desktop/mobile fit; no JS errors; no print/email calls.");
+    console.log("PASS: upload → coloring-page viewer → selected preview → 32-page proof → approval → mocked test checkout → verified success; desktop/mobile fit; no JS errors; no print/email calls.");
   } finally {
     if (browser) await browser.close();
     server.close();

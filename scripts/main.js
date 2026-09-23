@@ -28,6 +28,11 @@ const regenerateButton = document.querySelector("#regenerate-monster");
 const resultPanel = document.querySelector("#monster-result");
 const monsterPreviewBadge = document.querySelector("#monster-preview-badge");
 const downloadColoringButton = document.querySelector("#download-coloring");
+const coloringPageDialog = document.querySelector("#coloring-page-dialog");
+const coloringPagePreview = document.querySelector("#coloring-page-preview");
+const coloringPageDownloadLink = document.querySelector("#coloring-page-download-link");
+const coloringPageClose = document.querySelector("#coloring-page-close");
+const coloringPageDone = document.querySelector("#coloring-page-done");
 const converterStatus = document.querySelector("#converter-status");
 const converterNote = document.querySelector("#converter-note");
 const replaceDrawingButton = document.querySelector("#replace-drawing");
@@ -120,14 +125,13 @@ if (monsterUpload && drawingPreview && monsterPreview && convertButton) {
       downloadColoringButton.textContent = "Preparing...";
 
       try {
-        if (coloringPageUrl) {
-          await downloadPrintableColoringPage(coloringPageUrl);
-        } else {
-          await downloadColoringPage(monsterPreview);
-        }
+        const printablePage = coloringPageUrl
+          ? await preparePrintableColoringPage(coloringPageUrl)
+          : await prepareColoringPage(monsterPreview);
+        showColoringPagePreview(printablePage);
 
         if (converterStatus) {
-          converterStatus.textContent = "Coloring page downloaded.";
+          converterStatus.textContent = "Coloring page ready to view or save.";
         }
       } catch (error) {
         console.error(error);
@@ -141,10 +145,14 @@ if (monsterUpload && drawingPreview && monsterPreview && convertButton) {
         }
       } finally {
         downloadColoringButton.disabled = false;
-        downloadColoringButton.textContent = "Download Free Coloring Page";
+        downloadColoringButton.textContent = "View / Download Free Coloring Page";
       }
     });
   }
+
+  const closeColoringPage = () => coloringPageDialog?.close();
+  coloringPageClose?.addEventListener("click", closeColoringPage);
+  coloringPageDone?.addEventListener("click", closeColoringPage);
 
   styleButtons.forEach((button) => {
     button.addEventListener("click", () => {
@@ -1307,24 +1315,32 @@ function showMonsterGenerationError(error) {
   scrollToResultPanel({ focus: true, delay: 120 });
 }
 
-function downloadImage(url, filename) {
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = filename;
-  link.click();
-}
-
-async function downloadColoringPage(sourceImage) {
+async function prepareColoringPage(sourceImage) {
   await ensureImageLoaded(sourceImage);
   const lineArt = createLineArtCanvas(sourceImage);
-  const printablePage = await createPrintableColoringPage(lineArt);
-  downloadImage(printablePage.toDataURL("image/png"), "monstersnow-coloring-page.png");
+  return createPrintableColoringPage(lineArt);
 }
 
-async function downloadPrintableColoringPage(source) {
+async function preparePrintableColoringPage(source) {
   const lineArt = typeof source === "string" ? await loadImage(source) : source;
-  const printablePage = await createPrintableColoringPage(lineArt);
-  downloadImage(printablePage.toDataURL("image/png"), "monstersnow-coloring-page.png");
+  return createPrintableColoringPage(lineArt);
+}
+
+function showColoringPagePreview(printablePage) {
+  if (!coloringPageDialog || !coloringPagePreview || !coloringPageDownloadLink) {
+    throw new Error("The coloring page viewer is unavailable.");
+  }
+
+  const imageUrl = printablePage.toDataURL("image/png");
+  coloringPagePreview.src = imageUrl;
+  coloringPageDownloadLink.href = imageUrl;
+
+  if (typeof coloringPageDialog.showModal === "function") {
+    coloringPageDialog.showModal();
+  } else {
+    coloringPageDialog.setAttribute("open", "");
+    coloringPageDialog.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 }
 
 function ensureImageLoaded(image) {
