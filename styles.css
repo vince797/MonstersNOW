@@ -2671,6 +2671,56 @@ main > section {
     linear-gradient(142deg, #071f3d 0%, #07384d 56%, #087b80 100%);
 }
 
+.monster-gallery-page {
+  min-height: 66svh;
+  padding: clamp(64px, 8vw, 108px) clamp(20px, 6vw, 84px);
+  background:
+    radial-gradient(circle at 90% 10%, rgba(73, 199, 201, 0.16), transparent 28%),
+    linear-gradient(180deg, #f8fcfc 0%, #fffaf4 100%);
+}
+
+.monster-gallery-header {
+  display: grid;
+  justify-items: center;
+  max-width: 760px;
+  margin: 0 auto clamp(34px, 5vw, 58px);
+  text-align: center;
+}
+
+.monster-gallery-header h1 {
+  max-width: 14ch;
+  margin-top: 8px;
+  font-size: clamp(2.7rem, 6vw, 5rem);
+  letter-spacing: -0.055em;
+}
+
+.monster-gallery-header > p:last-child {
+  margin: 16px 0 0;
+  color: var(--muted);
+  font-size: clamp(1rem, 1.6vw, 1.18rem);
+}
+
+.monster-gallery-empty {
+  display: grid;
+  justify-items: center;
+  width: min(100%, 720px);
+  margin-inline: auto;
+  padding: clamp(38px, 7vw, 72px) 24px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.84);
+  text-align: center;
+}
+
+.monster-gallery-empty h2 {
+  font-size: clamp(1.65rem, 3vw, 2.35rem);
+}
+
+.monster-gallery-empty p {
+  margin: 10px 0 24px;
+  color: var(--muted);
+}
+
 .monsters-hero-copy {
   display: grid;
   justify-items: center;
