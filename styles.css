@@ -2687,6 +2687,80 @@ main > section {
   justify-content: center;
 }
 
+.real-transformations-panel {
+  display: grid;
+  grid-template-columns: minmax(240px, 0.62fr) minmax(360px, 1fr);
+  gap: clamp(20px, 3vw, 38px);
+  align-items: center;
+  width: min(100%, 1080px);
+  margin-inline: auto;
+  padding: clamp(22px, 3vw, 36px);
+  background: rgba(255, 255, 255, 0.98);
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: 22px;
+  box-shadow: 0 28px 60px rgba(0, 18, 38, 0.28);
+}
+
+.real-transformations-heading {
+  display: grid;
+  gap: 10px;
+}
+
+.real-transformations-heading h2 {
+  font-size: clamp(2rem, 3.5vw, 3.35rem);
+}
+
+.real-transformations-heading p,
+.real-gallery-empty p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.real-gallery-empty {
+  display: grid;
+  gap: 18px;
+  padding: clamp(18px, 2.4vw, 28px);
+  background: linear-gradient(145deg, #f4fbfb, #fff8ef);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+}
+
+.real-gallery-empty > div:last-child {
+  display: grid;
+  gap: 6px;
+}
+
+.real-gallery-empty strong {
+  color: var(--navy);
+  font-size: 1.15rem;
+}
+
+.real-gallery-empty-art {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+}
+
+.real-gallery-empty-art span {
+  display: grid;
+  min-height: 116px;
+  place-items: center;
+  padding: 14px;
+  border: 2px dashed rgba(0, 139, 148, 0.28);
+  border-radius: 12px;
+  color: var(--teal-dark);
+  font-size: 0.76rem;
+  font-weight: 900;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.real-gallery-empty-art b {
+  color: var(--orange);
+  font-size: 1.5rem;
+}
+
 .books-hero .eyebrow,
 .monsters-hero .eyebrow {
   color: #55d6d7;
@@ -3486,6 +3560,10 @@ main > section {
 }
 
 @media (max-width: 820px) {
+  .real-transformations-panel {
+    grid-template-columns: 1fr;
+  }
+
   .featured-transformation {
     grid-template-columns: 1fr;
     width: 100%;
@@ -3768,6 +3846,15 @@ main > section {
 }
 
 @media (max-width: 520px) {
+  .real-gallery-empty-art {
+    grid-template-columns: 1fr;
+  }
+
+  .real-gallery-empty-art b {
+    transform: rotate(90deg);
+    justify-self: center;
+  }
+
   .site-nav {
     gap: 12px;
     font-size: 0.86rem;
