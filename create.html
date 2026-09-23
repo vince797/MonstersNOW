@@ -8,7 +8,7 @@
       content="Upload a child's monster drawing to create a free MonstersNOW preview, printable coloring page, and personalized storybook."
     />
     <title>Create Your Monster | MonstersNOW</title>
-    <link rel="stylesheet" href="styles.css?v=20260920-public-polish" />
+    <link rel="stylesheet" href="styles.css?v=20260922-guided-book-flow" />
   </head>
   <body>
     <a class="skip-link" href="#main-content">Skip to content</a>
@@ -41,8 +41,8 @@
             <p class="eyebrow">Create your monster</p>
             <h1 id="converter-title">Upload their drawing.</h1>
             <p>
-              Choose a clear photo, create up to three monster previews, then
-              download the free coloring page or create a personalized storybook.
+              Choose a clear photo, create up to three monster previews, select
+              your favorite, then review the personalized book before checkout.
             </p>
           </div>
           <div class="create-flow-meta">
@@ -53,8 +53,9 @@
             </div>
             <ol class="converter-flow" aria-label="Creation progress">
               <li class="is-active" data-flow-step="upload"><i>1</i>Upload</li>
-              <li data-flow-step="preview"><i>2</i>Preview</li>
-              <li data-flow-step="download"><i>3</i>Download</li>
+              <li data-flow-step="preview"><i>2</i>Create</li>
+              <li data-flow-step="personalize"><i>3</i>Personalize</li>
+              <li data-flow-step="review"><i>4</i>Review</li>
             </ol>
           </div>
         </div>
@@ -142,6 +143,9 @@
                 <span>Softcover or hardcover</span>
               </div>
               <div class="preview-history" id="preview-history" aria-label="Generated monster versions" hidden></div>
+              <button class="button primary choose-monster-button" id="confirm-monster" type="button" hidden>
+                Use This Monster
+              </button>
               <div class="result-actions" hidden>
                 <button class="button secondary" id="regenerate-monster" type="button" disabled>
                   Try Another Version
@@ -154,7 +158,7 @@
                 <div class="book-offer-header">
                   <span class="result-label">Printed storybook</span>
                   <h4 id="result-book-title">Turn this monster into a printed storybook.</h4>
-                  <p>Add the names, choose a format, and continue to secure checkout.</p>
+                  <p>Add the names, choose a format, and review all 32 pages before test checkout.</p>
                 </div>
                 <form class="interest-form" id="storybook-interest-form">
                   <fieldset class="storybook-personalization">
@@ -185,6 +189,20 @@
                         />
                       </label>
                     </div>
+                    <div class="checkout-email-field">
+                      <label for="interest-email">Email address <span>Required</span></label>
+                      <input
+                        id="interest-email"
+                        type="email"
+                        placeholder="you@example.com"
+                        autocomplete="email"
+                        inputmode="email"
+                        aria-describedby="checkout-email-help interest-status"
+                        required
+                      />
+                      <small id="checkout-email-help">Used for the checkout receipt and book updates.</small>
+                      <p id="interest-status" role="status" aria-live="polite"></p>
+                    </div>
                     <p>These names will appear in the personalized story and book proof.</p>
                   </fieldset>
                   <div class="storybook-format-options" role="radiogroup" aria-label="Preferred storybook format">
@@ -209,11 +227,11 @@
                     <li>32-page, 8.5 x 8.5 inch picture-book format</li>
                     <li>Shipping address and rate handled in checkout</li>
                   </ul>
-                  <section class="feature-permission" aria-labelledby="feature-permission-title">
-                    <div>
-                      <span class="result-label" id="feature-permission-title">Optional website feature</span>
-                      <p>Parent-approved monsters can appear on the Monsters page after review.</p>
-                    </div>
+                  <details class="feature-permission">
+                    <summary>
+                      <span class="result-label">Optional: share this monster on our website</span>
+                      <small>Closed by default and never required to order.</small>
+                    </summary>
                     <label class="feature-check">
                       <input id="feature-monster" type="checkbox" />
                       <span>
@@ -236,15 +254,12 @@
                         <span>Also show the original drawing as the before image.</span>
                       </label>
                     </div>
-                  </section>
-                  <div class="interest-email-row">
-                    <label class="sr-only" for="interest-email">Email for storybook updates</label>
-                    <input id="interest-email" type="email" placeholder="Email for print updates" autocomplete="email" />
+                  </details>
+                  <div class="checkout-submit-row">
                     <button class="button primary" id="storybook-interest" type="submit" disabled>
-                      Start Storybook Checkout
+                      Review Your 32-Page Book
                     </button>
                   </div>
-                  <p id="interest-status" role="status"></p>
                 </form>
               </section>
             </div>
@@ -272,6 +287,6 @@
       </div>
     </footer>
 
-    <script src="scripts/main.js?v=20260921-catalog-release"></script>
+    <script src="scripts/main.js?v=20260922-guided-book-flow"></script>
   </body>
 </html>

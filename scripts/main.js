@@ -40,6 +40,7 @@ const resultActions = document.querySelector(".result-actions");
 const flowSteps = [...document.querySelectorAll(".converter-flow li")];
 const styleButtons = [...document.querySelectorAll("[data-monster-style]")];
 const previewHistory = document.querySelector("#preview-history");
+const confirmMonsterButton = document.querySelector("#confirm-monster");
 const resultBookOffer = document.querySelector("#result-book-offer");
 const storybookInterestButton = document.querySelector("#storybook-interest");
 const storybookInterestForm = document.querySelector("#storybook-interest-form");
@@ -72,7 +73,7 @@ const heicConverterUrl = "https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2
 const demoMonsterImage = "assets/step-2-character.jpg?v=20260515-horns";
 const defaultPreviewStyle = "storybook";
 const halloweenTestMode = new URLSearchParams(window.location.search).get("test") === "halloween";
-const storybookInterestButtonText = halloweenTestMode ? "Build Halloween Book Proof" : "Start Storybook Checkout";
+const storybookInterestButtonText = "Review Your 32-Page Book";
 if (halloweenTestMode && storybookInterestButton) {
   storybookInterestButton.textContent = storybookInterestButtonText;
   const offerTitle = document.querySelector("#result-book-title");
@@ -94,6 +95,7 @@ let selectedMonsterStyle = defaultPreviewStyle;
 let previewsUsed = 0;
 let generatedPreviews = [];
 let selectedPreviewId;
+let monsterConfirmed = false;
 let monsterSubmission;
 let isGeneratingPreview = false;
 let uploadDragDepth = 0;
@@ -170,6 +172,28 @@ if (storybookInterestForm) {
   storybookInterestForm.addEventListener("submit", handleStorybookInterestSubmit);
 }
 
+if (confirmMonsterButton) {
+  confirmMonsterButton.addEventListener("click", () => {
+    if (!selectedPreviewId) return;
+    monsterConfirmed = true;
+    confirmMonsterButton.textContent = "Monster Selected ✓";
+    resultBookOffer.hidden = false;
+    storybookInterestButton.disabled = false;
+    setConverterStage("personalize");
+    resultBookOffer.scrollIntoView({ behavior: "smooth", block: "start" });
+    childName?.focus({ preventScroll: true });
+  });
+}
+
+if (interestEmail) {
+  interestEmail.addEventListener("input", () => {
+    interestEmail.removeAttribute("aria-invalid");
+    if (interestStatus?.textContent === "Enter your email address to continue to secure checkout.") {
+      interestStatus.textContent = "";
+    }
+  });
+}
+
 if (featureMonster) {
   featureMonster.addEventListener("change", syncFeaturePermissionFields);
   syncFeaturePermissionFields();
@@ -191,11 +215,17 @@ async function handleStorybookInterestSubmit(event) {
 
   if (!email || !interestEmail.checkValidity()) {
     if (interestStatus) {
-      interestStatus.textContent = "Enter a valid email for storybook updates.";
+      interestStatus.textContent = "Enter your email address to continue to secure checkout.";
     }
 
+    interestEmail.setAttribute("aria-invalid", "true");
+    interestEmail.focus({ preventScroll: true });
+    interestEmail.scrollIntoView({ behavior: "smooth", block: "center" });
+    interestEmail.reportValidity();
     return;
   }
+
+  interestEmail.removeAttribute("aria-invalid");
 
   const selectedFormat = getSelectedStorybookFormat();
   const featurePermission = getFeaturePermission();
@@ -230,60 +260,16 @@ async function handleStorybookInterestSubmit(event) {
 
   persistStorybookInterest(submission, selectedFormat, featurePermission);
 
-  if (halloweenTestMode) {
-    setStorybookSubmitState({ disabled: true, text: "Building your book proof…" });
-    try {
-      const response = await fetch("/api/halloween-proof", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(submission) });
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error || "Could not make your proof.");
-      sessionStorage.setItem("monstersnow_halloween_test_proof", JSON.stringify({ ...result, submission }));
-      window.location.assign("halloween-proof.html");
-    } catch (error) {
-      if (interestStatus) interestStatus.textContent = error.message;
-      setStorybookSubmitState({ disabled: false, text: storybookInterestButtonText });
-    }
-    return;
-  }
-
-  setStorybookSubmitState({ disabled: true, text: "Starting checkout..." });
-
+  setConverterStage("review");
+  setStorybookSubmitState({ disabled: true, text: "Building your book proof…" });
   try {
-    const checkout = await submitStorybookCheckout(submission);
-
-    if (checkout.checkoutUrl) {
-      if (interestStatus) {
-        interestStatus.textContent = "Opening secure checkout...";
-      }
-
-      window.location.href = checkout.checkoutUrl;
-      return;
-    }
-
-    throw new Error("Checkout did not return a redirect URL.");
-  } catch (checkoutError) {
-    console.warn(checkoutError);
-
-    if (interestStatus) {
-        interestStatus.textContent = "Secure checkout is temporarily unavailable. Sending your book request instead.";
-    }
-  }
-
-  try {
-    await submitStorybookInterest(submission);
-
-    if (interestStatus) {
-      interestStatus.textContent = `Thanks. We will follow up about the ${selectedFormat.label.toLowerCase()} option.`;
-    }
-
-    setStorybookSubmitState({ disabled: true, text: "Request Sent" });
-  } catch (interestError) {
-    console.error(interestError);
-
-    if (interestStatus) {
-      interestStatus.textContent = "Secure checkout is temporarily unavailable. Opening an email draft instead.";
-    }
-
-    openStorybookInterestEmail(email, selectedFormat, featurePermission, selectedPreview);
+    const response = await fetch("/api/halloween-proof", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(submission) });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || "Could not make your proof.");
+    sessionStorage.setItem("monstersnow_halloween_test_proof", JSON.stringify({ ...result, submission }));
+    window.location.assign("halloween-proof.html");
+  } catch (error) {
+    if (interestStatus) interestStatus.textContent = error.message;
     setStorybookSubmitState({ disabled: false, text: storybookInterestButtonText });
   }
 }
@@ -652,14 +638,15 @@ function applyMonsterResult(result) {
   const remaining = maxFreePreviews - previewsUsed;
 
   selectGeneratedPreview(preview.id);
-  setConverterStage("download");
+  monsterConfirmed = false;
+  setConverterStage("preview");
 
   if (downloadColoringButton) {
     downloadColoringButton.disabled = false;
   }
 
   if (storybookInterestButton) {
-    storybookInterestButton.disabled = false;
+    storybookInterestButton.disabled = true;
     storybookInterestButton.textContent = storybookInterestButtonText;
   }
 
@@ -730,6 +717,7 @@ function selectGeneratedPreview(id, announce = false) {
   }
 
   selectedPreviewId = preview.id;
+  monsterConfirmed = false;
   monsterPreview.src = preview.image;
   monsterPreview.alt = `${getPreviewStyleLabel(preview.style)} generated monster character preview.`;
   coloringPageUrl = preview.coloringPage;
@@ -744,9 +732,16 @@ function selectGeneratedPreview(id, announce = false) {
   }
 
   if (storybookInterestButton) {
-    storybookInterestButton.disabled = false;
+    storybookInterestButton.disabled = true;
     storybookInterestButton.textContent = storybookInterestButtonText;
   }
+
+  if (confirmMonsterButton) {
+    confirmMonsterButton.hidden = false;
+    confirmMonsterButton.textContent = "Use This Monster";
+  }
+
+  if (resultBookOffer) resultBookOffer.hidden = true;
 
   if (announce && converterStatus) {
     converterStatus.textContent = `${getPreviewStyleLabel(preview.style)} preview selected.`;
@@ -762,6 +757,7 @@ function resetPreviewState() {
   previewsUsed = 0;
   generatedPreviews = [];
   selectedPreviewId = undefined;
+  monsterConfirmed = false;
   monsterSubmission = undefined;
   try { sessionStorage.removeItem("monstersnow_monster_submission"); } catch {}
   isGeneratingPreview = false;
@@ -776,6 +772,11 @@ function resetPreviewState() {
   if (previewHistory) {
     previewHistory.innerHTML = "";
     previewHistory.hidden = true;
+  }
+
+  if (confirmMonsterButton) {
+    confirmMonsterButton.hidden = true;
+    confirmMonsterButton.textContent = "Use This Monster";
   }
 
   if (downloadColoringButton) {
@@ -843,8 +844,13 @@ function syncPreviewControls() {
     resultActions.hidden = !hasPreview;
   }
 
+  if (confirmMonsterButton) {
+    confirmMonsterButton.hidden = !hasPreview;
+    confirmMonsterButton.textContent = monsterConfirmed ? "Monster Selected ✓" : "Use This Monster";
+  }
+
   if (resultBookOffer) {
-    resultBookOffer.hidden = !hasPreview;
+    resultBookOffer.hidden = !hasPreview || !monsterConfirmed;
   }
 
   if (downloadColoringButton) {
@@ -854,7 +860,7 @@ function syncPreviewControls() {
 
   if (storybookInterestButton) {
     storybookInterestButton.hidden = !hasPreview;
-    storybookInterestButton.disabled = !hasPreview;
+    storybookInterestButton.disabled = !hasPreview || !monsterConfirmed;
   }
 
   updatePreviewPresentation(hasPreview);
@@ -972,7 +978,7 @@ function scrollToResultPanel({ focus = false, delay = 0 } = {}) {
 }
 
 function setConverterStage(stage) {
-  const stageOrder = ["upload", "preview", "download"];
+  const stageOrder = ["upload", "preview", "personalize", "review"];
   const activeIndex = Math.max(0, stageOrder.indexOf(stage));
 
   flowSteps.forEach((step) => {
@@ -1221,7 +1227,7 @@ async function finalizeSavedMonster({ email, personalization, selectedPreviewId:
       email,
       childName: personalization.childName,
       monsterName: personalization.monsterName,
-      storyId: halloweenTestMode ? "halloween-monster-night" : "personalized-monster-storybook",
+      storyId: "halloween-monster-night",
       format,
       featurePermission,
     }),

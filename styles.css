@@ -1699,7 +1699,7 @@ main > section {
 
 .converter-flow {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
   max-width: 460px;
   padding: 0;
@@ -2148,6 +2148,11 @@ main > section {
   margin-top: 12px;
 }
 
+.choose-monster-button {
+  width: 100%;
+  margin-top: 12px;
+}
+
 .result-book-offer {
   display: grid;
   gap: 12px;
@@ -2208,10 +2213,42 @@ main > section {
   font-size: 0.78rem;
 }
 
-.interest-email-row {
+.checkout-submit-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 8px;
+}
+
+.checkout-email-field {
+  display: grid;
+  gap: 5px;
+}
+
+.checkout-email-field label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--navy);
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.checkout-email-field label span {
+  color: var(--orange-dark);
+  font-size: 0.66rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.checkout-email-field small {
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+
+.checkout-email-field #interest-status {
+  min-height: 1.1em;
+  margin: 0;
+  color: var(--orange-dark);
+  font-size: 0.76rem;
+  font-weight: 800;
 }
 
 .interest-form input[type="email"] {
@@ -2222,6 +2259,11 @@ main > section {
   border-radius: 8px;
   color: var(--ink);
   font: inherit;
+}
+
+.interest-form input[type="email"][aria-invalid="true"] {
+  border-color: var(--orange-dark);
+  box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.14);
 }
 
 .interest-form input[type="text"] {
@@ -2336,6 +2378,23 @@ main > section {
   background: #fff;
   border: 1px solid #ffd9bd;
   border-radius: 8px;
+}
+
+.feature-permission summary {
+  display: grid;
+  gap: 3px;
+  cursor: pointer;
+}
+
+.feature-permission summary small {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: none;
+}
+
+.feature-permission[open] summary {
+  margin-bottom: 10px;
 }
 
 .feature-permission p {
@@ -3669,7 +3728,7 @@ main > section {
   .style-options,
   .storybook-format-options,
   .storybook-name-fields,
-  .interest-email-row {
+  .checkout-submit-row {
     grid-template-columns: 1fr;
   }
 
