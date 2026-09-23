@@ -1483,52 +1483,6 @@ main > section {
   font-size: clamp(1.25rem, 2vw, 1.65rem);
 }
 
-.proof-strip {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 1px;
-  padding: 0 clamp(18px, 5vw, 72px);
-  background: var(--line);
-  border-block: 1px solid var(--line);
-}
-
-.proof-strip span {
-  display: grid;
-  min-height: 62px;
-  align-content: center;
-  gap: 2px;
-  padding: 10px 14px;
-  background: #fff;
-  color: var(--muted);
-  font-size: 0.88rem;
-  font-weight: 800;
-}
-
-.proof-strip strong {
-  color: var(--navy);
-  font-size: 1.05rem;
-}
-
-.hero + .proof-strip,
-.books-hero + .proof-strip,
-.monsters-hero + .proof-strip {
-  background: rgba(255, 255, 255, 0.11);
-  border-block: 1px solid rgba(255, 255, 255, 0.12);
-}
-
-.hero + .proof-strip span,
-.books-hero + .proof-strip span,
-.monsters-hero + .proof-strip span {
-  background: #07384d;
-  color: rgba(255, 255, 255, 0.68);
-}
-
-.hero + .proof-strip strong,
-.books-hero + .proof-strip strong,
-.monsters-hero + .proof-strip strong {
-  color: #fff;
-}
-
 .seasonal-section {
   display: grid;
   grid-template-columns: minmax(320px, 0.95fr) minmax(300px, 0.55fr);
@@ -3599,7 +3553,6 @@ main > section {
     grid-template-columns: 1fr;
   }
 
-  .proof-strip,
   .book-grid,
   .pricing-grid,
   .story-catalog-grid,
@@ -3787,34 +3740,6 @@ main > section {
     line-height: 1.45;
   }
 
-  .hero + .proof-strip {
-    gap: 8px;
-    padding: 14px 16px 22px;
-    border: 0;
-    background: linear-gradient(180deg, #08717b 0%, #075262 100%);
-  }
-
-  .hero + .proof-strip span {
-    min-height: 74px;
-    padding: 12px 14px;
-    border: 1px solid rgba(125, 229, 228, 0.2);
-    border-radius: 11px;
-    background: rgba(5, 40, 62, 0.58);
-    color: rgba(255, 255, 255, 0.72);
-    box-shadow: 0 8px 18px rgba(3, 26, 46, 0.12);
-  }
-
-  .hero + .proof-strip strong {
-    color: #fff;
-  }
-
-  .hero + .proof-strip + .transformation-section {
-    padding-top: 42px;
-    background:
-      radial-gradient(circle at 92% 12%, rgba(0, 169, 179, 0.1), transparent 28%),
-      linear-gradient(180deg, #f4fbfb 0%, #fff 86%);
-  }
-
   .steps-section,
   .converter-section,
   .create-flow-section,
@@ -3945,11 +3870,6 @@ main > section {
     grid-template-columns: 1fr;
   }
 
-  .proof-strip span {
-    min-height: 54px;
-    padding: 8px 12px;
-  }
-
   .upload-panel,
   .result-panel,
   .format-card,
@@ -3979,15 +3899,6 @@ main > section {
   .monster-card-images,
   .trust-row {
     grid-template-columns: 1fr;
-  }
-
-  .proof-strip {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .hero + .proof-strip span {
-    min-height: 74px;
-    padding: 12px 14px;
   }
 
   .book-hero-showcase {
