@@ -2761,24 +2761,26 @@ main > section {
 }
 
 .monster-gallery-grid {
-  width: min(100%, 1120px);
+  width: min(100%, 1180px);
   margin-inline: auto;
 }
 
 .monster-transformation-card {
+  display: grid;
+  grid-template-rows: auto 1fr;
   overflow: hidden;
   border: 1px solid rgba(6, 61, 79, 0.12);
-  border-radius: 26px;
+  border-radius: 22px;
   background: #fff;
-  box-shadow: 0 28px 70px rgba(6, 37, 58, 0.15);
+  box-shadow: 0 18px 46px rgba(6, 37, 58, 0.12);
 }
 
 .monster-transformation-images {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-  gap: clamp(14px, 2.5vw, 30px);
+  grid-template-columns: minmax(0, 1fr) 34px minmax(0, 1fr);
+  gap: clamp(8px, 1.2vw, 14px);
   align-items: center;
-  padding: clamp(18px, 3vw, 34px);
+  padding: clamp(12px, 1.8vw, 20px);
   background:
     radial-gradient(circle at 10% 12%, rgba(255, 106, 0, 0.12), transparent 28%),
     radial-gradient(circle at 90% 88%, rgba(0, 155, 164, 0.14), transparent 28%),
@@ -2787,7 +2789,7 @@ main > section {
 
 .monster-transformation-images figure {
   display: grid;
-  gap: 12px;
+  gap: 9px;
   min-width: 0;
   margin: 0;
 }
@@ -2795,10 +2797,10 @@ main > section {
 .gallery-image-crop {
   position: relative;
   overflow: hidden;
-  border: 8px solid #fff;
-  border-radius: 18px;
+  border: 5px solid #fff;
+  border-radius: 14px;
   background: #fff;
-  box-shadow: 0 18px 36px rgba(5, 33, 54, 0.16);
+  box-shadow: 0 10px 24px rgba(5, 33, 54, 0.14);
 }
 
 .gallery-image-crop img {
@@ -2829,7 +2831,7 @@ main > section {
 
 .monster-transformation-images figcaption {
   color: var(--navy);
-  font-size: 0.78rem;
+  font-size: clamp(0.62rem, 1vw, 0.72rem);
   font-weight: 900;
   letter-spacing: 0.05em;
   text-align: center;
@@ -2838,33 +2840,36 @@ main > section {
 
 .gallery-transformation-mark {
   display: grid;
-  width: 52px;
-  height: 52px;
+  width: 34px;
+  height: 34px;
   place-items: center;
   border-radius: 50%;
   background: var(--orange);
   color: #fff;
-  box-shadow: 0 12px 24px rgba(255, 106, 0, 0.24);
-  font-size: 1.65rem;
+  box-shadow: 0 8px 18px rgba(255, 106, 0, 0.22);
+  font-size: 1.15rem;
   font-weight: 900;
 }
 
 .monster-transformation-copy {
   display: grid;
-  justify-items: center;
-  padding: clamp(26px, 4vw, 44px);
-  text-align: center;
+  grid-template-columns: minmax(0, 0.9fr) minmax(180px, 1.1fr);
+  gap: 16px;
+  align-items: center;
+  padding: clamp(18px, 2.2vw, 26px);
+  text-align: left;
 }
 
 .monster-transformation-copy h2 {
-  margin-top: 10px;
-  font-size: clamp(1.9rem, 4vw, 3.2rem);
+  margin-top: 8px;
+  font-size: clamp(1.25rem, 2vw, 1.65rem);
+  letter-spacing: -0.03em;
 }
 
 .monster-transformation-copy p {
-  max-width: 680px;
-  margin: 12px 0 0;
+  margin: 0;
   color: var(--muted);
+  font-size: 0.95rem;
 }
 
 .about-page-hero {
@@ -2951,19 +2956,57 @@ main > section {
     grid-template-columns: 1fr;
   }
 
-  .monster-transformation-images {
+  .monster-transformation-copy {
     grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}
+
+@media (min-width: 860px) {
+  .monster-gallery-page .monster-gallery-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(18px, 2.4vw, 28px);
+  }
+}
+
+@media (max-width: 560px) {
+  .monster-gallery-page {
+    padding: 42px 14px 58px;
+  }
+
+  .monster-gallery-header {
+    margin-bottom: 26px;
+  }
+
+  .monster-gallery-header h1 {
+    max-width: 12ch;
+    font-size: clamp(2.35rem, 12vw, 3.25rem);
+  }
+
+  .monster-transformation-images {
+    grid-template-columns: minmax(0, 1fr) 24px minmax(0, 1fr);
+    gap: 5px;
+    padding: 10px;
   }
 
   .gallery-transformation-mark {
-    justify-self: center;
-    transform: rotate(90deg);
+    width: 24px;
+    height: 24px;
+    font-size: 0.85rem;
   }
 
-  .gallery-image-crop-drawing,
-  .gallery-image-crop-monster {
-    width: min(100%, 520px);
-    justify-self: center;
+  .gallery-image-crop {
+    border-width: 3px;
+    border-radius: 10px;
+  }
+
+  .monster-transformation-images figcaption {
+    font-size: 0.58rem;
+    letter-spacing: 0.035em;
+  }
+
+  .monster-transformation-copy {
+    padding: 17px 16px 20px;
   }
 }
 
