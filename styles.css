@@ -2760,6 +2760,113 @@ main > section {
   color: var(--muted);
 }
 
+.monster-gallery-grid {
+  width: min(100%, 1120px);
+  margin-inline: auto;
+}
+
+.monster-transformation-card {
+  overflow: hidden;
+  border: 1px solid rgba(6, 61, 79, 0.12);
+  border-radius: 26px;
+  background: #fff;
+  box-shadow: 0 28px 70px rgba(6, 37, 58, 0.15);
+}
+
+.monster-transformation-images {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: clamp(14px, 2.5vw, 30px);
+  align-items: center;
+  padding: clamp(18px, 3vw, 34px);
+  background:
+    radial-gradient(circle at 10% 12%, rgba(255, 106, 0, 0.12), transparent 28%),
+    radial-gradient(circle at 90% 88%, rgba(0, 155, 164, 0.14), transparent 28%),
+    linear-gradient(145deg, #fffaf3, #f2fbfb);
+}
+
+.monster-transformation-images figure {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  margin: 0;
+}
+
+.gallery-image-crop {
+  position: relative;
+  overflow: hidden;
+  border: 8px solid #fff;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 18px 36px rgba(5, 33, 54, 0.16);
+}
+
+.gallery-image-crop img {
+  position: absolute;
+  display: block;
+  max-width: none;
+}
+
+.gallery-image-crop-drawing {
+  aspect-ratio: 1;
+}
+
+.gallery-image-crop-drawing img {
+  top: -93.7%;
+  left: -34%;
+  width: 168%;
+}
+
+.gallery-image-crop-monster {
+  aspect-ratio: 1;
+}
+
+.gallery-image-crop-monster img {
+  top: -157.3%;
+  left: -11.5%;
+  width: 123%;
+}
+
+.monster-transformation-images figcaption {
+  color: var(--navy);
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.gallery-transformation-mark {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--orange);
+  color: #fff;
+  box-shadow: 0 12px 24px rgba(255, 106, 0, 0.24);
+  font-size: 1.65rem;
+  font-weight: 900;
+}
+
+.monster-transformation-copy {
+  display: grid;
+  justify-items: center;
+  padding: clamp(26px, 4vw, 44px);
+  text-align: center;
+}
+
+.monster-transformation-copy h2 {
+  margin-top: 10px;
+  font-size: clamp(1.9rem, 4vw, 3.2rem);
+}
+
+.monster-transformation-copy p {
+  max-width: 680px;
+  margin: 12px 0 0;
+  color: var(--muted);
+}
+
 .about-page-hero {
   display: grid;
   min-height: 66svh;
@@ -2842,6 +2949,21 @@ main > section {
   .about-page-story,
   .about-principles-grid {
     grid-template-columns: 1fr;
+  }
+
+  .monster-transformation-images {
+    grid-template-columns: 1fr;
+  }
+
+  .gallery-transformation-mark {
+    justify-self: center;
+    transform: rotate(90deg);
+  }
+
+  .gallery-image-crop-drawing,
+  .gallery-image-crop-monster {
+    width: min(100%, 520px);
+    justify-self: center;
   }
 }
 
