@@ -2153,6 +2153,11 @@ main > section {
   margin-top: 12px;
 }
 
+.replace-drawing-button {
+  width: 100%;
+  margin: 10px 0 4px;
+}
+
 .result-book-offer {
   display: grid;
   gap: 12px;

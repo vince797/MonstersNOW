@@ -11,9 +11,11 @@ const {
 const {
   completeMonsterPreview,
   failMonsterPreview,
+  requireSubmission,
   startMonsterPreview,
 } = require("../lib/monster-submissions");
 const { readJsonBody } = require("../lib/http");
+const { validateMonsterDrawing } = require("../lib/drawing-validator");
 
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 const IMAGE_MODEL = process.env.OPENAI_IMAGE_MODEL || "gpt-image-1.5";
@@ -76,6 +78,11 @@ module.exports = async function handler(request, response) {
 
   let previewRecord;
   try {
+    await requireSubmission(submissionId, submissionToken);
+    const startedAt = Date.now();
+    await validateMonsterDrawing(drawing, {
+      timeoutMs: Math.min(12 * 1000, getRemainingRequestBudget(startedAt)),
+    });
     previewRecord = await startMonsterPreview({
       submissionId,
       token: submissionToken,
@@ -83,7 +90,6 @@ module.exports = async function handler(request, response) {
       styleId: style,
       model: IMAGE_MODEL,
     });
-    const startedAt = Date.now();
     const references = await loadReferenceImages();
     const monsterImage = await createMonsterImage(
       drawing,
@@ -415,5 +421,8 @@ function formatErrorForLog(error) {
     param: error?.param,
     status: error?.status,
     requestId: error?.requestId,
+    validationReason: error?.validationReason,
+    providerStatus: error?.providerStatus,
+    providerRequestId: error?.providerRequestId,
   };
 }

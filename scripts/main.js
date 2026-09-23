@@ -30,6 +30,7 @@ const monsterPreviewBadge = document.querySelector("#monster-preview-badge");
 const downloadColoringButton = document.querySelector("#download-coloring");
 const converterStatus = document.querySelector("#converter-status");
 const converterNote = document.querySelector("#converter-note");
+const replaceDrawingButton = document.querySelector("#replace-drawing");
 const previewCount = document.querySelector("#preview-count");
 const uploadActionStatus = document.querySelector("#upload-action-status");
 const uploadError = document.querySelector("#upload-error");
@@ -170,6 +171,10 @@ if (monsterUpload && drawingPreview && monsterPreview && convertButton) {
 
 if (storybookInterestForm) {
   storybookInterestForm.addEventListener("submit", handleStorybookInterestSubmit);
+}
+
+if (replaceDrawingButton) {
+  replaceDrawingButton.addEventListener("click", () => monsterUpload?.click());
 }
 
 if (confirmMonsterButton) {
@@ -504,6 +509,7 @@ async function selectDrawingFile(file) {
   selectedDrawingFile = undefined;
   resetPreviewState();
   showUploadError("");
+  if (replaceDrawingButton) replaceDrawingButton.hidden = true;
   setUploadActionStatus(shouldConvertHeic ? "Converting HEIC photo to JPEG..." : "Preparing drawing preview.");
 
   if (convertButton) {
@@ -1257,7 +1263,10 @@ async function convertMonster(drawing, style, variationNumber, savedSubmission) 
   }));
 
   if (!response.ok) {
-    throw new Error(result.error || "Could not create monster preview.");
+    const error = new Error(result.error || "Could not create monster preview.");
+    error.code = result.code;
+    error.status = response.status;
+    throw error;
   }
 
   if (!result.monsterImage) {
@@ -1269,6 +1278,18 @@ async function convertMonster(drawing, style, variationNumber, savedSubmission) 
 
 function showMonsterGenerationError(error) {
   const hasPreview = generatedPreviews.length > 0;
+
+  if (error?.code === "monster_drawing_not_found") {
+    const message = "We couldn't find a clear monster drawing in this photo. Try a closer, brighter picture with the artwork filling most of the frame.";
+    showUploadError(message);
+    if (converterStatus) converterStatus.textContent = "This photo needs a different picture.";
+    if (converterNote) converterNote.textContent = message;
+    if (replaceDrawingButton) replaceDrawingButton.hidden = false;
+    setUploadActionStatus("No preview was used. Choose a different photo to continue.");
+    setConverterStage("upload");
+    scrollToResultPanel({ focus: true, delay: 120 });
+    return;
+  }
 
   if (converterStatus) {
     converterStatus.textContent = hasPreview ? "New version could not be created." : "Preview was not created.";
