@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex, nofollow" />
     <title>Dashboard | MonstersNOW Admin</title>
-    <link rel="stylesheet" href="styles.css?v=20260921-story-review" />
+    <link rel="stylesheet" href="styles.css?v=20260924-admin-login-polish" />
   </head>
   <body class="admin-page">
     <main>
@@ -23,20 +23,21 @@
         </div>
         <div class="admin-login-panel">
           <section class="admin-login-card">
-            <span class="admin-login-mark">MN</span>
-            <p class="eyebrow">Welcome back</p>
-            <h2>Sign in to MonstersNOW</h2>
-            <p>Enter your admin password to open the operations dashboard.</p>
+            <span class="admin-login-security"><i aria-hidden="true">◆</i> Private workspace</span>
+            <p class="eyebrow">MonstersNOW Admin</p>
+            <h2>Welcome back.</h2>
+            <p>Sign in to manage books, proofs, and orders.</p>
             <form id="admin-login-form">
-              <label for="admin-password">Admin password</label>
+              <label for="admin-password">Password</label>
               <div class="admin-password-field">
                 <input id="admin-password" type="password" autocomplete="current-password" placeholder="Enter your password" required />
                 <button id="toggle-admin-password" type="button" aria-label="Show password">Show</button>
               </div>
-              <button class="button primary" type="submit">Open dashboard</button>
+              <button class="button primary" type="submit">Sign in</button>
             </form>
-            <p id="admin-login-status" role="status"></p>
-            <a class="admin-return-link" href="index.html">← Return to the website</a>
+            <p class="admin-login-help">Password protected · Your session stays on this device.</p>
+            <p id="admin-login-status" role="status" aria-live="polite"></p>
+            <a class="admin-return-link" href="index.html">← Return to MonstersNOW</a>
           </section>
         </div>
       </section>

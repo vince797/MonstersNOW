@@ -146,27 +146,41 @@ body {
 }
 
 .admin-login-card {
-  width: min(430px, 100%);
+  width: min(460px, 100%);
+  padding: clamp(28px, 4vw, 44px);
+  border: 1px solid rgba(6, 61, 79, 0.1);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 24px 70px rgba(6, 37, 58, 0.12);
 }
 
-.admin-login-mark {
-  display: grid;
-  place-items: center;
-  width: 48px;
-  height: 48px;
-  margin-bottom: 34px;
-  border-radius: 14px;
-  color: #fff;
-  background: var(--orange);
-  box-shadow: 0 12px 26px rgba(232, 91, 24, 0.23);
-  font-weight: 950;
-  letter-spacing: -0.05em;
+.admin-login-security {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  margin-bottom: 28px;
+  padding: 8px 11px;
+  border-radius: 999px;
+  color: #087456;
+  background: #e7f7f1;
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.admin-login-security i {
+  color: #18a97f;
+  font-size: 0.55rem;
+  font-style: normal;
 }
 
 .admin-login-card h2 {
   margin-top: 8px;
   color: var(--navy);
-  font-size: clamp(2rem, 4vw, 2.8rem);
+  font-size: clamp(2.15rem, 4vw, 3.15rem);
+  line-height: 0.98;
   letter-spacing: -0.035em;
 }
 
@@ -185,22 +199,22 @@ body {
 }
 
 .admin-login-card form {
-  gap: 12px;
-  margin-top: 30px;
+  gap: 11px;
+  margin-top: 28px;
 }
 
 .admin-password-field {
   display: grid;
   grid-template-columns: 1fr auto;
-  border: 1px solid var(--line);
-  border-radius: 9px;
+  border: 1px solid #cedde4;
+  border-radius: 11px;
   background: #fff;
   transition: border-color 160ms ease, box-shadow 160ms ease;
 }
 
 .admin-password-field:focus-within {
   border-color: var(--teal);
-  box-shadow: 0 0 0 3px rgba(0, 151, 157, 0.12);
+  box-shadow: 0 0 0 4px rgba(0, 151, 157, 0.12);
 }
 
 .admin-password-field input {
@@ -212,6 +226,14 @@ body {
   background: transparent;
   color: var(--ink);
   font: inherit;
+}
+
+.admin-password-field input:-webkit-autofill,
+.admin-password-field input:-webkit-autofill:hover,
+.admin-password-field input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--ink);
+  box-shadow: 0 0 0 1000px #fff inset;
+  transition: background-color 9999s ease-out;
 }
 
 .admin-password-field button {
@@ -226,13 +248,49 @@ body {
 }
 
 .admin-login-card form .button {
-  min-height: 50px;
-  margin-top: 4px;
+  min-height: 52px;
+  margin-top: 5px;
+  border-radius: 10px;
+  font-size: 0.98rem;
+}
+
+.admin-login-help {
+  margin: 13px 0 0;
+  color: #7a899a;
+  font-size: 0.72rem;
+  text-align: center;
+}
+
+#admin-login-status {
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  border-radius: 9px;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 750;
+  line-height: 1.4;
+}
+
+#admin-login-status:not(:empty) {
+  margin-top: 14px;
+  padding: 10px 12px;
+  background: #edf6f7;
+}
+
+#admin-login-status.is-error {
+  color: #9b4218;
+  background: #fff0e8;
+}
+
+#admin-login-status.is-success {
+  color: #087456;
+  background: #e7f7f1;
 }
 
 .admin-return-link {
   display: inline-block;
-  margin-top: 28px;
+  margin-top: 24px;
   color: var(--muted);
   font-size: 0.86rem;
   font-weight: 800;
@@ -964,7 +1022,12 @@ body {
   }
 
   .admin-login-panel {
-    padding: 38px 22px;
+    padding: 28px 16px 38px;
+  }
+
+  .admin-login-card {
+    padding: 26px 22px 30px;
+    border-radius: 18px;
   }
 
   .admin-app {
@@ -2767,7 +2830,6 @@ main > section {
 
 .monster-transformation-card {
   display: grid;
-  grid-template-rows: auto 1fr;
   overflow: hidden;
   border: 1px solid rgba(6, 61, 79, 0.12);
   border-radius: 22px;
@@ -2849,27 +2911,6 @@ main > section {
   box-shadow: 0 8px 18px rgba(255, 106, 0, 0.22);
   font-size: 1.15rem;
   font-weight: 900;
-}
-
-.monster-transformation-copy {
-  display: grid;
-  grid-template-columns: minmax(0, 0.9fr) minmax(180px, 1.1fr);
-  gap: 16px;
-  align-items: center;
-  padding: clamp(18px, 2.2vw, 26px);
-  text-align: left;
-}
-
-.monster-transformation-copy h2 {
-  margin-top: 8px;
-  font-size: clamp(1.25rem, 2vw, 1.65rem);
-  letter-spacing: -0.03em;
-}
-
-.monster-transformation-copy p {
-  margin: 0;
-  color: var(--muted);
-  font-size: 0.95rem;
 }
 
 .about-page-hero {
@@ -2956,10 +2997,6 @@ main > section {
     grid-template-columns: 1fr;
   }
 
-  .monster-transformation-copy {
-    grid-template-columns: 1fr;
-    gap: 10px;
-  }
 }
 
 @media (min-width: 860px) {
@@ -3005,9 +3042,6 @@ main > section {
     letter-spacing: 0.035em;
   }
 
-  .monster-transformation-copy {
-    padding: 17px 16px 20px;
-  }
 }
 
 .monsters-hero-copy {
@@ -4363,7 +4397,16 @@ main > section {
 .story-book-meta small { color: var(--muted); font-size: .68rem; text-transform: none; }
 .story-book-meta em { width: fit-content; padding: 3px 6px; border-radius: 999px; color: #08727a; background: #e6f7f7; font-size: .58rem; font-style: normal; font-weight: 900; letter-spacing: .04em; text-transform: uppercase; }
 .story-editor { padding: 0; overflow: hidden; }
-.story-editor-heading { padding: 24px 26px 20px; background: linear-gradient(180deg, #fff, #fbfdfe); }
+.story-editor-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  padding: 24px 26px 20px;
+  background: linear-gradient(180deg, #fff, #fbfdfe);
+}
+.story-editor-heading .story-editor-title { width: 100%; }
+.story-editor-heading .story-editor-title h2 { max-width: 24ch; overflow-wrap: normal; word-break: normal; }
+.story-editor-heading .story-editor-actions { justify-content: flex-start; width: 100%; padding-top: 0; }
 .story-editor-kicker { display: flex; align-items: center; gap: 9px; }
 #story-stage { padding: 5px 8px; border-radius: 999px; color: #8c4a16; background: #fff0df; font-size: .65rem; font-weight: 900; letter-spacing: .04em; text-transform: uppercase; }
 #story-stage.is-published, #story-stage.is-content-ready { color: #087456; background: #e4f8f0; }
@@ -4529,7 +4572,7 @@ main > section {
 .book-checks-panel li.needs-work { color: #a44716; background: #fff1e7; }
 .book-checks-panel p { margin: 0; color: var(--muted); font-size: .7rem; line-height: 1.45; }
 #story-editor-status { margin-top: -16px; padding-bottom: 22px; }
-@media (max-width: 1300px) { .story-editor-heading { display: grid; grid-template-columns: minmax(0,1fr); } .story-editor-actions { justify-content: flex-start; padding-top: 12px; } .story-editor-title h2 { max-width: none; font-size: clamp(1.65rem,3vw,2.25rem); } }
+@media (max-width: 1300px) { .story-editor-title h2 { max-width: none; font-size: clamp(1.65rem,3vw,2.25rem); } }
 @media (max-width: 1180px) { .page-editor-layout { grid-template-columns: 130px minmax(0,1fr); } .book-checks-panel { position: static; grid-column: 1 / -1; } .book-checks-panel ul { grid-template-columns: repeat(2,minmax(0,1fr)); } }
 @media (max-width: 860px) { .story-admin { grid-template-columns: 1fr; } .story-sidebar { position: static; } .story-list { grid-template-columns: repeat(2,minmax(0,1fr)); } .page-editor-layout { grid-template-columns: 110px minmax(0,1fr); } .artwork-overview-grid { grid-template-columns: repeat(3,minmax(0,1fr)); } }
 @media (max-width: 680px) { .story-list { grid-template-columns: 1fr; } .story-editor-heading, .page-editor-heading, .selected-preview-heading { align-items: stretch; flex-direction: column; } .manuscript-import, .book-settings, .page-editor-heading, .page-editor-layout, #story-editor-status { margin-inline: 14px; } .book-settings-layout { grid-template-columns: 1fr; } .admin-cover-preview { width: min(180px,60vw); margin-inline: auto; } .page-editor-layout { grid-template-columns: 1fr; } .page-browser { position: static; max-height: none; } #page-nav { grid-template-columns: repeat(4,minmax(0,1fr)); } .story-page-card { grid-template-columns: 1fr; } .story-page-card > .page-card-header { align-items: flex-start; flex-direction: column; } .story-page-card textarea { min-height: 180px; } .token-toolbar { justify-content: flex-start; margin: 0 0 7px; } .page-artwork-panel { grid-template-columns: 1fr; } .page-artwork-visual { min-height: 180px; } .book-checks-panel { grid-column: auto; } .book-checks-panel ul { grid-template-columns: 1fr; } .selected-preview-heading .sample-fields { grid-template-columns: repeat(2,minmax(0,1fr)); } }

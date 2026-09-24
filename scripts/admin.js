@@ -161,7 +161,10 @@ manuscriptDrop.addEventListener("drop", handleManuscriptDrop);
 if (adminPassword) openLibrary();
 
 async function openLibrary() {
+  const submitButton = loginForm.querySelector('button[type="submit"]');
+  loginStatus.className = "is-pending";
   loginStatus.textContent = "Opening story library...";
+  submitButton.disabled = true;
   try {
     const [storyResult, orderResult] = await Promise.all([apiRequest(), apiRequest("?resource=orders")]);
     stories = storyResult.stories || [];
@@ -171,6 +174,7 @@ async function openLibrary() {
       stories = catalogResult?.stories || stories;
     }
     sessionStorage.setItem("monstersnow_admin_password", adminPassword);
+    loginStatus.className = "";
     login.hidden = true;
     adminApp.hidden = false;
     renderStoryList();
@@ -181,8 +185,28 @@ async function openLibrary() {
     showView("dashboard");
   } catch (error) {
     sessionStorage.removeItem("monstersnow_admin_password");
-    loginStatus.textContent = error.message;
+    console.error("Admin sign-in failed", error);
+    loginStatus.className = "is-error";
+    loginStatus.textContent = formatAdminLoginError(error);
+    passwordInput.focus();
+    passwordInput.select();
+  } finally {
+    submitButton.disabled = false;
   }
+}
+
+function formatAdminLoginError(error) {
+  const message = String(error?.message || "").toLowerCase();
+  if (message.includes("issued at future") || message.includes("not yet valid") || message.includes("clock")) {
+    return "Your device clock appears out of sync. Set the date and time automatically, then try again.";
+  }
+  if (message.includes("unauthorized") || message.includes("invalid") || message.includes("password") || message.includes("forbidden")) {
+    return "That password wasn’t accepted. Check it and try again.";
+  }
+  if (message.includes("failed to fetch") || message.includes("network")) {
+    return "We couldn’t reach the admin service. Check your connection and try again.";
+  }
+  return "We couldn’t open the dashboard. Please try again.";
 }
 
 function showView(view) {
@@ -1131,6 +1155,7 @@ function signOut() {
   passwordInput.value = "";
   adminApp.hidden = true;
   login.hidden = false;
+  loginStatus.className = "is-success";
   loginStatus.textContent = "Signed out.";
   passwordInput.focus();
 }
