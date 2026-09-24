@@ -5,6 +5,7 @@ const crypto = require("node:crypto");
 const {
   completeMonsterPreview,
   createMonsterSubmission,
+  deleteAdminMonster,
   finalizeMonsterSubmission,
   startMonsterPreview,
 } = require("../lib/monster-submissions");
@@ -45,6 +46,45 @@ test("monster submission is recorded before its private original is uploaded", a
     assert.doesNotMatch(calls[0].options.body, new RegExp(submission.token));
     assert.equal(calls[1].options.headers.apikey, "server-secret");
     assert.equal(calls[1].options.headers.Authorization, "Bearer server-secret");
+  } finally {
+    global.fetch = originalFetch;
+    process.env.SUPABASE_URL = originalUrl;
+    process.env.SUPABASE_SECRET_KEY = originalKey;
+  }
+});
+
+test("admin deletion removes private files before the monster record", async () => {
+  const originalFetch = global.fetch;
+  const originalUrl = process.env.SUPABASE_URL;
+  const originalKey = process.env.SUPABASE_SECRET_KEY;
+  process.env.SUPABASE_URL = "https://project.supabase.co";
+  process.env.SUPABASE_SECRET_KEY = "server-secret";
+  const submissionId = "11111111-1111-4111-8111-111111111111";
+  const calls = [];
+  global.fetch = async (url, options = {}) => {
+    calls.push({ url, options });
+    if (url.includes(`/monster_submissions?id=eq.${submissionId}`) && (options.method || "GET") === "GET") {
+      return jsonResponse([{ id: submissionId, original_path: `${submissionId}/original.png` }]);
+    }
+    if (url.includes(`/monster_previews?submission_id=eq.${submissionId}`)) {
+      return jsonResponse([{ preview_path: `${submissionId}/previews/one.png`, coloring_page_path: `${submissionId}/coloring/one.png` }]);
+    }
+    if (url.endsWith("/storage/v1/object/monster-submissions") && options.method === "DELETE") return jsonResponse([]);
+    if (url.includes(`/monster_submissions?id=eq.${submissionId}`) && options.method === "DELETE") return jsonResponse([]);
+    throw new Error(`Unexpected request: ${url}`);
+  };
+
+  try {
+    assert.equal(await deleteAdminMonster(submissionId), true);
+    const storageDelete = calls.find((call) => call.url.endsWith("/storage/v1/object/monster-submissions") && call.options.method === "DELETE");
+    assert.deepEqual(JSON.parse(storageDelete.options.body).prefixes, [
+      `${submissionId}/original.png`,
+      `${submissionId}/previews/one.png`,
+      `${submissionId}/coloring/one.png`,
+    ]);
+    const storageIndex = calls.indexOf(storageDelete);
+    const rowIndex = calls.findIndex((call) => call.url.includes("/monster_submissions?id=eq.") && call.options.method === "DELETE");
+    assert.ok(storageIndex < rowIndex);
   } finally {
     global.fetch = originalFetch;
     process.env.SUPABASE_URL = originalUrl;

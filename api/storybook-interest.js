@@ -9,7 +9,7 @@ const { createStory, ensureCatalogStories, getStory, listStories, updateStory } 
 const { listOrders, updateOrder } = require("../lib/order-library");
 const { importManuscript } = require("../lib/manuscript-import");
 const { uploadStoryArtwork } = require("../lib/story-artwork");
-const { createMonsterSubmission, finalizeMonsterSubmission } = require("../lib/monster-submissions");
+const { createMonsterSubmission, deleteAdminMonster, finalizeMonsterSubmission, listAdminMonsters } = require("../lib/monster-submissions");
 const { createAdminStoryProof } = require("../lib/admin-story-proof");
 
 module.exports = async function handler(request, response) {
@@ -88,12 +88,12 @@ module.exports = async function handler(request, response) {
     }
   }
 
-  if (["GET", "PUT", "PATCH"].includes(request.method)) {
+  if (["GET", "PUT", "PATCH", "DELETE"].includes(request.method)) {
     return handleAdminStories(request, response);
   }
 
   if (request.method !== "POST") {
-    return rejectUnsupportedMethod(request, response, ["GET", "POST", "PUT", "PATCH"]);
+    return rejectUnsupportedMethod(request, response, ["GET", "POST", "PUT", "PATCH", "DELETE"]);
   }
 
   let body;
@@ -151,6 +151,21 @@ async function handleAdminStories(request, response) {
       }
       return rejectUnsupportedMethod(request, response, ["GET", "PATCH"]);
     }
+
+    if (resource === "monsters") {
+      if (request.method === "GET") {
+        response.setHeader("Cache-Control", "private, no-store");
+        return sendJson(response, 200, { monsters: await listAdminMonsters() });
+      }
+      if (request.method === "DELETE") {
+        const deleted = await deleteAdminMonster(id);
+        if (!deleted) return sendJson(response, 404, { error: "Saved monster not found." });
+        return sendJson(response, 200, { deleted: true, id });
+      }
+      return rejectUnsupportedMethod(request, response, ["GET", "DELETE"]);
+    }
+
+    if (request.method === "DELETE") return rejectUnsupportedMethod(request, response, ["GET", "PUT", "PATCH"]);
 
     if (request.method === "GET") {
       const data = id ? await getStory(id) : await listStories();

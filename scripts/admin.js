@@ -8,6 +8,7 @@ const admin = document.querySelector("#story-admin");
 const productionAdmin = document.querySelector("#production-admin");
 const ordersAdmin = document.querySelector("#orders-admin");
 const customersAdmin = document.querySelector("#customers-admin");
+const monstersAdmin = document.querySelector("#monsters-admin");
 const newStoryButton = document.querySelector("#new-story");
 const storyList = document.querySelector("#story-list");
 const storyCount = document.querySelector("#story-count");
@@ -17,6 +18,7 @@ const editorStatus = document.querySelector("#story-editor-status");
 const pagesContainer = document.querySelector("#story-pages");
 let stories = [];
 let orders = [];
+let monsters = [];
 let manuscriptFile = null;
 let storyDirty = false;
 let loadingStory = false;
@@ -58,6 +60,9 @@ window.addEventListener("beforeunload", (event) => { if (storyDirty) { event.pre
 ["story-search", "story-filter"].forEach((id) => document.getElementById(id).addEventListener("input", renderStoryList));
 document.querySelector("#order-search").addEventListener("input", renderOrders);
 document.querySelector("#customer-search").addEventListener("input", renderCustomers);
+document.querySelector("#monster-search").addEventListener("input", renderMonsters);
+document.querySelector("#monster-filter").addEventListener("change", renderMonsters);
+document.querySelector("#monster-sort").addEventListener("change", renderMonsters);
 document.querySelectorAll("[data-order-view]").forEach((button) => button.addEventListener("click", () => { orderView = button.dataset.orderView; renderOrders(); }));
 document.querySelectorAll("[data-order-quick-filter]").forEach((button) => button.addEventListener("click", () => { orderQuickFilter = button.dataset.orderQuickFilter; renderOrders(); }));
 document.querySelector("#close-order-detail").addEventListener("click", closeOrderDetail);
@@ -167,9 +172,10 @@ async function openLibrary() {
   loginStatus.textContent = "Opening story library...";
   submitButton.disabled = true;
   try {
-    const [storyResult, orderResult] = await Promise.all([apiRequest(), apiRequest("?resource=orders")]);
+    const [storyResult, orderResult, monsterResult] = await Promise.all([apiRequest(), apiRequest("?resource=orders"), apiRequest("?resource=monsters")]);
     stories = storyResult.stories || [];
     orders = orderResult.orders || [];
+    monsters = monsterResult.monsters || [];
     if (Object.keys(CATALOG_COVERS).some((slug) => !stories.some((story) => story.slug === slug))) {
       const catalogResult = await setupCatalog();
       stories = catalogResult?.stories || stories;
@@ -182,6 +188,7 @@ async function openLibrary() {
     renderDashboard();
     renderOrders();
     renderCustomers();
+    renderMonsters();
     renderProductionHub();
     showView("dashboard");
   } catch (error) {
@@ -216,7 +223,8 @@ function showView(view) {
   productionAdmin.hidden = view !== "production";
   ordersAdmin.hidden = view !== "orders";
   customersAdmin.hidden = view !== "customers";
-  document.querySelector("#admin-view-title").textContent = view === "stories" ? "Stories" : view === "production" ? "Production" : view === "orders" ? "Orders" : view === "customers" ? "Customers" : "Dashboard";
+  monstersAdmin.hidden = view !== "monsters";
+  document.querySelector("#admin-view-title").textContent = view === "stories" ? "Stories" : view === "production" ? "Production" : view === "orders" ? "Orders" : view === "monsters" ? "Monsters" : view === "customers" ? "Customers" : "Dashboard";
   document.querySelectorAll("[data-admin-view]").forEach((button) => button.classList.toggle("is-active", button.dataset.adminView === view));
   if (view === "stories" && editor.hidden && stories[0]) editStory(stories[0]);
   if (view === "production") renderProductionHub();
@@ -230,6 +238,7 @@ function renderDashboard() {
   document.querySelector("#metric-drafts").textContent = stories.filter((story) => story.status === "draft").length;
   document.querySelector("#nav-story-count").textContent = stories.length;
   document.querySelector("#nav-order-count").textContent = orders.length;
+  document.querySelector("#nav-monster-count").textContent = monsters.length;
   document.querySelector("#nav-customer-count").textContent = new Set(orders.map((order) => order.customer_email?.toLowerCase()).filter(Boolean)).size;
   document.querySelector("#nav-production-count").textContent = productionReport?.checks?.filter((check) => check.status !== "pass").length || 0;
   const recent = document.querySelector("#recent-stories");
@@ -533,6 +542,137 @@ function renderCustomers() {
     article.querySelector("button").addEventListener("click", () => { showView("orders"); openOrderDetail(customer.orders[0]); });
     return article;
   }));
+}
+
+function renderMonsters() {
+  const query = document.querySelector("#monster-search").value.trim().toLowerCase();
+  const filter = document.querySelector("#monster-filter").value;
+  const sort = document.querySelector("#monster-sort").value;
+  const visible = monsters.filter((monster) => {
+    const matchesStatus = filter === "all" || monster.status === filter;
+    const searchable = [monster.monsterName, monster.childName, monster.customerEmail, monster.storyId, monster.sourceFilename]
+      .filter(Boolean).join(" ").toLowerCase();
+    return matchesStatus && searchable.includes(query);
+  }).sort((left, right) => monsterSort(left, right, sort));
+  const library = document.querySelector("#monster-library");
+  const emptyState = document.querySelector("#monsters-empty");
+  emptyState.hidden = visible.length > 0;
+  emptyState.querySelector("strong").textContent = monsters.length ? "No monsters match these filters" : "No saved monsters yet";
+  emptyState.querySelector("p").textContent = monsters.length ? "Try another search term or choose All monsters." : "Uploaded drawings will appear here after they are saved.";
+  document.querySelector("#monsters-status").textContent = visible.length
+    ? `Showing ${visible.length} of ${monsters.length} saved monster${monsters.length === 1 ? "" : "s"}.`
+    : "";
+  document.querySelector("#monster-metric-total").textContent = monsters.length;
+  document.querySelector("#monster-metric-ready").textContent = monsters.filter((monster) => monster.selectedPreviewUrl).length;
+  document.querySelector("#monster-metric-books").textContent = monsters.reduce((total, monster) => total + (monster.orders?.length || 0), 0);
+  document.querySelector("#monster-metric-gallery").textContent = monsters.filter((monster) => monster.featurePermission?.canFeatureMonster).length;
+  library.replaceChildren(...visible.map(buildMonsterCard));
+}
+
+function monsterSort(left, right, sort) {
+  if (sort === "oldest") return new Date(left.createdAt) - new Date(right.createdAt);
+  if (sort === "name") return (left.monsterName || "Unnamed monster").localeCompare(right.monsterName || "Unnamed monster");
+  if (sort === "books") return (right.orders?.length || 0) - (left.orders?.length || 0) || new Date(right.updatedAt) - new Date(left.updatedAt);
+  return new Date(right.updatedAt || right.createdAt) - new Date(left.updatedAt || left.createdAt);
+}
+
+function buildMonsterCard(monster) {
+  const article = document.createElement("article");
+  const canFeature = Boolean(monster.featurePermission?.canFeatureMonster);
+  const canFeatureDrawing = Boolean(monster.featurePermission?.canFeatureDrawing);
+  const latestOrder = monster.orders?.[0];
+  article.className = "monster-library-card";
+  article.innerHTML = '<div class="monster-library-images"><figure data-original><div class="monster-image-empty">No drawing</div><figcaption>Original drawing</figcaption></figure><span class="monster-transform-arrow" aria-hidden="true">→<small>transformed</small></span><figure data-preview><div class="monster-image-empty">No generated preview</div><figcaption>Storybook monster</figcaption></figure></div><div class="monster-library-info"><header><div><p class="eyebrow">Saved character</p><h3></h3></div><span data-status></span></header><dl><div><dt>Child</dt><dd data-child></dd></div><div><dt>Customer</dt><dd data-customer></dd></div><div><dt>Story</dt><dd data-story></dd></div><div><dt>Books</dt><dd data-orders></dd></div></dl><div class="monster-permission"></div><div class="monster-library-actions"></div><small data-updated></small></div>';
+  article.querySelector("h3").textContent = monster.monsterName || "Unnamed monster";
+  article.querySelector("[data-status]").textContent = monsterStatusLabel(monster.status);
+  article.querySelector("[data-status]").className = `monster-library-status is-${monster.status || "draft"}`;
+  article.querySelector("[data-child]").textContent = monster.childName || "Not provided";
+  article.querySelector("[data-customer]").textContent = monster.customerEmail || "Not provided";
+  article.querySelector("[data-story]").textContent = storyLabel(monster.storyId);
+  article.querySelector("[data-orders]").textContent = `${monster.orders?.length || 0} connected`;
+  article.querySelector("[data-preview] figcaption").textContent = monster.hasSelectedPreview ? "Selected monster" : "Latest generated preview";
+  article.querySelector("[data-updated]").textContent = `Saved ${relativeAge(monster.updatedAt || monster.createdAt)} · ${monster.previewCount || 0} generated version${monster.previewCount === 1 ? "" : "s"}`;
+  setMonsterImage(article.querySelector("[data-original]"), monster.originalUrl, `${monster.monsterName || "Monster"} original drawing`);
+  setMonsterImage(article.querySelector("[data-preview]"), monster.selectedPreviewUrl, `${monster.monsterName || "Monster"} approved storybook character`);
+  const permission = article.querySelector(".monster-permission");
+  permission.innerHTML = `<strong>${canFeature ? "Gallery permission granted" : "Private — no gallery permission"}</strong><span>${canFeature ? (canFeatureDrawing ? "Monster and original drawing may be featured." : "Finished monster only; original remains private.") : "Nothing from this submission should appear publicly."}</span>`;
+  permission.classList.toggle("can-feature", canFeature);
+  const actions = article.querySelector(".monster-library-actions");
+  if (monster.selectedPreviewUrl) actions.append(downloadButton(monster.selectedPreviewUrl, "Download monster"));
+  if (monster.originalUrl) actions.append(downloadButton(monster.originalUrl, "Open drawing"));
+  if (latestOrder) {
+    const orderButton = document.createElement("button");
+    orderButton.type = "button";
+    orderButton.className = "button secondary";
+    orderButton.textContent = monster.orders.length > 1 ? `View ${monster.orders.length} books` : "View connected book";
+    orderButton.addEventListener("click", () => {
+      showView("orders");
+      openOrderDetail(orders.find((order) => order.id === latestOrder.id) || latestOrder);
+    });
+    actions.append(orderButton);
+  }
+  const deleteButton = document.createElement("button");
+  deleteButton.type = "button";
+  deleteButton.className = "button monster-delete-button";
+  deleteButton.textContent = "Delete monster";
+  deleteButton.addEventListener("click", () => deleteMonster(monster, deleteButton));
+  actions.append(deleteButton);
+  return article;
+}
+
+async function deleteMonster(monster, button) {
+  const name = monster.monsterName || "this unnamed monster";
+  const owner = monster.customerEmail ? ` for ${monster.customerEmail}` : "";
+  const bookWarning = monster.orders?.length
+    ? `\n\nIts ${monster.orders.length} existing connected book${monster.orders.length === 1 ? "" : "s"} will remain, but the saved artwork link will be removed.`
+    : "";
+  if (!window.confirm(`Permanently delete ${name}${owner}?\n\nThe original drawing, generated previews, and coloring page will be removed and cannot be recovered.${bookWarning}`)) return;
+  const status = document.querySelector("#monsters-status");
+  button.disabled = true;
+  button.textContent = "Deleting…";
+  status.className = "is-pending";
+  status.textContent = `Deleting ${name}…`;
+  try {
+    await apiRequest(`?resource=monsters&id=${encodeURIComponent(monster.id)}`, { method: "DELETE" });
+    monsters = monsters.filter((item) => item.id !== monster.id);
+    orders.forEach((order) => { if (order.monster_submission_id === monster.id) order.monster_submission_id = null; });
+    renderMonsters();
+    renderDashboard();
+    status.className = "is-success";
+    status.textContent = `${name} was permanently deleted.`;
+  } catch (error) {
+    button.disabled = false;
+    button.textContent = "Delete monster";
+    status.className = "is-error";
+    status.textContent = error.message;
+  }
+}
+
+function setMonsterImage(figure, url, alt) {
+  if (!url) return;
+  const image = document.createElement("img");
+  image.src = url;
+  image.alt = alt;
+  image.loading = "lazy";
+  figure.querySelector(".monster-image-empty").replaceWith(image);
+}
+
+function downloadButton(url, label) {
+  const link = document.createElement("a");
+  link.className = "button secondary";
+  link.href = url;
+  link.target = "_blank";
+  link.rel = "noopener";
+  link.textContent = label;
+  return link;
+}
+
+function monsterStatusLabel(status) {
+  return ({ ready: "Ready to reuse", ordered: "Used in order", draft: "Draft", expired: "Expired" })[status] || "Saved";
+}
+
+function storyLabel(storyId) {
+  return stories.find((story) => story.id === storyId || story.slug === storyId)?.title_template || String(storyId || "Not selected").replaceAll("-", " ");
 }
 
 function relativeAge(value) {
