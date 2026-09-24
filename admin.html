@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex, nofollow" />
     <title>Dashboard | MonstersNOW Admin</title>
-    <link rel="stylesheet" href="styles.css?v=20260924-admin-login-polish" />
+    <link rel="stylesheet" href="styles.css?v=20260924-admin-navigation" />
   </head>
   <body class="admin-page">
     <main>
@@ -53,11 +53,8 @@
             <button type="button" data-admin-view="production"><span>◆</span>Production <em id="nav-production-count">0</em></button>
             <button type="button" data-admin-view="orders"><span>□</span>Orders <em id="nav-order-count">0</em></button>
             <button type="button" data-admin-view="customers"><span>♙</span>Customers <em id="nav-customer-count">0</em></button>
-          </nav>
-          <div class="admin-rail-bottom">
             <button type="button" disabled><span>⚙</span>Settings <small>Soon</small></button>
-            <button id="admin-sign-out" type="button"><span>↪</span>Sign out</button>
-          </div>
+          </nav>
         </aside>
 
         <div class="admin-workspace">
@@ -69,6 +66,7 @@
             <div class="admin-topbar-actions">
               <a href="index.html" target="_blank" rel="noopener">View website ↗</a>
               <span class="admin-status"><i></i>Connected</span>
+              <button class="admin-sign-out-button" id="admin-sign-out" type="button">Sign out</button>
             </div>
           </header>
 
@@ -183,26 +181,25 @@
 
           <div class="page-editor-heading">
             <div><p class="eyebrow">Page editor</p><h3 id="selected-page-title">Page 1</h3></div>
-            <div class="page-step-actions"><button class="button secondary" id="open-story-review" type="button">Review book</button><button class="button secondary" id="open-artwork-overview" type="button">Artwork overview</button><button class="button secondary" id="previous-page" type="button">← Previous</button><button class="button secondary" id="next-page" type="button">Next →</button></div>
+            <div class="page-step-actions"><button class="button secondary" id="open-story-review" type="button">Review</button><button class="button secondary" id="open-artwork-overview" type="button">All artwork</button><button class="button secondary" id="previous-page" type="button">← Previous</button><button class="button primary" id="next-page" type="button">Next page →</button></div>
           </div>
           <div class="page-editor-layout">
             <aside class="page-browser">
-              <div><strong id="page-progress">0/32 copy · 0/32 artwork approved</strong><p>Each page tracks copy and artwork separately. Use ⌘/Ctrl+S to save.</p></div>
+              <div class="page-browser-summary"><div><strong id="page-progress">0/32 copy · 0/32 artwork approved</strong><p>Select a page to edit. Orange marks the current page.</p></div><button class="button secondary" id="add-page" type="button">Add page</button></div>
               <nav id="page-nav" aria-label="Jump to book page"></nav>
-              <button class="button secondary" id="add-page" type="button">Add page</button>
             </aside>
             <section class="page-editing-stage">
               <div id="story-pages" class="story-pages"></div>
-              <section class="selected-spread-preview">
-                <div class="selected-preview-heading"><div><strong>Spread preview</strong><small>Personalization and page pacing</small></div><div class="sample-fields"><label>Child<input id="sample-child" value="Alex" /></label><label>Monster<input id="sample-monster" value="Milo" /></label></div></div>
+              <details class="selected-spread-preview">
+                <summary class="selected-preview-heading"><div><strong>Spread preview</strong><small>Check personalization and page pacing</small></div><span>Open preview</span></summary>
+                <div class="sample-fields"><label>Child<input id="sample-child" value="Alex" /></label><label>Monster<input id="sample-monster" value="Milo" /></label></div>
                 <div id="story-preview" class="story-spread-preview"></div>
-              </section>
+              </details>
             </section>
-            <aside class="book-checks-panel">
-              <strong>Book checks</strong>
-              <ul id="story-readiness-list"></ul>
-              <p>Publishing stays locked until all required checks pass.</p>
-            </aside>
+            <details class="book-checks-panel">
+              <summary><span><strong>Book readiness</strong><small id="book-checks-summary">Checking requirements…</small></span><span>View checks</span></summary>
+              <div class="book-checks-body"><ul id="story-readiness-list"></ul><p>Publishing stays locked until all required checks pass.</p></div>
+            </details>
           </div>
           <p id="story-editor-status" role="status"></p>
         </form>

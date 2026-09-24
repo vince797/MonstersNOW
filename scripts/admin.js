@@ -1283,6 +1283,10 @@ function refreshPageTools() {
     { ok: !settings.seasonal || Boolean(settings.from && settings.until), label: settings.seasonal ? "Seasonal availability dates are set" : "Evergreen availability" },
     { ok: !cards.some((card) => card.querySelector("textarea").value.length > 1200), label: "Page text is within review length" },
   ];
+  const passedChecks = checks.filter((check) => check.ok).length;
+  const checksPanel = document.querySelector(".book-checks-panel");
+  checksPanel.classList.toggle("is-ready", passedChecks === checks.length);
+  document.querySelector("#book-checks-summary").textContent = `${passedChecks}/${checks.length} checks passed`;
   document.querySelector("#story-readiness-list").replaceChildren(...checks.map((check) => {
     const item = document.createElement("li"); item.className = check.ok ? "is-ready" : "needs-work"; item.textContent = `${check.ok ? "✓" : "!"} ${check.label}`; return item;
   }));
