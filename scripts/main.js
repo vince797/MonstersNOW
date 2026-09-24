@@ -16,8 +16,22 @@ if (navToggle && siteNavigation) {
     navToggle.setAttribute("aria-expanded", String(open));
     siteNavigation.classList.toggle("is-open", open);
   });
-  siteNavigation.addEventListener("click", (event) => { if (event.target.closest("a")) closeNavigation(); });
+  siteNavigation.addEventListener("click", (event) => {
+    const link = event.target.closest("a");
+    if (!link) return;
+
+    const destination = new URL(link.href, window.location.href);
+    const staysOnCurrentDocument =
+      destination.origin === window.location.origin &&
+      destination.pathname === window.location.pathname &&
+      destination.search === window.location.search;
+
+    // Keep the menu in place while another page loads so the current page
+    // does not visibly reflow for a frame. In-page links still close it.
+    if (staysOnCurrentDocument) closeNavigation();
+  });
   document.addEventListener("keydown", (event) => { if (event.key === "Escape") { closeNavigation(); navToggle.focus(); } });
+  window.addEventListener("pageshow", closeNavigation);
 }
 
 const monsterUpload = document.querySelector("#monster-upload");
