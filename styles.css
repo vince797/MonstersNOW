@@ -4451,10 +4451,17 @@ main > section {
 .story-page-card > .page-card-header > span { display: grid; }
 .story-page-card > .page-card-header small { color: var(--teal-dark); font-size: .62rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
 .story-page-card > .page-card-header strong { color: var(--navy); font-size: 1.25rem; }
+.page-card-header-tools { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 10px; }
+[data-page-completion] { padding: 5px 8px; border-radius: 999px; color: #a44716; background: #fff0e6; font-size: .62rem; font-style: normal; font-weight: 900; text-transform: uppercase; }
+[data-page-completion].is-ready { color: #087456; background: #e4f8f0; }
 .story-page-card label { align-content: start; }
-.story-page-card label > span:first-child { font-weight: 850; }
 .story-page-card label > small { color: var(--muted); font-size: .68rem; text-align: right; }
-.story-page-card textarea { min-height: 230px; resize: vertical; line-height: 1.55; }
+.story-page-card textarea { min-height: 190px; resize: vertical; line-height: 1.55; }
+.page-field-heading, .page-artwork-heading { display: flex; align-items: center; gap: 9px; min-height: 38px; }
+.page-field-heading > b, .page-step-number { display: grid; flex: 0 0 28px; width: 28px; height: 28px; place-items: center; border-radius: 50%; color: #fff; background: var(--teal); font-size: .72rem; font-weight: 950; }
+.page-field-heading > span, .page-artwork-heading > span:last-child { display: grid; gap: 1px; }
+.page-field-heading strong, .page-artwork-heading strong { color: var(--navy); font-size: .88rem; }
+.page-field-heading small, .page-artwork-heading small { color: var(--muted); font-size: .66rem; font-weight: 650; line-height: 1.3; }
 .page-card-actions, .token-toolbar { display: flex; flex-wrap: wrap; gap: 6px; }
 .page-card-actions button, .token-toolbar button { padding: 7px 9px; border: 1px solid #d5e1e8; border-radius: 7px; background: #f8fbfc; color: #365269; font: inherit; font-size: .68rem; font-weight: 850; cursor: pointer; }
 .page-card-actions button:hover, .token-toolbar button:hover { border-color: var(--teal); color: var(--teal-dark); background: #effafa; }
@@ -4474,9 +4481,12 @@ main > section {
 .monster-zone::after { right: 20%; }
 .monster-zone span, .monster-zone-preview { display: grid; place-items: center; font-size: clamp(.48rem,1.2vw,.7rem); font-weight: 950; letter-spacing: .06em; }
 .monster-zone[data-layer="behind"] { z-index: 1; opacity: .62; }
-.monster-placement-controls { display: grid; gap: 8px; margin: 0; padding: 12px; border: 1px solid #d9e5ea; border-radius: 10px; background: #f6fafb; }
-.monster-placement-controls legend { padding: 0 5px; color: var(--navy); font-size: .78rem; font-weight: 900; }
-.monster-placement-controls legend small { color: var(--teal-dark); font-size: .62rem; text-transform: uppercase; }
+.monster-placement-controls { margin: 0; padding: 0; border: 1px solid #d9e5ea; border-radius: 10px; background: #f6fafb; }
+.monster-placement-controls summary { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 11px 12px; color: var(--navy); cursor: pointer; font-size: .76rem; font-weight: 900; list-style: none; }
+.monster-placement-controls summary::-webkit-details-marker { display: none; }
+.monster-placement-controls summary small { color: var(--teal-dark); font-size: .58rem; text-transform: uppercase; }
+.monster-placement-controls[open] { display: grid; gap: 8px; padding: 0 12px 12px; }
+.monster-placement-controls[open] summary { margin-inline: -12px; padding-inline: 12px; border-bottom: 1px solid #d9e5ea; }
 .monster-placement-controls > label { display: grid; grid-template-columns: 70px minmax(0,1fr) 38px; align-items: center; gap: 8px; color: var(--muted); font-size: .7rem; font-weight: 800; }
 .monster-placement-controls input[type="range"] { min-width: 0; accent-color: var(--teal); }
 .monster-placement-controls output { color: var(--navy); font-size: .68rem; font-weight: 850; text-align: right; }
@@ -4492,6 +4502,7 @@ main > section {
 .page-artwork-visual [data-artwork-empty] small { font-size: .7rem; }
 .page-artwork-controls { display: grid; align-content: start; gap: 11px; }
 .page-artwork-controls > div:first-child { display: grid; gap: 3px; }
+.page-artwork-controls > .page-artwork-heading { display: flex; gap: 9px; }
 .page-artwork-controls > div:first-child small, .page-artwork-controls [data-artwork-message] { color: var(--muted); font-size: .72rem; line-height: 1.4; }
 .artwork-upload-button { position: relative; justify-content: center; overflow: hidden; cursor: pointer; }
 .artwork-upload-button input { position: absolute; width: 1px; height: 1px; opacity: 0; }
