@@ -4466,6 +4466,8 @@ main > section {
 .page-artwork-panel { display: grid; grid-column: 1 / -1; grid-template-columns: minmax(220px, .8fr) minmax(260px, 1.2fr); gap: 18px; padding-top: 18px; border-top: 1px solid var(--line); }
 .page-artwork-visual { position: relative; display: grid; min-height: 220px; overflow: hidden; place-items: center; border: 1px dashed #cbdbe3; border-radius: 12px; background: linear-gradient(145deg,#f4f8fa,#edf3f6); }
 .page-artwork-visual img { width: 100%; height: 100%; max-height: 340px; object-fit: contain; background: #eaf0f3; }
+.page-artwork-visual img.is-reference { padding: 8px; background: #f4eee5; }
+.page-artwork-visual[data-reference-label]::after { position: absolute; right: 10px; bottom: 10px; padding: 6px 8px; border-radius: 7px; color: #fff; background: rgba(6,27,59,.88); content: attr(data-reference-label); font-size: .58rem; font-weight: 900; letter-spacing: .045em; text-transform: uppercase; }
 .monster-zone { position: absolute; z-index: 3; aspect-ratio: .72; border: 2px dashed rgba(0,139,151,.82); border-radius: 48% 48% 42% 42%; background: rgba(0,173,181,.15); color: #006f78; pointer-events: none; transform-origin: center; box-shadow: 0 0 0 3px rgba(255,255,255,.72); }
 .monster-zone::before, .monster-zone::after { content: ""; position: absolute; top: 22%; width: 22%; aspect-ratio: 1; border: 2px solid currentColor; border-radius: 50%; background: rgba(255,255,255,.7); }
 .monster-zone::before { left: 20%; }
