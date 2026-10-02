@@ -4,9 +4,9 @@
   --ink: #12233d;
   --muted: #56667a;
   --teal: #00a9b3;
-  --teal-dark: #008490;
-  --orange: #ff6a00;
-  --orange-dark: #dc5200;
+  --teal-dark: #006b73;
+  --orange: #c24100;
+  --orange-dark: #9e3300;
   --yellow: #ffc947;
   --purple: #8658d3;
   --green: #68b82e;
@@ -2108,7 +2108,7 @@ main > section {
   outline-offset: 4px;
 }
 
-.result-panel h3 {
+.result-panel h2 {
   margin: 0 0 6px;
 }
 
@@ -2767,7 +2767,7 @@ main > section {
   justify-self: start;
   width: fit-content;
   padding: 4px 9px;
-  background: var(--teal);
+  background: var(--teal-dark);
   border-radius: 6px;
   color: #fff;
   font-size: 0.78rem;
@@ -2850,7 +2850,10 @@ main > section {
 }
 
 .monster-gallery-grid {
+  display: grid;
   width: min(100%, 1180px);
+  gap: clamp(18px, 2.4vw, 28px);
+  align-items: stretch;
   margin-inline: auto;
 }
 
@@ -2861,6 +2864,62 @@ main > section {
   border-radius: 22px;
   background: #fff;
   box-shadow: 0 18px 46px rgba(6, 37, 58, 0.12);
+}
+
+.monster-gallery-note {
+  display: grid;
+  align-content: center;
+  gap: 14px;
+  padding: clamp(26px, 4vw, 48px);
+  border: 1px solid rgba(6, 61, 79, 0.12);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 88% 12%, rgba(0, 169, 179, 0.13), transparent 28%),
+    #fff;
+  box-shadow: 0 18px 46px rgba(6, 37, 58, 0.08);
+}
+
+.monster-gallery-note h2,
+.monster-gallery-note p {
+  margin: 0;
+}
+
+.monster-gallery-note h2 {
+  max-width: 16ch;
+  color: var(--navy);
+  font-size: clamp(1.7rem, 3vw, 2.65rem);
+  line-height: 1.03;
+  letter-spacing: -0.035em;
+}
+
+.monster-gallery-note > p:not(.eyebrow) {
+  max-width: 54ch;
+  color: var(--muted);
+}
+
+.monster-gallery-note ul {
+  display: grid;
+  gap: 8px;
+  margin: 2px 0 6px;
+  padding: 0;
+  list-style: none;
+}
+
+.monster-gallery-note li {
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+  color: var(--navy);
+  font-weight: 850;
+}
+
+.monster-gallery-note li::before {
+  color: var(--teal-dark);
+  content: "✓";
+}
+
+.monster-gallery-note .button {
+  justify-self: start;
 }
 
 .monster-transformation-images {
@@ -3028,7 +3087,6 @@ main > section {
 @media (min-width: 860px) {
   .monster-gallery-page .monster-gallery-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: clamp(18px, 2.4vw, 28px);
   }
 }
 
@@ -4840,14 +4898,6 @@ main > section {
 .monster-zone::after { right: 20%; }
 .monster-zone span, .monster-zone-preview { display: grid; place-items: center; font-size: clamp(.48rem,1.2vw,.7rem); font-weight: 950; letter-spacing: .06em; }
 .monster-zone[data-layer="behind"] { z-index: 1; opacity: .62; }
-.monster-zone[data-reference-removal="true"] { border-color: #ff6b00; background: rgba(255,248,239,.93); color: #a94712; box-shadow: 0 0 0 4px rgba(255,255,255,.88); }
-.monster-zone[data-reference-removal="true"]::before, .monster-zone[data-reference-removal="true"]::after { display: none; }
-.monster-zone-preview[data-reference-removal="true"] { min-width: 76px; padding: 7px; aspect-ratio: auto; border-radius: 8px; font-size: .48rem; text-align: center; }
-.background-plate-check { display: flex !important; align-items: flex-start; gap: 9px !important; padding: 10px; border: 1px solid #d6e7e9; border-radius: 9px; background: #f7fbfc; color: #17304e !important; cursor: pointer; }
-.background-plate-check input { flex: 0 0 auto; width: 18px; height: 18px; margin-top: 1px; accent-color: var(--teal); }
-.background-plate-check span { display: grid; gap: 2px; }
-.background-plate-check small { color: var(--muted); font-size: .68rem; line-height: 1.35; }
-.background-plate-check:has(input:checked) { border-color: #8fd7c0; background: #edfaf4; }
 .monster-placement-controls { margin: 0; padding: 0; border: 1px solid #d9e5ea; border-radius: 10px; background: #f6fafb; }
 .monster-placement-controls summary { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 11px 12px; color: var(--navy); cursor: pointer; font-size: .76rem; font-weight: 900; list-style: none; }
 .monster-placement-controls summary::-webkit-details-marker { display: none; }
