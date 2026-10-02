@@ -1,0 +1,39 @@
+{
+  "title": "Bedtime Monster",
+  "status": "artwork_in_review",
+  "updated": "2026-10-01",
+  "artwork_role": "background_plate",
+  "format": "2:1 landscape spread, two facing square pages",
+  "output_dimensions": {
+    "width": 1774,
+    "height": 887,
+    "format": "png"
+  },
+  "spreads": [
+    {
+      "pages": "04-05",
+      "asset": "assets/storybook/bedtime-monster/pages-04-05-background-v1.png",
+      "status": "draft",
+      "childPlacement": { "x": 38, "y": 74, "scale": 34, "facing": "right", "layer": "front" },
+      "monsterPlacement": { "x": 72, "y": 74, "scale": 36, "facing": "left", "layer": "front" },
+      "backgroundPlateConfirmed": false
+    },
+    {
+      "pages": "06-07",
+      "asset": "assets/storybook/bedtime-monster/pages-06-07-background-v1.png",
+      "status": "draft",
+      "childPlacement": { "x": 34, "y": 75, "scale": 34, "facing": "right", "layer": "front" },
+      "monsterPlacement": { "x": 66, "y": 75, "scale": 36, "facing": "left", "layer": "front" },
+      "backgroundPlateConfirmed": false
+    }
+  ],
+  "checks": [
+    { "label": "Background-only artwork", "status": "pass", "detail": "No starring child, monster, substitute character, or placement guide is baked into the two draft spreads" },
+    { "label": "Spread dimensions", "status": "pass", "detail": "Both draft PNG files are 1774 x 887 pixels" },
+    { "label": "Visual continuity", "status": "review", "detail": "Confirm bedroom geography, lighting, palette, and planned page turns against the approved manuscript" },
+    { "label": "Personalized proof", "status": "blocked", "detail": "Composite approved child and monster assets in Admin after story and placement review" },
+    { "label": "Print readiness", "status": "blocked", "detail": "Draft concept art is not print-ready" }
+  ],
+  "next_action": "Approve the visual direction and manuscript beats, then plan the remaining spreads before generating additional background plates."
+}
+
