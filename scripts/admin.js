@@ -751,7 +751,7 @@ async function setupCatalog({ announce = false } = {}) {
 }
 
 function catalogCover(slug) {
-  return CATALOG_COVERS[slug] || "assets/monstersnow-logo.png";
+  return CATALOG_COVERS[slug] || "assets/monstersnow-logo-v2.svg";
 }
 
 function existingSpreadReference(pageNumber) {
@@ -770,7 +770,7 @@ function existingSpreadLabel(pageNumber) {
 function updateCoverPreview(slug) {
   const image = document.querySelector("#story-cover-preview");
   const cover = CATALOG_COVERS[slug];
-  image.src = cover || "assets/monstersnow-logo.png";
+  image.src = cover || "assets/monstersnow-logo-v2.svg";
   image.alt = cover ? `Current cover for ${document.querySelector("#story-title").value || "this book"}` : "No catalog cover assigned yet";
   image.classList.toggle("is-placeholder", !cover);
 }

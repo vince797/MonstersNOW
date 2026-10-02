@@ -113,11 +113,10 @@ body {
 }
 
 .admin-login-brand img {
-  width: 150px;
-  height: 82px;
-  object-fit: cover;
-  object-position: 50% 34%;
-  border-radius: 7px;
+  width: 210px;
+  height: 85px;
+  object-fit: contain;
+  object-position: left center;
 }
 
 .admin-login-brand h1 {
@@ -328,10 +327,9 @@ body {
 
 .admin-rail-brand img {
   width: 132px;
-  height: 72px;
-  object-fit: cover;
-  object-position: 50% 34%;
-  border-radius: 8px;
+  height: 54px;
+  object-fit: contain;
+  object-position: left center;
 }
 
 .admin-nav {
@@ -983,8 +981,8 @@ body {
   }
 
   .admin-rail-brand img {
-    width: 54px;
-    height: 54px;
+    width: 70px;
+    height: 34px;
   }
 
   .admin-nav button {
@@ -1165,19 +1163,17 @@ a {
 }
 
 .brand img {
-  width: 124px;
-  height: 74px;
-  object-fit: cover;
-  object-position: 50% 34%;
-  border-radius: 8px;
+  width: 168px;
+  height: 68px;
+  object-fit: contain;
+  object-position: left center;
 }
 
 .footer-brand img {
-  width: 138px;
-  height: 82px;
-  object-fit: cover;
-  object-position: 50% 34%;
-  border-radius: 8px;
+  width: 190px;
+  height: 77px;
+  object-fit: contain;
+  object-position: left center;
 }
 
 .site-nav,
@@ -4445,8 +4441,8 @@ main > section {
   }
 
   .brand img {
-    width: 112px;
-    height: 66px;
+    width: 142px;
+    height: 58px;
   }
 
   .header-actions {
@@ -4656,12 +4652,12 @@ main > section {
   .brand,
   .brand picture {
     min-width: 0;
-    width: 96px;
+    width: 118px;
   }
 
   .brand img {
-    width: 96px;
-    height: 58px;
+    width: 118px;
+    height: 48px;
   }
 
   .nav-toggle { width: 42px; }

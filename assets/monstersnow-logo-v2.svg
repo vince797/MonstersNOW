@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 250" role="img" aria-labelledby="title description">
+  <title id="title">MonstersNOW</title>
+  <desc id="description">An orange hand-drawn storybook character peeking over an open book beside the MonstersNOW wordmark.</desc>
+  <g transform="translate(18 8)">
+    <path d="M88 38c29-11 73 3 88 32 13 25 9 71-12 91-21 20-78 22-105 3-28-20-32-63-14-91 10-16 25-27 43-35Z" fill="#ff6b0a" stroke="#06244a" stroke-width="7" stroke-linejoin="round"/>
+    <path d="m76 39 5-27 24 19 15-27 13 31 25-15-2 31" fill="#ff8b2d" stroke="#06244a" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+    <ellipse cx="91" cy="89" rx="18" ry="22" fill="#fffaf1" stroke="#06244a" stroke-width="6"/>
+    <ellipse cx="132" cy="84" rx="24" ry="30" fill="#fffaf1" stroke="#06244a" stroke-width="6"/>
+    <circle cx="94" cy="94" r="7" fill="#06244a"/>
+    <circle cx="137" cy="90" r="9" fill="#06244a"/>
+    <path d="M90 128c18 17 39 17 58-2" fill="none" stroke="#06244a" stroke-width="7" stroke-linecap="round"/>
+    <path d="M19 164c34-12 67-8 98 13 31-21 64-25 98-13l-10 57c-34-8-63-3-88 14-25-17-54-22-88-14Z" fill="#fffaf1" stroke="#008b98" stroke-width="8" stroke-linejoin="round"/>
+    <path d="M117 177v58M35 181c29-5 55 0 76 15M199 181c-29-5-55 0-76 15" fill="none" stroke="#b9e5e6" stroke-width="4" stroke-linecap="round"/>
+  </g>
+  <g transform="translate(245 72)">
+    <text x="0" y="62" fill="#06244a" font-family="Fredoka, Arial Rounded MT Bold, sans-serif" font-size="70" font-weight="750" letter-spacing="-4">Monsters</text>
+    <text x="260" y="62" fill="#ff6200" font-family="Fredoka, Arial Rounded MT Bold, sans-serif" font-size="70" font-weight="800" letter-spacing="-4">NOW</text>
+    <path d="M4 82h352" stroke="#00aeb8" stroke-width="7" stroke-linecap="round"/>
+    <text x="5" y="113" fill="#496176" font-family="Fredoka, Arial, sans-serif" font-size="17" font-weight="700" letter-spacing="2.7">DRAW IT. MAKE IT. STAR IN IT.</text>
+  </g>
+</svg>
