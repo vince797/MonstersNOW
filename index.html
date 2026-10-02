@@ -7,8 +7,20 @@
       name="description"
       content="MonstersNOW turns a child's monster drawing into a free AI monster preview, printable coloring page, and personalized storybook."
     />
+    <link rel="canonical" href="https://www.monstersnow.com/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="MonstersNOW" />
+    <meta property="og:title" content="Turn Your Child's Drawing Into a Real Storybook | MonstersNOW" />
+    <meta property="og:description" content="Transform a child's original monster drawing into a storybook character, printable coloring page, and personalized printed book." />
+    <meta property="og:url" content="https://www.monstersnow.com/" />
+    <meta property="og:image" content="https://www.monstersnow.com/assets/hero-storybook.png" />
+    <meta property="og:image:alt" content="A child's monster drawing transformed into a colorful storybook scene." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Turn Your Child's Drawing Into a Real Storybook | MonstersNOW" />
+    <meta name="twitter:description" content="Transform a child's original monster drawing into a storybook character and personalized printed book." />
+    <meta name="twitter:image" content="https://www.monstersnow.com/assets/hero-storybook.png" />
     <title>MonstersNOW | Turn Child Drawings Into Monster Storybooks</title>
-    <link rel="stylesheet" href="styles.css?v=20260924-mobile-hero-clean" />
+    <link rel="stylesheet" href="styles.css?v=20261001-trust-layout" />
     <link rel="stylesheet" href="cover-art.css?v=20260921-story-catalog" />
     <link rel="stylesheet" href="home-polish.css?v=20260922-even-cover-cards" />
   </head>
@@ -51,6 +63,15 @@
             <a class="button primary" href="create.html">Create Your Monster</a>
             <a class="button secondary" href="books.html">Browse Books</a>
           </div>
+
+          <a class="mobile-proof-strip" href="monsters.html" aria-label="See the real drawing-to-storybook transformation gallery">
+            <span class="mobile-proof-images" aria-hidden="true">
+              <i class="gallery-image-crop gallery-image-crop-drawing"><img src="assets/gallery/red-blue-monster-before-after-source-v1.jpg" alt="" /></i>
+              <b>→</b>
+              <i class="gallery-image-crop gallery-image-crop-monster"><img src="assets/gallery/red-blue-monster-before-after-source-v1.jpg" alt="" /></i>
+            </span>
+            <span><strong>See a real transformation</strong><small>Original drawing → storybook monster</small></span>
+          </a>
 
           <div class="mini-steps" aria-label="MonstersNOW summary">
             <span><i>1</i>Upload Drawing</span>
@@ -345,14 +366,58 @@
       <nav aria-label="Footer navigation">
         <a href="books.html">Books</a>
         <a href="monsters.html">Gallery</a>
-        <a href="#pricing">Pricing</a>
-        <a href="#how-it-works">How It Works</a>
-        <a href="#faq">FAQ</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+        <a href="policies.html">Shipping &amp; Returns</a>
+        <a href="privacy.html">Privacy</a>
+        <a href="terms.html">Terms</a>
       </nav>
       <div class="footer-meta">
-        <p>&copy; <span id="year"></span> MonstersNOW. All rights reserved.</p><a class="footer-admin" href="admin.html">Admin</a>
+        <p>&copy; <span id="year"></span> MonstersNOW. All rights reserved.</p>
       </div>
     </footer>
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://www.monstersnow.com/#organization",
+            "name": "MonstersNOW",
+            "url": "https://www.monstersnow.com/",
+            "logo": "https://www.monstersnow.com/assets/monstersnow-logo.png",
+            "email": "hello@monstersnow.com"
+          },
+          {
+            "@type": "Product",
+            "@id": "https://www.monstersnow.com/#storybook",
+            "name": "Personalized MonstersNOW Storybook",
+            "description": "A 32-page personalized storybook starring a storybook character based on a child's original monster drawing.",
+            "image": "https://www.monstersnow.com/assets/storybook/cover-series/minimal-concepts/halloween-monster-night-v2-web.jpg",
+            "brand": { "@id": "https://www.monstersnow.com/#organization" },
+            "offers": {
+              "@type": "AggregateOffer",
+              "priceCurrency": "USD",
+              "lowPrice": "24.99",
+              "highPrice": "39.99",
+              "offerCount": "2",
+              "availability": "https://schema.org/PreOrder",
+              "url": "https://www.monstersnow.com/create.html"
+            }
+          },
+          {
+            "@type": "FAQPage",
+            "mainEntity": [
+              { "@type": "Question", "name": "What should my child draw?", "acceptedAnswer": { "@type": "Answer", "text": "Any original monster works best: silly, friendly, colorful, or completely made up." } },
+              { "@type": "Question", "name": "Is there really a free option?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. The free path creates a printable coloring page from the monster drawing." } },
+              { "@type": "Question", "name": "What about privacy?", "acceptedAnswer": { "@type": "Answer", "text": "Upload a clear photo of the drawing, not a child's face. Artwork is not added to galleries without permission." } },
+              { "@type": "Question", "name": "How will books be printed?", "acceptedAnswer": { "@type": "Answer", "text": "Each approved book is printed on demand and shipped to the address provided at checkout." } }
+            ]
+          }
+        ]
+      }
+    </script>
 
     <script src="scripts/main.js?v=20260924-smooth-mobile-nav"></script>
   </body>

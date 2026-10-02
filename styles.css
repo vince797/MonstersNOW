@@ -1561,6 +1561,10 @@ main > section {
   border-radius: 17px;
 }
 
+.mobile-proof-strip {
+  display: none;
+}
+
 .section-heading {
   max-width: 760px;
 }
@@ -3853,6 +3857,117 @@ main > section {
   gap: 12px;
 }
 
+.policy-hero {
+  padding: clamp(54px, 8vw, 96px) clamp(18px, 8vw, 120px) 42px;
+  color: #fff;
+  background:
+    radial-gradient(circle at 88% 18%, rgba(73, 199, 201, 0.25), transparent 30%),
+    linear-gradient(135deg, #071f3d, #087b80);
+}
+
+.policy-hero h1 {
+  max-width: 13ch;
+  color: #fff;
+}
+
+.policy-hero > p:not(.eyebrow) {
+  max-width: 680px;
+  margin: 18px 0 0;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 1.1rem;
+}
+
+.policy-layout {
+  display: grid;
+  grid-template-columns: minmax(190px, 0.3fr) minmax(0, 1fr);
+  gap: clamp(28px, 5vw, 72px);
+  padding: clamp(34px, 6vw, 76px) clamp(18px, 8vw, 120px);
+  background: #f5fafb;
+}
+
+.policy-nav {
+  position: sticky;
+  top: 108px;
+  display: grid;
+  align-self: start;
+  gap: 5px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #fff;
+}
+
+.policy-nav a {
+  padding: 9px 10px;
+  border-radius: 8px;
+  color: var(--navy);
+  font-size: 0.86rem;
+  font-weight: 850;
+  text-decoration: none;
+}
+
+.policy-nav a:hover,
+.policy-nav a:focus-visible {
+  color: var(--teal-dark);
+  background: #eaf8f8;
+}
+
+.policy-content {
+  display: grid;
+  gap: 18px;
+  max-width: 820px;
+}
+
+.policy-content article,
+.contact-card {
+  padding: clamp(20px, 3vw, 32px);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 14px 34px rgba(6, 27, 59, 0.07);
+}
+
+.policy-content article {
+  scroll-margin-top: 116px;
+}
+
+.policy-content h2 {
+  font-size: clamp(1.45rem, 2.5vw, 2rem);
+}
+
+.policy-content h3 {
+  margin-top: 18px;
+}
+
+.policy-content p,
+.policy-content li,
+.contact-card p {
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.policy-content ul {
+  display: grid;
+  gap: 8px;
+  padding-left: 20px;
+}
+
+.policy-updated {
+  margin-top: 14px !important;
+  font-size: 0.82rem !important;
+}
+
+.contact-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.contact-card a:not(.button) {
+  color: var(--teal-dark);
+  font-weight: 900;
+}
+
 .footer-admin {
   padding: 5px 9px;
   border: 1px solid rgba(255, 255, 255, 0.24);
@@ -3900,11 +4015,6 @@ main > section {
   .site-nav a:hover, .site-nav a:focus-visible { background: #eef9fa; }
   .nav-toggle { display: block; justify-self: end; }
 
-  .hero {
-    grid-template-columns: 1fr;
-    min-height: auto;
-  }
-
   .converter-section,
   .converter-tool,
   .create-flow-header,
@@ -3933,6 +4043,13 @@ main > section {
 
   main > section {
     scroll-margin-top: 150px;
+  }
+}
+
+@media (max-width: 1080px) {
+  .hero {
+    grid-template-columns: 1fr;
+    min-height: auto;
   }
 }
 
@@ -4098,9 +4215,63 @@ main > section {
 
   .hero-copy-wrap > .hero-copy { order: 1; }
   .hero-copy-wrap > .hero-actions { order: 2; }
-  .hero-copy-wrap > .mini-steps { order: 3; }
-  .hero-copy-wrap > .rating-row { order: 4; }
+  .hero-copy-wrap > .mobile-proof-strip { order: 3; }
+  .hero-copy-wrap > .mini-steps { order: 4; }
+  .hero-copy-wrap > .rating-row { order: 5; }
   .hero-scene { display: none; }
+
+  .mobile-proof-strip {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: min(100%, 430px);
+    margin-top: 15px;
+    padding: 8px 12px 8px 8px;
+    border: 1px solid rgba(125, 229, 228, 0.34);
+    border-radius: 14px;
+    color: #fff;
+    background: rgba(4, 27, 55, 0.38);
+    text-decoration: none;
+  }
+
+  .mobile-proof-images {
+    display: grid;
+    flex: 0 0 auto;
+    grid-template-columns: 48px 16px 48px;
+    align-items: center;
+    gap: 3px;
+  }
+
+  .mobile-proof-images i {
+    width: 48px;
+    height: 48px;
+    border: 2px solid #fff;
+    border-radius: 9px;
+    box-shadow: none;
+  }
+
+  .mobile-proof-images b {
+    color: var(--orange);
+    font-size: 1rem;
+    text-align: center;
+  }
+
+  .mobile-proof-strip > span:last-child {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .mobile-proof-strip strong {
+    font-size: 0.82rem;
+    line-height: 1.2;
+  }
+
+  .mobile-proof-strip small {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.68rem;
+    font-weight: 750;
+  }
 
   .hero .button.secondary {
     border-color: rgba(125, 229, 228, 0.62);
@@ -4190,6 +4361,15 @@ main > section {
 
   .footer-meta {
     justify-content: flex-start;
+  }
+
+  .policy-layout,
+  .contact-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .policy-nav {
+    position: static;
   }
 }
 
