@@ -858,13 +858,20 @@ function addPage(page = {}) {
   const card = document.createElement("section");
   card.className = "story-page-card";
   card.innerHTML = `<header class="page-card-header"><span><small data-page-role>Story page</small><strong>Page <span data-page-number></span></strong></span><div class="page-card-header-tools"><em data-page-completion>Checking page…</em><div class="page-card-actions"><button type="button" data-page-action="up" aria-label="Move page up" title="Move page up">↑</button><button type="button" data-page-action="down" aria-label="Move page down" title="Move page down">↓</button><button type="button" data-page-action="duplicate">Duplicate</button><button type="button" data-page-action="remove">Remove</button></div></div></header><label class="page-copy-field"><span class="page-field-heading"><b>1</b><span><strong>Story text</strong><small>The words printed in the book</small></span></span><span class="token-toolbar" aria-label="Insert personalization"><button type="button" data-insert-token="{child_name}">+ Child name</button><button type="button" data-insert-token="{monster_name}">+ Monster name</button></span><textarea rows="8" maxlength="2000" placeholder="Write the words the child will read on this page…"></textarea><small><span data-text-words>0 words</span> · <span data-text-count>0</span>/2,000 characters</small></label><label><span class="page-field-heading"><b>2</b><span><strong>Illustration direction</strong><small>Internal notes for creating or revising the scene</small></span></span><textarea rows="8" maxlength="3000" placeholder="Describe the scene, characters, action, lighting, and composition…"></textarea><small><span data-art-words>0 words</span> · <span data-art-count>0</span>/3,000 characters</small></label><section class="page-artwork-panel"><div class="page-artwork-visual"><img alt="" data-artwork-image hidden /><div data-artwork-empty><span>◇</span><strong>No artwork uploaded</strong><small>JPG, PNG, or WebP · 3 MB maximum</small></div><div class="monster-zone" data-monster-zone aria-label="Admin-only personalized monster placement"><span>MONSTER</span></div></div><div class="page-artwork-controls"><div class="page-artwork-heading"><span class="page-step-number">3</span><span><strong>Page artwork</strong><small data-artwork-name>Upload the background illustration without a monster.</small></span></div><label class="button secondary artwork-upload-button"><input type="file" accept="image/jpeg,image/png,image/webp" data-artwork-file /> <span data-artwork-upload-label>Upload artwork</span></label><label class="artwork-status-label">Review status<select data-artwork-review><option value="missing">Missing</option><option value="draft">Draft</option><option value="approved">Approved</option><option value="final">Final</option></select></label><details class="monster-placement-controls"><summary>Monster placement <small>Advanced</small></summary><label>Horizontal <input type="range" min="5" max="95" data-placement="x" /><output data-placement-output="x"></output></label><label>Baseline <input type="range" min="10" max="95" data-placement="y" /><output data-placement-output="y"></output></label><label>Size <input type="range" min="15" max="70" data-placement="scale" /><output data-placement-output="scale"></output></label><div><label>Facing<select data-placement="facing"><option value="left">Left</option><option value="right">Right</option><option value="neutral">Neutral</option></select></label><label>Layer<select data-placement="layer"><option value="front">In front</option><option value="behind">Behind foreground</option></select></label></div><p>The guide is never included in customer previews or print files.</p></details><button class="button secondary" type="button" data-remove-artwork hidden>Remove from page</button><p data-artwork-message role="status"></p></div></section>`;
+  const backgroundCheck = document.createElement("label");
+  backgroundCheck.className = "background-plate-check";
+  backgroundCheck.innerHTML = '<input type="checkbox" data-background-confirmed /> <span><strong>Clean background confirmed</strong><small>No permanent sample monster appears in the reserved zone.</small></span>';
+  card.querySelector(".artwork-status-label").after(backgroundCheck);
   card.dataset.artworkUrl = page.artworkUrl || "";
   card.dataset.artworkPath = page.artworkPath || "";
   card.dataset.artworkName = page.artworkName || "";
   card.dataset.artworkStatus = page.artworkStatus || (page.artworkUrl ? "draft" : "missing");
   card.dataset.artworkUpdatedAt = page.artworkUpdatedAt || "";
+  card.dataset.backgroundPlateConfirmed = String(page.backgroundPlateConfirmed === true);
   card.dataset.referenceArtworkUrl = existingSpreadReference(pageNumber);
   card.dataset.referenceArtworkLabel = existingSpreadLabel(pageNumber);
+  card.dataset.artworkRole = "background_plate";
+  card.dataset.monsterRequired = String(page.monsterRequired ?? pageNumber !== 3);
   const placement = page.monsterPlacement || {};
   card.dataset.monsterX = String(placement.x ?? 68);
   card.dataset.monsterY = String(placement.y ?? 72);
@@ -889,6 +896,11 @@ function addPage(page = {}) {
     card.dataset.artworkStatus = event.target.value;
     markStoryDirty();
     renderArtwork(card);
+    refreshPageTools();
+  });
+  card.querySelector("[data-background-confirmed]").addEventListener("change", (event) => {
+    card.dataset.backgroundPlateConfirmed = String(event.target.checked);
+    markStoryDirty();
     refreshPageTools();
   });
   card.querySelector("[data-remove-artwork]").addEventListener("click", () => removePageArtwork(card));
@@ -971,6 +983,9 @@ function pageData(card) {
     artworkName: card.dataset.artworkName || "",
     artworkStatus: card.dataset.artworkStatus || "missing",
     artworkUpdatedAt: card.dataset.artworkUpdatedAt || null,
+    artworkRole: "background_plate",
+    backgroundPlateConfirmed: card.dataset.backgroundPlateConfirmed === "true",
+    monsterRequired: card.dataset.monsterRequired !== "false",
     monsterPlacement: {
       x: Number(card.dataset.monsterX),
       y: Number(card.dataset.monsterY),
@@ -1020,23 +1035,29 @@ function renderArtwork(card) {
   const hasReference = !hasArtwork && Boolean(card.dataset.referenceArtworkUrl);
   const visibleArtworkUrl = hasArtwork ? card.dataset.artworkUrl : card.dataset.referenceArtworkUrl;
   const visual = card.querySelector(".page-artwork-visual");
-  if (hasReference) visual.dataset.referenceLabel = `${card.dataset.referenceArtworkLabel} · spread reference`;
+  if (hasReference) visual.dataset.referenceLabel = `${card.dataset.referenceArtworkLabel} · sample monster reference only`;
   else delete visual.dataset.referenceLabel;
   image.hidden = !visibleArtworkUrl;
   image.classList.toggle("is-reference", hasReference);
-  image.alt = hasReference ? "Existing two-page Halloween spread reference" : "Uploaded page artwork";
+  image.alt = hasReference ? "Existing illustrated Halloween spread used only as a composition reference" : "Uploaded monster-free background plate";
   emptyState.hidden = Boolean(visibleArtworkUrl);
   remove.hidden = !hasArtwork;
   status.disabled = !hasArtwork;
   status.value = hasArtwork ? card.dataset.artworkStatus || "draft" : "missing";
-  uploadLabel.textContent = hasArtwork ? "Replace artwork" : hasReference ? "Upload final page artwork" : "Upload artwork";
+  const backgroundConfirmed = card.querySelector("[data-background-confirmed]");
+  backgroundConfirmed.checked = card.dataset.backgroundPlateConfirmed === "true";
+  backgroundConfirmed.disabled = !hasArtwork;
+  uploadLabel.textContent = hasArtwork ? "Replace background plate" : hasReference ? "Upload clean background plate" : "Upload background plate";
   name.textContent = hasArtwork
-    ? `${card.dataset.artworkName || "Uploaded artwork"} · ${artworkStatusLabel(status.value)}`
+    ? `${card.dataset.artworkName || "Uploaded background plate"} · ${artworkStatusLabel(status.value)} · Customer monster added later`
     : hasReference
-      ? `${card.dataset.referenceArtworkLabel} · Existing spread reference · Final page artwork still required.`
-      : "Upload the current illustration for this page.";
+      ? `${card.dataset.referenceArtworkLabel} · Composition reference with sample monster · Upload a clean plate with this zone empty.`
+      : "Upload the background illustration with the personalized monster area left empty.";
   if (visibleArtworkUrl && image.getAttribute("src") !== visibleArtworkUrl) image.src = visibleArtworkUrl;
-  card.querySelector("[data-monster-zone]").hidden = hasReference;
+  const zone = card.querySelector("[data-monster-zone]");
+  zone.hidden = card.dataset.monsterRequired === "false";
+  zone.dataset.referenceRemoval = String(hasReference);
+  zone.querySelector("span").textContent = hasReference ? "REMOVE SAMPLE" : "CUSTOM MONSTER";
   renderMonsterPlacement(card);
 }
 
@@ -1154,6 +1175,7 @@ function storyReviewState(cards = [...pagesContainer.children]) {
     if (!areas[0].value.trim()) issues.push({ page: index, label: `Page ${index + 1}: story text is missing` });
     if (!areas[1].value.trim()) issues.push({ page: index, label: `Page ${index + 1}: illustration direction is missing` });
     if (!card.dataset.artworkUrl) issues.push({ page: index, label: `Page ${index + 1}: artwork is missing` });
+    else if (card.dataset.backgroundPlateConfirmed !== "true") issues.push({ page: index, label: `Page ${index + 1}: confirm the artwork is a clean background plate` });
     else if (!["approved", "final"].includes(card.dataset.artworkStatus)) issues.push({ page: index, label: `Page ${index + 1}: artwork needs approval` });
     const unknown = `${areas[0].value} ${areas[1].value}`.match(/\{[^}]+\}/g) || [];
     [...new Set(unknown)].filter((token) => !["{child_name}", "{monster_name}"].includes(token)).forEach((token) => issues.push({ page: index, label: `Page ${index + 1}: unknown token ${token}` }));
@@ -1222,9 +1244,10 @@ function buildReviewPage(card, index, child, monster) {
   if (visualUrl) {
     const image = document.createElement("img"); image.src = visualUrl; image.alt = card.dataset.artworkUrl ? `Artwork for page ${index + 1}` : `Existing spread reference for page ${index + 1}`; art.append(image);
   } else art.innerHTML = "<span>Artwork missing</span>";
-  if (card.dataset.artworkUrl) {
+  if (visualUrl && card.dataset.monsterRequired !== "false") {
     const zone = document.createElement("i");
     zone.className = "monster-zone monster-zone-preview";
+    zone.dataset.referenceRemoval = String(!card.dataset.artworkUrl && Boolean(card.dataset.referenceArtworkUrl));
     zone.style.left = `${card.dataset.monsterX || 68}%`;
     zone.style.top = `${card.dataset.monsterY || 72}%`;
     zone.style.width = `${card.dataset.monsterScale || 36}%`;
@@ -1233,7 +1256,7 @@ function buildReviewPage(card, index, child, monster) {
   }
   section.querySelector("p").textContent = card.querySelectorAll("textarea")[0].value.replaceAll("{child_name}", child).replaceAll("{monster_name}", monster) || "No story text yet.";
   const footer = section.querySelectorAll("footer span");
-  footer[0].textContent = card.dataset.artworkUrl ? artworkStatusLabel(card.dataset.artworkStatus || "missing") : card.dataset.referenceArtworkUrl ? "Spread reference · final art required" : "Artwork missing";
+  footer[0].textContent = card.dataset.artworkUrl ? `${artworkStatusLabel(card.dataset.artworkStatus || "missing")} background plate` : card.dataset.referenceArtworkUrl ? "Sample-monster reference · clean plate required" : "Background plate missing";
   footer[1].textContent = `${wordCount(card.querySelectorAll("textarea")[0].value)} words`;
   return section;
 }
@@ -1267,7 +1290,7 @@ async function saveStory(status, { silent = false } = {}) {
   if (savingStory) return null;
   clearTimeout(storyAutosaveTimer);
   if (!silent && !editor.reportValidity()) return null;
-  const artIncomplete = [...pagesContainer.children].some((card) => !card.dataset.artworkUrl || !["approved", "final"].includes(card.dataset.artworkStatus));
+  const artIncomplete = [...pagesContainer.children].some((card) => !card.dataset.artworkUrl || card.dataset.backgroundPlateConfirmed !== "true" || !["approved", "final"].includes(card.dataset.artworkStatus));
   if (status === "published" && (pagesContainer.children.length !== 32 || [...pagesContainer.querySelectorAll("textarea")].some((area) => !area.value.trim()) || artIncomplete)) {
     editorStatus.textContent = "Complete all 32 pages, upload artwork, and mark every illustration approved or final before publishing. You can save a draft at any time.";
     return null;
@@ -1406,10 +1429,12 @@ function renderSelectedSpread(cards = [...pagesContainer.children]) {
       image.alt = card.dataset.artworkUrl ? `Artwork for page ${firstIndex + offset + 1}` : `Existing spread reference for page ${firstIndex + offset + 1}`;
       art.append(image);
     } else art.textContent = "Artwork pending";
-    if (card.dataset.artworkUrl) {
+    if (visualUrl && card.dataset.monsterRequired !== "false") {
       const zone = document.createElement("span");
       zone.className = "monster-zone monster-zone-preview";
-      zone.textContent = "MONSTER";
+      const referenceOnly = !card.dataset.artworkUrl && Boolean(card.dataset.referenceArtworkUrl);
+      zone.dataset.referenceRemoval = String(referenceOnly);
+      zone.textContent = referenceOnly ? "REMOVE SAMPLE" : "CUSTOM MONSTER";
       zone.style.left = `${card.dataset.monsterX || 68}%`;
       zone.style.top = `${card.dataset.monsterY || 72}%`;
       zone.style.width = `${card.dataset.monsterScale || 36}%`;
@@ -1426,7 +1451,7 @@ function renderSelectedSpread(cards = [...pagesContainer.children]) {
 function refreshPageTools() {
   const cards = [...pagesContainer.children];
   const ready = cards.filter((card) => [...card.querySelectorAll("textarea")].every((area) => area.value.trim())).length;
-  const artworkReady = cards.filter((card) => card.dataset.artworkUrl && ["approved", "final"].includes(card.dataset.artworkStatus)).length;
+  const artworkReady = cards.filter((card) => card.dataset.artworkUrl && card.dataset.backgroundPlateConfirmed === "true" && ["approved", "final"].includes(card.dataset.artworkStatus)).length;
   const referenceCount = new Set(cards.map((card) => card.dataset.referenceArtworkUrl).filter(Boolean)).size;
   document.querySelector("#page-progress").textContent = `${ready}/32 copy · ${artworkReady}/32 final art${referenceCount ? ` · ${referenceCount} existing spread references` : ""}`;
   document.querySelector("#add-page").disabled = cards.length >= 32;
@@ -1436,7 +1461,7 @@ function refreshPageTools() {
     button.type = "button";
     const complete = [...card.querySelectorAll("textarea")].every((area) => area.value.trim());
     const artStatus = card.dataset.artworkStatus || "missing";
-    const pageReady = complete && card.dataset.artworkUrl && ["approved", "final"].includes(artStatus);
+    const pageReady = complete && card.dataset.artworkUrl && card.dataset.backgroundPlateConfirmed === "true" && ["approved", "final"].includes(artStatus);
     const completion = card.querySelector("[data-page-completion]");
     completion.textContent = pageReady ? "Page ready" : !complete ? "Copy needs work" : card.dataset.referenceArtworkUrl && !card.dataset.artworkUrl ? "Reference art available" : card.dataset.artworkUrl ? "Artwork needs review" : "Artwork needed";
     completion.className = pageReady ? "is-ready" : "needs-work";
@@ -1460,7 +1485,7 @@ function refreshPageTools() {
     { ok: Boolean(settings.title && settings.slug), label: "Title and slug are complete" },
     { ok: cards.length === 32, label: `${cards.length}/32 pages added` },
     { ok: ready === cards.length && cards.length > 0, label: "Every page has story text and art direction" },
-    { ok: artworkReady === cards.length && cards.length === 32, label: `${artworkReady}/32 page illustrations approved or final` },
+    { ok: artworkReady === cards.length && cards.length === 32, label: `${artworkReady}/32 clean background plates confirmed and approved` },
     { ok: !unresolved.length, label: unresolved.length ? `Unknown tokens: ${unresolved.join(", ")}` : "No unknown personalization tokens" },
     { ok: !settings.seasonal || Boolean(settings.from && settings.until), label: settings.seasonal ? "Seasonal availability dates are set" : "Evergreen availability" },
     { ok: !cards.some((card) => card.querySelector("textarea").value.length > 1200), label: "Page text is within review length" },

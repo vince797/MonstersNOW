@@ -1,7 +1,7 @@
 {
   "title": "Halloween Monster Night",
   "status": "blocked",
-  "updated": "2026-09-18",
+  "updated": "2026-10-01",
   "format": "8.5 \u00d7 8.5 in, full color, 32 pages",
   "checks": [
     {
@@ -22,7 +22,7 @@
     {
       "label": "Print-art quality review",
       "status": "blocked",
-      "detail": "Approve sharpened print derivatives at 100% zoom"
+      "detail": "Create and approve monster-free background plates for all 32 pages"
     },
     {
       "label": "Softcover package cover",
@@ -40,5 +40,5 @@
       "detail": "Run after final-resolution art and covers exist"
     }
   ],
-  "next_action": "Review the 14 print-art derivatives at 100% zoom, then retrieve Lulu cover dimensions for both bindings."
+  "next_action": "Use the illustrated spreads as composition references only. Create clean background plates with each custom-monster zone empty, confirm each plate in Admin, then generate an order-specific proof with the approved customer monster."
 }

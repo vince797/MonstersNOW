@@ -12,6 +12,9 @@ test("master copy becomes a pinned order-specific render manifest", () => {
       text: `Page ${index + 1} for {child_name} and {monster_name}`,
       artworkUrl: `https://assets.example/page-${index + 1}.jpg`,
       artworkStatus: "final",
+      artworkRole: "background_plate",
+      backgroundPlateConfirmed: true,
+      monsterRequired: index !== 2,
       monsterPlacement: { x: 30, y: 80, scale: 35, facing: index % 2 ? "right" : "left", layer: "front" },
     })),
   };
@@ -25,6 +28,8 @@ test("master copy becomes a pinned order-specific render manifest", () => {
   assert.equal(book.pages.length, 32);
   assert.equal(book.pages[0].text, "Page 1 for Riley and Fizz");
   assert.equal(book.pages[1].monster.pose, "primary-mirrored");
+  assert.equal(book.pages[2].monster, null);
+  assert.ok(book.pages.every((page) => page.artworkRole === "background_plate"));
   assert.deepEqual(book.readiness, { copyReady: true, artworkReady: true, monsterReady: true });
   assert.match(book.fingerprint, /^[a-f0-9]{64}$/);
 });
