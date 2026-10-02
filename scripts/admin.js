@@ -36,7 +36,11 @@ const orderStatuses = ["checkout_started", "paid", "proofing", "approved", "prin
 const orderDialog = document.querySelector("#order-detail");
 const artworkDialog = document.querySelector("#artwork-overview");
 const storyReviewDialog = document.querySelector("#story-review");
+const commandDialog = document.querySelector("#admin-command");
+const commandInput = document.querySelector("#admin-command-input");
+const commandResults = document.querySelector("#admin-command-results");
 let reviewSpreadIndex = 0;
+let commandSelection = 0;
 const CATALOG_COVERS = {
   "halloween-monster-night": "assets/storybook/cover-series/minimal-concepts/halloween-monster-night-v2-web.jpg",
   "big-adventure": "assets/storybook/cover-series/minimal-concepts/big-adventure-v2-web.jpg",
@@ -96,6 +100,7 @@ loginForm.addEventListener("submit", async (event) => {
 newStoryButton.addEventListener("click", () => editStory());
 document.querySelector("#setup-catalog").addEventListener("click", () => setupCatalog({ announce: true }));
 document.querySelector("#dashboard-new-story").addEventListener("click", () => { showView("stories"); editStory(); });
+document.querySelector("#rail-new-story").addEventListener("click", () => { showView("stories"); editStory(); });
 document.querySelector("#halloween-story").addEventListener("click", () => { showView("stories"); editStory({ title_template: "{child_name} and {monster_name}'s Halloween Adventure", slug: "halloween-adventure", description: "A playful Halloween quest filled with costumes, pumpkins, and friendly surprises.", is_seasonal: true, available_from: "2026-09-15", available_until: "2026-10-31", pages: [] }); });
 document.querySelector("#production-open-book").addEventListener("click", openProductionBook);
 document.querySelector("#production-open-orders").addEventListener("click", () => showView("orders"));
@@ -139,6 +144,20 @@ document.querySelector("#order-filter").addEventListener("change", renderOrders)
 document.querySelectorAll("[data-admin-view]").forEach((button) => button.addEventListener("click", () => showView(button.dataset.adminView)));
 document.querySelectorAll("[data-open-stories]").forEach((button) => button.addEventListener("click", () => showView("stories")));
 document.querySelectorAll("[data-open-orders]").forEach((button) => button.addEventListener("click", () => showView("orders")));
+document.querySelectorAll("[data-admin-view-jump]").forEach((button) => button.addEventListener("click", () => {
+  if (button.dataset.adminStoryFilter) {
+    document.querySelector("#story-filter").value = button.dataset.adminStoryFilter;
+    renderStoryList();
+  }
+  if (button.dataset.adminOrderFilter === "active") orderQuickFilter = "active";
+  showView(button.dataset.adminViewJump);
+  if (button.dataset.adminViewJump === "orders") renderOrders();
+}));
+document.querySelector("#open-admin-command").addEventListener("click", openAdminCommand);
+document.querySelector("#close-admin-command").addEventListener("click", closeAdminCommand);
+commandDialog.addEventListener("click", (event) => { if (event.target === commandDialog) closeAdminCommand(); });
+commandInput.addEventListener("input", () => { commandSelection = 0; renderAdminCommand(); });
+commandInput.addEventListener("keydown", handleCommandKeys);
 document.querySelector("#add-page").addEventListener("click", () => addPage());
 document.querySelector("#previous-page").addEventListener("click", () => selectPage(selectedPageIndex - 1, true));
 document.querySelector("#next-page").addEventListener("click", () => selectPage(selectedPageIndex + 1, true));
@@ -151,6 +170,11 @@ document.querySelector("#cancel-manuscript-import").addEventListener("click", ()
 document.querySelector("#manuscript-file").addEventListener("change", updateManuscriptFile);
 document.querySelector("#import-manuscript").addEventListener("click", importManuscript);
 document.addEventListener("keydown", (event) => {
+  if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+    event.preventDefault();
+    commandDialog.open ? closeAdminCommand() : openAdminCommand();
+    return;
+  }
   if (editor.hidden) return;
   if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "s") {
     event.preventDefault();
@@ -165,6 +189,12 @@ manuscriptDrop.addEventListener("dragleave", () => manuscriptDrop.classList.remo
 manuscriptDrop.addEventListener("drop", handleManuscriptDrop);
 
 if (adminPassword) openLibrary();
+
+document.querySelector("#dashboard-date").textContent = new Intl.DateTimeFormat("en-US", {
+  weekday: "long",
+  month: "long",
+  day: "numeric",
+}).format(new Date());
 
 async function openLibrary() {
   const submitButton = loginForm.querySelector('button[type="submit"]');
@@ -224,10 +254,124 @@ function showView(view) {
   ordersAdmin.hidden = view !== "orders";
   customersAdmin.hidden = view !== "customers";
   monstersAdmin.hidden = view !== "monsters";
-  document.querySelector("#admin-view-title").textContent = view === "stories" ? "Stories" : view === "production" ? "Production" : view === "orders" ? "Orders" : view === "monsters" ? "Monsters" : view === "customers" ? "Customers" : "Dashboard";
+  const viewCopy = {
+    dashboard: ["Overview", "A clear view of the work that needs you."],
+    orders: ["Orders", "Move every book from payment to delivery."],
+    stories: ["Books", "Write, review, and publish the master catalog."],
+    production: ["Production", "Prepare print files and clear release gates."],
+    monsters: ["Monsters", "Manage reusable characters and permissions."],
+    customers: ["Customers", "See families, books, and order history together."],
+  };
+  const [title, context] = viewCopy[view] || viewCopy.dashboard;
+  document.querySelector("#admin-view-title").textContent = title;
+  document.querySelector("#admin-view-context").textContent = context;
+  document.title = `${title} | MonstersNOW Admin`;
   document.querySelectorAll("[data-admin-view]").forEach((button) => button.classList.toggle("is-active", button.dataset.adminView === view));
   if (view === "stories" && editor.hidden && stories[0]) editStory(stories[0]);
   if (view === "production") renderProductionHub();
+}
+
+function openAdminCommand() {
+  if (adminApp.hidden) return;
+  commandSelection = 0;
+  commandInput.value = "";
+  renderAdminCommand();
+  commandDialog.showModal();
+  requestAnimationFrame(() => commandInput.focus());
+}
+
+function closeAdminCommand() {
+  if (commandDialog.open) commandDialog.close();
+}
+
+function renderAdminCommand() {
+  const query = commandInput.value.trim().toLowerCase();
+  const customers = [...orders.reduce((map, order) => {
+    const email = order.customer_email?.trim().toLowerCase();
+    if (!email) return map;
+    const customer = map.get(email) || { email: order.customer_email, children: new Set(), monsters: new Set(), count: 0 };
+    if (order.child_name) customer.children.add(order.child_name);
+    if (order.monster_name) customer.monsters.add(order.monster_name);
+    customer.count += 1;
+    map.set(email, customer);
+    return map;
+  }, new Map()).values()];
+  const items = [
+    { type: "Go to", title: "Overview", detail: "Workspace summary", keywords: "dashboard home", run: () => showView("dashboard") },
+    { type: "Go to", title: "Orders", detail: "Fulfillment queue", keywords: "orders fulfillment", run: () => showView("orders") },
+    { type: "Go to", title: "Books", detail: "Master catalog", keywords: "stories books", run: () => showView("stories") },
+    { type: "Go to", title: "Production", detail: "Print readiness", keywords: "production print", run: () => showView("production") },
+    ...stories.map((story) => ({
+      type: "Book",
+      title: story.title_template,
+      detail: `${story.status || "draft"} · version ${story.version || 1}`,
+      keywords: `${story.slug} ${story.description || ""}`,
+      run: () => { showView("stories"); editStory(story); },
+    })),
+    ...orders.map((order) => ({
+      type: "Order",
+      title: `${order.child_name || "Child"} + ${order.monster_name || "Monster"}`,
+      detail: `${order.customer_email || "No email"} · ${(order.status || "new").replaceAll("_", " ")}`,
+      keywords: `${order.id} ${order.story_label || ""}`,
+      run: () => { showView("orders"); openOrderDetail(order); },
+    })),
+    ...monsters.map((monster) => ({
+      type: "Monster",
+      title: monster.monsterName || "Unnamed monster",
+      detail: `${monster.childName || "No child"} · ${monsterStatusLabel(monster.status)}`,
+      keywords: `${monster.customerEmail || ""} ${storyLabel(monster.storyId)}`,
+      run: () => {
+        document.querySelector("#monster-search").value = monster.monsterName || monster.childName || "";
+        showView("monsters");
+        renderMonsters();
+      },
+    })),
+    ...customers.map((customer) => ({
+      type: "Customer",
+      title: customer.email,
+      detail: `${customer.count} order${customer.count === 1 ? "" : "s"} · ${[...customer.children].join(", ") || "No child name"}`,
+      keywords: `${[...customer.children].join(" ")} ${[...customer.monsters].join(" ")}`,
+      run: () => {
+        document.querySelector("#customer-search").value = customer.email;
+        showView("customers");
+        renderCustomers();
+      },
+    })),
+  ].filter((item) => !query || `${item.type} ${item.title} ${item.detail} ${item.keywords}`.toLowerCase().includes(query)).slice(0, 12);
+
+  commandResults.replaceChildren(...items.map((item, index) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = index === commandSelection ? "is-selected" : "";
+    button.innerHTML = "<span></span><div><strong></strong><small></small></div><em>↵</em>";
+    button.querySelector("span").textContent = item.type;
+    button.querySelector("strong").textContent = item.title;
+    button.querySelector("small").textContent = item.detail;
+    button.addEventListener("mouseenter", () => {
+      commandSelection = index;
+      [...commandResults.querySelectorAll("button")].forEach((result, resultIndex) => result.classList.toggle("is-selected", resultIndex === index));
+    });
+    button.addEventListener("click", () => { closeAdminCommand(); item.run(); });
+    button._commandRun = item.run;
+    return button;
+  }));
+  if (!items.length) commandResults.innerHTML = '<div class="admin-command-empty"><strong>No matches</strong><span>Try a title, name, email, or order ID.</span></div>';
+}
+
+function handleCommandKeys(event) {
+  const buttons = [...commandResults.querySelectorAll("button")];
+  if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+    event.preventDefault();
+    commandSelection = Math.max(0, Math.min(buttons.length - 1, commandSelection + (event.key === "ArrowDown" ? 1 : -1)));
+    buttons.forEach((button, index) => button.classList.toggle("is-selected", index === commandSelection));
+    buttons[commandSelection]?.scrollIntoView({ block: "nearest" });
+  }
+  if (event.key === "Enter" && buttons[commandSelection]) {
+    event.preventDefault();
+    const button = buttons[commandSelection];
+    closeAdminCommand();
+    button._commandRun();
+  }
 }
 
 function renderDashboard() {
@@ -440,7 +584,9 @@ function renderStoryList() {
 function renderOrders() {
   const filter = document.querySelector("#order-filter").value;
   const query = document.querySelector("#order-search").value.trim().toLowerCase();
-  const matchesQuickFilter = (order) => orderQuickFilter === "all" || (orderQuickFilter === "attention" ? orderNeedsAttention(order) : order.status === orderQuickFilter);
+  const matchesQuickFilter = (order) => orderQuickFilter === "all"
+    || (orderQuickFilter === "active" ? ["proofing", "approved", "printing"].includes(order.status) : false)
+    || (orderQuickFilter === "attention" ? orderNeedsAttention(order) : order.status === orderQuickFilter);
   const visible = orders.filter((order) => matchesQuickFilter(order) && (filter === "all" || order.status === filter) && [order.customer_email, order.child_name, order.monster_name, order.story_label, order.id].join(" ").toLowerCase().includes(query));
   document.querySelector("#queue-all").textContent = orders.length;
   document.querySelector("#queue-attention").textContent = orders.filter(orderNeedsAttention).length;
@@ -857,7 +1003,7 @@ function addPage(page = {}) {
   const pageNumber = pagesContainer.children.length + 1;
   const card = document.createElement("section");
   card.className = "story-page-card";
-  card.innerHTML = `<header class="page-card-header"><span><small data-page-role>Story page</small><strong>Page <span data-page-number></span></strong></span><div class="page-card-header-tools"><em data-page-completion>Checking page…</em><div class="page-card-actions"><button type="button" data-page-action="up" aria-label="Move page up" title="Move page up">↑</button><button type="button" data-page-action="down" aria-label="Move page down" title="Move page down">↓</button><button type="button" data-page-action="duplicate">Duplicate</button><button type="button" data-page-action="remove">Remove</button></div></div></header><label class="page-copy-field"><span class="page-field-heading"><b>1</b><span><strong>Story text</strong><small>The words printed in the book</small></span></span><span class="token-toolbar" aria-label="Insert personalization"><button type="button" data-insert-token="{child_name}">+ Child name</button><button type="button" data-insert-token="{monster_name}">+ Monster name</button></span><textarea rows="8" maxlength="2000" placeholder="Write the words the child will read on this page…"></textarea><small><span data-text-words>0 words</span> · <span data-text-count>0</span>/2,000 characters</small></label><label><span class="page-field-heading"><b>2</b><span><strong>Illustration direction</strong><small>Internal notes for creating or revising the scene</small></span></span><textarea rows="8" maxlength="3000" placeholder="Describe the scene, characters, action, lighting, and composition…"></textarea><small><span data-art-words>0 words</span> · <span data-art-count>0</span>/3,000 characters</small></label><section class="page-artwork-panel"><div class="page-artwork-visual"><img alt="" data-artwork-image hidden /><div data-artwork-empty><span>◇</span><strong>No artwork uploaded</strong><small>JPG, PNG, or WebP · 3 MB maximum</small></div><div class="monster-zone" data-monster-zone aria-label="Admin-only personalized monster placement"><span>MONSTER</span></div><div class="child-zone" data-child-zone aria-label="Admin-only personalized child placement"><span>CHILD</span></div></div><div class="page-artwork-controls"><div class="page-artwork-heading"><span class="page-step-number">3</span><span><strong>Page artwork</strong><small data-artwork-name>Upload the background illustration without permanent characters.</small></span></div><label class="button secondary artwork-upload-button"><input type="file" accept="image/jpeg,image/png,image/webp" data-artwork-file /> <span data-artwork-upload-label>Upload artwork</span></label><label class="artwork-status-label">Review status<select data-artwork-review><option value="missing">Missing</option><option value="draft">Draft</option><option value="approved">Approved</option><option value="final">Final</option></select></label><details class="monster-placement-controls"><summary>Monster placement <small>Advanced</small></summary><label>Horizontal <input type="range" min="5" max="95" data-character="monster" data-placement="x" /><output data-character-output="monster-x"></output></label><label>Baseline <input type="range" min="10" max="95" data-character="monster" data-placement="y" /><output data-character-output="monster-y"></output></label><label>Size <input type="range" min="15" max="70" data-character="monster" data-placement="scale" /><output data-character-output="monster-scale"></output></label><div><label>Facing<select data-character="monster" data-placement="facing"><option value="left">Left</option><option value="right">Right</option><option value="neutral">Neutral</option></select></label><label>Layer<select data-character="monster" data-placement="layer"><option value="front">In front</option><option value="behind">Behind foreground</option></select></label></div></details><details class="monster-placement-controls child-placement-controls"><summary>Child placement <small>Advanced</small></summary><label>Horizontal <input type="range" min="5" max="95" data-character="child" data-placement="x" /><output data-character-output="child-x"></output></label><label>Baseline <input type="range" min="10" max="95" data-character="child" data-placement="y" /><output data-character-output="child-y"></output></label><label>Size <input type="range" min="15" max="70" data-character="child" data-placement="scale" /><output data-character-output="child-scale"></output></label><div><label>Facing<select data-character="child" data-placement="facing"><option value="left">Left</option><option value="right">Right</option><option value="neutral">Neutral</option></select></label><label>Layer<select data-character="child" data-placement="layer"><option value="front">In front</option><option value="behind">Behind foreground</option></select></label></div><p>Placement guides are never printed.</p></details><button class="button secondary" type="button" data-remove-artwork hidden>Remove from page</button><p data-artwork-message role="status"></p></div></section>`;
+  card.innerHTML = `<header class="page-card-header"><span><small data-page-role>Story page</small><strong>Page <span data-page-number></span></strong></span><div class="page-card-header-tools"><em data-page-completion>Checking page…</em><div class="page-card-actions"><button type="button" data-page-action="up" aria-label="Move page up" title="Move page up">↑</button><button type="button" data-page-action="down" aria-label="Move page down" title="Move page down">↓</button><button type="button" data-page-action="duplicate">Duplicate</button><button type="button" data-page-action="remove">Remove</button></div></div></header><label class="page-copy-field"><span class="page-field-heading"><b>1</b><span><strong>Story text</strong><small>The words printed in the book</small></span></span><span class="token-toolbar" role="group" aria-label="Insert personalization"><button type="button" data-insert-token="{child_name}">+ Child name</button><button type="button" data-insert-token="{monster_name}">+ Monster name</button></span><textarea rows="8" maxlength="2000" placeholder="Write the words the child will read on this page…"></textarea><small><span data-text-words>0 words</span> · <span data-text-count>0</span>/2,000 characters</small></label><label><span class="page-field-heading"><b>2</b><span><strong>Illustration direction</strong><small>Internal notes for creating or revising the scene</small></span></span><textarea rows="8" maxlength="3000" placeholder="Describe the scene, characters, action, lighting, and composition…"></textarea><small><span data-art-words>0 words</span> · <span data-art-count>0</span>/3,000 characters</small></label><section class="page-artwork-panel"><div class="page-artwork-visual"><img alt="" data-artwork-image hidden /><div data-artwork-empty><span>◇</span><strong>No artwork uploaded</strong><small>JPG, PNG, or WebP · 3 MB maximum</small></div><div class="monster-zone" data-monster-zone role="img" aria-label="Admin-only personalized monster placement"><span>MONSTER</span></div><div class="child-zone" data-child-zone role="img" aria-label="Admin-only personalized child placement"><span>CHILD</span></div></div><div class="page-artwork-controls"><div class="page-artwork-heading"><span class="page-step-number">3</span><span><strong>Page artwork</strong><small data-artwork-name>Upload the background illustration without permanent characters.</small></span></div><label class="button secondary artwork-upload-button"><input type="file" accept="image/jpeg,image/png,image/webp" data-artwork-file /> <span data-artwork-upload-label>Upload artwork</span></label><label class="artwork-status-label">Review status<select data-artwork-review><option value="missing">Missing</option><option value="draft">Draft</option><option value="approved">Approved</option><option value="final">Final</option></select></label><details class="monster-placement-controls"><summary>Monster placement <small>Advanced</small></summary><label>Horizontal <input type="range" min="5" max="95" data-character="monster" data-placement="x" /><output data-character-output="monster-x"></output></label><label>Baseline <input type="range" min="10" max="95" data-character="monster" data-placement="y" /><output data-character-output="monster-y"></output></label><label>Size <input type="range" min="15" max="70" data-character="monster" data-placement="scale" /><output data-character-output="monster-scale"></output></label><div><label>Facing<select data-character="monster" data-placement="facing"><option value="left">Left</option><option value="right">Right</option><option value="neutral">Neutral</option></select></label><label>Layer<select data-character="monster" data-placement="layer"><option value="front">In front</option><option value="behind">Behind foreground</option></select></label></div></details><details class="monster-placement-controls child-placement-controls"><summary>Child placement <small>Advanced</small></summary><label>Horizontal <input type="range" min="5" max="95" data-character="child" data-placement="x" /><output data-character-output="child-x"></output></label><label>Baseline <input type="range" min="10" max="95" data-character="child" data-placement="y" /><output data-character-output="child-y"></output></label><label>Size <input type="range" min="15" max="70" data-character="child" data-placement="scale" /><output data-character-output="child-scale"></output></label><div><label>Facing<select data-character="child" data-placement="facing"><option value="left">Left</option><option value="right">Right</option><option value="neutral">Neutral</option></select></label><label>Layer<select data-character="child" data-placement="layer"><option value="front">In front</option><option value="behind">Behind foreground</option></select></label></div><p>Placement guides are never printed.</p></details><button class="button secondary" type="button" data-remove-artwork hidden>Remove from page</button><p data-artwork-message role="status"></p></div></section>`;
   const backgroundCheck = document.createElement("label");
   backgroundCheck.className = "background-plate-check";
   backgroundCheck.innerHTML = '<input type="checkbox" data-background-confirmed /> <span><strong>Clean background confirmed</strong><small>No permanent child or sample monster appears in either reserved zone.</small></span>';

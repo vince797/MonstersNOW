@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex, nofollow" />
     <title>Dashboard | MonstersNOW Admin</title>
-    <link rel="stylesheet" href="styles.css?v=20261001-character-plates" />
+    <link rel="stylesheet" href="styles.css?v=20261002-admin-operations" />
   </head>
   <body class="admin-page">
     <main>
@@ -46,26 +46,32 @@
         <aside class="admin-rail">
           <a class="admin-rail-brand" href="index.html" aria-label="MonstersNOW home">
             <img src="assets/monstersnow-logo-v2.svg" alt="MonstersNOW" />
+            <span>Operations</span>
           </a>
           <nav class="admin-nav" aria-label="Admin navigation">
-            <button class="is-active" type="button" data-admin-view="dashboard"><span>⌂</span>Dashboard</button>
-            <button type="button" data-admin-view="stories"><span>▤</span>Stories <em id="nav-story-count">0</em></button>
-            <button type="button" data-admin-view="production"><span>◆</span>Production <em id="nav-production-count">0</em></button>
-            <button type="button" data-admin-view="orders"><span>□</span>Orders <em id="nav-order-count">0</em></button>
-            <button type="button" data-admin-view="monsters"><span>●</span>Monsters <em id="nav-monster-count">0</em></button>
-            <button type="button" data-admin-view="customers"><span>♙</span>Customers <em id="nav-customer-count">0</em></button>
-            <button type="button" disabled><span>⚙</span>Settings <small>Soon</small></button>
+            <span class="admin-nav-label">Workspace</span>
+            <button class="is-active" type="button" data-admin-view="dashboard"><span aria-hidden="true">⌂</span>Overview</button>
+            <button type="button" data-admin-view="orders"><span aria-hidden="true">↗</span>Orders <em id="nav-order-count">0</em></button>
+            <button type="button" data-admin-view="stories"><span aria-hidden="true">▤</span>Books <em id="nav-story-count">0</em></button>
+            <button type="button" data-admin-view="production"><span aria-hidden="true">◇</span>Production <em id="nav-production-count">0</em></button>
+            <span class="admin-nav-label">Library</span>
+            <button type="button" data-admin-view="monsters"><span aria-hidden="true">●</span>Monsters <em id="nav-monster-count">0</em></button>
+            <button type="button" data-admin-view="customers"><span aria-hidden="true">♙</span>Customers <em id="nav-customer-count">0</em></button>
           </nav>
+          <div class="admin-rail-footer">
+            <button type="button" id="rail-new-story"><span aria-hidden="true">＋</span>New book</button>
+            <a href="index.html" target="_blank" rel="noopener"><span aria-hidden="true">↗</span>View storefront</a>
+          </div>
         </aside>
 
         <div class="admin-workspace">
           <header class="admin-topbar">
-            <div>
-              <p class="eyebrow">MonstersNOW Admin</p>
+            <div class="admin-topbar-title">
               <h1 id="admin-view-title">Dashboard</h1>
+              <p id="admin-view-context">A clear view of the work that needs you.</p>
             </div>
             <div class="admin-topbar-actions">
-              <a href="index.html" target="_blank" rel="noopener">View website ↗</a>
+              <button class="admin-command-trigger" id="open-admin-command" type="button"><span aria-hidden="true">⌕</span> Quick find <kbd>⌘ K</kbd></button>
               <span class="admin-status"><i></i>Connected</span>
               <button class="admin-sign-out-button" id="admin-sign-out" type="button">Sign out</button>
             </div>
@@ -74,43 +80,51 @@
           <section class="admin-dashboard" id="admin-dashboard">
             <div class="admin-welcome-card">
               <div>
-                <p class="eyebrow">Good to see you</p>
-                <h2>Your story studio is ready.</h2>
-                <p>Build the Halloween release, manage your evergreen catalog, and keep every master story organized in one place.</p>
+                <p class="eyebrow" id="dashboard-date">Today</p>
+                <h2>Your work, sorted.</h2>
+                <p>Start with the queue, then move books and orders forward from one focused workspace.</p>
               </div>
-              <button class="button primary" id="dashboard-new-story" type="button">Create a story</button>
+              <div class="admin-welcome-actions">
+                <button class="button primary" type="button" data-open-orders>Review orders</button>
+                <button class="button secondary" id="dashboard-new-story" type="button">New book</button>
+              </div>
             </div>
 
-            <div class="admin-metrics" aria-label="Operations summary">
-              <article><span>Total orders</span><strong id="metric-orders">0</strong><small>All checkout records</small></article>
-              <article><span>In production</span><strong id="metric-production">0</strong><small>Proofing through printing</small></article>
-              <article><span>Published stories</span><strong id="metric-published">0</strong><small>Available to customers</small></article>
-              <article><span>Story drafts</span><strong id="metric-drafts">0</strong><small>Still in progress</small></article>
+            <div class="admin-metrics" role="group" aria-label="Operations summary">
+              <button type="button" data-admin-view-jump="orders"><span>Total orders</span><strong id="metric-orders">0</strong><small>Open order history <b>→</b></small></button>
+              <button type="button" data-admin-view-jump="orders" data-admin-order-filter="active"><span>In production</span><strong id="metric-production">0</strong><small>Proofing through print <b>→</b></small></button>
+              <button type="button" data-admin-view-jump="stories" data-admin-story-filter="published"><span>Published books</span><strong id="metric-published">0</strong><small>Live in the catalog <b>→</b></small></button>
+              <button type="button" data-admin-view-jump="stories" data-admin-story-filter="draft"><span>Draft books</span><strong id="metric-drafts">0</strong><small>Continue editing <b>→</b></small></button>
             </div>
 
             <div class="admin-dashboard-grid">
-              <section class="admin-panel">
-                <div class="admin-panel-heading"><div><p class="eyebrow">Library</p><h2>Recent stories</h2></div><button type="button" data-open-stories>View all</button></div>
+              <section class="admin-panel attention-panel">
+                <div class="admin-panel-heading"><div><p class="eyebrow">Work queue</p><h2>Needs attention</h2></div><button type="button" data-open-orders>All orders</button></div>
+                <div id="attention-list" class="attention-list"></div>
+              </section>
+              <section class="admin-panel recent-panel">
+                <div class="admin-panel-heading"><div><p class="eyebrow">Book studio</p><h2>Recent books</h2></div><button type="button" data-open-stories>All books</button></div>
                 <div id="recent-stories" class="recent-stories"></div>
+              </section>
+            </div>
+            <div class="admin-dashboard-lower">
+              <section class="admin-panel production-readiness-panel">
+                <div class="admin-panel-heading">
+                  <div><p class="eyebrow">Print production</p><h2>Halloween readiness</h2></div>
+                  <span class="production-overall" id="production-overall">Checking…</span>
+                </div>
+                <div class="production-summary"><p id="production-format">Loading print specifications…</p><small id="production-updated"></small></div>
+                <div class="production-checks" id="production-checks"></div>
+                <div class="production-next"><strong>Next production step</strong><p id="production-next-action">Loading…</p></div>
               </section>
               <aside class="admin-panel admin-next-panel">
                 <p class="eyebrow">Launch focus</p>
                 <h2>Halloween is next.</h2>
-                <p>Create the seasonal master story, set its availability dates, and complete all 32 pages before publishing.</p>
-                <button class="button secondary" type="button" id="halloween-story">Start Halloween story</button>
-                <a class="button primary" href="create.html?test=halloween" target="_blank" rel="noopener">Run Halloween test order</a>
+                <p>Finish the seasonal master, verify the art, and test the purchase flow.</p>
+                <button class="button secondary" type="button" id="halloween-story">Open Halloween book</button>
+                <a class="button primary" href="create.html?test=halloween" target="_blank" rel="noopener">Run test order ↗</a>
               </aside>
             </div>
-            <section class="admin-panel attention-panel"><div class="admin-panel-heading"><div><p class="eyebrow">Operations</p><h2>Needs attention</h2></div><button type="button" data-open-orders>Open orders</button></div><div id="attention-list" class="attention-list"></div></section>
-            <section class="admin-panel production-readiness-panel">
-              <div class="admin-panel-heading">
-                <div><p class="eyebrow">Print production</p><h2>Halloween book readiness</h2></div>
-                <span class="production-overall" id="production-overall">Checking…</span>
-              </div>
-              <div class="production-summary"><p id="production-format">Loading print specifications…</p><small id="production-updated"></small></div>
-              <div class="production-checks" id="production-checks"></div>
-              <div class="production-next"><strong>Next production step</strong><p id="production-next-action">Loading…</p></div>
-            </section>
           </section>
 
           <section class="story-admin" id="story-admin" hidden>
@@ -337,9 +351,10 @@
         </div>
       </section>
     </main>
+    <dialog id="admin-command" class="admin-command"><div class="admin-command-shell"><header><span aria-hidden="true">⌕</span><input id="admin-command-input" type="search" placeholder="Find a book, order, customer, or monster…" autocomplete="off" aria-label="Quick find" /><button id="close-admin-command" type="button" aria-label="Close quick find">Esc</button></header><div class="admin-command-hint"><span>Quick navigation</span><span>↑↓ move · Enter open</span></div><div id="admin-command-results" class="admin-command-results"></div></div></dialog>
     <dialog id="artwork-overview" class="artwork-overview"><div class="artwork-overview-shell"><header><div><p class="eyebrow">Visual production</p><h2>Artwork overview</h2><p id="artwork-overview-summary">Review all 32 pages at a glance.</p></div><button class="button secondary" id="close-artwork-overview" type="button">Close</button></header><nav class="artwork-filters" aria-label="Filter artwork"><button class="is-active" type="button" data-artwork-filter="all">All</button><button type="button" data-artwork-filter="missing">Missing</button><button type="button" data-artwork-filter="draft">Draft</button><button type="button" data-artwork-filter="approved">Approved</button><button type="button" data-artwork-filter="final">Final</button></nav><div id="artwork-overview-grid" class="artwork-overview-grid"></div></div></dialog>
     <dialog id="story-review" class="story-review"><div class="story-review-shell"><header><div><p class="eyebrow">Final master review</p><h2 id="story-review-title">Review book</h2><p id="story-review-summary">Check every spread before approval.</p></div><button class="button secondary" id="close-story-review" type="button">Return to editor</button></header><div class="story-review-toolbar"><div class="sample-fields"><label>Child<input id="review-child" value="Alex" maxlength="40" /></label><label>Monster<input id="review-monster" value="Milo" maxlength="40" /></label></div><nav id="story-review-spread-nav" aria-label="Book spreads"></nav></div><div class="story-review-body"><main><div class="story-review-progress"><button class="button secondary" id="review-previous" type="button">← Previous</button><strong id="review-spread-label">Spread 1</strong><button class="button secondary" id="review-next" type="button">Next →</button></div><article id="story-review-spread" class="review-spread"></article></main><aside><div class="review-readiness"><strong id="review-readiness-title">Checking book…</strong><span id="review-readiness-count"></span></div><ul id="story-review-issues"></ul><button class="button primary" id="approve-master-story" type="button">Approve master book</button><p id="story-review-status" role="status"></p></aside></div></div></dialog>
     <dialog id="order-detail" class="order-detail"><form id="order-detail-form"><div class="admin-panel-heading"><div><p class="eyebrow">Fulfillment record</p><h2>Order details</h2></div><button type="button" id="close-order-detail" class="button secondary">Close</button></div><div class="order-detail-summary"><p id="order-detail-id"></p><span id="order-detail-age"></span></div><section class="order-next-action" aria-live="polite"><span>Next required action</span><strong id="order-next-action">Review this order</strong><small id="order-next-help"></small></section><ol class="order-progress" id="order-progress" aria-label="Order progress"></ol><dl id="order-detail-fields"></dl><section class="order-artwork-panel" id="order-artwork-panel" hidden><div><p class="eyebrow">Customer artwork</p><h3>Saved monster files</h3></div><div class="order-artwork-grid" id="order-artwork-grid"></div></section><section class="proof-approval-panel"><div><p class="eyebrow">Required production gate</p><h3>Proof and Lulu submission</h3><p id="proof-approval-state">This order has not been approved for printing.</p></div><div class="lulu-shipping-fields" id="lulu-shipping-fields" hidden><label>Recipient name<input id="lulu-recipient-name" autocomplete="name" /></label><label>Phone<input id="lulu-phone" autocomplete="tel" /></label><label class="wide">Street address<input id="lulu-street" autocomplete="street-address" /></label><label>City<input id="lulu-city" autocomplete="address-level2" /></label><label>State / region<input id="lulu-state" autocomplete="address-level1" /></label><label>Postal code<input id="lulu-postcode" autocomplete="postal-code" /></label><label>Country code<input id="lulu-country" value="US" maxlength="2" autocomplete="country" /></label><label>Shipping level<select id="lulu-shipping-level"><option value="MAIL">Mail</option><option value="PRIORITY_MAIL">Priority mail</option><option value="GROUND">Ground</option><option value="EXPEDITED">Expedited</option><option value="EXPRESS">Express</option></select></label></div><div class="proof-approval-actions"><button class="button secondary" id="approve-order-proof" type="button">Approve proof</button><button class="button secondary" id="revoke-order-proof" type="button" hidden>Revoke approval</button><button class="button primary" id="send-order-lulu" type="button" disabled>Send to Lulu Sandbox</button></div><small id="proof-approval-help">Approval locks the exact master version, names, monster, and print-package fingerprint.</small></section><p class="order-payment-notice">A checkout record is not proof of payment. Verify payment in Stripe before advancing the order.</p><label>Operational status<select id="order-detail-status"></select></label><label>Production notes<textarea id="order-detail-notes" rows="6" maxlength="2000" placeholder="Proof review, approval details, printer updates, tracking follow-up…"></textarea></label><div class="order-detail-actions"><button class="button secondary" id="advance-order" type="button">Advance order</button><button class="button primary" id="save-order-detail" type="submit">Save changes</button></div><p id="order-detail-message" role="status"></p></form></dialog>
-    <script src="scripts/admin.js?v=20261001-character-plates"></script>
+    <script src="scripts/admin.js?v=20261002-admin-operations"></script>
   </body>
 </html>
