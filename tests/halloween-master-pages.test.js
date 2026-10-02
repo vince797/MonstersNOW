@@ -15,6 +15,7 @@ test("Halloween manuscript maps to 32 complete editable Admin pages", () => {
   assert.ok(pages.every((page) => page.backgroundPlateConfirmed === false));
   assert.ok(pages.every((page) => page.backgroundPlateVersion === 2));
   assert.ok(pages.filter((page) => page.monsterRequired).every((page) => /background plate|background/i.test(page.illustrationPrompt)));
+  assert.ok(pages.every((page) => /reusable environment plate only/i.test(page.illustrationPrompt)));
   assert.equal(pages[2].monsterRequired, false);
   assert.equal(pages[2].childRequired, false);
   assert.ok(pages.slice(3, 31).every((page) => page.childRequired));
