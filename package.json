@@ -6,5 +6,8 @@
     "heic-convert": "2.1.0",
     "mammoth": "1.12.3",
     "pdf-parse": "2.4.5"
+  },
+  "devDependencies": {
+    "agent-browser": "^0.38.2"
   }
 }
