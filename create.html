@@ -8,7 +8,7 @@
       content="Upload a child's monster drawing to create a free MonstersNOW preview, printable coloring page, and personalized storybook."
     />
     <title>Create Your Monster | MonstersNOW</title>
-    <link rel="stylesheet" href="styles.css?v=20260922-drawing-check" />
+    <link rel="stylesheet" href="styles.css?v=20261001-child-character" />
   </head>
   <body>
     <a class="skip-link" href="#main-content">Skip to content</a>
@@ -191,6 +191,27 @@
                         />
                       </label>
                     </div>
+                    <section class="child-character-picker" aria-labelledby="child-character-title">
+                      <div class="child-character-heading">
+                        <div><strong id="child-character-title">Choose the child character</strong><small>Optional. Select the closest illustrated look—no child photo needed.</small></div>
+                        <span id="child-character-selection">Monster only</span>
+                      </div>
+                      <div class="child-character-options" role="radiogroup" aria-label="Child character appearance">
+                        <label class="child-character-option is-selected">
+                          <input type="radio" name="child-character" value="none" checked />
+                          <span class="child-avatar child-avatar-none" aria-hidden="true">◇</span><b>Monster only</b>
+                        </label>
+                        <label class="child-character-option"><input type="radio" name="child-character" value="warm-curly-dark" /><span class="child-avatar" style="--skin:#8f5538;--hair:#24150f;--hair-shape:48%" aria-hidden="true"></span><b>Curly dark</b></label>
+                        <label class="child-character-option"><input type="radio" name="child-character" value="deep-coils-black" /><span class="child-avatar avatar-coils" style="--skin:#5c3426;--hair:#17100e" aria-hidden="true"></span><b>Coils</b></label>
+                        <label class="child-character-option"><input type="radio" name="child-character" value="medium-wavy-brown" /><span class="child-avatar avatar-wave" style="--skin:#bd7b54;--hair:#4a2818" aria-hidden="true"></span><b>Wavy brown</b></label>
+                        <label class="child-character-option"><input type="radio" name="child-character" value="golden-straight-black" /><span class="child-avatar avatar-straight" style="--skin:#d4a071;--hair:#171717" aria-hidden="true"></span><b>Straight black</b></label>
+                        <label class="child-character-option"><input type="radio" name="child-character" value="light-short-brown" /><span class="child-avatar avatar-short" style="--skin:#f0c3a0;--hair:#6a3d24" aria-hidden="true"></span><b>Short brown</b></label>
+                        <label class="child-character-option"><input type="radio" name="child-character" value="light-wavy-blonde" /><span class="child-avatar avatar-wave" style="--skin:#f5ceb0;--hair:#d9a83e" aria-hidden="true"></span><b>Wavy blonde</b></label>
+                        <label class="child-character-option"><input type="radio" name="child-character" value="medium-curly-auburn" /><span class="child-avatar avatar-coils" style="--skin:#c88962;--hair:#8c3d25" aria-hidden="true"></span><b>Curly auburn</b></label>
+                        <label class="child-character-option"><input type="radio" name="child-character" value="deep-braids-black" /><span class="child-avatar avatar-braids" style="--skin:#70422f;--hair:#16110f" aria-hidden="true"></span><b>Braids</b></label>
+                      </div>
+                      <p>Skin tone and hair are visual choices only. MonstersNOW does not ask for or infer race.</p>
+                    </section>
                     <div class="checkout-email-field">
                       <label for="interest-email">Email address <span>Required</span></label>
                       <input
@@ -205,7 +226,7 @@
                       <small id="checkout-email-help">Used for the checkout receipt and book updates.</small>
                       <p id="interest-status" role="status" aria-live="polite"></p>
                     </div>
-                    <p>These names will appear in the personalized story and book proof.</p>
+                    <p>The names and selected character will appear in the personalized book proof.</p>
                   </fieldset>
                   <div class="storybook-format-options" role="radiogroup" aria-label="Preferred storybook format">
                     <label class="storybook-format-choice">
@@ -309,6 +330,6 @@
       </div>
     </footer>
 
-    <script src="scripts/main.js?v=20260924-smooth-mobile-nav"></script>
+    <script src="scripts/main.js?v=20261001-child-character"></script>
   </body>
 </html>

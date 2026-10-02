@@ -10,9 +10,13 @@ test("Halloween manuscript maps to 32 complete editable Admin pages", () => {
   assert.match(pages[30].text, /next Halloween/i);
   assert.match(pages[31].text, /Meet \{monster_name\}/);
   assert.ok(pages.every((page) => Number.isFinite(page.monsterPlacement.x)));
+  assert.ok(pages.every((page) => Number.isFinite(page.childPlacement.x)));
   assert.ok(pages.every((page) => page.artworkRole === "background_plate"));
   assert.ok(pages.every((page) => page.backgroundPlateConfirmed === false));
+  assert.ok(pages.every((page) => page.backgroundPlateVersion === 2));
   assert.ok(pages.filter((page) => page.monsterRequired).every((page) => /background plate|background/i.test(page.illustrationPrompt)));
   assert.equal(pages[2].monsterRequired, false);
-  assert.match(pages[3].illustrationPrompt, /do not include a permanent story monster/i);
+  assert.equal(pages[2].childRequired, false);
+  assert.ok(pages.slice(3, 31).every((page) => page.childRequired));
+  assert.match(pages[3].illustrationPrompt, /do not include a permanent child or story monster/i);
 });

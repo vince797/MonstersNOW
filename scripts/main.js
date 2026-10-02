@@ -82,6 +82,8 @@ const interestEmail = document.querySelector("#interest-email");
 const interestStatus = document.querySelector("#interest-status");
 const childName = document.querySelector("#child-name");
 const monsterName = document.querySelector("#monster-name");
+const childCharacterInputs = [...document.querySelectorAll('input[name="child-character"]')];
+const childCharacterSelection = document.querySelector("#child-character-selection");
 const storybookFormatInputs = [...document.querySelectorAll('input[name="storybook-format"]')];
 const featureMonster = document.querySelector("#feature-monster");
 const featureShowDrawing = document.querySelector("#feature-show-drawing");
@@ -239,6 +241,9 @@ if (featureMonster) {
   featureMonster.addEventListener("change", syncFeaturePermissionFields);
   syncFeaturePermissionFields();
 }
+
+for (const input of childCharacterInputs) input.addEventListener("change", syncChildCharacterPicker);
+syncChildCharacterPicker();
 
 async function handleStorybookInterestSubmit(event) {
   event.preventDefault();
@@ -421,7 +426,26 @@ function getStorybookPersonalization() {
   return {
     childName: childName?.value.trim() || "",
     monsterName: monsterName?.value.trim() || "",
+    childCharacter: getSelectedChildCharacter(),
   };
+}
+
+function getSelectedChildCharacter() {
+  const input = childCharacterInputs.find((option) => option.checked);
+  const labels = {
+    none: "Monster only", "warm-curly-dark": "Curly dark hair", "deep-coils-black": "Black coily hair",
+    "medium-wavy-brown": "Wavy brown hair", "golden-straight-black": "Straight black hair",
+    "light-short-brown": "Short brown hair", "light-wavy-blonde": "Wavy blonde hair",
+    "medium-curly-auburn": "Curly auburn hair", "deep-braids-black": "Black braids",
+  };
+  const id = input?.value || "none";
+  return { id, label: labels[id] || labels.none, included: id !== "none" };
+}
+
+function syncChildCharacterPicker() {
+  const selected = getSelectedChildCharacter();
+  for (const input of childCharacterInputs) input.closest("label")?.classList.toggle("is-selected", input.checked);
+  if (childCharacterSelection) childCharacterSelection.textContent = selected.label;
 }
 
 function createClientSubmissionId() {

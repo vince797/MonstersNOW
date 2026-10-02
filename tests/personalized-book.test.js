@@ -14,13 +14,17 @@ test("master copy becomes a pinned order-specific render manifest", () => {
       artworkStatus: "final",
       artworkRole: "background_plate",
       backgroundPlateConfirmed: true,
+      backgroundPlateVersion: 2,
       monsterRequired: index !== 2,
+      childRequired: index === 0,
+      childPlacement: { x: 72, y: 82, scale: 30, facing: "left", layer: "front" },
       monsterPlacement: { x: 30, y: 80, scale: 35, facing: index % 2 ? "right" : "left", layer: "front" },
     })),
   };
   const book = buildPersonalizedBook(story, {
     childName: "Riley",
     monsterName: "Fizz",
+    childCharacter: { id: "deep-braids-black", label: "Black braids", included: true },
     selectedPreviewId: "preview-1",
   }, { selectedPreviewUrl: "https://assets.example/fizz.png" });
 
@@ -29,6 +33,9 @@ test("master copy becomes a pinned order-specific render manifest", () => {
   assert.equal(book.pages[0].text, "Page 1 for Riley and Fizz");
   assert.equal(book.pages[1].monster.pose, "primary-mirrored");
   assert.equal(book.pages[2].monster, null);
+  assert.equal(book.pages[0].child.preset.id, "deep-braids-black");
+  assert.equal(book.pages[1].child, null);
+  assert.deepEqual(book.childCharacter, { id: "deep-braids-black", label: "Black braids", included: true });
   assert.ok(book.pages.every((page) => page.artworkRole === "background_plate"));
   assert.deepEqual(book.readiness, { copyReady: true, artworkReady: true, monsterReady: true });
   assert.match(book.fingerprint, /^[a-f0-9]{64}$/);

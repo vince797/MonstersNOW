@@ -30,7 +30,7 @@ test("checkout succeeds and records an order when optional intake email is not c
       body: {
         submissionId: "submission-123",
         email: "parent@example.com",
-        personalization: { childName: "Sam", monsterName: "Noodle" },
+        personalization: { childName: "Sam", monsterName: "Noodle", childCharacter: { id: "light-short-brown", label: "Short brown hair", included: true } },
         format: "softcover",
         source: "create-form",
       },
@@ -39,6 +39,8 @@ test("checkout succeeds and records an order when optional intake email is not c
     assert.equal(response.body.checkoutUrl, "https://checkout.stripe.com/mock");
     assert.equal(response.body.orderId, "order-1");
     assert.equal(response.body.intakeEmailId, null);
+    const storedOrder = JSON.parse(calls[1].options.body)[0];
+    assert.deepEqual(storedOrder.child_character, { id: "light-short-brown", label: "Short brown hair", included: true });
     assert.match(response.body.warnings.join(" "), /order is still available in Admin/i);
     assert.equal(calls.length, 2);
   } finally { global.fetch = originalFetch; }

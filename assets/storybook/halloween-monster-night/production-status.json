@@ -22,7 +22,7 @@
     {
       "label": "Print-art quality review",
       "status": "blocked",
-      "detail": "Create and approve monster-free background plates for all 32 pages"
+      "detail": "Create and approve child-free and monster-free background plates for all 32 pages"
     },
     {
       "label": "Softcover package cover",
@@ -40,5 +40,5 @@
       "detail": "Run after final-resolution art and covers exist"
     }
   ],
-  "next_action": "Use the illustrated spreads as composition references only. Create clean background plates with each custom-monster zone empty, confirm each plate in Admin, then generate an order-specific proof with the approved customer monster."
+  "next_action": "Use the illustrated spreads as composition references only. Remove the default child and sample monster, keep both personalized-character zones empty, confirm each clean plate in Admin, then generate an order-specific proof with the selected child preset and approved customer monster."
 }
