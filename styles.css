@@ -3938,26 +3938,46 @@ main > section {
 }
 
 .home-trust-section {
+  padding-block: 24px;
   background: #f5fcfd;
 }
 
-.home-trust-section .trust-row span {
-  display: grid;
-  align-content: center;
-  gap: 5px;
-  min-height: 112px;
-  padding: 16px;
-  border-radius: 10px;
-}
-
-.home-trust-section .trust-row strong {
+.home-trust-line {
+  display: flex;
+  max-width: 760px;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  margin: 0 auto;
   color: var(--navy);
+  font-size: 0.9rem;
+  font-weight: 900;
 }
 
-.home-trust-section .trust-row small {
-  color: var(--muted);
-  font-size: 0.82rem;
-  line-height: 1.4;
+.home-trust-line span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.home-trust-line span::before {
+  color: var(--teal);
+  content: "✓";
+}
+
+.faq-section .section-heading h2 {
+  font-size: clamp(2rem, 4vw, 3.25rem);
+}
+
+.faq-section .faq-grid {
+  max-width: 820px;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-inline: auto;
+}
+
+.faq-section .faq-grid summary {
+  min-height: 64px;
 }
 
 .shipping-clarity {
