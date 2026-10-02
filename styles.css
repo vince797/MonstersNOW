@@ -1123,6 +1123,7 @@ body {
 img {
   display: block;
   max-width: 100%;
+  height: auto;
 }
 
 a {
@@ -1561,6 +1562,23 @@ main > section {
   border-radius: 17px;
 }
 
+.hero-scene picture,
+.seasonal-art picture,
+.book-preview picture,
+.brand picture,
+.footer-brand picture {
+  display: block;
+  width: 100%;
+}
+
+.brand picture {
+  width: 124px;
+}
+
+.footer-brand picture {
+  width: 138px;
+}
+
 .mobile-proof-strip {
   display: none;
 }
@@ -1668,7 +1686,9 @@ main > section {
   position: relative;
   display: grid;
   min-width: 0;
+  width: min(100%, 620px);
   margin: 0;
+  justify-self: center;
   place-items: center;
   overflow: hidden;
   background: #b96d32;
@@ -3673,7 +3693,7 @@ main > section {
 }
 
 .review-card,
-.faq-grid article {
+.faq-grid details {
   min-height: 154px;
   padding: 20px;
   background: #fff;
@@ -3718,8 +3738,87 @@ main > section {
   background: #fff;
 }
 
-.faq-grid article {
+.faq-grid details {
+  min-height: 0;
+  padding: 0;
   box-shadow: none;
+}
+
+.faq-grid summary {
+  position: relative;
+  display: flex;
+  min-height: 72px;
+  align-items: center;
+  padding: 18px 54px 18px 20px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.faq-grid summary::-webkit-details-marker {
+  display: none;
+}
+
+.faq-grid summary::after {
+  position: absolute;
+  right: 20px;
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  color: var(--teal-dark);
+  background: #eaf8f8;
+  border-radius: 50%;
+  content: "+";
+  font-size: 1.2rem;
+  font-weight: 900;
+}
+
+.faq-grid details[open] summary::after {
+  content: "−";
+}
+
+.faq-grid details > p {
+  margin: 0;
+  padding: 0 20px 20px;
+}
+
+.home-trust-section {
+  background: #f5fcfd;
+}
+
+.home-trust-section .trust-row span {
+  display: grid;
+  align-content: center;
+  gap: 5px;
+  min-height: 112px;
+  padding: 16px;
+  border-radius: 10px;
+}
+
+.home-trust-section .trust-row strong {
+  color: var(--navy);
+}
+
+.home-trust-section .trust-row small {
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.shipping-clarity {
+  display: grid;
+  gap: 5px;
+  padding: 12px 14px;
+  color: var(--navy);
+  background: #f1f9f9;
+  border: 1px solid #d5eaeb;
+  border-radius: 10px;
+}
+
+.shipping-clarity p {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.45;
 }
 
 .cta-section {
@@ -4307,6 +4406,7 @@ main > section {
   .pricing-section,
   .reviews-section,
   .faq-section,
+  .home-trust-section,
   .cta-section,
   .book-page-cta,
   .checkout-status-section {
@@ -4435,9 +4535,12 @@ main > section {
   .result-panel,
   .format-card,
   .pricing-card,
-  .review-card,
-  .faq-grid article {
+  .review-card {
     padding: 16px;
+  }
+
+  .faq-grid details {
+    padding: 0;
   }
 
   .hero-actions,
@@ -4471,6 +4574,11 @@ main > section {
   .monster-card-images,
   .trust-row {
     grid-template-columns: 1fr;
+  }
+
+  .home-transformation .transformation-images,
+  .home-trust-section .trust-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .book-hero-showcase {

@@ -4,6 +4,20 @@ if (year) {
   year.textContent = new Date().getFullYear();
 }
 
+const seasonalBanner = document.querySelector("[data-seasonal-banner]");
+if (seasonalBanner) {
+  const today = new Date();
+  const calendarDate = (today.getMonth() + 1) * 100 + today.getDate();
+  const halloweenSeason = calendarDate >= 901 && calendarDate <= 1031;
+  if (!halloweenSeason) {
+    seasonalBanner.querySelector("[data-banner-label]").textContent = "Storybook spotlight";
+    seasonalBanner.querySelector("[data-banner-copy]").textContent = "Turn their drawing into a personalized storybook adventure.";
+    const bannerLink = seasonalBanner.querySelector("[data-banner-link]");
+    bannerLink.href = "books.html";
+    bannerLink.textContent = "Explore the stories →";
+  }
+}
+
 const navToggle = document.querySelector(".nav-toggle");
 const siteNavigation = document.querySelector("#site-navigation");
 if (navToggle && siteNavigation) {

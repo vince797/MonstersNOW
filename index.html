@@ -20,16 +20,23 @@
     <meta name="twitter:description" content="Transform a child's original monster drawing into a storybook character and personalized printed book." />
     <meta name="twitter:image" content="https://www.monstersnow.com/assets/hero-storybook.png" />
     <title>MonstersNOW | Turn Child Drawings Into Monster Storybooks</title>
-    <link rel="stylesheet" href="styles.css?v=20261001-trust-layout" />
+    <link rel="stylesheet" href="styles.css?v=20261001-home-performance" />
     <link rel="stylesheet" href="cover-art.css?v=20260921-story-catalog" />
     <link rel="stylesheet" href="home-polish.css?v=20260922-even-cover-cards" />
   </head>
   <body>
     <a class="skip-link" href="#main-content">Skip to content</a>
-    <aside class="seasonal-banner"><strong>Halloween story spotlight</strong><span>Turn their monster into a cozy 32-page adventure.</span><a href="books.html#halloween">Explore the story →</a></aside>
+    <aside class="seasonal-banner" data-seasonal-banner>
+      <strong data-banner-label>Halloween story spotlight</strong>
+      <span data-banner-copy>Turn their monster into a cozy 32-page adventure.</span>
+      <a data-banner-link href="books.html#halloween">Explore the story →</a>
+    </aside>
     <header class="site-header">
       <a class="brand" href="index.html" aria-label="MonstersNOW home">
-        <img src="assets/monstersnow-logo.png" alt="" />
+        <picture>
+          <source srcset="assets/monstersnow-logo-248.avif" type="image/avif" />
+          <img src="assets/monstersnow-logo.png" alt="" width="124" height="74" />
+        </picture>
       </a>
       <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-navigation"><span></span><span></span><span></span><b>Menu</b></button>
 
@@ -66,9 +73,9 @@
 
           <a class="mobile-proof-strip" href="monsters.html" aria-label="See the real drawing-to-storybook transformation gallery">
             <span class="mobile-proof-images" aria-hidden="true">
-              <i class="gallery-image-crop gallery-image-crop-drawing"><img src="assets/gallery/red-blue-monster-before-after-source-v1.jpg" alt="" /></i>
+              <i class="gallery-image-crop gallery-image-crop-drawing"><img src="assets/gallery/red-blue-monster-before-after-source-v1-160.avif" alt="" width="160" height="348" /></i>
               <b>→</b>
-              <i class="gallery-image-crop gallery-image-crop-monster"><img src="assets/gallery/red-blue-monster-before-after-source-v1.jpg" alt="" /></i>
+              <i class="gallery-image-crop gallery-image-crop-monster"><img src="assets/gallery/red-blue-monster-before-after-source-v1-160.avif" alt="" width="160" height="348" /></i>
             </span>
             <span><strong>See a real transformation</strong><small>Original drawing → storybook monster</small></span>
           </a>
@@ -86,10 +93,20 @@
         </div>
 
         <div class="hero-scene">
-          <img
-            src="assets/hero-storybook.png"
-            alt="A friendly blue monster holding a crayon behind an open book showing a child's monster drawing transformed into a colorful storybook scene."
-          />
+          <picture>
+            <source
+              srcset="assets/hero-storybook-720.avif 720w, assets/hero-storybook-1361.avif 1361w"
+              sizes="(max-width: 1080px) 92vw, 52vw"
+              type="image/avif"
+            />
+            <img
+              src="assets/hero-storybook.png"
+              alt="A friendly blue monster holding a crayon behind an open book showing a child's monster drawing transformed into a colorful storybook scene."
+              width="1361"
+              height="1156"
+              fetchpriority="high"
+            />
+          </picture>
         </div>
       </section>
 
@@ -107,7 +124,7 @@
             <li>Choose from up to three character versions.</li>
             <li>Use the chosen monster across coloring pages and stories.</li>
           </ul>
-          <a class="button primary" href="create.html">Try It With Their Drawing</a>
+          <a class="button primary" href="create.html">Create Your Monster</a>
         </div>
 
         <article class="featured-transformation home-transformation" aria-label="Illustrative example of a drawing transformed into a storybook monster">
@@ -117,6 +134,8 @@
               <img
                 src="assets/master-references/input-drawing-purple.jpg"
                 alt="Original purple monster drawing with arms, legs, and a smiling face."
+                width="235"
+                height="292"
               />
             </figure>
             <figure>
@@ -124,6 +143,8 @@
               <img
                 src="assets/master-references/character-purple-storybook-style.jpg"
                 alt="Polished purple storybook monster based on the original drawing."
+                width="274"
+                height="342"
               />
             </figure>
           </div>
@@ -140,24 +161,24 @@
           <p class="eyebrow">Storybook keepsakes</p>
           <h2 id="seasonal-title">A custom monster book without the scary stuff.</h2>
           <p>
-            Turn one drawing into a friendly Soft 3D Storybook Monster preview,
-            a free coloring page, and a character ready for personalized storybooks.
+            Turn one drawing into a warm, kid-safe character for coloring pages
+            and personalized storybooks. You approve the result before anything is shared.
           </p>
-          <ul class="feature-list">
-            <li>Warm, kid-safe monster art for young children.</li>
-            <li>The same eyes, horns, colors, shape, and personality carry through every scene.</li>
-            <li>Parents preview and approve before anything is featured publicly.</li>
-          </ul>
           <div class="seasonal-actions">
-            <a class="button primary" href="create.html">Start a Monster</a>
-            <a class="button secondary" href="books.html">View Story Catalog</a>
+            <a class="button primary" href="create.html">Create Your Monster</a>
           </div>
         </div>
         <figure class="seasonal-art">
-          <img
-            src="assets/master-references/soft-3d-storybook-monster-03-wood-v2-web.jpg"
-            alt="A friendly Soft 3D Storybook Monster character for storybook previews."
-          />
+          <picture>
+            <source srcset="assets/master-references/soft-3d-storybook-monster-03-wood-v2-720.avif" type="image/avif" />
+            <img
+              src="assets/master-references/soft-3d-storybook-monster-03-wood-v2-web.jpg"
+              alt="A friendly Soft 3D Storybook Monster character for storybook previews."
+              width="1254"
+              height="1254"
+              loading="lazy"
+            />
+          </picture>
           <figcaption>Soft 3D Storybook Monster style</figcaption>
         </figure>
       </section>
@@ -176,6 +197,9 @@
               <img
                 src="assets/step-1-drawing.jpg"
                 alt="A child's green monster drawing on paper with crayons and a dotted arrow."
+                width="364"
+                height="168"
+                loading="lazy"
               />
             </div>
           </article>
@@ -188,6 +212,9 @@
               <img
                 src="assets/step-2-character.jpg?v=20260515-horns"
                 alt="A polished green monster with orange horns waving beside a dotted arrow."
+                width="900"
+                height="450"
+                loading="lazy"
               />
             </div>
           </article>
@@ -200,6 +227,9 @@
               <img
                 src="assets/step-3-storybook.jpg"
                 alt="An open storybook showing a green monster in a magical landscape."
+                width="330"
+                height="178"
+                loading="lazy"
               />
             </div>
           </article>
@@ -216,7 +246,10 @@
         <div class="book-grid home-cover-grid">
           <article class="book-card">
             <figure class="book-preview series-book-preview">
-              <img class="series-cover-image" src="assets/storybook/cover-series/minimal-concepts/halloween-monster-night-v2-web.jpg" alt="Halloween Monster Night sample cover" loading="lazy" />
+              <picture>
+                <source srcset="assets/storybook/cover-series/minimal-concepts/halloween-monster-night-v2-640.avif" type="image/avif" />
+                <img class="series-cover-image" src="assets/storybook/cover-series/minimal-concepts/halloween-monster-night-v2-web.jpg" alt="Halloween Monster Night sample cover" width="640" height="640" loading="lazy" />
+              </picture>
             </figure>
             <div class="book-card-content">
               <h3>Halloween Monster Night</h3>
@@ -227,7 +260,10 @@
 
           <article class="book-card">
             <figure class="book-preview series-book-preview">
-              <img class="series-cover-image" src="assets/storybook/cover-series/minimal-concepts/big-adventure-v2-web.jpg" alt="Big Adventure sample cover" loading="lazy" />
+              <picture>
+                <source srcset="assets/storybook/cover-series/minimal-concepts/big-adventure-v2-640.avif" type="image/avif" />
+                <img class="series-cover-image" src="assets/storybook/cover-series/minimal-concepts/big-adventure-v2-web.jpg" alt="Big Adventure sample cover" width="640" height="640" loading="lazy" />
+              </picture>
             </figure>
             <div class="book-card-content">
               <h3>Big Adventure</h3>
@@ -238,7 +274,10 @@
 
           <article class="book-card">
             <figure class="book-preview series-book-preview">
-              <img class="series-cover-image" src="assets/storybook/cover-series/minimal-concepts/bedtime-monster-v2-web.jpg" alt="Bedtime Monster sample cover" loading="lazy" />
+              <picture>
+                <source srcset="assets/storybook/cover-series/minimal-concepts/bedtime-monster-v2-640.avif" type="image/avif" />
+                <img class="series-cover-image" src="assets/storybook/cover-series/minimal-concepts/bedtime-monster-v2-web.jpg" alt="Bedtime Monster sample cover" width="640" height="640" loading="lazy" />
+              </picture>
             </figure>
             <div class="book-card-content">
               <h3>Bedtime Monster</h3>
@@ -249,7 +288,10 @@
 
           <article class="book-card">
             <figure class="book-preview series-book-preview">
-              <img class="series-cover-image" src="assets/storybook/cover-series/minimal-concepts/abc-monster-book-v2-web.jpg" alt="ABC Monster Book sample cover" loading="lazy" />
+              <picture>
+                <source srcset="assets/storybook/cover-series/minimal-concepts/abc-monster-book-v2-640.avif" type="image/avif" />
+                <img class="series-cover-image" src="assets/storybook/cover-series/minimal-concepts/abc-monster-book-v2-web.jpg" alt="ABC Monster Book sample cover" width="640" height="640" loading="lazy" />
+              </picture>
             </figure>
             <div class="book-card-content">
               <h3>ABC Monster Book</h3>
@@ -299,13 +341,30 @@
                 <span>$39.99 + shipping</span>
               </div>
             </div>
+            <div class="shipping-clarity">
+              <strong>What happens after checkout</strong>
+              <p>Review and approve the book proof before it prints. Shipping cost and the available delivery estimate are shown for the destination address before payment.</p>
+            </div>
             <ul class="feature-list">
               <li>32-page, 8.5-inch square story starring their monster.</li>
               <li>Cover and interior page previews before printing.</li>
               <li>Printed on demand and shipped directly to you.</li>
             </ul>
-            <a class="button secondary" href="create.html">Create Your Storybook</a>
+            <a class="button secondary" href="create.html">Create Your Monster</a>
           </article>
+        </div>
+      </section>
+
+      <section class="home-trust-section" aria-labelledby="trust-title">
+        <div class="section-heading centered">
+          <p class="eyebrow">Made for families</p>
+          <h2 id="trust-title">Clear choices from drawing to delivery.</h2>
+        </div>
+        <div class="trust-row" aria-label="Order and privacy assurances">
+          <span><strong>Private by default</strong><small>Drawings are not featured publicly without permission.</small></span>
+          <span><strong>Proof before print</strong><small>Review the personalized pages before production begins.</small></span>
+          <span><strong>Secure checkout</strong><small>Payment is handled through Stripe Checkout.</small></span>
+          <span><strong>Made to order</strong><small>Each approved book is printed for its recipient.</small></span>
         </div>
       </section>
 
@@ -315,51 +374,54 @@
         </div>
 
         <div class="faq-grid">
-          <article>
-            <h3>What should my child draw?</h3>
+          <details>
+            <summary><h3>What should my child draw?</h3></summary>
             <p>Any original monster works best: silly, friendly, colorful, or completely made up.</p>
-          </article>
-          <article>
-            <h3>Is there really a free option?</h3>
+          </details>
+          <details>
+            <summary><h3>Is there really a free option?</h3></summary>
             <p>Yes. The free path creates a printable coloring page from the monster drawing.</p>
-          </article>
-          <article>
-            <h3>Can I try different monster versions?</h3>
+          </details>
+          <details>
+            <summary><h3>Can I try different monster versions?</h3></summary>
             <p>Yes. Each uploaded drawing gets up to three free preview versions before you choose one.</p>
-          </article>
-          <article>
-            <h3>What about privacy?</h3>
+          </details>
+          <details>
+            <summary><h3>What about privacy?</h3></summary>
             <p>Upload a clear photo of the drawing, not a child's face. Artwork is not added to galleries without permission.</p>
-          </article>
-          <article>
-            <h3>How will books be printed?</h3>
+          </details>
+          <details>
+            <summary><h3>How will books be printed?</h3></summary>
             <p>Each book is printed on demand and shipped directly to the address provided at checkout.</p>
-          </article>
-          <article>
-            <h3>Can one monster star in multiple books?</h3>
+          </details>
+          <details>
+            <summary><h3>Can one monster star in multiple books?</h3></summary>
             <p>Yes. Create one monster, then reuse it across adventure, ABC, counting, and seasonal stories.</p>
-          </article>
-          <article>
-            <h3>Can I make seasonal stories?</h3>
+          </details>
+          <details>
+            <summary><h3>Can I make seasonal stories?</h3></summary>
             <p>Yes. Seasonal stories are designed to feel cozy, colorful, and kid-safe rather than scary.</p>
-          </article>
-          <article>
-            <h3>How should I photograph a drawing?</h3>
+          </details>
+          <details>
+            <summary><h3>How should I photograph a drawing?</h3></summary>
             <p>Use bright light, keep the paper flat, and fill the frame with the drawing.</p>
-          </article>
+          </details>
         </div>
       </section>
 
       <section class="cta-section" id="start" aria-labelledby="cta-title">
         <h2 id="cta-title">Ready to create their monster?</h2>
-        <a class="button primary" href="create.html">Create Your Book</a>
+        <a class="button primary" href="create.html">Create Your Monster</a>
       </section>
     </main>
 
     <footer class="site-footer">
       <div class="footer-intro">
         <a class="footer-brand" href="index.html" aria-label="MonstersNOW home">
-          <img src="assets/monstersnow-logo.png" alt="" />
+          <picture>
+            <source srcset="assets/monstersnow-logo-248.avif" type="image/avif" />
+            <img src="assets/monstersnow-logo.png" alt="" width="138" height="82" loading="lazy" />
+          </picture>
         </a>
         <p>Big stories from little imaginations.</p>
       </div>
@@ -419,6 +481,6 @@
       }
     </script>
 
-    <script src="scripts/main.js?v=20260924-smooth-mobile-nav"></script>
+    <script src="scripts/main.js?v=20261001-seasonal-rollover"></script>
   </body>
 </html>
