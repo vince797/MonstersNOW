@@ -1,6 +1,8 @@
-# Halloween Monster Night - Illustration Set v1
+# Halloween Monster Night - legacy character-in-scene prompts
 
-Generated using the built-in image-generation tool. Reference: approved pages 4-5. These are review artwork assets, not print-ready PDFs. Final typography, bleed, resolution, book pagination, and customer monster substitution still require production validation.
+These prompts document the original review artwork with a fixed sample child and purple demo monster baked into each scene. Do not use them for new production environments. The reusable `pages-*-environment-v1.png` plates remove both starring characters and reserve independent areas for the customer's approved child and monster layers. See `../BACKGROUND_PLATES.md` for the current artwork rule and review checklist.
+
+Generated using the built-in image-generation tool. Reference: approved pages 4-5. These are historical review assets, not print-ready PDFs. Final typography, bleed, resolution, book pagination, customer monster compositing, and production validation remain separate steps.
 
 ## Generation prompts
 
@@ -55,4 +57,3 @@ Use case: illustration-story. Asset: full-bleed 2:1 landscape two-page children'
 ### Pages 30-31
 
 Use case: illustration-story. Asset: full-bleed 2:1 landscape two-page children's book illustration, two facing square pages. Use the supplied approved opening spread as the exact style and character identity reference, not an edit target: match Mia's brown hair in a bun, teal padded jacket, rust-orange scarf, dark pants, purple sneakers and orange pumpkin bucket. Match Moxie exactly: rounded purple furry body, one large turquoise eye, two curved gold horns, teal head tuft and oval spots, friendly open smile, two arms and short legs, no clothing or accessories. Premium tactile soft-3D storybook style, warm kid-safe Halloween, deep navy/violet/teal/orange/gold. Keep faces and important objects away from the central 10% gutter. Leave an uncluttered lower-left area for later story text. No lettering, captions, logos, watermark, scary imagery or gore. The Monster Star is always a five-pointed warm-gold star. Scene: Pages 30-31: two connected narrative scenes divided naturally at the center gutter, continuous deep-blue sky and trailing gold sparkles. LEFT square page: joyful Pumpkin Parade, Moxie and Mia lead beneath glowing stars, Friend A pumpkin, Friend B moon, burgundy-coated white-bearded keeper and friendly neighbors follow. Repaired cream orange-bordered banner correctly hangs, blank without lettering, glowing route pumpkins. RIGHT square page: later cozy home interior matching warm opening house. Mia and Moxie together beside a small table with exactly TWO wrapped favorite treats resting on it; full orange pumpkin bucket nearby. Monster Star twinkles above distant rooftops through window. Moxie does not touch, hold or eat treats. Exactly one Mia and Moxie per scene, no extra duplicates. Keep each scene's faces safely within its square and away from central gutter. Leave calm lower areas for text. Warm satisfied ending.
-

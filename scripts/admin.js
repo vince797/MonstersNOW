@@ -63,7 +63,6 @@ const CATALOG_COVERS = {
   "the-monster-who-lost-their-glow": "assets/storybook/cover-series/minimal-concepts/the-monster-who-lost-their-glow-v3-web.jpg",
   "birthday-monster-adventure": "assets/storybook/cover-series/minimal-concepts/birthday-monster-adventure-v2-web.jpg",
 };
-const HALLOWEEN_SPREAD_VERSIONS = new Map([[10, 2], [12, 2], [14, 2], [18, 2]]);
 editor.addEventListener("submit", (event) => event.preventDefault());
 editor.addEventListener("input", (event) => {
   if (!event.target.id.startsWith("sample-") && !event.target.matches("[data-artwork-file]")) markStoryDirty();
@@ -918,8 +917,7 @@ function catalogCover(slug) {
 function existingSpreadReference(pageNumber) {
   if (document.querySelector("#story-slug").value !== "halloween-monster-night" || pageNumber < 4 || pageNumber > 31) return "";
   const spreadStart = pageNumber % 2 === 0 ? pageNumber : pageNumber - 1;
-  const version = HALLOWEEN_SPREAD_VERSIONS.get(spreadStart) || 1;
-  return `assets/storybook/halloween-monster-night/pages-${String(spreadStart).padStart(2, "0")}-${String(spreadStart + 1).padStart(2, "0")}-master-v${version}.png`;
+  return `assets/storybook/halloween-monster-night/pages-${String(spreadStart).padStart(2, "0")}-${String(spreadStart + 1).padStart(2, "0")}-environment-v1.png`;
 }
 
 function existingSpreadLabel(pageNumber) {
@@ -1222,7 +1220,7 @@ function renderArtwork(card) {
   const hasReference = !hasArtwork && Boolean(card.dataset.referenceArtworkUrl);
   const visibleArtworkUrl = hasArtwork ? card.dataset.artworkUrl : card.dataset.referenceArtworkUrl;
   const visual = card.querySelector(".page-artwork-visual");
-  if (hasReference) visual.dataset.referenceLabel = `${card.dataset.referenceArtworkLabel} · default child and sample monster reference only`;
+  if (hasReference) visual.dataset.referenceLabel = `${card.dataset.referenceArtworkLabel} · character-free environment reference`;
   else delete visual.dataset.referenceLabel;
   image.hidden = !visibleArtworkUrl;
   image.classList.toggle("is-reference", hasReference);
@@ -1234,29 +1232,28 @@ function renderArtwork(card) {
   const backgroundConfirmed = card.querySelector("[data-background-confirmed]");
   backgroundConfirmed.checked = card.dataset.backgroundPlateConfirmed === "true";
   backgroundConfirmed.disabled = !hasArtwork;
-  uploadLabel.textContent = hasArtwork ? "Replace background plate" : hasReference ? "Upload clean background plate" : "Upload background plate";
+  uploadLabel.textContent = hasArtwork ? "Replace background plate" : hasReference ? "Upload approved environment plate" : "Upload background plate";
   name.textContent = hasArtwork
     ? `${card.dataset.artworkName || "Uploaded background plate"} · ${artworkStatusLabel(status.value)} · Selected child and monster added later`
     : hasReference
-      ? `${card.dataset.referenceArtworkLabel} · Composition reference only · Remove the default child and sample monster.`
+      ? `${card.dataset.referenceArtworkLabel} · Character-free environment reference · Upload it to story storage before approval.`
       : "Upload the background illustration with both personalized character areas empty.";
   if (visibleArtworkUrl && image.getAttribute("src") !== visibleArtworkUrl) image.src = visibleArtworkUrl;
   for (const character of ["monster", "child"]) {
     const zone = card.querySelector(`[data-${character}-zone]`);
-    zone.dataset.referenceRemoval = String(hasReference);
-    zone.querySelector("span").textContent = hasReference ? `REMOVE ${character.toUpperCase()}` : `CUSTOM ${character.toUpperCase()}`;
+    zone.dataset.referenceRemoval = "false";
+    zone.querySelector("span").textContent = `CUSTOM ${character.toUpperCase()}`;
   }
   renderCharacterPlacements(card);
 }
 
 function appendPreviewCharacterZones(art, card) {
-  const referenceOnly = !card.dataset.artworkUrl && Boolean(card.dataset.referenceArtworkUrl);
   for (const character of ["monster", "child"]) {
     if (card.dataset[`${character}Required`] !== "true") continue;
     const zone = document.createElement("span");
     zone.className = `${character}-zone ${character}-zone-preview`;
-    zone.dataset.referenceRemoval = String(referenceOnly);
-    zone.textContent = referenceOnly ? `REMOVE ${character.toUpperCase()}` : `CUSTOM ${character.toUpperCase()}`;
+    zone.dataset.referenceRemoval = "false";
+    zone.textContent = `CUSTOM ${character.toUpperCase()}`;
     zone.style.left = `${card.dataset[`${character}X`] || (character === "monster" ? 68 : 30)}%`;
     zone.style.top = `${card.dataset[`${character}Y`] || (character === "monster" ? 72 : 82)}%`;
     zone.style.width = `${card.dataset[`${character}Scale`] || (character === "monster" ? 36 : 30)}%`;
@@ -1452,7 +1449,7 @@ function buildReviewPage(card, index, child, monster) {
   if (visualUrl) appendPreviewCharacterZones(art, card);
   section.querySelector("p").textContent = card.querySelectorAll("textarea")[0].value.replaceAll("{child_name}", child).replaceAll("{monster_name}", monster) || "No story text yet.";
   const footer = section.querySelectorAll("footer span");
-  footer[0].textContent = card.dataset.artworkUrl ? `${artworkStatusLabel(card.dataset.artworkStatus || "missing")} background plate` : card.dataset.referenceArtworkUrl ? "Default-character reference · clean plate required" : "Background plate missing";
+  footer[0].textContent = card.dataset.artworkUrl ? `${artworkStatusLabel(card.dataset.artworkStatus || "missing")} background plate` : card.dataset.referenceArtworkUrl ? "Environment reference · upload required" : "Background plate missing";
   footer[1].textContent = `${wordCount(card.querySelectorAll("textarea")[0].value)} words`;
   return section;
 }
