@@ -260,6 +260,15 @@ body {
   font-size: 0.98rem;
 }
 
+.admin-login-card form .button.primary {
+  background: #b84400;
+}
+
+.admin-login-card form .button.primary:hover,
+.admin-login-card form .button.primary:focus-visible {
+  background: #963800;
+}
+
 .admin-login-help {
   margin: 13px 0 0;
   color: #7a899a;

@@ -5,11 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="Explore MonstersNOW storybook options, from bedtime and adventure stories to ABC, counting, kindness, seasonal, and birthday books."
+      content="Choose a MonstersNOW personalized storybook and turn a child's original monster drawing into the star of a 32-page printed keepsake."
     />
+    <link rel="canonical" href="https://www.monstersnow.com/books" />
     <title>Books | MonstersNOW Story Catalog</title>
+    <link rel="icon" href="assets/monstersnow-logo-v2.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="styles.css?v=20260923-no-count-strips" />
     <link rel="stylesheet" href="cover-art.css?v=20260921-mobile-catalog" />
+    <link rel="stylesheet" href="storefront.css?v=20261002-public-storefront" />
   </head>
   <body>
     <a class="skip-link" href="#main-content">Skip to content</a>
@@ -42,13 +45,14 @@
             Choose a story. <span>Make it theirs.</span>
           </h1>
           <p>
-            Their drawing becomes the star of a beautifully illustrated book
-            made especially for them.
+            Start with the story that is ready now, or preview what is joining
+            the shelf next. Their drawing becomes the character in every book.
           </p>
           <div class="hero-actions">
-            <a class="button primary" href="create.html">Create Your Monster</a>
+            <a class="button primary" href="create.html?story=halloween-monster-night">Personalize the Ready Story</a>
             <a class="button secondary" href="#catalog">See Story Options</a>
           </div>
+          <p class="availability-note"><strong>Ready now:</strong> Halloween Monster Night · 32 pages · Ages 2–8</p>
         </div>
 
         <div class="book-hero-showcase" role="group" aria-label="A personalized MonstersNOW storybook made from a child's drawing">
@@ -74,9 +78,14 @@
           <p class="eyebrow">Choose the story</p>
           <h2 id="catalog-title">Choose their next story.</h2>
           <p>
-            Explore cozy, adventurous, and educational stories created around
-            the monster your child imagined.
+            One story is ready to personalize today. The rest are a preview of
+            the collection in development—no waitlist or purchase required.
           </p>
+        </div>
+
+        <div class="catalog-key" role="group" aria-label="Story availability key">
+          <span><i class="availability-dot is-ready" aria-hidden="true"></i>Ready to personalize</span>
+          <span><i class="availability-dot" aria-hidden="true"></i>In development</span>
         </div>
 
         <div class="story-catalog-grid">
@@ -84,92 +93,98 @@
             <figure class="personalized-cover cover-halloween">
               <img class="series-cover-image" src="assets/storybook/cover-series/minimal-concepts/halloween-monster-night-v2-web.jpg" alt="Halloween Monster Night sample cover" />
             </figure>
-            <span class="story-status seasonal">Halloween spotlight</span>
+            <span class="story-status available">Ready to personalize</span>
             <h3>Halloween Monster Night</h3>
             <p>A cozy trick-or-treat story with costumes, porch lights, pumpkins, and a friendly monster finding courage.</p>
             <div class="story-meta">
               <span>Ages 2-8</span>
-              <span>Seasonal</span>
+              <span>32 pages</span>
             </div>
-            <a class="story-card-action" href="create.html?story=halloween-monster-night">Create this story →</a>
+            <a class="story-card-action" href="create.html?story=halloween-monster-night">Choose this story <span aria-hidden="true">→</span></a>
           </article>
 
           <article class="story-card">
             <figure class="personalized-cover cover-adventure">
               <img class="series-cover-image" src="assets/storybook/cover-series/minimal-concepts/big-adventure-v2-web.jpg" alt="Big Adventure sample cover" loading="lazy" />
             </figure>
-            <span class="story-status available">Featured story</span>
+            <span class="story-status soon">In development</span>
             <h3>Big Adventure</h3>
             <p>A classic journey where the child's monster explores a magical world and finds courage.</p>
             <div class="story-meta">
               <span>Ages 2-8</span>
               <span>Giftable</span>
             </div>
+            <span class="story-card-note">Preview title—not yet available to order</span>
           </article>
 
           <article class="story-card">
             <figure class="personalized-cover cover-bedtime">
               <img class="series-cover-image" src="assets/storybook/cover-series/minimal-concepts/bedtime-monster-v2-web.jpg" alt="Bedtime Monster sample cover" loading="lazy" />
             </figure>
-            <span class="story-status available">Featured story</span>
+            <span class="story-status soon">In development</span>
             <h3>Bedtime Monster</h3>
             <p>A softer read-aloud story for winding down with the same familiar character.</p>
             <div class="story-meta">
               <span>Ages 0-5</span>
               <span>Bedtime</span>
             </div>
+            <span class="story-card-note">Preview title—not yet available to order</span>
           </article>
 
           <article class="story-card">
             <figure class="personalized-cover cover-abc">
               <img class="series-cover-image" src="assets/storybook/cover-series/minimal-concepts/abc-monster-book-v2-web.jpg" alt="ABC Monster Book sample cover" loading="lazy" />
             </figure>
-            <span class="story-status available">Featured story</span>
+            <span class="story-status soon">In development</span>
             <h3>ABC Monster Book</h3>
             <p>Letters and playful scenes built around the child's monster for early learning.</p>
             <div class="story-meta">
               <span>Ages 2-6</span>
               <span>Learning</span>
             </div>
+            <span class="story-card-note">Preview title—not yet available to order</span>
           </article>
 
           <article class="story-card">
             <figure class="personalized-cover cover-counting">
               <img class="series-cover-image" src="assets/storybook/cover-series/minimal-concepts/counting-with-my-monster-v2-web.jpg" alt="Counting with My Monster sample cover" loading="lazy" />
             </figure>
-            <span class="story-status soon">Coming soon</span>
+            <span class="story-status soon">In development</span>
             <h3>Counting with My Monster</h3>
             <p>A number book that turns counting practice into a silly monster hunt.</p>
             <div class="story-meta">
               <span>Ages 2-6</span>
               <span>Numbers</span>
             </div>
+            <span class="story-card-note">Preview title—not yet available to order</span>
           </article>
 
           <article class="story-card">
             <figure class="personalized-cover cover-kindness">
               <img class="series-cover-image" src="assets/storybook/cover-series/minimal-concepts/the-monster-who-lost-their-glow-v3-web.jpg" alt="The Monster Who Lost Their Glow sample cover" loading="lazy" />
             </figure>
-            <span class="story-status soon">Coming soon</span>
+            <span class="story-status soon">In development</span>
             <h3>The Monster Who Lost Their Glow</h3>
             <p>A heartfelt story about a monster whose light returns through friendship, courage, and small acts of kindness.</p>
             <div class="story-meta">
               <span>Ages 2-8</span>
               <span>Values</span>
             </div>
+            <span class="story-card-note">Preview title—not yet available to order</span>
           </article>
 
           <article class="story-card">
             <figure class="personalized-cover cover-birthday">
               <img class="series-cover-image" src="assets/storybook/cover-series/minimal-concepts/birthday-monster-adventure-v2-web.jpg" alt="Birthday Monster Adventure sample cover" loading="lazy" />
             </figure>
-            <span class="story-status soon">Coming soon</span>
+            <span class="story-status soon">In development</span>
             <h3>Birthday Monster Adventure</h3>
             <p>A personalized celebration story that turns their monster into the party guest of honor.</p>
             <div class="story-meta">
               <span>Ages 2-8</span>
               <span>Birthday</span>
             </div>
+            <span class="story-card-note">Preview title—not yet available to order</span>
           </article>
         </div>
       </section>
@@ -214,25 +229,26 @@
       <section class="about-section book-process-section" aria-labelledby="book-process-title">
         <div>
           <p class="eyebrow">How it works</p>
-          <h2 id="book-process-title">One drawing can become a small library.</h2>
+          <h2 id="book-process-title">From drawing to approved book.</h2>
         </div>
         <div class="trust-copy">
           <p>
-            The monster you choose becomes a reusable character for future
-            books, so your family can continue its adventures across new stories.
+            Start with the ready story. You choose the monster, add the names,
+            and review the complete proof before the book can move toward print.
           </p>
           <ul class="feature-list">
             <li>Upload once and choose the best monster preview.</li>
             <li>Keep its defining features consistent throughout the story.</li>
-            <li>Use that character across available story themes.</li>
+            <li>Select only stories marked ready to personalize.</li>
             <li>Start with a free coloring page before ordering print.</li>
           </ul>
         </div>
       </section>
 
       <section class="book-page-cta" aria-labelledby="books-cta-title">
-        <h2 id="books-cta-title">Ready to create the first monster?</h2>
-        <a class="button primary" href="create.html">Create Your Monster</a>
+        <p class="eyebrow">Ready now</p>
+        <h2 id="books-cta-title">Make their monster the star of Halloween Monster Night.</h2>
+        <a class="button primary" href="create.html?story=halloween-monster-night">Start This Story</a>
       </section>
     </main>
 
@@ -257,6 +273,6 @@
       </div>
     </footer>
 
-    <script src="scripts/main.js?v=20260924-smooth-mobile-nav"></script>
+    <script src="scripts/main.js?v=20261002-public-storefront"></script>
   </body>
 </html>

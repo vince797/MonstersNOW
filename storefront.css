@@ -1,0 +1,322 @@
+/* Public storefront layer.
+   Kept separate from admin and proof styles so customer-facing changes remain isolated. */
+
+:root {
+  --storefront-ink: #062446;
+  --storefront-teal: #007f89;
+  --storefront-teal-dark: #005e67;
+  --storefront-orange-dark: #b84400;
+  --storefront-paper: #fffdf9;
+}
+
+html {
+  scroll-padding-top: 7rem;
+}
+
+body {
+  background: var(--storefront-paper);
+}
+
+a,
+button,
+input,
+summary {
+  -webkit-tap-highlight-color: transparent;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+summary:focus-visible,
+[tabindex]:focus-visible {
+  outline: 3px solid #087f8c;
+  outline-offset: 3px;
+}
+
+.site-nav a,
+.site-footer a {
+  text-underline-offset: .2em;
+}
+
+.site-nav a[aria-current="page"],
+.site-footer a[aria-current="page"] {
+  color: #963800;
+}
+
+.site-nav a {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.button,
+.story-card-action,
+.book-card-link {
+  min-height: 44px;
+}
+
+.availability-note {
+  max-width: max-content;
+  margin: 1.1rem 0 0;
+  padding: .65rem .85rem;
+  border: 1px solid rgba(0, 127, 137, .25);
+  border-radius: .75rem;
+  background: rgba(255, 255, 255, .78);
+  color: var(--storefront-ink);
+  font-size: .87rem;
+  line-height: 1.45;
+}
+
+.catalog-key {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: .65rem 1.25rem;
+  margin: 0 auto 1.6rem;
+  color: #526477;
+  font-size: .78rem;
+  font-weight: 700;
+}
+
+.catalog-key span {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+}
+
+.availability-dot {
+  width: .7rem;
+  height: .7rem;
+  border: 2px solid #8190a1;
+  border-radius: 50%;
+  background: #fff;
+}
+
+.availability-dot.is-ready {
+  border-color: var(--storefront-teal);
+  background: var(--storefront-teal);
+  box-shadow: 0 0 0 3px rgba(0, 127, 137, .13);
+}
+
+.story-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.story-card .story-meta {
+  margin-top: auto;
+}
+
+.story-card-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1rem;
+  padding: .7rem .9rem;
+  border-radius: .7rem;
+  background: var(--storefront-teal);
+  color: #fff;
+  font-size: .8rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.story-card-action:hover {
+  background: var(--storefront-teal-dark);
+  color: #fff;
+}
+
+.story-card-note {
+  display: block;
+  margin-top: .9rem;
+  color: #637084;
+  font-size: .73rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.format-card > span,
+.storybook-price-list em {
+  color: #913900;
+}
+
+.selected-story-card {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr) auto;
+  gap: .85rem;
+  align-items: center;
+  max-width: 42rem;
+  margin-top: 1.25rem;
+  padding: .7rem;
+  border: 1px solid rgba(0, 127, 137, .28);
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, .94);
+  box-shadow: 0 10px 30px rgba(6, 36, 70, .07);
+}
+
+.selected-story-card img {
+  width: 72px;
+  height: 72px;
+  border-radius: .7rem;
+  object-fit: cover;
+}
+
+.selected-story-card span {
+  display: grid;
+  gap: .15rem;
+  min-width: 0;
+}
+
+.selected-story-card small,
+.selected-story-card em {
+  color: #526477;
+  font-style: normal;
+  font-size: .72rem;
+  line-height: 1.35;
+}
+
+.selected-story-card small {
+  color: var(--storefront-teal-dark);
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.selected-story-card strong {
+  color: var(--storefront-ink);
+  font-size: 1rem;
+  line-height: 1.2;
+}
+
+.selected-story-card > a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: .4rem .55rem;
+  color: var(--storefront-teal-dark);
+  font-size: .76rem;
+  font-weight: 800;
+}
+
+.privacy-note a {
+  color: inherit;
+  font-weight: 800;
+}
+
+.proof-promise {
+  display: grid;
+  gap: .22rem;
+  margin: 1rem 0;
+  padding: .9rem 1rem .9rem 3.1rem;
+  border: 1px solid rgba(0, 127, 137, .25);
+  border-radius: .9rem;
+  background: #f1fbfb;
+  color: var(--storefront-ink);
+  position: relative;
+}
+
+.proof-promise::before {
+  content: "✓";
+  display: grid;
+  place-items: center;
+  width: 1.55rem;
+  height: 1.55rem;
+  position: absolute;
+  top: .9rem;
+  left: 1rem;
+  border-radius: 50%;
+  background: var(--storefront-teal);
+  color: #fff;
+  font-weight: 900;
+}
+
+.proof-promise span {
+  color: #4b6075;
+  font-size: .82rem;
+  line-height: 1.5;
+}
+
+.home-cover-grid .book-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.home-cover-grid .book-card-content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+.book-card-link,
+.book-card-availability {
+  display: inline-flex;
+  align-items: center;
+  margin-top: auto;
+  padding-top: .75rem;
+  color: var(--storefront-teal-dark);
+  font-size: .75rem;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.book-card-link {
+  text-decoration: none;
+}
+
+.book-card-link:hover {
+  text-decoration: underline;
+}
+
+.book-card-availability {
+  color: #6a7482;
+}
+
+.book-page-cta .eyebrow {
+  margin-bottom: .4rem;
+}
+
+@media (max-width: 760px) {
+  html {
+    scroll-padding-top: 5.5rem;
+  }
+
+  .site-nav.is-open a {
+    width: 100%;
+    padding-block: .65rem;
+  }
+
+  .selected-story-card {
+    grid-template-columns: 58px minmax(0, 1fr);
+  }
+
+  .selected-story-card img {
+    width: 58px;
+    height: 58px;
+  }
+
+  .selected-story-card > a {
+    grid-column: 2;
+    min-height: 36px;
+    padding: 0;
+  }
+
+  .catalog-key {
+    justify-content: flex-start;
+    margin-inline: .25rem;
+  }
+
+  .availability-note {
+    font-size: .8rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

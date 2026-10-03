@@ -20,9 +20,11 @@
     <meta name="twitter:description" content="Transform a child's original monster drawing into a storybook character and personalized printed book." />
     <meta name="twitter:image" content="https://www.monstersnow.com/assets/hero-storybook-v2.png" />
     <title>MonstersNOW | Turn Child Drawings Into Monster Storybooks</title>
+    <link rel="icon" href="assets/monstersnow-logo-v2.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="styles.css?v=20261001-home-performance" />
     <link rel="stylesheet" href="cover-art.css?v=20260921-story-catalog" />
     <link rel="stylesheet" href="home-polish.css?v=20260922-even-cover-cards" />
+    <link rel="stylesheet" href="storefront.css?v=20261002-public-storefront" />
   </head>
   <body>
     <a class="skip-link" href="#main-content">Skip to content</a>
@@ -66,7 +68,7 @@
           </p>
 
           <div class="hero-actions">
-            <a class="button primary" href="create.html">Create Your Monster</a>
+            <a class="button primary" href="create.html?story=halloween-monster-night">Create Your Monster</a>
             <a class="button secondary" href="books.html">Browse Books</a>
           </div>
 
@@ -238,7 +240,7 @@
         </div>
 
         <div class="book-grid home-cover-grid">
-          <article class="book-card">
+          <article class="book-card is-ready-book">
             <figure class="book-preview series-book-preview">
               <picture>
                 <source srcset="assets/storybook/cover-series/minimal-concepts/halloween-monster-night-v2-640.avif" type="image/avif" />
@@ -249,6 +251,7 @@
               <h3>Halloween Monster Night</h3>
               <p>A cozy seasonal adventure about finding courage.</p>
               <span class="book-card-meta">Seasonal</span>
+              <a class="book-card-link" href="create.html?story=halloween-monster-night">Ready now · Choose this story <span aria-hidden="true">→</span></a>
             </div>
           </article>
 
@@ -263,6 +266,7 @@
               <h3>Big Adventure</h3>
               <p>A magical journey where their monster finds courage.</p>
               <span class="book-card-meta">Adventure</span>
+              <span class="book-card-availability">In development</span>
             </div>
           </article>
 
@@ -277,6 +281,7 @@
               <h3>Bedtime Monster</h3>
               <p>A gentle read-aloud for cozy nights and quiet moments.</p>
               <span class="book-card-meta">Bedtime</span>
+              <span class="book-card-availability">In development</span>
             </div>
           </article>
 
@@ -291,6 +296,7 @@
               <h3>ABC Monster Book</h3>
               <p>Playful early learning starring their own character.</p>
               <span class="book-card-meta">Learning</span>
+              <span class="book-card-availability">In development</span>
             </div>
           </article>
         </div>
@@ -461,6 +467,6 @@
       }
     </script>
 
-    <script src="scripts/main.js?v=20261001-seasonal-rollover"></script>
+    <script src="scripts/main.js?v=20261002-public-storefront"></script>
   </body>
 </html>

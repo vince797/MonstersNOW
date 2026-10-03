@@ -89,6 +89,19 @@ const featureMonster = document.querySelector("#feature-monster");
 const featureShowDrawing = document.querySelector("#feature-show-drawing");
 const featureDisplayName = document.querySelector("#feature-display-name");
 const featurePermissionFields = document.querySelector("#feature-permission-fields");
+const selectedStoryCard = document.querySelector("#selected-story");
+const selectedStoryTitle = document.querySelector("#selected-story-title");
+
+const createQuery = new URLSearchParams(window.location.search);
+const publicStoryCatalog = {
+  "halloween-monster-night": {
+    id: "halloween-monster-night",
+    label: "Halloween Monster Night",
+    ready: true,
+  },
+};
+const requestedStoryId = new URLSearchParams(window.location.search).get("story");
+const selectedStory = publicStoryCatalog[requestedStoryId] || publicStoryCatalog["halloween-monster-night"];
 
 const allowedUploadTypes = new Set([
   "image/png",
@@ -108,14 +121,14 @@ const maxFreePreviews = 3;
 const heicConverterUrl = "https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js";
 const demoMonsterImage = "assets/step-2-character.jpg?v=20260515-horns";
 const defaultPreviewStyle = "storybook";
-const createQuery = new URLSearchParams(window.location.search);
 const halloweenTestMode = createQuery.get("test") === "halloween";
-const availableStories = {
-  "halloween-monster-night": "Halloween Monster Night",
-};
-const selectedStoryId = Object.hasOwn(availableStories, createQuery.get("story")) ? createQuery.get("story") : "halloween-monster-night";
-const selectedStoryLabel = availableStories[selectedStoryId];
 const storybookInterestButtonText = "Review Your 32-Page Book";
+if (selectedStoryCard && selectedStoryTitle) {
+  selectedStoryCard.dataset.storyId = selectedStory.id;
+  selectedStoryTitle.textContent = selectedStory.label;
+  const offerTitle = document.querySelector("#result-book-title");
+  if (offerTitle) offerTitle.textContent = `Personalize ${selectedStory.label}.`;
+}
 if (halloweenTestMode && storybookInterestButton) {
   storybookInterestButton.textContent = storybookInterestButtonText;
   const offerTitle = document.querySelector("#result-book-title");
@@ -295,8 +308,8 @@ async function handleStorybookInterestSubmit(event) {
     style: selectedPreview?.style || selectedMonsterStyle,
     monsterImage: selectedPreview?.image || null,
     featurePermission,
-    storyId: selectedStoryId,
-    storyLabel: selectedStoryLabel,
+    storyId: selectedStory.id,
+    storyLabel: selectedStory.label,
   };
 
   try {
@@ -306,7 +319,7 @@ async function handleStorybookInterestSubmit(event) {
       selectedPreviewId: submission.selectedPreviewId,
       format: selectedFormat.value,
       featurePermission,
-      storyId: selectedStoryId,
+      storyId: selectedStory.id,
     });
     if (savedMonster?.id) submission.monsterSubmissionId = savedMonster.id;
     if (savedMonster?.id && monsterSubmission?.token) submission.monsterSubmissionToken = monsterSubmission.token;
@@ -358,6 +371,8 @@ function persistStorybookInterest(submission, selectedFormat, featurePermission)
         previewId: submission.selectedPreviewId,
         style: submission.style,
         featurePermission,
+        storyId: submission.storyId,
+        storyLabel: submission.storyLabel,
         submittedAt: new Date().toISOString(),
       }),
     );
@@ -424,6 +439,7 @@ function openStorybookInterestEmail(email, selectedFormat, featurePermission, se
       `Preferred format: ${selectedFormat.label}`,
       `Child's first name: ${personalization.childName}`,
       `Monster's name: ${personalization.monsterName}`,
+      `Story: ${selectedStory.label}`,
       `Monster style: ${getPreviewStyleLabel(selectedPreview?.style || selectedMonsterStyle)}`,
       `Selected preview ID: ${selectedPreview?.id || selectedPreviewId || "Not provided"}`,
       `Feature finished monster: ${featurePermission.canFeatureMonster ? "Yes" : "No"}`,
@@ -1306,7 +1322,7 @@ async function finalizeSavedMonster({ email, personalization, selectedPreviewId:
       email,
       childName: personalization.childName,
       monsterName: personalization.monsterName,
-      storyId,
+      storyId: storyId || selectedStory.id,
       format,
       featurePermission,
     }),
