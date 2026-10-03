@@ -1,0 +1,28 @@
+{
+  "id": "golden-straight-black-standing-candidate-v1",
+  "presetId": "golden-straight-black",
+  "pose": "standing",
+  "status": "unapproved-art-candidate",
+  "productionReady": false,
+  "humanArtApprovalRequired": true,
+  "sourceGeneratedPath": "/workspace/scratch/35dc605e17ed/generated_images/exec-a454c40e-c25d-44dd-b4a5-76d405a4b0a0.png",
+  "prompt": "Use case: illustration-story / style-transfer. Create ONE full-body transparent MonstersNOW child preset master in the same established warm tactile soft-3D storybook world as the reference child. The reference defines costume, child body proportions, quality, camera and gentle lighting, NOT this new preset's hair or skin. Preserve exact teal padded quilted jacket over dusty-pink shirt, richly knitted burnt-orange scarf with fringed ends, indigo cuffed trousers, purple high-top canvas sneakers with cream laces/soles and small golden heart side patch, and one orange pumpkin bucket with one black arched handle. Fictional preschool/early-school-age child, rounded face, expressive brown eyes, credible gentle child proportions. Standing neutral, weight on two clearly grounded feet, body and face three-quarter to image RIGHT; relaxed pleasant closed-mouth small smile, not open-mouthed excitement. Both hands naturally clasp the same bucket handle in front at waist height. Exactly two arms, two hands, two legs and two shoes. Ensure plausible five-digit hands, no fused fingers, clean bucket handle and laces. Same moderate head-to-body ratio, neither baby nor adult. Premium softly modeled 3D family storybook art with tactile fabric and soft hair detail, not vector art or photo. Subtle warm key light upper-left plus cool fill, no orange aura or harsh rim. Entire body, hair and both soles fully inside portrait 2:3 canvas with transparent margins. Genuinely alpha-transparent background, no scenery, ground, shadow blob, checkerboard, text, branding or other figures. This is a candidate curated preset, not a customer portrait. Preset identity: golden-straight-black. Golden tan skin with a softly golden undertone. Smooth straight BLACK hair in a neat jaw-length bob with a gently rounded outline and simple side-swept straight fringe. Clearly straight texture, NO waves, curls, bun, ponytail or braids. Rounded child face with brown eyes and calm attentive expression; tiny closed-mouth smile. Keep black hair truly dark, subtle soft highlights only.",
+  "references": [
+    "/workspace/scratch/35dc605e17ed/monstersnow/assets/characters/candidates/warm-curly-dark-v1/porch.png"
+  ],
+  "generatedWith": "built-in image_gen",
+  "generatedAt": "2026-10-03",
+  "poseAvailability": [
+    "standing"
+  ],
+  "supportedCombinations": "One curated rendered preset only; no arbitrary trait combinations or unrendered poses supported.",
+  "libraryFileId": "libfile_1253091706c081919d7090c2144326f0",
+  "libraryFilename": "standing(20261003-221635-1).png",
+  "libraryVersion": 0,
+  "alphaValidated": true,
+  "nativeDimensions": [
+    1024,
+    1536
+  ],
+  "selectedForCandidateBatch": true
+}

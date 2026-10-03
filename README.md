@@ -39,12 +39,24 @@ default brand direction is centralized as `Soft 3D Storybook Monster` in
 previews, approval/revision previews, and kid-safe story scenes can reuse
 the same prompt language.
 
+## Personalized review (current local increment)
+
+The child picker now uses a shared illustrated-character catalog and the customer
+and Admin preview share one layered page compositor. The supplied child assets
+are clearly labeled unapproved Soft 3D candidates; seven choices still have standing poses only. Read
+[`docs/PERSONALIZED_REVIEW_IMPLEMENTATION.md`](docs/PERSONALIZED_REVIEW_IMPLEMENTATION.md)
+for completed work, final-art requirements, tests, and release gates.
+
+Review-only compositions cannot create paid orders, even with the live flag set.
+Lulu submission is closed until exact approved interior and binding-specific cover
+artifacts are hosted and verified. Do not interpret browser PDF export as a print
+production file.
+
 ## Storybook checkout and interest
 
-The create flow builds a signed 32-page review proof before posting the approved
-selection to `/api/storybook-checkout`. That checkout route verifies the proof,
-published master, and exact saved monster before it records the order and starts
-Stripe Checkout. Configure these Vercel environment variables:
+The create flow builds a signed 32-page review proof. The existing checkout
+implementation remains for the future production integration, but the current
+review-only proof is explicitly rejected before payment or order creation. Configure these Vercel environment variables:
 
 ```text
 STRIPE_SECRET_KEY
@@ -91,5 +103,6 @@ See `LULU_SANDBOX.md` for the server-side Lulu Print API sandbox setup. The
 sandbox routes use `LULU_SANDBOX_CLIENT_KEY` and
 `LULU_SANDBOX_CLIENT_SECRET`, never browser-exposed keys. The configured
 storybook variants are an 8.5 x 8.5 in premium-color softcover and hardcover.
-The sandbox storybook order route can generate signed proof PDFs, start Lulu
-file validations, and optionally submit a sandbox print job.
+The sandbox storybook route can prepare explicitly synthetic, watermarked demo
+PDFs and start sandbox file validations. It cannot submit a print job. See
+`docs/lulu-approved-artifact-handoff.md` for the exact approved-file contract.

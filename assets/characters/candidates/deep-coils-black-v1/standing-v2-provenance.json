@@ -1,0 +1,28 @@
+{
+  "id": "deep-coils-black-standing-v2-candidate-v1",
+  "presetId": "deep-coils-black",
+  "pose": "standing",
+  "status": "unapproved-art-candidate",
+  "productionReady": false,
+  "humanArtApprovalRequired": true,
+  "sourceGeneratedPath": "/workspace/scratch/35dc605e17ed/generated_images/exec-44ad7c31-7bf0-4f78-8ad4-22e8504f7d4e.png",
+  "prompt": "Use case: identity-preserve / precise-object-edit. Keep this exact fictional child's pose, face shape, brown eyes, short tight black coils, teal padded jacket, orange scarf, trousers, purple sneakers, pumpkin bucket, hands, body proportions, transparency and every costume detail unchanged. Make ONE targeted correction to the preset: deepen the skin color consistently on face, neck, ears and both hands to a rich DARK chocolate-brown complexion. It should be clearly deeper than the current golden/caramel complexion, with lit midtones close to cocoa #633c2c and deep neutral-brown shadows. Preserve appealing natural soft highlights without lightening the base complexion into tan or orange. No changes to facial expression or identity, no newly added makeup/accessories/props. This corrects deep-coils-black preset skin tone only. Keep the exact same rounded coily short hairstyle and closed-mouth gentle smile. Full body, feet and hair uncut, clean genuine transparent alpha background, no scene, background, aura, vignette, floor, ground shadow or text. Same polished tactile soft-3D storybook illustration; one child only.",
+  "references": [
+    "/workspace/scratch/35dc605e17ed/monstersnow/assets/characters/candidates/deep-coils-black-v1/standing.png"
+  ],
+  "generatedWith": "built-in image_gen",
+  "generatedAt": "2026-10-03",
+  "poseAvailability": [
+    "standing"
+  ],
+  "supportedCombinations": "One curated rendered preset only; no arbitrary trait combinations or unrendered poses supported.",
+  "libraryFileId": "libfile_8a47074111a881919f0eccd0d1fb9084",
+  "libraryFilename": "standing-v2.png",
+  "libraryVersion": 0,
+  "alphaValidated": true,
+  "nativeDimensions": [
+    1024,
+    1536
+  ],
+  "selectedForCandidateBatch": true
+}

@@ -1,0 +1,29 @@
+{
+  "id": "home-two-treats-prop-candidate-v1",
+  "presetId": "home-two-treats",
+  "pose": "prop",
+  "status": "unapproved-art-candidate",
+  "productionReady": false,
+  "humanArtApprovalRequired": true,
+  "sourceGeneratedPath": "/workspace/scratch/35dc605e17ed/generated_images/exec-8c8943b9-5e64-4e04-9c85-ba7411124be1.png",
+  "prompt": "Use case: illustration-story / precise-object-edit. Create ONE compact transparent prop layer containing EXACTLY TWO individually wrapped small Halloween treats, matching the two treats visible on the coffee table on the RIGHT half of reference 2: one small chocolate cupcake with orange swirled frosting and tiny warm sprinkles inside a clear cellophane bag tied with a small orange bow, and one golden five-point STAR-shaped iced cookie inside its own clear cellophane bag tied with a small purple bow. Reference 1 is the unchanged empty coffee table whose camera, warm side lighting and soft-3D storybook material style this prop will match; it is NOT a canvas to edit. Reference 2 confirms intended prop identities only. Return only the two wrapped treats side-by-side in one cutout, cupcake on image LEFT and star cookie on RIGHT, both on the same invisible level tabletop plane with a small gap. Low three-quarter camera view just above tabletop, see a little of cupcake top and mostly front of the star cookie; do not make a high overhead product flatlay. Warm soft room light from upper-left and subtle golden highlights in clear crinkled wrappers, tasteful orange/purple/gold palette, premium tactile cinematic children's-book 3D. Clear wrappers should preserve genuine partial alpha transparency so background can show through; sharp highlights/folds retained, no opaque gray rectangle. The cupcake and star cookie are the only two food items. No extra candy, plate, tray, table, floor, hands, characters, bow duplicates, labels, printed packaging, lettering, watermark or scene. Horizontal compact composition with all wrapper tips inside frame and ample transparent margins, clean true alpha edges. No broad cast shadow; tiny natural shadow only immediately beneath objects if necessary. Do not modify either reference image.",
+  "references": [
+    "/workspace/scratch/35dc605e17ed/monstersnow/assets/storybook/halloween-monster-night/pages-30-31-environment-v1.png",
+    "/workspace/scratch/35dc605e17ed/monstersnow/assets/storybook/halloween-monster-night/pages-30-31-master-v1.png"
+  ],
+  "generatedWith": "built-in image_gen",
+  "generatedAt": "2026-10-03",
+  "poseAvailability": [
+    "prop"
+  ],
+  "supportedCombinations": "Exactly two individually wrapped treats in one independent prop layer.",
+  "libraryFileId": "libfile_8bc3defa02a08191b5c4972ca271e9ba",
+  "libraryFilename": "two-wrapped-treats.png",
+  "libraryVersion": 0,
+  "alphaValidated": true,
+  "nativeDimensions": [
+    1536,
+    1024
+  ],
+  "selectedForCandidateBatch": true
+}

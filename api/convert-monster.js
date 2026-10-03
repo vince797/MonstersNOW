@@ -1,3 +1,4 @@
+const { guardReviewPreview } = require("../lib/review-preview-api-guard");
 const fs = require("node:fs/promises");
 const path = require("node:path");
 const { Blob } = require("node:buffer");
@@ -16,6 +17,7 @@ const {
 } = require("../lib/monster-submissions");
 const { readJsonBody } = require("../lib/http");
 const { validateMonsterDrawing } = require("../lib/drawing-validator");
+const { validateMonsterRenderAsset, setImageOutputFields } = require("../lib/monster-render-asset");
 
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 const IMAGE_MODEL = process.env.OPENAI_IMAGE_MODEL || "gpt-image-1.5";
@@ -35,6 +37,7 @@ const characterReferenceImages = [
 const coloringPageReferenceImage = "assets/master-references/coloring-page-line-art.jpg";
 
 module.exports = async function handler(request, response) {
+  if (await guardReviewPreview(request, response)) return;
   if (request.method !== "POST") {
     response.setHeader("Allow", "POST");
     return response.status(405).json({ error: "Method not allowed" });
@@ -98,6 +101,7 @@ module.exports = async function handler(request, response) {
       variationNumber,
       getRemainingRequestBudget(startedAt),
     );
+    const renderAsset = await validateMonsterRenderAsset(monsterImage);
     const { coloringPage, warnings } = await createOptionalColoringPage(
       monsterImage,
       references,
@@ -116,6 +120,7 @@ module.exports = async function handler(request, response) {
       mode: "ai",
       submissionId,
       previewId: persistedPreview.id,
+      renderAsset,
       monsterImage,
       coloringPage,
       warnings,
@@ -204,6 +209,7 @@ async function createMonsterImage(drawing, references, style, variationNumber, t
     prompt: buildMonsterCharacterPrompt({ style, variationNumber }),
     negativePrompt: MONSTERSNOW_IMAGE_NEGATIVE_PROMPT,
     images: [dataUrlToImagePart(drawing, "drawing.jpg"), ...references.characterStyle],
+    background: "transparent",
     size: "1024x1024",
     timeoutMs,
   });
@@ -258,7 +264,7 @@ async function createColoringPage(monsterImage, references, timeoutMs) {
   });
 }
 
-async function createImageEdit({ prompt, negativePrompt, images, size, timeoutMs }) {
+async function createImageEdit({ prompt, negativePrompt, images, size, timeoutMs, background = "opaque" }) {
   const models = getImageModels();
   let lastError;
 
@@ -272,6 +278,7 @@ async function createImageEdit({ prompt, negativePrompt, images, size, timeoutMs
         images,
         size,
         timeoutMs,
+        background,
       });
     } catch (error) {
       lastError = error;
@@ -320,7 +327,7 @@ function shouldRetryWithFallbackModel(error, index, models) {
   );
 }
 
-async function requestImageEdit({ model, prompt, images, size, timeoutMs }) {
+async function requestImageEdit({ model, prompt, images, size, timeoutMs, background = "opaque" }) {
   const formData = new FormData();
   const controller = new AbortController();
   const requestTimeoutMs = Number.isFinite(timeoutMs)
@@ -333,7 +340,7 @@ async function requestImageEdit({ model, prompt, images, size, timeoutMs }) {
   formData.append("n", "1");
   formData.append("size", size);
   formData.append("quality", IMAGE_QUALITY);
-  formData.append("output_format", "png");
+  setImageOutputFields(formData, background);
 
   images.forEach((image, index) => {
     formData.append(

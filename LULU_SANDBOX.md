@@ -1,3 +1,10 @@
+> Current safety status: The old storybook submission path is disabled. Generic
+> regenerated PDFs cannot fulfill approved orders. Only explicit synthetic demos
+> (`purpose: "sandbox-demo", synthetic_data: true`) may prepare demo files or
+> request sandbox validation. All print-submission requests fail before network
+> access. Historical submission examples below are not enabled workflows; see
+> [the current artifact contract](docs/lulu-approved-artifact-handoff.md).
+
 # Lulu Sandbox Integration
 
 This project uses Lulu's Print API sandbox through server-side Vercel API routes.

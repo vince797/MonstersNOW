@@ -1,3 +1,4 @@
+const { guardReviewPreview } = require("../lib/review-preview-api-guard");
 const {
   getStorybookPricingSummary,
   getStorybookProductVariants,
@@ -15,6 +16,7 @@ const {
 } = require("../lib/lulu-payloads");
 
 module.exports = async function handler(request, response) {
+  if (await guardReviewPreview(request, response)) return;
   const resource = firstQueryValue(request.query?.resource);
 
   if (resource === "cost") {

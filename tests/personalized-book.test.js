@@ -1,5 +1,6 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
+const { resolveChildCharacter } = require("../lib/child-characters");
 const { buildPersonalizedBook } = require("../lib/personalized-book");
 
 test("master copy becomes a pinned order-specific render manifest", () => {
@@ -39,9 +40,12 @@ test("master copy becomes a pinned order-specific render manifest", () => {
   assert.equal(book.pages[0].child.preset.id, "deep-braids-black");
   assert.equal(book.pages[0].child.imageUrl, "https://assets.example/children/deep-braids-black.png");
   assert.equal(book.pages[1].child, null);
-  assert.deepEqual(book.childCharacter, { id: "deep-braids-black", label: "Braids", included: true, skinTone: "deep", hairColor: "black", hairStyle: "braids" });
+  assert.deepEqual(book.childCharacter, resolveChildCharacter("deep-braids-black"));
   assert.ok(book.pages.every((page) => page.artworkRole === "background_plate"));
-  assert.deepEqual(book.readiness, { copyReady: true, artworkReady: true, monsterReady: true, childReady: true, rendererReady: true, productionReady: true, blockers: [] });
+  assert.equal(book.readiness.childReady, false, "sample catalog artwork is not final art");
+  assert.equal(book.readiness.rendererReady, false, "a claimed renderer version cannot certify output");
+  assert.equal(book.readiness.productionReady, false);
+  assert.ok(book.readiness.blockers.length >= 2);
   assert.match(book.fingerprint, /^[a-f0-9]{64}$/);
 });
 

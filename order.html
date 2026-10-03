@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <script src="scripts/review-preview.js?v=20261003-isolated-review-v1" defer></script>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex,nofollow" />
@@ -8,7 +9,7 @@
     <meta name="description" content="Privately review your MonstersNOW order and approve its book proof." />
     <title>Your Storybook Order | MonstersNOW</title>
     <link rel="stylesheet" href="styles.css?v=20261002-customer-orders" />
-    <script src="scripts/order-status.js?v=20261002-customer-orders" defer></script>
+    <script src="scripts/order-status.js?v=20261003-personalized-review-v4" defer></script>
   </head>
   <body>
     <a class="skip-link" href="#main-content">Skip to content</a>
@@ -36,8 +37,9 @@
             <h2 id="customer-proof-title">Your proof is being prepared.</h2>
             <p id="customer-proof-message">We will let you know when the cover and all 32 interior pages are ready.</p>
             <a id="customer-proof-open" class="button primary" href="#" target="_blank" rel="noopener noreferrer" hidden>Open proof PDF</a>
+            <div id="customer-proof-package-links" class="customer-proof-actions" hidden><a id="customer-package-interior" class="button primary" target="_blank" rel="noopener noreferrer">Open all 32 interior pages</a><a id="customer-package-cover" class="button secondary" target="_blank" rel="noopener noreferrer">Open selected-format cover</a></div><p id="customer-package-state" role="note" hidden></p><button id="customer-proof-refresh" class="button secondary" type="button">Refresh proof and links</button>
             <form id="customer-proof-form" hidden>
-              <label class="feature-check"><input id="customer-proof-approved" type="checkbox" /> <span>I reviewed the names, selected monster, cover, and all 32 interior pages in this exact PDF.</span></label>
+              <label class="feature-check"><input id="customer-proof-approved" type="checkbox" /> <span id="customer-review-confirmation">I reviewed the names, selected child and monster, cover, and all 32 interior pages in these exact files.</span></label>
               <div class="customer-proof-actions">
                 <button id="customer-proof-approve" class="button primary" type="button">Approve this proof</button>
                 <button id="customer-proof-request" class="button secondary" type="button">Request a change</button>

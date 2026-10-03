@@ -45,8 +45,8 @@ const server = http.createServer(async (req, res) => {
     return;
   }
   const file = path.resolve(root, `.${pathname === "/" ? "/index.html" : pathname}`);
-  if (!file.startsWith(root + path.sep) || !/\.(html|css|js|png|jpg|jpeg|webp)$/.test(file) || !fs.existsSync(file)) { res.statusCode = 404; return res.end(); }
-  const types = { ".html": "text/html", ".js": "application/javascript", ".css": "text/css", ".png": "image/png", ".jpg": "image/jpeg" };
+  if (!file.startsWith(root + path.sep) || !/\.(html|css|js|png|jpg|jpeg|webp|svg|avif)$/.test(file) || !fs.existsSync(file)) { res.statusCode = 404; return res.end(); }
+  const types = { ".html": "text/html", ".js": "application/javascript", ".css": "text/css", ".png": "image/png", ".svg": "image/svg+xml", ".avif": "image/avif", ".jpg": "image/jpeg" };
   res.setHeader("Content-Type", types[path.extname(file)] || "application/octet-stream");
   fs.createReadStream(file).pipe(res);
 });
@@ -56,12 +56,13 @@ const server = http.createServer(async (req, res) => {
   base = `http://127.0.0.1:${server.address().port}`;
   let browser;
   try {
-    browser = await chromium.launch({ headless: true });
+    browser = await chromium.launch({ headless: true, executablePath: process.env.CHROMIUM_PATH || "/usr/bin/chromium", args: ["--no-sandbox"] });
     const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
     const errors = [];
     page.on("pageerror", (error) => errors.push(error.message));
     await page.goto(`${base}/create.html?test=halloween`);
     await page.locator("#monster-upload").setInputFiles(path.join(root, "assets/step-2-character.jpg"));
+    await page.locator("#confirm-monster").click();
     await page.locator("#storybook-interest").waitFor({ state: "visible" });
     await page.locator("#download-coloring").click();
     await page.locator("#coloring-page-dialog[open]").waitFor({ state: "visible" });

@@ -21,3 +21,13 @@ test("Halloween manuscript maps to 32 complete editable Admin pages", () => {
   assert.ok(pages.slice(3, 31).every((page) => page.childRequired));
   assert.match(pages[3].illustrationPrompt, /do not include a permanent child or story monster/i);
 });
+
+
+test("spread text uses the closest paragraph break without dropping or repeating copy", () => {
+  const { splitSpreadText } = require("../lib/halloween-master-pages");
+  const paragraphs = ["a".repeat(80), "b".repeat(80), "c".repeat(150), "d".repeat(20)];
+  const halves = splitSpreadText(paragraphs.join("\n\n"));
+  assert.equal(halves[0], paragraphs.slice(0, 2).join("\n\n"));
+  assert.equal(halves[1], paragraphs.slice(2).join("\n\n"));
+  assert.equal(halves.join("\n\n"), paragraphs.join("\n\n"));
+});

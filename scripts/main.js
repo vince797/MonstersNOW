@@ -83,7 +83,6 @@ const interestStatus = document.querySelector("#interest-status");
 const childName = document.querySelector("#child-name");
 const monsterName = document.querySelector("#monster-name");
 const childCharacterInputs = [...document.querySelectorAll('input[name="child-character"]')];
-const childCharacterSelection = document.querySelector("#child-character-selection");
 const storybookFormatInputs = [...document.querySelectorAll('input[name="storybook-format"]')];
 const featureMonster = document.querySelector("#feature-monster");
 const featureShowDrawing = document.querySelector("#feature-show-drawing");
@@ -262,11 +261,10 @@ if (featureMonster) {
   syncFeaturePermissionFields();
 }
 
-for (const input of childCharacterInputs) input.addEventListener("change", syncChildCharacterPicker);
-syncChildCharacterPicker();
-
+let isBuildingStorybookProof = false;
 async function handleStorybookInterestSubmit(event) {
   event.preventDefault();
+  if (isBuildingStorybookProof) return;
   const email = interestEmail?.value.trim();
   const personalization = getStorybookPersonalization();
 
@@ -312,6 +310,8 @@ async function handleStorybookInterestSubmit(event) {
     storyLabel: selectedStory.label,
   };
 
+  isBuildingStorybookProof = true;
+  setStorybookSubmitState({ disabled: true, text: "Saving your selection…" });
   try {
     const savedMonster = await finalizeSavedMonster({
       email,
@@ -326,6 +326,8 @@ async function handleStorybookInterestSubmit(event) {
   } catch (error) {
     console.error(error);
     if (interestStatus) interestStatus.textContent = error.message || "Your monster could not be saved. Please try again.";
+    isBuildingStorybookProof = false;
+    setStorybookSubmitState({ disabled: false, text: storybookInterestButtonText });
     return;
   }
 
@@ -342,6 +344,8 @@ async function handleStorybookInterestSubmit(event) {
   } catch (error) {
     if (interestStatus) interestStatus.textContent = error.message;
     setStorybookSubmitState({ disabled: false, text: storybookInterestButtonText });
+  } finally {
+    isBuildingStorybookProof = false;
   }
 }
 
@@ -460,20 +464,9 @@ function getStorybookPersonalization() {
 
 function getSelectedChildCharacter() {
   const input = childCharacterInputs.find((option) => option.checked);
-  const labels = {
-    none: "Monster only", "warm-curly-dark": "Curly dark hair", "deep-coils-black": "Black coily hair",
-    "medium-wavy-brown": "Wavy brown hair", "golden-straight-black": "Straight black hair",
-    "light-short-brown": "Short brown hair", "light-wavy-blonde": "Wavy blonde hair",
-    "medium-curly-auburn": "Curly auburn hair", "deep-braids-black": "Black braids",
-  };
-  const id = input?.value || "none";
-  return { id, label: labels[id] || labels.none, included: id !== "none" };
-}
-
-function syncChildCharacterPicker() {
-  const selected = getSelectedChildCharacter();
-  for (const input of childCharacterInputs) input.closest("label")?.classList.toggle("is-selected", input.checked);
-  if (childCharacterSelection) childCharacterSelection.textContent = selected.label;
+  // Use the same allowlist and asset identity as the proof and server.
+  return window.MonstersNOWCharacters?.resolveChildCharacter(input?.value || "none")
+    || { id: "none", label: "Monster only", included: false };
 }
 
 function createClientSubmissionId() {

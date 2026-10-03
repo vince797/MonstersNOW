@@ -68,7 +68,7 @@ test("customer order view is redacted and uses a short-lived proof URL", async (
   } finally { global.fetch = originalFetch; }
 });
 
-test("customer approval is bound to the published proof fingerprint", async () => {
+test("manual review PDF fingerprints cannot bypass exact package approval", async () => {
   process.env.ORDER_ACCESS_SECRET = secret;
   process.env.SUPABASE_URL = "https://db.example.com";
   process.env.SUPABASE_SECRET_KEY = "service-secret";
@@ -83,10 +83,8 @@ test("customer approval is bound to the published proof fingerprint", async () =
   };
   try {
     await assert.rejects(() => reviewCustomerProof(access.token, { action: "approve", fingerprint: "c".repeat(64) }), /proof changed/i);
-    const approved = await reviewCustomerProof(access.token, { action: "approve", fingerprint: "b".repeat(64) });
-    assert.equal(approved.proof.status, "approved");
-    const patchCall = calls.find((call) => call.options.method === "PATCH");
-    assert.equal(JSON.parse(patchCall.options.body).customer_proof_status, "approved");
+    await assert.rejects(() => reviewCustomerProof(access.token, { action: "approve", fingerprint: "b".repeat(64) }), /exact interior-and-cover package/);
+    assert.equal(calls.some((call) => call.options.method === "PATCH"), false);
   } finally { global.fetch = originalFetch; }
 });
 
@@ -110,4 +108,22 @@ test("publishing a proof fingerprints the PDF and resets customer review state",
     assert.equal(published.customer_proof_master_version, 7);
     assert.equal(JSON.parse(calls[1].options.body).customer_proof_revision_notes, null);
   } finally { global.fetch = originalFetch; }
+});
+
+test('an invalidated package workflow never falls back to an older manual proof', async () => {
+  const oldFetch = global.fetch;
+  process.env.ORDER_ACCESS_SECRET = secret;
+  const access = deriveOrderAccess({ submissionId: 'expired-package', email: 'sample@example.com', format: { id: 'softcover' } });
+  const calls = [];
+  global.fetch = async url => {
+    calls.push(url);
+    if (url.includes('/storybook_orders')) return { ok: true, json: async () => [baseOrder({ active_artifact_package_id: null, artifact_workflow_started_at: '2026-10-03T00:00:00Z', order_access_token_hash: access.tokenHash })] };
+    if (url.includes('/order_render_jobs')) return { ok: true, json: async () => [{ id: 'job', status: 'completed', attempts: 1 }] };
+    throw Error('Must not sign the old manual proof');
+  };
+  try {
+    const view = await getCustomerOrderView(access.token);
+    assert.equal(view.proof.url, null); assert.equal(view.proof.fingerprint, null); assert.equal(view.proof.canApprove, false);
+    assert.equal(view.artifactError.code, 'artifact_source_changed'); assert.equal(calls.some(url => url.includes('/object/sign')), false);
+  } finally { global.fetch = oldFetch; }
 });

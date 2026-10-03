@@ -1,54 +1,54 @@
 {
   "title": "Halloween Monster Night",
   "status": "blocked",
-  "updated": "2026-10-01",
-  "format": "8.5 \u00d7 8.5 in, full color, 32 pages",
+  "updated": "2026-10-03",
+  "format": "8.5 × 8.5 in, full color, 32 pages",
   "checks": [
     {
       "label": "Interior pagination",
       "status": "pass",
-      "detail": "32 of 32 pages"
+      "detail": "Local review-candidate export contains 32 single interior pages; not production approval"
     },
     {
       "label": "Interior size and bleed",
       "status": "pass",
-      "detail": "8.75 \u00d7 8.75 in media; 8.5 \u00d7 8.5 in trim"
+      "detail": "Local candidate: 630 × 630 pt media/bleed with 612 × 612 pt trim"
     },
     {
       "label": "Illustration dimensions",
-      "status": "pass",
-      "detail": "300 PPI effective; 300 PPI required"
+      "status": "blocked",
+      "detail": "Native environment halves are 887 × 887 pixels, about 101 PPI at 8.75 in; upscaled copies do not meet the 300 PPI detail requirement"
     },
     {
       "label": "Print-art quality review",
       "status": "blocked",
-      "detail": "Create and approve child-free and monster-free background plates for all 32 pages"
+      "detail": "Preserve the 14 existing environment plates. Final-detail masters, four front/back-matter plates, and foreground masks still need approval"
     },
     {
       "label": "Child character render asset",
       "status": "blocked",
-      "detail": "Create an approved transparent render asset for each selectable child preset"
+      "detail": "One three-pose transparent Soft 3D candidate is in review; other seven choices are fixtures. No child assets are production-approved"
     },
     {
       "label": "Personalized page compositor",
       "status": "blocked",
-      "detail": "Replace the generic placeholder PDF generator with the approved background + child + monster compositor"
+      "detail": "Shared child/monster review compositor and actual PDF candidate exporter implemented; immutable approved-file hosting and fulfillment integration remain blocked"
     },
     {
       "label": "Softcover package cover",
       "status": "blocked",
-      "detail": "Awaiting exact Lulu cover dimensions"
+      "detail": "Exact 32-page Lulu template verified: 1251.51 × 630 pt. Actual candidate exported; final cover art, preflight and approval pending"
     },
     {
       "label": "Hardcover package cover",
       "status": "blocked",
-      "detail": "Awaiting exact Lulu cover dimensions"
+      "detail": "Exact 32-page Lulu template verified: 1368 × 738 pt, including case wrap. Actual candidate exported; final cover art, preflight and approval pending"
     },
     {
       "label": "Lulu file validation",
       "status": "blocked",
-      "detail": "Run after final-resolution art and covers exist"
+      "detail": "No production files or print jobs submitted. Require completed exact-SKU normalization after final-art and artifact approval"
     }
   ],
-  "next_action": "Create clean background plates first, then approved transparent child preset assets. The selected customer monster is already pinned by preview ID and image URL in the order manifest, but production approval remains locked until the personalized compositor replaces the placeholder PDF generator."
+  "next_action": "Review final character art and page placements, obtain genuine print-detail backgrounds, approve the exact immutable interior and binding-specific cover PDFs, then complete preflight and Lulu normalization. Paid checkout and both legacy print routes remain disabled."
 }

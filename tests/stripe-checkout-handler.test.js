@@ -7,7 +7,7 @@ function responseStub() {
   return { status(code) { this.code = code; return this; }, json(body) { this.body = body; return this; } };
 }
 
-test("checkout succeeds and records an order when optional intake email is not configured", async () => {
+test("review artwork cannot create a paid order even with the live flag enabled", async () => {
   const handler = require("../api/storybook-checkout");
   const originalFetch = global.fetch;
   process.env.STRIPE_SECRET_KEY = "sk_live_mock";
@@ -82,24 +82,9 @@ test("checkout succeeds and records an order when optional intake email is not c
         proofToken: signProof(buildHalloweenProof(proofInput)),
       },
     }, response);
-    assert.equal(response.code, 200);
-    assert.equal(response.body.checkoutUrl, "https://checkout.stripe.com/mock");
-    assert.equal(response.body.orderId, "order-1");
-    assert.equal(response.body.intakeEmailId, null);
-    const orderInsert = calls.find((call) => call.url.includes("/storybook_orders?on_conflict="));
-    const storedOrder = JSON.parse(orderInsert.options.body)[0];
-    assert.deepEqual(storedOrder.child_character, { id: "light-short-brown", label: "Short brown hair", included: true });
-    assert.equal(storedOrder.story_id, "halloween-monster-night");
-    assert.equal(storedOrder.selected_preview_id, previewId);
-    const stripeIndex = calls.findIndex((call) => call.url === "https://api.stripe.com/v1/checkout/sessions");
-    assert.ok(calls.indexOf(orderInsert) < stripeIndex, "order must be recorded before Stripe Checkout opens");
-    assert.match(storedOrder.submission_id, /^order-[a-f0-9]{48}$/);
-    assert.match(storedOrder.order_access_token_hash, /^[a-f0-9]{64}$/);
-    const stripeCall = calls.find((call) => call.url === "https://api.stripe.com/v1/checkout/sessions");
-    const stripeParams = new URLSearchParams(stripeCall.options.body);
-    assert.match(stripeParams.get("success_url"), /order_token=mn_order_/);
-    assert.equal(stripeParams.get("automatic_tax[enabled]"), "true");
-    assert.match(response.body.warnings.join(" "), /order is still available in Admin/i);
+    assert.equal(response.code, 409);
+    assert.equal(response.body.code, "review_artwork_not_for_sale");
+    assert.equal(calls.length, 0, "review copies must not reach payment, storage, or email");
   } finally { global.fetch = originalFetch; }
 });
 

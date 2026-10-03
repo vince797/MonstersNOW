@@ -86,6 +86,13 @@ orderDialog.addEventListener("cancel", (event) => { event.preventDefault(); clos
 document.querySelector("#order-detail-form").addEventListener("submit", saveOrderDetail);
 document.querySelector("#advance-order").addEventListener("click", advanceSelectedOrder);
 document.querySelector("#approve-order-proof").addEventListener("click", approveSelectedOrderProof);
+document.querySelector("#render-order-artifacts").addEventListener("click", () => runArtifactAction("render_job"));
+document.querySelector("#refresh-order-artifacts").addEventListener("click", () => runArtifactAction("artifact_status"));
+document.querySelector("#approve-artifact-package").addEventListener("click", () => runArtifactAction("approve_artifact_package"));
+document.querySelector("#request-artifact-changes").addEventListener("click", () => runArtifactAction("request_artifact_changes"));
+document.querySelector("#artifact-revision-notes").addEventListener("input", () => selectedOrder && renderArtifactPackage(selectedOrder));
+document.querySelector("#copy-artifact-proof-link").addEventListener("click", copySelectedCustomerProofLink);
+document.querySelector("#artifact-reviewed").addEventListener("change", () => selectedOrder && renderArtifactPackage(selectedOrder));
 document.querySelector("#revoke-order-proof").addEventListener("click", revokeSelectedOrderProof);
 document.querySelector("#send-order-lulu").addEventListener("click", sendSelectedOrderToLulu);
 document.querySelector("#publish-customer-proof").addEventListener("click", publishSelectedCustomerProof);
@@ -672,7 +679,7 @@ function renderOrderBoard(visible) {
 }
 
 function orderNeedsAttention(order) {
-  if (order.payment_issue) return true;
+  if (order.payment_issue || ["failed", "error"].includes(order.artifact_job?.status) || ["superseded", "stale", "invalidated"].includes(order.artifact_package?.status)) return true;
   const ageHours = Math.max(0, (Date.now() - new Date(order.updated_at || order.created_at).getTime()) / 3600000);
   const limits = { checkout_started: 24, paid: 24, proofing: 48, approved: 24, printing: 168, shipped: 168 };
   return Number.isFinite(ageHours) && limits[order.status] !== undefined && ageHours >= limits[order.status];
@@ -1047,6 +1054,29 @@ function addPage(page = {}) {
   card.dataset.childScale = String(childPlacement.scale ?? 30);
   card.dataset.childFacing = childPlacement.facing || "right";
   card.dataset.childLayer = childPlacement.layer || "front";
+  const poseLabel = document.createElement("label");
+  poseLabel.textContent = "Child pose ";
+  const poseSelect = document.createElement("select");
+  poseSelect.dataset.childPose = "";
+  for (const [value, label] of [["", "Automatic scene pose"], ["porch", "Standing / porch"], ["garden", "Walking / garden"], ["garden-quiet", "Quiet / garden"], ["standing", "Neutral standing"], ["seated-home", "Seated / home"]]) poseSelect.append(new Option(label, value));
+  poseSelect.value = page.childPose || "";
+  card.dataset.childPose = poseSelect.value;
+  poseLabel.append(poseSelect);
+  card.querySelector(".child-placement-controls").append(poseLabel);
+  poseSelect.addEventListener("change", () => { card.dataset.childPose = poseSelect.value; markStoryDirty(); });
+  const cropLabel = document.createElement("label");
+  cropLabel.textContent = "Background crop for rendered page ";
+  const cropSelect = document.createElement("select");
+  cropSelect.dataset.backgroundCrop = "";
+  for (const [value, label] of [["full", "Full page image"], ["left", "Left half of spread"], ["right", "Right half of spread"]]) cropSelect.append(new Option(label, value));
+  cropSelect.value = page.backgroundCrop || "full";
+  card.dataset.backgroundCrop = cropSelect.value;
+  cropLabel.append(cropSelect);
+  card.querySelector(".page-artwork-controls").append(cropLabel);
+  cropSelect.addEventListener("change", () => { card.dataset.backgroundCrop = cropSelect.value; markStoryDirty(); });
+  const renderNote = document.createElement("small");
+  renderNote.textContent = "Scene poses apply when that child has matching art. Render the private order package to inspect the exact crop and layout; the editor keeps the full source reference visible.";
+  card.querySelector(".page-artwork-controls").append(renderNote);
   const areas = card.querySelectorAll("textarea");
   areas[0].value = page.text || "";
   areas[1].value = page.illustrationPrompt || "";
@@ -1165,6 +1195,8 @@ function pageData(card) {
       layer: card.dataset.monsterLayer,
     },
     childRequired: card.dataset.childRequired === "true",
+    childPose: card.dataset.childPose || "",
+    backgroundCrop: card.dataset.backgroundCrop || "full",
     childPlacement: {
       x: Number(card.dataset.childX),
       y: Number(card.dataset.childY),
@@ -1700,6 +1732,8 @@ function openOrderDetail(order) {
   list.replaceChildren();
   Object.entries(fields).forEach(([label, value]) => { const term = document.createElement("dt"); const detail = document.createElement("dd"); term.textContent = label; detail.textContent = value || "—"; list.append(term, detail); });
   renderOrderArtwork(order.monster_assets);
+  renderOrderComposition(order);
+  renderArtifactPackage(order);
   const savedAddress = order.shipping_address || {};
   document.querySelector("#lulu-recipient-name").value = order.shipping_name || "";
   document.querySelector("#lulu-email").value = order.customer_email || "";
@@ -1719,6 +1753,94 @@ function openOrderDetail(order) {
   orderDialog.showModal();
 }
 
+const artifactActionsInFlight = new Set();
+let shownArtifactHash = null;
+function artifactHttpsUrl(value) {
+  try { const url = new URL(value); return url.protocol === "https:" && !url.username && !url.password ? url.toString() : ""; } catch { return ""; }
+}
+function renderArtifactPackage(order) {
+  const job = order.artifact_job;
+  const pkg = order.artifact_package;
+  const pending = artifactActionsInFlight.has(order.id) || (["pending", "queued", "rendering", "running"].includes(job?.status) && !job?.retryable);
+  const render = document.querySelector("#render-order-artifacts");
+  render.disabled = pending || Boolean(order.payment_issue) || order.status !== "proofing";
+  render.textContent = job?.retryable || job?.status === "failed" || job?.status === "error" ? "Retry private proof render" : pkg ? "Render latest saved version" : "Render private proof files";
+  document.querySelector("#refresh-order-artifacts").disabled = artifactActionsInFlight.has(order.id);
+  document.querySelector("#artifact-job-status").textContent = pending
+    ? "Rendering private candidate files. You can close this order and refresh its status later."
+    : job?.status === "failed" || job?.status === "error" ? `Render needs attention: ${job.errorCode || "render_failed"}. ${job.retryable ? "Review the cause, then retry." : "Resolve the source or configuration before retrying."}`
+    : order.artifact_error ? order.artifact_error.message || "The saved files changed. Render a new candidate."
+    : pkg ? "Frozen candidate package available. Printing remains disabled." : "No private package is ready yet. Render the saved order or refresh file status.";
+  const visible = Boolean(pkg?.id && pkg?.packageHash);
+  document.querySelector("#artifact-package-details").hidden = !visible;
+  document.querySelector("#copy-artifact-proof-link").hidden = !visible;
+  if (shownArtifactHash !== (pkg?.packageHash || null)) {
+    document.querySelector("#artifact-reviewed").checked = false;
+    document.querySelector("#artifact-revision-notes").value = "";
+    shownArtifactHash = pkg?.packageHash || null;
+  }
+  if (!visible) return;
+  document.querySelector("#artifact-package-identity").textContent = `${pkg.format === "hardcover" ? "Hardcover" : "Softcover"} · package ${pkg.packageHash.slice(0, 16)}… · ${pkg.status || "candidate"}`;
+  for (const [kind, selector] of [["interior", "#artifact-interior-link"], ["cover", "#artifact-cover-link"]]) {
+    const link = document.querySelector(selector), url = artifactHttpsUrl(pkg[kind]?.url);
+    link.hidden = !url;
+    if (url) link.href = url; else link.removeAttribute("href");
+    link.title = pkg[kind]?.sha256 ? `SHA-256: ${pkg[kind].sha256}` : "";
+  }
+  document.querySelector("#artifact-package-blockers").replaceChildren(...(pkg.blockers || []).map(blocker => {
+    const li = document.createElement("li"); li.textContent = typeof blocker === "string" ? blocker : blocker.message || blocker.detail || blocker.code || "Production check pending"; return li;
+  }));
+  const customer = pkg.customerApproval?.status || "pending", adminReview = pkg.adminApproval?.status || "pending";
+  document.querySelector("#artifact-review-approvals").textContent = `Customer review: ${customer.replaceAll("_", " ")} · Admin review: ${adminReview.replaceAll("_", " ")}. These reviews apply only to this package; changed files require new review.`;
+  document.querySelector("#approve-artifact-package").disabled = pending || Boolean(order.payment_issue) || !artifactHttpsUrl(pkg.interior?.url) || !artifactHttpsUrl(pkg.cover?.url) || customer !== "approved" || adminReview === "approved" || !document.querySelector("#artifact-reviewed").checked || ["superseded", "stale", "invalidated"].includes(pkg.status);
+  document.querySelector("#request-artifact-changes").disabled = pending || Boolean(order.payment_issue) || document.querySelector("#artifact-revision-notes").value.trim().length < 3 || ["superseded", "stale", "invalidated"].includes(pkg.status);
+}
+async function runArtifactAction(action) {
+  if (!selectedOrder || artifactActionsInFlight.has(selectedOrder.id)) return;
+  const target = selectedOrder;
+  const pkg = target.artifact_package;
+  if (action === "approve_artifact_package" && (!pkg || !document.querySelector("#artifact-reviewed").checked)) return;
+  if (action === "request_artifact_changes" && (!pkg || document.querySelector("#artifact-revision-notes").value.trim().length < 3)) return;
+  artifactActionsInFlight.add(target.id);
+  renderArtifactPackage(target);
+  const message = document.querySelector("#order-detail-message");
+  message.textContent = action === "render_job" ? "Creating exact private proof files from the saved order…" : action === "artifact_status" ? "Checking the current frozen files…" : "Recording your review of this exact package…";
+  try {
+    const result = await apiRequest(`?resource=orders&id=${encodeURIComponent(target.id)}`, {
+      method: "PATCH", body: { action, ...(["approve_artifact_package", "request_artifact_changes"].includes(action) ? { packageId: pkg.id, packageHash: pkg.packageHash, notes: document.querySelector("#artifact-revision-notes").value } : {}) },
+    });
+    Object.assign(target, result.order);
+    renderOrders(); renderDashboard();
+    if (selectedOrder?.id === target.id) {
+      renderArtifactPackage(target);
+      renderOrderNextAction(target);
+      message.textContent = action === "approve_artifact_package" ? "Candidate review recorded. Printing remains disabled." : action === "request_artifact_changes" ? "Changes recorded. Edit the saved source, then render a new package for review." : "File status updated. Review the exact cover and interior above.";
+    }
+  } catch (error) {
+    if (selectedOrder?.id === target.id) message.textContent = `${error.message} Refresh file status before retrying if the request timed out.`;
+  } finally {
+    artifactActionsInFlight.delete(target.id);
+    if (selectedOrder?.id === target.id) renderArtifactPackage(target);
+  }
+}
+
+function renderOrderComposition(order) {
+  const container = document.querySelector("#order-composition-pages");
+  const notice = document.querySelector("#order-composition-notice");
+  const details = document.querySelector("#order-composition-details");
+  container.replaceChildren();
+  details.open = false;
+  details.hidden = true;
+  try {
+    const story = stories.find((item) => item.id === order.story_id || item.slug === order.story_id);
+    if (!story) throw new Error("The saved master story is unavailable. Load the master before reviewing this order.");
+    const book = window.MonstersNOWComposition.composeReviewBook(story, order, order.monster_assets || {});
+    window.MonstersNOWPageCompositor.renderReviewBook(container, book);
+    notice.textContent = `Saved master v${book.masterVersion || "unknown"} · ${book.childCharacter.label} · ${book.format}. This is a current-master review, not the customer's approved PDF. Sample child art and missing backgrounds cannot be approved for printing. Open the exact PDF separately for customer approval.`;
+    details.hidden = false;
+  } catch (error) { notice.textContent = error.message; }
+}
+
 function syncOrderStatusOptions(order) {
   const select = document.querySelector("#order-detail-status");
   const editableStatuses = new Set([order.status, "cancelled"]);
@@ -1735,15 +1857,20 @@ function renderOrderNextAction(order) {
     checkout_started: ["Verify payment in Stripe", "Confirm payment before beginning proof production."],
     paid: ["Begin personalized proof", "Advance the order to proofing when production work starts."],
     proofing: ["Review and approve the proof", "Approval fingerprints the exact master, names, and selected monster."],
-    approved: ["Enter shipping and send to Lulu Sandbox", "Lulu validates both PDFs before creating the print job."],
+    approved: ["Review production blockers", "Printing is disabled until exact artifacts, final art, preflight, and Lulu normalization are approved."],
     printing: ["Monitor the Lulu print job", order.lulu_print_job_id ? `Print job ${order.lulu_print_job_id} is in production.` : "Confirm the printer accepted the order."],
     shipped: ["Add delivery follow-up", "Confirm delivery, then complete the order."],
     completed: ["No action required", "This order is complete."],
     cancelled: ["No action required", "This order was cancelled."],
   };
+  const artifactAction = ["failed", "error"].includes(order.artifact_job?.status)
+    ? ["Resolve the proof render", `Render failed: ${order.artifact_job.errorCode || "unknown error"}. Check the saved artwork and retry the private render.`]
+    : ["superseded", "stale", "invalidated"].includes(order.artifact_package?.status)
+      ? ["Render a new proof version", "The previous file package no longer matches the saved order. New files require new review."]
+      : null;
   const [title, help] = order.payment_issue
     ? ["Resolve the Stripe payment issue", `Fulfillment is blocked: ${order.payment_issue.replaceAll("_", " ")}. Review the payment in Stripe.`]
-    : actions[order.status] || ["Review this order", "Confirm the current fulfillment state."];
+    : artifactAction || actions[order.status] || ["Review this order", "Confirm the current fulfillment state."];
   document.querySelector(".order-next-action").classList.toggle("is-blocked", Boolean(order.payment_issue));
   document.querySelector("#order-next-action").textContent = title;
   document.querySelector("#order-next-help").textContent = help;
@@ -1779,14 +1906,15 @@ function renderProofApproval(order) {
     help.textContent = "Upload the exact cover-and-interior PDF. Customer approval is required before final production approval.";
   }
   approve.hidden = approved || submitted;
-  approve.disabled = blocked || customerStatus !== "approved" || !["proofing", "approved"].includes(order.status);
+  approve.disabled = true;
+  approve.title = "Legacy manual PDFs cannot authorize production. Use the exact file package review above.";
   revoke.hidden = !approved || submitted;
   document.querySelector("#customer-proof-upload").hidden = approved || submitted || order.status !== "proofing";
   document.querySelector("#publish-customer-proof").disabled = blocked || order.status !== "proofing";
   document.querySelector("#copy-customer-proof-link").hidden = !order.customer_proof_path;
   document.querySelector("#lulu-shipping-fields").hidden = !approved || submitted;
-  send.disabled = blocked || !approved || submitted;
-  send.title = blocked ? "Resolve the Stripe payment issue first." : approved ? "Validate the production PDFs and create the Lulu Sandbox print job." : "Approve the proof first.";
+  send.disabled = true; // Immutable approved-artifact storage is not configured in this review build.
+  send.title = "Printing is disabled until immutable approved interior and binding-specific cover files are available.";
 }
 
 async function publishSelectedCustomerProof() {

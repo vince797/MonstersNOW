@@ -1,0 +1,28 @@
+{
+  "id": "light-short-brown-standing-candidate-v1",
+  "presetId": "light-short-brown",
+  "pose": "standing",
+  "status": "unapproved-art-candidate",
+  "productionReady": false,
+  "humanArtApprovalRequired": true,
+  "sourceGeneratedPath": "/workspace/scratch/35dc605e17ed/generated_images/exec-0962f536-894c-40db-b5d7-0a0fe8a04d17.png",
+  "prompt": "Use case: illustration-story / style-transfer. Create ONE full-body transparent MonstersNOW child preset master in the same established warm tactile soft-3D storybook world as the reference child. The reference defines costume, child body proportions, quality, camera and gentle lighting, NOT this new preset's hair or skin. Preserve exact teal padded quilted jacket over dusty-pink shirt, richly knitted burnt-orange scarf with fringed ends, indigo cuffed trousers, purple high-top canvas sneakers with cream laces/soles and small golden heart side patch, and one orange pumpkin bucket with one black arched handle. Fictional preschool/early-school-age child, rounded face, expressive brown eyes, credible gentle child proportions. Standing neutral, weight on two clearly grounded feet, body and face three-quarter to image RIGHT; relaxed pleasant closed-mouth small smile, not open-mouthed excitement. Both hands naturally clasp the same bucket handle in front at waist height. Exactly two arms, two hands, two legs and two shoes. Ensure plausible five-digit hands, no fused fingers, clean bucket handle and laces. Same moderate head-to-body ratio, neither baby nor adult. Premium softly modeled 3D family storybook art with tactile fabric and soft hair detail, not vector art or photo. Subtle warm key light upper-left plus cool fill, no orange aura or harsh rim. Entire body, hair and both soles fully inside portrait 2:3 canvas with transparent margins. Genuinely alpha-transparent background, no scenery, ground, shadow blob, checkerboard, text, branding or other figures. This is a candidate curated preset, not a customer portrait. Preset identity: light-short-brown. LIGHT skin with natural warm peach undertone, short lightly tousled medium BROWN hair cut above the ears and nape, small side-swept quiff and several softly lifted tufts at crown. Definitely short boyish haircut, no bob, bun, ringlets, ponytail or braid. A slightly broader rounded child face with short natural eyelashes (not long dramatic lashes), small soft nose and gentle closed-lip half smile. Unembellished neutral presentation, same child age and body proportions.",
+  "references": [
+    "/workspace/scratch/35dc605e17ed/monstersnow/assets/characters/candidates/warm-curly-dark-v1/porch.png"
+  ],
+  "generatedWith": "built-in image_gen",
+  "generatedAt": "2026-10-03",
+  "poseAvailability": [
+    "standing"
+  ],
+  "supportedCombinations": "One curated rendered preset only; no arbitrary trait combinations or unrendered poses supported.",
+  "libraryFileId": "libfile_9d1664a5222c819191d423f1fbe279de",
+  "libraryFilename": "standing(1).png",
+  "libraryVersion": 0,
+  "alphaValidated": true,
+  "nativeDimensions": [
+    1024,
+    1536
+  ],
+  "selectedForCandidateBatch": true
+}

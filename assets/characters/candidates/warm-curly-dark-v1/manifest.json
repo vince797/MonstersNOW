@@ -1,0 +1,190 @@
+{
+  "presetId": "warm-curly-dark",
+  "status": "unapproved-art-candidate",
+  "humanArtApprovalRequired": true,
+  "productionReady": false,
+  "generator": "OpenAI image generation",
+  "generationDate": "2026-10-03",
+  "sourceArtworkModified": false,
+  "identity": {
+    "skin": "warm medium-tan",
+    "hair": "dark chocolate curls in high bun, small dark-red tie",
+    "eyes": "brown",
+    "clothes": "teal quilted jacket, dusty-pink shirt, rust-orange knit scarf, cuffed indigo trousers, purple high-top shoes with cream laces/soles and gold heart decoration"
+  },
+  "references": [
+    "assets/storybook/halloween-monster-night/pages-04-05-master-v1.png",
+    "assets/storybook/halloween-monster-night/pages-18-19-master-v2.png",
+    "assets/storybook/halloween-monster-night/pages-30-31-master-v1.png"
+  ],
+  "assets": [
+    {
+      "id": "warm-curly-dark-porch-candidate-v1",
+      "src": "/assets/characters/candidates/warm-curly-dark-v1/porch.png",
+      "status": "unapproved-art-candidate",
+      "version": "candidate-v1",
+      "style": "soft-3d-storybook",
+      "mimeType": "image/png",
+      "transparent": true,
+      "fullBody": true,
+      "width": 1024,
+      "height": 1536,
+      "nativeWidth": 1024,
+      "nativeHeight": 1536,
+      "sha256": "e5fb743e8eefe4f27a1ce31cff29ca1292efcfb9cfe7c831d65a11513886bae4",
+      "facing": "right",
+      "mirror": false,
+      "pose": "porch",
+      "suggestedAnchor": {
+        "type": "bottom-center",
+        "x": 0.5,
+        "y": 0.978515625,
+        "basis": "alpha>=128 visible core foot baseline; verify per-scene placement"
+      },
+      "alphaInspection": {
+        "pose": "porch",
+        "width": 1024,
+        "height": 1536,
+        "format": "RGBA",
+        "alphaRange": [
+          0,
+          254
+        ],
+        "fullyTransparentPercent": 52.125,
+        "alpha1to15Percent": 2.697,
+        "alpha16to127Percent": 1.333,
+        "alpha128to250Percent": 3.462,
+        "alpha251to254Percent": 40.383,
+        "alpha255Percent": 0.0,
+        "outside8pxCoreFringeMaximumAlpha": 127,
+        "outside8pxCoreFringePixelsOver15": 1087,
+        "coreBounds": [
+          102,
+          59,
+          891,
+          1503
+        ],
+        "status": "unapproved-art-candidate",
+        "productionReady": false
+      }
+    },
+    {
+      "id": "warm-curly-dark-garden-candidate-v1",
+      "src": "/assets/characters/candidates/warm-curly-dark-v1/garden.png",
+      "status": "unapproved-art-candidate",
+      "version": "candidate-v1",
+      "style": "soft-3d-storybook",
+      "mimeType": "image/png",
+      "transparent": true,
+      "fullBody": true,
+      "width": 1024,
+      "height": 1536,
+      "nativeWidth": 1024,
+      "nativeHeight": 1536,
+      "sha256": "3110683cbe6ecc3a0b83e3af9030b027c508ab2ea7aa65cf6bdadae2adaf076f",
+      "facing": "right",
+      "mirror": false,
+      "pose": "garden",
+      "suggestedAnchor": {
+        "type": "bottom-center",
+        "x": 0.5,
+        "y": 0.951171875,
+        "basis": "alpha>=128 visible core foot baseline; verify per-scene placement"
+      },
+      "alphaInspection": {
+        "pose": "garden",
+        "width": 1024,
+        "height": 1536,
+        "format": "RGBA",
+        "alphaRange": [
+          0,
+          254
+        ],
+        "fullyTransparentPercent": 52.546,
+        "alpha1to15Percent": 2.439,
+        "alpha16to127Percent": 1.329,
+        "alpha128to250Percent": 3.292,
+        "alpha251to254Percent": 40.393,
+        "alpha255Percent": 0.0,
+        "outside8pxCoreFringeMaximumAlpha": 122,
+        "outside8pxCoreFringePixelsOver15": 1063,
+        "coreBounds": [
+          113,
+          71,
+          956,
+          1461
+        ],
+        "status": "unapproved-art-candidate",
+        "productionReady": false
+      }
+    },
+    {
+      "id": "warm-curly-dark-seated-home-candidate-v1",
+      "src": "/assets/characters/candidates/warm-curly-dark-v1/seated-home.png",
+      "status": "unapproved-art-candidate",
+      "version": "candidate-v1",
+      "style": "soft-3d-storybook",
+      "mimeType": "image/png",
+      "transparent": true,
+      "fullBody": true,
+      "width": 1024,
+      "height": 1536,
+      "nativeWidth": 1024,
+      "nativeHeight": 1536,
+      "sha256": "4e4a6854e8d95cea58a3393ced4c7b625b45d54b1af0e865161f4fef9ae3d7c4",
+      "facing": "right",
+      "mirror": false,
+      "pose": "seated-home",
+      "suggestedAnchor": {
+        "type": "bottom-center",
+        "x": 0.5,
+        "y": 0.9733072916666666,
+        "basis": "alpha>=128 visible core foot baseline; verify per-scene placement"
+      },
+      "alphaInspection": {
+        "pose": "seated-home",
+        "width": 1024,
+        "height": 1536,
+        "format": "RGBA",
+        "alphaRange": [
+          0,
+          254
+        ],
+        "fullyTransparentPercent": 47.005,
+        "alpha1to15Percent": 2.393,
+        "alpha16to127Percent": 1.565,
+        "alpha128to250Percent": 3.16,
+        "alpha251to254Percent": 45.876,
+        "alpha255Percent": 0.0,
+        "outside8pxCoreFringeMaximumAlpha": 122,
+        "outside8pxCoreFringePixelsOver15": 1689,
+        "coreBounds": [
+          57,
+          45,
+          950,
+          1495
+        ],
+        "status": "unapproved-art-candidate",
+        "productionReady": false
+      }
+    }
+  ],
+  "contactSheet": {
+    "path": "output/character-art-review/warm-curly-dark-three-pose-alpha-review.png",
+    "width": 1800,
+    "height": 1556
+  },
+  "validation": {
+    "visual": "Inspected each generated figure, then exact alpha over checkerboard and original background plates. No visible broad orange/black halo in flattened render. Face/outfit/shape remain coherent across three poses.",
+    "limitations": [
+      "Native 1024x1536 generated files; no upscaling claimed as native detail or print approval.",
+      "All opaque interiors generated at alpha251-254; preserve source RGBA, verify final proof.",
+      "Per-scene scale, placement, contact shadows, relighting and occlusion masks remain art/compositing work.",
+      "Seated-home figure requires sofa seat alignment and table foreground masking where overlapping.",
+      "Only first of 8 preset identities has this pose library; other catalog entries stay existing review fixtures."
+    ],
+    "backgroundsUnchanged": true,
+    "catalogUnchanged": true,
+    "approvalFlagsUnchanged": true
+  }
+}

@@ -1,3 +1,4 @@
+const { guardReviewPreview } = require("../lib/review-preview-api-guard");
 const {
   assertSandboxEndpointSecret,
   getSafeSandboxConfig,
@@ -8,6 +9,7 @@ const {
 const { rejectUnsupportedMethod, sendJson } = require("../lib/http");
 
 module.exports = async function handler(request, response) {
+  if (await guardReviewPreview(request, response)) return;
   if (request.method !== "GET") {
     return rejectUnsupportedMethod(request, response, ["GET"]);
   }

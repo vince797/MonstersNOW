@@ -1,3 +1,4 @@
+const { guardReviewPreview } = require("../lib/review-preview-api-guard");
 const { readJsonBody, rejectUnsupportedMethod, sendJson } = require("../lib/http");
 const {
   buildStorybookInterestSubmission,
@@ -13,9 +14,10 @@ const { attachCheckoutSession, recordCheckoutOrder } = require("../lib/order-lib
 const { deriveOrderAccess } = require("../lib/customer-orders");
 const { getAdminMonsterAssets, requireSubmission } = require("../lib/monster-submissions");
 const { listStories, validateStoryPublishReadiness } = require("../lib/story-library");
-const { buildHalloweenProof, verifyProof, STORY_ID, TITLE } = require("../lib/halloween-proof");
+const { buildHalloweenProofWithGeometry, verifyProof, STORY_ID, TITLE } = require("../lib/halloween-proof");
 
 module.exports = async function handler(request, response) {
+  if (await guardReviewPreview(request, response)) return;
   if (request.method !== "POST") {
     return rejectUnsupportedMethod(request, response, ["POST"]);
   }
@@ -49,11 +51,18 @@ module.exports = async function handler(request, response) {
     }
     let proof;
     try {
-      proof = buildHalloweenProof(body);
+      proof = await buildHalloweenProofWithGeometry(body);
       verifyProof(proof, body.proofToken);
     } catch (error) {
       error.name = "StorybookInterestError";
       error.code = error.code || "invalid_storybook_proof";
+      throw error;
+    }
+    if (proof.reviewOnly || proof.productionReady !== true) {
+      const error = new Error("This is a review-only composition. Final approved artwork and immutable Lulu files are required before paid checkout.");
+      error.name = "StorybookInterestError";
+      error.status = 409;
+      error.code = "review_artwork_not_for_sale";
       throw error;
     }
     submission = buildStorybookInterestSubmission({ ...body, storyId: STORY_ID, storyLabel: TITLE });

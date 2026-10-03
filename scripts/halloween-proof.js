@@ -8,52 +8,26 @@ try {
   const testMode = savedProof.submission?.testMode === true;
   document.querySelector("#proof-mode-message").textContent = testMode
     ? "This checkout is in test mode: no real payment, shipping, or print order occurs. Your proof is saved in this browser tab until checkout; keep a PDF if you want a copy."
-    : "Continue only when the names and selected monster are correct. Stripe will collect payment and the shipping address securely.";
+    : "Review only. Paid checkout and printing remain closed until final artwork and both Lulu files have passed approval.";
   document.querySelector("#proof-approval-copy").textContent = testMode
     ? "I reviewed the names, selected monster, and all 32 pages. I approve this review copy for test checkout."
     : "I reviewed the names, selected monster, and all 32 pages and want to continue to secure checkout.";
   proofCheckout.querySelector("button").textContent = testMode ? "Continue to Stripe test checkout" : "Continue to secure checkout";
-  for (const page of savedProof.proof.pages) {
-    const article = document.createElement("article");
-    article.className = "book-proof-page";
-    const title = document.createElement("h2");
-    title.textContent = page.title;
-    article.append(title);
-    if (page.art) {
-      const image = document.createElement("img");
-      image.src = savedProof.proof.monsterImage;
-      image.alt = savedProof.proof.monsterName;
-      article.append(image);
-    }
-    const text = document.createElement("p");
-    text.textContent = page.text;
-    const number = document.createElement("span");
-    number.className = "proof-page-number";
-    number.textContent = `${page.number} · Layout proof — not for print production`;
-    article.append(text, number);
-    document.querySelector("#proof-pages").append(article);
+  if (savedProof.proof.rendererVersion !== "layered-review-v1" || !savedProof.proof.pages.every((page) => Array.isArray(page.layers))) {
+    throw new Error("This saved proof predates the layered review. Build a new proof.");
   }
-  proofCheckout.hidden = false;
-  const fitProofPages = () => {
-    for (const article of document.querySelectorAll(".book-proof-page")) {
-      article.style.minHeight = "";
-      const text = article.querySelector("p");
-      text.style.fontSize = "";
-      if (window.innerWidth > 650) {
-        let size = Number.parseFloat(getComputedStyle(text).fontSize);
-        while (article.scrollHeight > article.clientHeight + 2 && size > 12) {
-          size -= 0.5;
-          text.style.fontSize = `${size}px`;
-        }
-        // Never clip a long name or paragraph just to preserve a square on
-        // screen. The print stylesheet restores physical page dimensions.
-        if (article.scrollHeight > article.clientHeight + 2) article.style.minHeight = `${article.scrollHeight + 24}px`;
-      }
-    }
-  };
-  fitProofPages();
-  window.addEventListener("resize", fitProofPages);
-} catch {
+  window.MonstersNOWPageCompositor.renderReviewBook(document.querySelector("#proof-pages"), savedProof.proof);
+  const notice = document.querySelector("#proof-composition-notice");
+  const summary = document.createElement("strong");
+  summary.textContent = `${savedProof.proof.childCharacter.label} · ${savedProof.proof.format === "hardcover" ? "Hardcover" : "Softcover"} · ${savedProof.proof.rendererVersion}`;
+  const list = document.createElement("ul");
+  for (const warning of savedProof.proof.warnings || []) { const li = document.createElement("li"); li.textContent = warning; list.append(li); }
+  notice.replaceChildren(summary, list);
+  // Sample review artwork can never enter live payment. Test checkout remains explicit.
+  proofCheckout.hidden = !testMode;
+
+} catch (error) {
+  proofCheckout.hidden = true;
   proofStatus.textContent = "No book proof is saved in this tab. Return to Create, choose your monster, and build a new proof.";
 }
 document.querySelector("#print-proof").addEventListener("click", () => window.print());
@@ -63,6 +37,7 @@ proofCheckout.addEventListener("submit", async (event) => {
   const button = proofCheckout.querySelector("button");
   button.disabled = true;
   const testMode = savedProof.submission?.testMode === true;
+  if (!testMode) { status.textContent = "Paid checkout is closed for this review copy."; button.disabled = false; return; }
   status.textContent = testMode ? "Opening test checkout…" : "Opening secure checkout…";
   try {
     const response = await fetch(testMode ? "/api/halloween-test-checkout" : "/api/storybook-checkout", {

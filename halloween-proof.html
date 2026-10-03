@@ -1,11 +1,17 @@
 <!doctype html>
 <html lang="en">
 <head>
+    <script src="scripts/review-preview.js?v=20261003-isolated-review-v1" defer></script>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow"><title>Review Your Halloween Book | MonstersNOW</title>
   <link rel="stylesheet" href="styles.css?v=20260917-halloween-test">
   <link rel="stylesheet" href="halloween-proof.css?v=20260917-halloween-test">
-  <script src="scripts/halloween-proof.js?v=20261002-checkout-guards" defer></script>
+  <link rel="stylesheet" href="page-compositor.css?v=20261003-personalized-review-v4">
+  <script src="lib/child-characters.js?v=20261003-personalized-review-v4" defer></script>
+  <script src="lib/halloween-review-layouts.js?v=20261003-personalized-review-v4" defer></script>
+    <script src="lib/review-composition.js?v=20261003-personalized-review-v4" defer></script>
+  <script src="scripts/page-compositor.js?v=20261003-personalized-review-v4" defer></script>
+  <script src="scripts/halloween-proof.js?v=20261003-personalized-review-v4" defer></script>
 </head>
 <body>
   <header class="proof-toolbar">
@@ -17,8 +23,9 @@
     <section class="proof-intro">
       <p class="eyebrow">Your monster. A whole Halloween adventure.</p>
       <h1>Review your book before checkout.</h1>
-      <p>All 32 interior pages use the approved story and your selected monster. This is a layout proof, with character vignettes—not the finished scene illustrations or Lulu-ready print files.</p>
+      <p>Review the selected child and monster together over the existing Halloween backgrounds. Child artwork is a sample fixture; final character poses, missing front matter, and high-resolution print artwork still need approval.</p>
       <p id="proof-mode-message">Your proof is saved in this browser tab until checkout; keep a PDF if you want a copy.</p>
+      <div id="proof-composition-notice" class="composition-review-notice"></div>
       <p id="proof-status" role="status"></p>
     </section>
     <div id="proof-pages" class="proof-pages"></div>

@@ -15,6 +15,8 @@ const details = document.querySelector("#customer-order-details");
 const proofForm = document.querySelector("#customer-proof-form");
 const proofStatus = document.querySelector("#customer-proof-status");
 let currentOrder;
+let displayedProofIdentity = null;
+let isSubmittingProof = false;
 
 document.querySelector("#customer-proof-approve").addEventListener("click", () => submitProofResponse("approve"));
 document.querySelector("#customer-proof-request").addEventListener("click", () => {
@@ -23,6 +25,7 @@ document.querySelector("#customer-proof-request").addEventListener("click", () =
   document.querySelector("#customer-proof-notes").focus();
 });
 document.querySelector("#customer-proof-send-change").addEventListener("click", () => submitProofResponse("request_changes"));
+document.querySelector("#customer-proof-refresh").addEventListener("click", loadOrder);
 
 if (!orderToken) {
   showError("This private order link is incomplete. Open the latest link from MonstersNOW or contact us for help.");
@@ -74,20 +77,79 @@ function renderProgress(status) {
   }));
 }
 
-function renderProof(proof, paymentIssue) {
+function secureProofUrl(value) {
+  try { const url = new URL(value); return url.protocol === "https:" && !url.username && !url.password ? url.toString() : ""; } catch { return ""; }
+}
+function renderProof(proof = {}, paymentIssue) {
   const proofTitle = document.querySelector("#customer-proof-title");
   const proofMessage = document.querySelector("#customer-proof-message");
   const open = document.querySelector("#customer-proof-open");
+  const pkg = proof.package;
+  const identity = pkg?.packageHash || proof.fingerprint || null;
+  if (identity !== displayedProofIdentity) {
+    document.querySelector("#customer-proof-approved").checked = false;
+    document.querySelector("#customer-proof-notes").value = "";
+    document.querySelector("#customer-proof-notes-wrap").hidden = true;
+    document.querySelector("#customer-proof-send-change").hidden = true;
+    proofStatus.textContent = "";
+    displayedProofIdentity = identity;
+  }
   proofForm.hidden = true;
-  open.hidden = !proof.url;
-  if (proof.url) open.href = proof.url;
+  document.querySelector("#customer-proof-approve").hidden = false;
+  document.querySelector("#customer-proof-approved").closest("label").hidden = false;
+  open.hidden = true; open.removeAttribute("href");
+  document.querySelector("#customer-proof-package-links").hidden = !pkg;
+  document.querySelector("#customer-package-state").hidden = !pkg;
+  if (pkg) {
+    const stale = ["superseded", "stale", "invalidated"].includes(pkg.status);
+    let filesAvailable = true;
+    for (const kind of ["interior", "cover"]) {
+      const link = document.querySelector(`#customer-package-${kind}`), url = secureProofUrl(pkg[kind]?.url);
+      link.hidden = !url || stale;
+      if (url && !stale) link.href = url; else link.removeAttribute("href");
+      filesAvailable &&= Boolean(url);
+      link.title = pkg[kind]?.sha256 ? `SHA-256: ${pkg[kind].sha256}` : "";
+    }
+    document.querySelector("#customer-package-state").textContent = `Review candidate · ${pkg.format === "hardcover" ? "hardcover" : "softcover"} · version ${pkg.packageHash.slice(0, 16)}… Your response applies to this exact pair of files. Printing remains disabled while production checks are unfinished.`;
+    const status = pkg.customerApproval?.status || proof.status;
+    if (stale) {
+      proofTitle.textContent = "This proof has changed.";
+      proofMessage.textContent = "A newer version needs review. Refresh to open its current cover and interior; earlier approval does not carry over.";
+    } else if (!filesAvailable) {
+      proofTitle.textContent = "The proof files are temporarily unavailable.";
+      proofMessage.textContent = "Refresh the private links before reviewing or approving. No print order can be sent.";
+    } else if ([pkg.customerApproval?.status, pkg.adminApproval?.status].includes("changes_requested")) {
+      proofTitle.textContent = "A revised file package is needed.";
+      proofMessage.textContent = "Changes were requested in this version. You can still view these files, but approval is paused until a revised package is published.";
+    } else if (status === "approved") {
+      proofTitle.textContent = "You reviewed this exact candidate.";
+      proofMessage.textContent = "Your response is saved. The book still needs final artwork and production approval before printing.";
+      proofForm.hidden = Boolean(paymentIssue);
+      document.querySelector("#customer-proof-approve").hidden = true;
+      document.querySelector("#customer-proof-approved").closest("label").hidden = true;
+    } else if (status === "changes_requested") {
+      proofTitle.textContent = "Your change request was received.";
+      proofMessage.textContent = "We will prepare a revised file package. It will need a new review.";
+    } else {
+      proofTitle.textContent = "Your exact cover and interior are ready to review.";
+      proofMessage.textContent = "Open both PDFs and review the names, selected characters, cover, and all 32 interior pages. These are watermarked review candidates.";
+      proofForm.hidden = Boolean(paymentIssue) || proof.canApprove === false;
+      if (proof.canApprove === false) { proofTitle.textContent = "This package is not open for approval."; proofMessage.textContent = "Refresh for the current review status or wait for a revised package from MonstersNOW."; }
+    }
+    return;
+  }
+  const url = secureProofUrl(proof.url);
+  open.hidden = !url;
+  if (url) open.href = url;
   if (proof.status === "ready") {
-    proofTitle.textContent = "Your 32-page proof is ready.";
-    proofMessage.textContent = `Open the PDF and review every page. Your approval applies only to fingerprint ${proof.fingerprint.slice(0, 12)}…`;
-    proofForm.hidden = paymentIssue;
+    proofTitle.textContent = "A manual PDF is available for review.";
+    proofMessage.textContent = "You can open this PDF and request changes. MonstersNOW must publish the exact cover-and-interior package before approval can be recorded.";
+    proofForm.hidden = Boolean(paymentIssue) || !url;
+    document.querySelector("#customer-proof-approve").hidden = true;
+    document.querySelector("#customer-proof-approved").closest("label").hidden = true;
   } else if (proof.status === "approved") {
-    proofTitle.textContent = "You approved this proof.";
-    proofMessage.textContent = "Production can now perform its final preflight before sending the book to print.";
+    proofTitle.textContent = "You reviewed this proof.";
+    proofMessage.textContent = "Your response is saved. Final production checks and exact-file approval remain required before printing.";
   } else if (proof.status === "changes_requested") {
     proofTitle.textContent = "Your change request was received.";
     proofMessage.textContent = "We will prepare a revised PDF. The previous proof cannot move to print.";
@@ -98,26 +160,32 @@ function renderProof(proof, paymentIssue) {
 }
 
 async function submitProofResponse(action) {
-  if (!currentOrder?.proof?.fingerprint) return;
+  const pkg = currentOrder?.proof?.package;
+  if (isSubmittingProof || (!pkg?.packageHash && !currentOrder?.proof?.fingerprint)) return;
+  if (action === "approve" && (currentOrder.proof.canApprove === false || [pkg?.customerApproval?.status, pkg?.adminApproval?.status].includes("changes_requested"))) {
+    proofStatus.textContent = "This version needs revision before it can be approved. Refresh for the latest files.";
+    return;
+  }
   if (action === "approve" && !document.querySelector("#customer-proof-approved").checked) {
     proofStatus.textContent = "Check the review confirmation before approving.";
     return;
   }
+  isSubmittingProof = true;
   const button = action === "approve" ? document.querySelector("#customer-proof-approve") : document.querySelector("#customer-proof-send-change");
-  button.disabled = true;
+  for (const control of proofForm.querySelectorAll("button")) control.disabled = true;
   proofStatus.textContent = action === "approve" ? "Recording your approval…" : "Sending your change request…";
   try {
     const response = await fetch("/api/customer-order", {
       method: "POST",
       headers: { Authorization: `Bearer ${orderToken}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ action, fingerprint: currentOrder.proof.fingerprint, notes: document.querySelector("#customer-proof-notes").value }),
+      body: JSON.stringify({ action, ...(pkg ? { packageId: pkg.id, packageHash: pkg.packageHash } : { fingerprint: currentOrder.proof.fingerprint }), notes: document.querySelector("#customer-proof-notes").value }),
     });
     const result = await response.json();
     if (!response.ok || !result.order) throw new Error(result.error || "Your response could not be saved.");
     renderOrder(result.order);
     proofStatus.textContent = action === "approve" ? "Proof approved. Thank you." : "Change request received.";
   } catch (error) { proofStatus.textContent = error.message; }
-  finally { button.disabled = false; }
+  finally { isSubmittingProof = false; for (const control of proofForm.querySelectorAll("button")) control.disabled = false; }
 }
 
 function statusMessage(order) {

@@ -1,0 +1,53 @@
+{
+  "id": "generated-sample-purple-wave-candidate-v1",
+  "src": "/assets/characters/candidates/sample-monster-v1/purple-wave-candidate.png",
+  "status": "unapproved-generated-sample",
+  "customerApproved": false,
+  "productionReady": false,
+  "generator": "OpenAI image generation",
+  "sourceReference": "assets/master-references/character-purple-storybook-style.jpg",
+  "sourceReferenceNativeDimensions": [
+    274,
+    342
+  ],
+  "note": "New generated synthetic sample from reference; not a lossless cutout or a customer-approved selection. Original source is unchanged.",
+  "width": 1145,
+  "height": 1374,
+  "nativeWidth": 1145,
+  "nativeHeight": 1374,
+  "format": "png",
+  "mode": "RGBA",
+  "transparent": true,
+  "mirror": false,
+  "sha256": "04ee59c132d457f1418be386a69fab2ab0979a591469dcabf14b7b35e133a0b9",
+  "alphaRange": [
+    0,
+    255
+  ],
+  "fullyTransparentPercent": 46.52771686276005,
+  "fullyOpaquePercent": 0.06680523508959275,
+  "coreBounds": [
+    74,
+    69,
+    1129,
+    1288
+  ],
+  "identityReview": {
+    "singleEye": true,
+    "twoGoldenHorns": true,
+    "tealFiveLeafTuft": true,
+    "twoUpperFangs": true,
+    "twoLowerTeeth": true,
+    "tealBellySpots": true,
+    "viewerRightHandRaised": true,
+    "twoFeetWithThreeToesEach": true,
+    "noNewAccessories": true,
+    "visibleIdentityMismatch": "None identified in reviewed main traits; generated texture and fine contours are not pixel-exact to small JPEG reference."
+  },
+  "pending": [
+    "Human visual approval",
+    "Scene-specific placement and contact shadows",
+    "Native-resolution print preflight"
+  ],
+  "alphaPreviewLibraryFileId": "libfile_471f3763c60c81918dc41a07e1b05126"
+}

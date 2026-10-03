@@ -1,0 +1,28 @@
+{
+  "id": "warm-curly-dark-garden-quiet-candidate-v1",
+  "presetId": "warm-curly-dark",
+  "pose": "garden-quiet",
+  "status": "unapproved-art-candidate",
+  "productionReady": false,
+  "humanArtApprovalRequired": true,
+  "sourceGeneratedPath": "/workspace/scratch/35dc605e17ed/generated_images/exec-2bca98eb-f76c-4be4-96a0-3644f2d148c2.png",
+  "prompt": "Use case: identity-preserve. Edit the supplied full-body MonstersNOW child cutout with ONE deliberate narrative change: make her expression quiet and slightly hesitant, ready to gather courage, instead of overjoyed. Preserve exact face identity, warm medium-tan skin, brown eyes, dark chocolate curly high bun with small dark-red tie, teal quilted jacket, dusty-pink undershirt, rust-orange knitted scarf and fringed ends, cuffed indigo trousers, purple high-top shoes and held pumpkin bucket. Keep three-quarter RIGHT orientation. Pause the walking pose into a tentative small step, shoulders slightly drawn in; one hand holds bucket low at side and the free hand lightly rests at upper jacket near chest, not pointing. Mouth CLOSED in a small thoughtful neutral curve, no teeth visible, eyes attentive with gently raised inner brows, gaze forward and slightly right at a reassuring nearby companion. Convey mild uncertainty and growing courage, not fear, sadness or distress. No huge grin, laughter, tears or dramatic emotion. Same child proportions and exact tactile soft-3D storybook materials. Two arms/hands/legs/feet only, anatomically clean. Full body including bun and shoe soles, comfortable transparent margin all around, clean true alpha background. No scene, floor, props beyond her existing held bucket, cast shadow, text, borders or glow. Preserve image quality and outfit; change only expression and restrained pose needed for the story.",
+  "references": [
+    "/workspace/scratch/35dc605e17ed/monstersnow/assets/characters/candidates/warm-curly-dark-v1/garden.png"
+  ],
+  "generatedWith": "built-in image_gen",
+  "generatedAt": "2026-10-03",
+  "poseAvailability": [
+    "garden-quiet"
+  ],
+  "supportedCombinations": "One curated rendered preset only; no arbitrary trait combinations or unrendered poses supported.",
+  "libraryFileId": "libfile_37f06b2d9be081918104d6c84830d720",
+  "libraryFilename": "garden-quiet.png",
+  "libraryVersion": 0,
+  "alphaValidated": true,
+  "nativeDimensions": [
+    1024,
+    1536
+  ],
+  "selectedForCandidateBatch": true
+}

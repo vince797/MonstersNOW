@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <script src="scripts/review-preview.js?v=20261003-isolated-review-v1" defer></script>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
@@ -12,6 +13,7 @@
     <link rel="icon" href="assets/monstersnow-logo-v2.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="styles.css?v=20261001-child-character" />
     <link rel="stylesheet" href="storefront.css?v=20261002-public-storefront" />
+    <link rel="stylesheet" href="styles/child-picker.css?v=20261003-personalized-review-v4" />
   </head>
   <body>
     <a class="skip-link" href="#main-content">Skip to content</a>
@@ -43,8 +45,8 @@
             <p class="eyebrow">Create your monster</p>
             <h1 id="converter-title">Upload their drawing.</h1>
             <p>
-              Choose a clear photo, create up to three monster previews, select
-              your favorite, then review the personalized book before checkout.
+              Choose an illustrated character and upload a clear photo of the monster drawing.
+              Create up to three previews, then review the personalized book before checkout.
             </p>
             <div class="selected-story-card" id="selected-story" data-story-id="halloween-monster-night" role="group" aria-label="Selected story">
               <img src="assets/storybook/cover-series/minimal-concepts/halloween-monster-night-v2-web.jpg" alt="" width="96" height="96" />
@@ -70,6 +72,21 @@
             </ol>
           </div>
         </div>
+
+        <section class="child-character-picker" id="child-character-picker" aria-labelledby="child-character-title">
+          <div class="child-character-heading">
+            <div>
+              <p class="eyebrow">Make it their adventure</p>
+              <h2 id="child-character-title">Choose their illustrated character.</h2>
+              <p id="child-character-help">Pick a storybook companion before uploading the monster drawing, or keep the story monster-only. You can change this anytime before review. No child photo needed.</p>
+            </div>
+            <span id="child-character-selection" data-child-character-selection role="status" aria-live="polite">Monster only</span>
+          </div>
+          <p class="child-character-sample-note" id="child-character-sample-note"><strong>Review artwork · not yet approved</strong> All eight choices use Soft 3D candidates. Curly dark has four poses; seven choices have standing art only. None is approved or print-ready artwork.</p>
+          <div class="child-character-options" data-child-character-options role="radiogroup" aria-labelledby="child-character-title" aria-describedby="child-character-help child-character-sample-note"></div>
+          <noscript><p>Enable JavaScript to choose an illustrated character. The default is Monster only.</p></noscript>
+          <p class="child-character-privacy">Skin tone and hair are visual choices only. We do not ask for or infer race. Your character choice is remembered in this tab.</p>
+        </section>
 
         <div class="converter-tool" data-converter>
           <form class="upload-panel" novalidate>
@@ -203,27 +220,7 @@
                         />
                       </label>
                     </div>
-                    <section class="child-character-picker" aria-labelledby="child-character-title">
-                      <div class="child-character-heading">
-                        <div><strong id="child-character-title">Choose the child character</strong><small>Optional. Select the closest illustrated look—no child photo needed.</small></div>
-                        <span id="child-character-selection">Monster only</span>
-                      </div>
-                      <div class="child-character-options" role="radiogroup" aria-label="Child character appearance">
-                        <label class="child-character-option is-selected">
-                          <input type="radio" name="child-character" value="none" checked />
-                          <span class="child-avatar child-avatar-none" aria-hidden="true">◇</span><b>Monster only</b>
-                        </label>
-                        <label class="child-character-option"><input type="radio" name="child-character" value="warm-curly-dark" /><span class="child-avatar" style="--skin:#8f5538;--hair:#24150f;--hair-shape:48%" aria-hidden="true"></span><b>Curly dark</b></label>
-                        <label class="child-character-option"><input type="radio" name="child-character" value="deep-coils-black" /><span class="child-avatar avatar-coils" style="--skin:#5c3426;--hair:#17100e" aria-hidden="true"></span><b>Coils</b></label>
-                        <label class="child-character-option"><input type="radio" name="child-character" value="medium-wavy-brown" /><span class="child-avatar avatar-wave" style="--skin:#bd7b54;--hair:#4a2818" aria-hidden="true"></span><b>Wavy brown</b></label>
-                        <label class="child-character-option"><input type="radio" name="child-character" value="golden-straight-black" /><span class="child-avatar avatar-straight" style="--skin:#d4a071;--hair:#171717" aria-hidden="true"></span><b>Straight black</b></label>
-                        <label class="child-character-option"><input type="radio" name="child-character" value="light-short-brown" /><span class="child-avatar avatar-short" style="--skin:#f0c3a0;--hair:#6a3d24" aria-hidden="true"></span><b>Short brown</b></label>
-                        <label class="child-character-option"><input type="radio" name="child-character" value="light-wavy-blonde" /><span class="child-avatar avatar-wave" style="--skin:#f5ceb0;--hair:#d9a83e" aria-hidden="true"></span><b>Wavy blonde</b></label>
-                        <label class="child-character-option"><input type="radio" name="child-character" value="medium-curly-auburn" /><span class="child-avatar avatar-coils" style="--skin:#c88962;--hair:#8c3d25" aria-hidden="true"></span><b>Curly auburn</b></label>
-                        <label class="child-character-option"><input type="radio" name="child-character" value="deep-braids-black" /><span class="child-avatar avatar-braids" style="--skin:#70422f;--hair:#16110f" aria-hidden="true"></span><b>Braids</b></label>
-                      </div>
-                      <p>Skin tone and hair are visual choices only. MonstersNOW does not ask for or infer race.</p>
-                    </section>
+                    <p class="child-character-summary">Your illustrated character: <strong data-child-character-selection>Monster only</strong>. <a href="#child-character-picker">Change character</a></p>
                     <div class="checkout-email-field">
                       <label for="interest-email">Email address <span>Required</span></label>
                       <input
@@ -346,6 +343,8 @@
       </div>
     </footer>
 
-    <script src="scripts/main.js?v=20261003-integrated-storefront"></script>
+    <script src="lib/child-characters.js?v=20261003-personalized-review-v4"></script>
+    <script src="scripts/child-character-picker.js?v=20261003-personalized-review-v4"></script>
+    <script src="scripts/main.js?v=20261003-personalized-review-v4"></script>
   </body>
 </html>

@@ -1,0 +1,40 @@
+.composed-proof-page { display:flex; flex-direction:column; padding:0; aspect-ratio:auto; min-height:0; overflow:hidden; background:#fff8ec; color:#132d3d; border-radius:12px; }
+.composition-stage { isolation:isolate; position:relative; width:100%; aspect-ratio:1; background:linear-gradient(160deg,#172f4c,#54747d); overflow:hidden; flex-shrink:0; }
+.composition-layer { position:absolute; }
+.composition-background { inset:0; z-index:0; overflow:hidden; }
+.composition-layer img { display:block; width:100%; height:100%; margin:0; max-width:none; min-height:0; object-fit:contain; }
+.composition-background img { object-fit:cover; }
+.composition-background.crop-left img,.composition-background.crop-right img { width:200%; height:100%; object-fit:fill; }
+.composition-background.crop-right img { transform:translateX(-50%); }
+.composition-monster,.composition-child { transform:translate(-50%,-100%); z-index:1; height:64%; display:flex; align-items:flex-end; }
+.composition-monster img,.composition-child img { height:auto; max-height:100%; object-fit:contain; object-position:center bottom; filter:drop-shadow(0 9px 6px #14212b35); }
+.composition-child { z-index:2; }
+.composition-prop { transform:translate(-50%,-100%); z-index:1; }
+.composition-prop img { height:auto; }
+.composition-sample-mark { position:absolute; z-index:3; bottom:10px; left:12px; max-width:calc(100% - 24px); padding:4px 8px; border-radius:4px; color:white; background:#132d3de8; font:700 8px/1.4 system-ui,sans-serif; letter-spacing:.08em; }
+.composition-copy { padding:22px 24px 12px; }
+.composition-copy h2 { color:#193a43; font-size:19px; line-height:1.3; margin:0 0 10px; overflow-wrap:anywhere; }
+.composition-copy p { white-space:pre-line; font-size:15px; line-height:1.55; margin:0; overflow-wrap:anywhere; }
+.composition-footer { display:flex; gap:12px; justify-content:space-between; align-items:flex-start; padding:8px 24px 18px; margin-top:auto; }
+.composition-footer .proof-page-number { padding:0; color:#567; font-size:11px; flex-shrink:0; }
+.composition-page-notes { color:#80510c; text-align:right; font-size:10px; }
+.composition-missing { background:#fff3d3; color:#80510c; padding:6px; font-size:12px; }
+.composition-review-notice { border:1px solid #c5d4d4; background:#f2f8f5; color:#23434b; padding:18px; border-radius:10px; font-size:14px; line-height:1.5; }
+.composition-review-notice ul { margin:10px 0 0; padding-left:20px; }
+.order-composition-review { padding:22px 0; border-top:1px solid #dde5e4; }
+.order-composition-review h3 { margin:8px 0; }
+.order-composition-pages { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; margin-top:18px; }
+.order-composition-pages .composition-copy { padding:16px; }
+.order-composition-pages .composition-copy h2 { font-size:16px; }
+.order-composition-pages .composition-copy p { font-size:13px; }
+.order-composition-review summary { cursor:pointer; padding:14px 0; font-weight:700; }
+@media(max-width:650px) { .order-composition-pages { grid-template-columns:1fr; } .composition-copy { padding:20px; } .composition-copy p { font-size:15px; } }
+@media print { .composed-proof-page { width:8.5in; height:8.5in; break-after:page; border-radius:0; } .composition-stage { height:4.2in; aspect-ratio:auto; } .composition-copy { padding:.25in .5in; } .composition-copy p { font-size:12pt!important; } .composition-copy h2 { font-size:16pt!important; } .composition-footer { padding:.1in .5in; } }
+
+.artifact-review-panel { border:1px solid #c8dedc; border-radius:14px; padding:20px; background:#f4faf7; margin:20px 0; }
+.artifact-review-panel h3 { margin:6px 0; }
+.artifact-review-panel p,.artifact-review-panel li { font-size:13px; line-height:1.55; }
+.artifact-actions { display:flex; flex-wrap:wrap; gap:10px; margin:14px 0; }
+.artifact-review-panel .feature-check { display:flex; gap:10px; margin:16px 0; align-items:flex-start; font-size:13px; line-height:1.5; }
+.artifact-review-panel .feature-check input { flex-shrink:0; }
+#artifact-package-blockers { margin:14px 0; padding-left:20px; color:#775220; }

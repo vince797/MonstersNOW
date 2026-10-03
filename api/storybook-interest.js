@@ -1,3 +1,4 @@
+const { guardReviewPreview } = require("../lib/review-preview-api-guard");
 const { readJsonBody, rejectUnsupportedMethod, sendJson } = require("../lib/http");
 const {
   buildStorybookInterestSubmission,
@@ -15,6 +16,7 @@ const { createAdminStoryProof } = require("../lib/admin-story-proof");
 const { getCustomerOrderView, reviewCustomerProof } = require("../lib/customer-orders");
 
 module.exports = async function handler(request, response) {
+  if (await guardReviewPreview(request, response)) return;
   const resource = firstQueryValue(request.query?.resource) || new URL(request.url, "https://monstersnow.com").searchParams.get("resource");
   const testHandlers = {
     "halloween-proof": "../lib/halloween-proof-handler",
@@ -154,12 +156,12 @@ module.exports = async function handler(request, response) {
 module.exports.config = { api: { bodyParser: false } };
 
 async function handleAdminStories(request, response) {
+  const resource = firstQueryValue(request.query?.resource) || "stories";
   try {
     assertAdminRequest(request);
     const id = firstQueryValue(request.query?.id);
-    const resource = firstQueryValue(request.query?.resource) || "stories";
-
     if (resource === "orders") {
+      response.setHeader("Cache-Control", "private, no-store");
       if (request.method === "GET") return sendJson(response, 200, { orders: await listOrders() });
       if (request.method === "PATCH") {
         const order = await updateOrder(id, await readJsonBody(request, { maxBytes: 28 * 1024 * 1024 }), { request });

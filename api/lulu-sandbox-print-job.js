@@ -1,37 +1,19 @@
-const {
-  assertSandboxEndpointSecret,
-  getSandboxConfig,
-  luluErrorToResponse,
-  luluSandboxRequest,
-} = require("../lib/lulu-sandbox");
-const { readJsonBody, rejectUnsupportedMethod, sendJson } = require("../lib/http");
-const {
-  buildPrintJobPayload,
-  validationErrorToResponse,
-} = require("../lib/lulu-payloads");
+const { guardReviewPreview } = require("../lib/review-preview-api-guard");
+const { assertSandboxEndpointSecret, luluErrorToResponse } = require('../lib/lulu-sandbox');
+const { rejectUnsupportedMethod, sendJson } = require('../lib/http');
 
+// Do not let the legacy generic endpoint bypass exact-artifact order review.
 module.exports = async function handler(request, response) {
-  if (request.method !== "POST") {
-    return rejectUnsupportedMethod(request, response, ["POST"]);
-  }
-
+  if (await guardReviewPreview(request, response)) return;
+  if (request.method !== 'POST') return rejectUnsupportedMethod(request, response, ['POST']);
   try {
     assertSandboxEndpointSecret(request, { required: true });
-
-    const payload = buildPrintJobPayload(await readJsonBody(request), getSandboxConfig());
-    const result = await luluSandboxRequest("/print-jobs/", {
-      method: "POST",
-      body: payload,
-    });
-
-    return sendJson(response, 201, {
-      printJob: result.data,
-      request: payload,
+    return sendJson(response, 409, {
+      code: 'approved_artifact_handoff_unavailable',
+      error: 'Print submission is disabled until the exact approved interior and binding-specific cover artifacts are verified and hosted. Generic file URLs cannot bypass order review.',
     });
   } catch (error) {
-    const { status, payload } =
-      error.name === "ValidationError" ? validationErrorToResponse(error) : luluErrorToResponse(error);
-
+    const { status, payload } = luluErrorToResponse(error);
     return sendJson(response, status, payload);
   }
 };

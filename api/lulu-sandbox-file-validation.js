@@ -1,3 +1,4 @@
+const { guardReviewPreview } = require("../lib/review-preview-api-guard");
 const {
   assertSandboxEndpointSecret,
   luluErrorToResponse,
@@ -11,6 +12,7 @@ const {
 } = require("../lib/lulu-payloads");
 
 module.exports = async function handler(request, response) {
+  if (await guardReviewPreview(request, response)) return;
   if (request.method !== "GET" && request.method !== "POST") {
     return rejectUnsupportedMethod(request, response, ["GET", "POST"]);
   }

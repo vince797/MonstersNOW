@@ -1,9 +1,11 @@
+const { guardReviewPreview } = require("../lib/review-preview-api-guard");
 const convert = require("heic-convert");
 const { readJsonBody, rejectUnsupportedMethod, sendJson } = require("../lib/http");
 
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 
 module.exports = async function handler(request, response) {
+  if (await guardReviewPreview(request, response)) return;
   if (request.method !== "POST") {
     return rejectUnsupportedMethod(request, response, ["POST"]);
   }

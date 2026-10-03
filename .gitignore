@@ -8,3 +8,8 @@ deploy/
 node_modules/
 tmp/
 scripts/__pycache__/
+# Generated local review exports; source assets and renderer stay versioned.
+output/pdf/composed-review/
+output/character-art-review/
+
+output/pdf/scale-review-before/
