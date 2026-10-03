@@ -66,3 +66,11 @@ test('all story scenes explicitly specify larger heroes and keep full-page basel
   if(!layoutForPage(n)?.artBox){assert.ok(630*(1-p.child.y/100)>=45);assert.ok(630*(1-p.monster.y/100)>=45);}
  }
 });
+
+test('the red-cushion star has a complete centered source window on page7',()=>{
+ const p=book().pages[6];assert.equal(p.layers.find(l=>l.type==='background').crop,'center');
+ const {buildHalloweenMasterPages}=require('../lib/halloween-master-pages');
+ assert.equal(buildHalloweenMasterPages()[6].backgroundCrop,'center');
+ const {normalizePages}=require('../lib/story-library');
+ assert.equal(normalizePages([{text:'Sample',backgroundCrop:'center'}])[0].backgroundCrop,'center');
+});

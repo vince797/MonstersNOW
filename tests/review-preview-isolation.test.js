@@ -66,3 +66,15 @@ test('each real API handler independently prevents production execution without 
   assert.equal(outbound,0);
  } finally { global.fetch = originalFetch; }
 });
+
+test('direct handler invocation fails closed even if all deployment metadata is missing', async () => {
+ const savedVercel=process.env.VERCEL,savedEnv=process.env.VERCEL_ENV;
+ const savedFetch=global.fetch;delete process.env.VERCEL;delete process.env.VERCEL_ENV;
+ global.fetch=()=>{throw new Error('OUTBOUND CALL FORBIDDEN');};
+ try {
+  const {guardReviewPreview}=require('../lib/review-preview-api-guard');
+  let code,body;const response={setHeader(){},status(value){code=value;return this;},json(value){body=value;}};
+  assert.equal(await guardReviewPreview({url:'/api/convert-monster',method:'POST'},response),true);
+  assert.equal(code,404);assert.equal(body.synthetic,true);
+ } finally {global.fetch=savedFetch;if(savedVercel===undefined)delete process.env.VERCEL;else process.env.VERCEL=savedVercel;if(savedEnv===undefined)delete process.env.VERCEL_ENV;else process.env.VERCEL_ENV=savedEnv;}
+});

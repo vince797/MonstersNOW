@@ -66,6 +66,7 @@ test('actual proof HTML renders all 32 composed pages and never exposes paid che
   assert.equal(doc.querySelector('#proof-checkout').hidden,true);
   assert.match(doc.querySelector('[data-page-number="31"] .composition-child img').src,/seated-home\.png$/);
   assert.match(doc.querySelector('#proof-composition-notice').textContent,/awaiting approval/);
+  assert.ok(doc.querySelector('[data-page-number="7"] .composition-background.crop-center'));
   assert.deepEqual(errors,[]);
  } finally { dom.window.close(); }
 });

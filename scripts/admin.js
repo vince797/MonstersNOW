@@ -1068,7 +1068,7 @@ function addPage(page = {}) {
   cropLabel.textContent = "Background crop for rendered page ";
   const cropSelect = document.createElement("select");
   cropSelect.dataset.backgroundCrop = "";
-  for (const [value, label] of [["full", "Full page image"], ["left", "Left half of spread"], ["right", "Right half of spread"]]) cropSelect.append(new Option(label, value));
+  for (const [value, label] of [["full", "Full page image"], ["left", "Left half of spread"], ["right", "Right half of spread"], ["center", "Center window of spread"]]) cropSelect.append(new Option(label, value));
   cropSelect.value = page.backgroundCrop || "full";
   card.dataset.backgroundCrop = cropSelect.value;
   cropLabel.append(cropSelect);

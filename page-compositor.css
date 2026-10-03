@@ -4,8 +4,9 @@
 .composition-background { inset:0; z-index:0; overflow:hidden; }
 .composition-layer img { display:block; width:100%; height:100%; margin:0; max-width:none; min-height:0; object-fit:contain; }
 .composition-background img { object-fit:cover; }
-.composition-background.crop-left img,.composition-background.crop-right img { width:200%; height:100%; object-fit:fill; }
+.composition-background.crop-left img,.composition-background.crop-right img,.composition-background.crop-center img { width:200%; height:100%; object-fit:fill; }
 .composition-background.crop-right img { transform:translateX(-50%); }
+.composition-background.crop-center img { transform:translateX(-25%); }
 .composition-monster,.composition-child { transform:translate(-50%,-100%); z-index:1; height:64%; display:flex; align-items:flex-end; }
 .composition-monster img,.composition-child img { height:auto; max-height:100%; object-fit:contain; object-position:center bottom; filter:drop-shadow(0 9px 6px #14212b35); }
 .composition-child { z-index:2; }

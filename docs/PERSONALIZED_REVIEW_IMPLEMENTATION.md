@@ -22,7 +22,7 @@ Foreground occlusion masks are not supplied. Pages requesting a behind-foregroun
 
 ## Verification
 
-Run `node --test tests/*.test.js`. Tests cover all canonical preset IDs, spoofed metadata, sample readiness, 32 pages, all background assets, exact selected monster, no mirrored identity, change-sensitive proof receipts, both formats, fail-closed checkout/print paths, and exact-file artifact validation.
+Run `npm test` (the unit runner declares an explicit local development environment). Tests cover all canonical preset IDs, spoofed metadata, sample readiness, 32 pages, all background assets, exact selected monster, no mirrored identity, change-sensitive proof receipts, both formats, fail-closed checkout/print paths, and exact-file artifact validation.
 
 Browser regression scripts:
 
@@ -53,10 +53,16 @@ Transparent PNG output is requested explicitly using `background: "transparent"`
 
 Explicit scene layouts protect supporting faces and the window/star clues. Crowded pages 14, 17, 18, 24, 30 and 31 use an uncropped framed illustration with copy below; other flagged pages use compact copy areas. Garden heroes stay on the lower open path, the parade uses a walking pose, and page 31 uses a sofa-seat anchor. The source background pixels are unchanged. Final scene shadows/occlusion and art approval remain separate gates.
 
-Final aggregate local check at this checkpoint: 172 tests passed. Independent review found no remaining application-path ownership/hash/approval bypass. Neither database transaction execution nor deployed browser QA is claimed: the migration has not been applied, and the current environment blocks browser process sockets and localhost browsing.
+Final aggregate local check at this checkpoint: 174 tests passed. Independent review found no remaining application-path ownership/hash/approval bypass. Neither database transaction execution nor deployed browser QA is claimed: the migration has not been applied, and the current environment blocks browser process sockets and localhost browsing.
 
 ## Review preview isolation
 
 The review branch includes Node routing middleware plus an entry guard in every API handler. In Vercel preview mode, only deterministic synthetic sample responses are available. The browser disables real uploads and personal-data fields, retains canonical child and binding choices, and provides an explicit sample-book button. Preview requests cannot reach production database, image generation, email, payment or print handlers. Unknown preview mode fails closed. Production behavior passes through unchanged.
 
 These guards have automated local coverage. Browser process-socket restrictions still prevent a local Chromium smoke test. Deployed routing, bundled native dependencies and source files, time/memory and actual renderer behavior must be checked against the exact preview commit. Poppler page-image generation is a local CLI helper, not a server prerequisite for generating the stored PDF package.
+
+### Centered star crop follow-up
+
+Page 7 now uses a centered square window from the unchanged pages 6–7 environment plate, so the complete star on its red cushion is visible on one page. The giant pumpkin remains visible on page 6. The same center-window choice is available in the admin master-page crop control. Newly generated Halloween masters include that choice; an older saved master must select and save the center crop explicitly before rerendering. No live master record was changed.
+
+Unknown deployment environments are now denied by the individual API guards as well as routing middleware. Local unit tests explicitly declare development mode; an unrecognized deployment cannot fall through to real API handlers if middleware is bypassed or missing.

@@ -15,7 +15,7 @@
     "jsdom": "27.0.0"
   },
   "scripts": {
-    "test": "node --test tests/*.test.js",
+    "test": "node --import ./tests/local-test-environment.js --test tests/*.test.js",
     "test:pdf": "node --test tests/composed-book-pdf.test.js",
     "export:review": "node scripts/export-review-book.js"
   }
