@@ -26,7 +26,7 @@ test("master copy becomes a pinned order-specific render manifest", () => {
     monsterName: "Fizz",
     childCharacter: { id: "deep-braids-black", label: "Black braids", included: true },
     selectedPreviewId: "preview-1",
-  }, { selectedPreviewUrl: "https://assets.example/fizz.png" });
+  }, { selectedPreviewUrl: "https://assets.example/fizz.png", selectedPreviewId: "preview-1" });
 
   assert.equal(book.masterVersion, 7);
   assert.equal(book.pages.length, 32);
@@ -39,6 +39,30 @@ test("master copy becomes a pinned order-specific render manifest", () => {
   assert.ok(book.pages.every((page) => page.artworkRole === "background_plate"));
   assert.deepEqual(book.readiness, { copyReady: true, artworkReady: true, monsterReady: true });
   assert.match(book.fingerprint, /^[a-f0-9]{64}$/);
+});
+
+test("proof fingerprints remain stable when signed asset URLs rotate", () => {
+  const story = {
+    id: "story-1", version: 1, title_template: "Story",
+    pages: Array.from({ length: 32 }, (_, index) => ({
+      text: `Page ${index + 1}`,
+      artworkUrl: `https://assets.example/page-${index + 1}.jpg`,
+      artworkStatus: "final",
+      backgroundPlateConfirmed: true,
+      backgroundPlateVersion: 2,
+    })),
+  };
+  const order = { childName: "Riley", monsterName: "Fizz", selectedPreviewId: "preview-1" };
+  const first = buildPersonalizedBook(story, order, { selectedPreviewId: "preview-1", selectedPreviewUrl: "https://assets.example/fizz.png?token=one" });
+  const second = buildPersonalizedBook(story, order, { selectedPreviewId: "preview-1", selectedPreviewUrl: "https://assets.example/fizz.png?token=two" });
+  assert.equal(first.fingerprint, second.fingerprint);
+});
+
+test("an order cannot silently switch to another saved monster preview", () => {
+  const story = { id: "story-1", pages: Array.from({ length: 32 }, () => ({ text: "Ready" })) };
+  assert.throws(() => buildPersonalizedBook(story, {
+    childName: "Riley", monsterName: "Fizz", selectedPreviewId: "preview-1",
+  }, { selectedPreviewId: "preview-2", selectedPreviewUrl: "https://assets.example/fizz.png" }), /does not match/i);
 });
 
 test("a print manifest cannot be built without an approved monster image", () => {

@@ -41,10 +41,10 @@ the same prompt language.
 
 ## Storybook checkout and interest
 
-The create flow first posts selected previews to `/api/storybook-checkout` to
-start Stripe Checkout. That checkout route validates payment configuration,
-sends the selected monster preview to operations through Resend, then returns a
-Stripe-hosted checkout URL. Configure these Vercel environment variables:
+The create flow builds a signed 32-page review proof before posting the approved
+selection to `/api/storybook-checkout`. That checkout route verifies the proof,
+published master, and exact saved monster before it records the order and starts
+Stripe Checkout. Configure these Vercel environment variables:
 
 ```text
 STRIPE_SECRET_KEY
@@ -52,10 +52,13 @@ STRIPE_STORYBOOK_SHIPPING_RATE_IDS
 STRIPE_WEBHOOK_SECRET
 STORYBOOK_CHECKOUT_ALLOWED_COUNTRIES
 STORYBOOK_CHECKOUT_SITE_URL
+STORYBOOK_LIVE_CHECKOUT_ENABLED
 ```
 
 `STRIPE_STORYBOOK_SHIPPING_RATE_IDS` is a comma-separated list of Stripe
-shipping rate IDs. Register `https://www.monstersnow.com/api/stripe-webhook`
+shipping rate IDs. Keep `STORYBOOK_LIVE_CHECKOUT_ENABLED` unset until the final
+PDF renderer and printer validation have passed a physical proof order; set it
+to `true` only when paid fulfillment is ready. Register `https://www.monstersnow.com/api/stripe-webhook`
 as a Stripe webhook for `checkout.session.completed`,
 `checkout.session.async_payment_succeeded`, `checkout.session.async_payment_failed`,
 `checkout.session.expired`, `refund.created`, and `charge.dispute.created`, then store its signing secret in

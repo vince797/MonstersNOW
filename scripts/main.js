@@ -108,6 +108,8 @@ const maxFreePreviews = 3;
 const heicConverterUrl = "https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js";
 const demoMonsterImage = "assets/step-2-character.jpg?v=20260515-horns";
 const defaultPreviewStyle = "storybook";
+const halloweenStoryId = "halloween-monster-night";
+const halloweenStoryLabel = "Halloween Monster Night";
 const halloweenTestMode = new URLSearchParams(window.location.search).get("test") === "halloween";
 const storybookInterestButtonText = "Review Your 32-Page Book";
 if (halloweenTestMode && storybookInterestButton) {
@@ -280,6 +282,9 @@ async function handleStorybookInterestSubmit(event) {
   const submission = {
     submissionId,
     source: "create-form",
+    storyId: halloweenStoryId,
+    storyLabel: halloweenStoryLabel,
+    testMode: halloweenTestMode,
     email,
     personalization,
     format: selectedFormat.value,
@@ -1293,7 +1298,7 @@ async function finalizeSavedMonster({ email, personalization, selectedPreviewId:
       email,
       childName: personalization.childName,
       monsterName: personalization.monsterName,
-      storyId: "halloween-monster-night",
+      storyId: halloweenStoryId,
       format,
       featurePermission,
     }),

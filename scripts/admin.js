@@ -1,6 +1,19 @@
 const login = document.querySelector("#admin-login");
 const loginForm = document.querySelector("#admin-login-form");
 const passwordInput = document.querySelector("#admin-password");
+const luluShippingFields = document.querySelector("#lulu-shipping-fields");
+if (luluShippingFields && !document.querySelector("#lulu-email")) {
+  const emailLabel = document.createElement("label");
+  emailLabel.textContent = "Email";
+  const emailInput = document.createElement("input");
+  emailInput.id = "lulu-email";
+  emailInput.type = "email";
+  emailInput.autocomplete = "email";
+  emailLabel.append(emailInput);
+  luluShippingFields.querySelector("label")?.after(emailLabel);
+}
+const paymentNotice = document.querySelector(".order-payment-notice");
+if (paymentNotice) paymentNotice.textContent = "Payment status is controlled by verified Stripe events. Unpaid orders cannot advance to production.";
 const loginStatus = document.querySelector("#admin-login-status");
 const adminApp = document.querySelector("#admin-app");
 const dashboard = document.querySelector("#admin-dashboard");
@@ -1471,9 +1484,9 @@ async function saveStory(status, { silent = false } = {}) {
   if (savingStory) return null;
   clearTimeout(storyAutosaveTimer);
   if (!silent && !editor.reportValidity()) return null;
-  const artIncomplete = [...pagesContainer.children].some((card) => !card.dataset.artworkUrl || card.dataset.backgroundPlateConfirmed !== "true" || !["approved", "final"].includes(card.dataset.artworkStatus));
+  const artIncomplete = [...pagesContainer.children].some((card) => !card.dataset.artworkUrl || card.dataset.backgroundPlateConfirmed !== "true" || Number(card.dataset.backgroundPlateVersion || 0) < 2 || !["approved", "final"].includes(card.dataset.artworkStatus));
   if (status === "published" && (pagesContainer.children.length !== 32 || [...pagesContainer.querySelectorAll("textarea")].some((area) => !area.value.trim()) || artIncomplete)) {
-    editorStatus.textContent = "Complete all 32 pages, upload artwork, and mark every illustration approved or final before publishing. You can save a draft at any time.";
+    editorStatus.textContent = "Complete all 32 pages and approve a version 2 clean background plate for every page before publishing. You can save a draft at any time.";
     return null;
   }
   const id = document.querySelector("#story-id").value;
@@ -1684,6 +1697,7 @@ function openOrderDetail(order) {
   renderOrderArtwork(order.monster_assets);
   const savedAddress = order.shipping_address || {};
   document.querySelector("#lulu-recipient-name").value = order.shipping_name || "";
+  document.querySelector("#lulu-email").value = order.customer_email || "";
   document.querySelector("#lulu-phone").value = order.shipping_phone || "";
   document.querySelector("#lulu-street").value = savedAddress.line1 || "";
   document.querySelector("#lulu-city").value = savedAddress.city || "";
@@ -1704,12 +1718,11 @@ function syncOrderStatusOptions(order) {
   const select = document.querySelector("#order-detail-status");
   const editableStatuses = new Set([order.status, "cancelled"]);
   if (!order.payment_issue) {
-    if (order.status === "checkout_started") editableStatuses.add("paid");
     if (order.status === "paid") editableStatuses.add("proofing");
     if (order.status === "printing" && order.lulu_print_job_id) editableStatuses.add("shipped");
     if (order.status === "shipped") editableStatuses.add("completed");
   }
-  select.replaceChildren(...orderStatuses.filter((status) => editableStatuses.has(status)).map((status) => new Option(status === "paid" ? "Paid (manually verified)" : status.replaceAll("_", " "), status, false, status === order.status)));
+  select.replaceChildren(...orderStatuses.filter((status) => editableStatuses.has(status)).map((status) => new Option(status.replaceAll("_", " "), status, false, status === order.status)));
 }
 
 function renderOrderNextAction(order) {
@@ -1781,6 +1794,7 @@ async function sendSelectedOrderToLulu() {
   if (!selectedOrder) return;
   const values = {
     name: document.querySelector("#lulu-recipient-name").value.trim(),
+    email: document.querySelector("#lulu-email").value.trim(),
     phone_number: document.querySelector("#lulu-phone").value.trim(),
     street1: document.querySelector("#lulu-street").value.trim(),
     city: document.querySelector("#lulu-city").value.trim(),

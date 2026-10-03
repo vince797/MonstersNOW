@@ -53,11 +53,15 @@ STRIPE_STORYBOOK_SHIPPING_RATE_IDS
 STRIPE_WEBHOOK_SECRET
 STORYBOOK_CHECKOUT_ALLOWED_COUNTRIES
 STORYBOOK_CHECKOUT_SITE_URL
+STORYBOOK_LIVE_CHECKOUT_ENABLED
 ```
 
 `STRIPE_STORYBOOK_SHIPPING_RATE_IDS` must contain one or more Stripe shipping
 rate IDs. `STORYBOOK_CHECKOUT_ALLOWED_COUNTRIES` defaults to `US` when omitted.
-Use the production domain for `STORYBOOK_CHECKOUT_SITE_URL` in Production.
+Use the production domain for `STORYBOOK_CHECKOUT_SITE_URL` in Production. Keep
+`STORYBOOK_LIVE_CHECKOUT_ENABLED` unset until the published master, final PDF
+renderer, and printer validation have passed an end-to-end proof order. Set it
+to `true` only when paid fulfillment is ready.
 Create a live Stripe webhook destination at
 `https://www.monstersnow.com/api/stripe-webhook`, subscribe it to
 `checkout.session.completed`, `checkout.session.async_payment_succeeded`,

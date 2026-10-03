@@ -1,6 +1,6 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const { assertAllowedStatusChange, decorateOrder, encodeApprovalNotes, parseApprovalNotes } = require("../lib/order-library");
+const { assertAllowedStatusChange, decorateOrder, encodeApprovalNotes, normalizeLuluShippingAddress, parseApprovalNotes } = require("../lib/order-library");
 
 test("proof approval audit survives operator note edits without a schema migration", () => {
   const approval = {
@@ -28,10 +28,27 @@ test("revoking approval removes only the audit marker", () => {
 });
 
 test("production statuses cannot bypass approval and Lulu submission", () => {
+  assert.throws(() => assertAllowedStatusChange({ status: "checkout_started" }, "paid"), /next required step/i);
   assert.doesNotThrow(() => assertAllowedStatusChange({ status: "paid" }, "proofing"));
   assert.throws(() => assertAllowedStatusChange({ status: "proofing" }, "approved"), /proof approval/i);
   assert.throws(() => assertAllowedStatusChange({ status: "approved" }, "printing"), /Lulu/i);
   assert.throws(() => assertAllowedStatusChange({ status: "printing" }, "shipped"), /print job/i);
   assert.doesNotThrow(() => assertAllowedStatusChange({ status: "printing", lulu_print_job_id: "job-1" }, "shipped"));
   assert.throws(() => assertAllowedStatusChange({ status: "paid", payment_issue: "refund_created" }, "proofing"), /payment issue/i);
+});
+
+test("Lulu shipping handoff always includes the order email", () => {
+  assert.deepEqual(normalizeLuluShippingAddress({
+    name: "Parent", phone_number: "555-0100", street1: "1 Main St", city: "Apopka", state_code: "FL", postcode: "32703", country_code: "US",
+  }, { customer_email: "parent@example.com" }), {
+    name: "Parent",
+    email: "parent@example.com",
+    phone_number: "555-0100",
+    street1: "1 Main St",
+    street2: undefined,
+    city: "Apopka",
+    state_code: "FL",
+    postcode: "32703",
+    country_code: "US",
+  });
 });

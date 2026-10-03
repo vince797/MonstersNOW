@@ -63,6 +63,7 @@ test("admin deletion removes private files before the monster record", async () 
   const calls = [];
   global.fetch = async (url, options = {}) => {
     calls.push({ url, options });
+    if (url.includes(`/storybook_orders?monster_submission_id=eq.${submissionId}`)) return jsonResponse([]);
     if (url.includes(`/monster_submissions?id=eq.${submissionId}`) && (options.method || "GET") === "GET") {
       return jsonResponse([{ id: submissionId, original_path: `${submissionId}/original.png` }]);
     }
@@ -85,6 +86,32 @@ test("admin deletion removes private files before the monster record", async () 
     const storageIndex = calls.indexOf(storageDelete);
     const rowIndex = calls.findIndex((call) => call.url.includes("/monster_submissions?id=eq.") && call.options.method === "DELETE");
     assert.ok(storageIndex < rowIndex);
+  } finally {
+    global.fetch = originalFetch;
+    process.env.SUPABASE_URL = originalUrl;
+    process.env.SUPABASE_SECRET_KEY = originalKey;
+  }
+});
+
+test("admin deletion is blocked while customer artwork belongs to an active order", async () => {
+  const originalFetch = global.fetch;
+  const originalUrl = process.env.SUPABASE_URL;
+  const originalKey = process.env.SUPABASE_SECRET_KEY;
+  process.env.SUPABASE_URL = "https://project.supabase.co";
+  process.env.SUPABASE_SECRET_KEY = "server-secret";
+  const submissionId = "11111111-1111-4111-8111-111111111111";
+  const calls = [];
+  global.fetch = async (url, options = {}) => {
+    calls.push({ url, options });
+    if (url.includes(`/storybook_orders?monster_submission_id=eq.${submissionId}`)) {
+      return jsonResponse([{ id: "order-1", status: "proofing" }]);
+    }
+    throw new Error(`Unexpected request: ${url}`);
+  };
+
+  try {
+    await assert.rejects(deleteAdminMonster(submissionId), /active order/i);
+    assert.equal(calls.length, 1);
   } finally {
     global.fetch = originalFetch;
     process.env.SUPABASE_URL = originalUrl;
