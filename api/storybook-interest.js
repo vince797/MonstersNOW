@@ -5,6 +5,7 @@ const {
   storybookInterestErrorToResponse,
 } = require("../lib/storybook-interest");
 const { assertAdminRequest } = require("../lib/admin-auth");
+const { adminDataErrorContext, shouldLogAdminDataError } = require("../lib/admin-errors");
 const { createStory, ensureCatalogStories, getStory, listStories, updateStory } = require("../lib/story-library");
 const { listOrders, updateOrder } = require("../lib/order-library");
 const { importManuscript } = require("../lib/manuscript-import");
@@ -178,8 +179,8 @@ async function handleAdminStories(request, response) {
     if (!story) return sendJson(response, 404, { error: "Story not found." });
     return sendJson(response, request.method === "PUT" ? 201 : 200, { story });
   } catch (error) {
-    if ((error.status || 500) >= 500) {
-      console.error("Admin story request failed", { code: error.code, message: error.message });
+    if (shouldLogAdminDataError(error)) {
+      console.error("Admin data request failed", adminDataErrorContext(error, request, resource));
     }
     return sendJson(response, error.status || 500, {
       code: error.code || "admin_story_failed",

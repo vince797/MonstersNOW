@@ -235,10 +235,11 @@ async function openLibrary() {
 
 function formatAdminLoginError(error) {
   const message = String(error?.message || "").toLowerCase();
+  const code = String(error?.code || "").toLowerCase();
   if (message.includes("issued at future") || message.includes("not yet valid") || message.includes("clock")) {
-    return "Your device clock appears out of sync. Set the date and time automatically, then try again.";
+    return "The MonstersNOW database credential has a timestamp problem. Your device clock is not the cause. Try again shortly; if it continues, update the Supabase secret key in Vercel.";
   }
-  if (message.includes("unauthorized") || message.includes("invalid") || message.includes("password") || message.includes("forbidden")) {
+  if (code === "invalid_admin_password" || message.includes("password")) {
     return "That password wasn’t accepted. Check it and try again.";
   }
   if (message.includes("failed to fetch") || message.includes("network")) {
@@ -1545,7 +1546,12 @@ async function apiRequest(query = "", options = {}) {
     body: options.body ? JSON.stringify(options.body) : undefined,
   });
   const result = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(result.error || "The story library could not be opened.");
+  if (!response.ok) {
+    const error = new Error(result.error || "The story library could not be opened.");
+    error.code = result.code || "admin_request_failed";
+    error.status = response.status;
+    throw error;
+  }
   return result;
 }
 
