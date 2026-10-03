@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex,nofollow" />
+    <meta name="referrer" content="no-referrer" />
+    <meta name="description" content="Privately review your MonstersNOW order and approve its book proof." />
+    <title>Your Storybook Order | MonstersNOW</title>
+    <link rel="stylesheet" href="styles.css?v=20261002-customer-orders" />
+    <script src="scripts/order-status.js?v=20261002-customer-orders" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    <header class="site-header">
+      <a class="brand" href="index.html" aria-label="MonstersNOW home"><img src="assets/monstersnow-logo-v2.svg" alt="" /></a>
+      <div class="header-actions"><a class="button header-button" href="contact.html">Need help?</a></div>
+    </header>
+    <main id="main-content">
+      <section class="customer-order-shell" aria-labelledby="customer-order-title">
+        <div class="customer-order-heading">
+          <p class="eyebrow">Private order portal</p>
+          <h1 id="customer-order-title">Opening your storybook order…</h1>
+          <p id="customer-order-message" role="status" aria-live="polite">Checking your secure order link.</p>
+        </div>
+        <section id="customer-order-details" class="customer-order-details" hidden>
+          <div class="customer-order-summary">
+            <div><span>Order</span><strong id="customer-order-reference"></strong></div>
+            <div><span>Story</span><strong id="customer-order-story"></strong></div>
+            <div><span>Format</span><strong id="customer-order-format"></strong></div>
+            <div><span>Total</span><strong id="customer-order-total"></strong></div>
+          </div>
+          <ol id="customer-order-progress" class="customer-order-progress" aria-label="Order progress"></ol>
+          <section id="customer-proof-panel" class="customer-proof-panel">
+            <p class="eyebrow">Book proof</p>
+            <h2 id="customer-proof-title">Your proof is being prepared.</h2>
+            <p id="customer-proof-message">We will let you know when the cover and all 32 interior pages are ready.</p>
+            <a id="customer-proof-open" class="button primary" href="#" target="_blank" rel="noopener noreferrer" hidden>Open proof PDF</a>
+            <form id="customer-proof-form" hidden>
+              <label class="feature-check"><input id="customer-proof-approved" type="checkbox" /> <span>I reviewed the names, selected monster, cover, and all 32 interior pages in this exact PDF.</span></label>
+              <div class="customer-proof-actions">
+                <button id="customer-proof-approve" class="button primary" type="button">Approve this proof</button>
+                <button id="customer-proof-request" class="button secondary" type="button">Request a change</button>
+              </div>
+              <label id="customer-proof-notes-wrap" hidden>What should we change?<textarea id="customer-proof-notes" rows="5" maxlength="1000" placeholder="Describe the page, name, artwork, or other correction."></textarea></label>
+              <button id="customer-proof-send-change" class="button primary" type="button" hidden>Send change request</button>
+              <p id="customer-proof-status" role="status" aria-live="polite"></p>
+            </form>
+          </section>
+        </section>
+      </section>
+    </main>
+    <footer class="site-footer"><div class="footer-intro"><a class="footer-brand" href="index.html" aria-label="MonstersNOW home"><img src="assets/monstersnow-logo-v2.svg" alt="" /></a><p>Big stories from little imaginations.</p></div><nav aria-label="Footer navigation"><a href="contact.html">Contact</a><a href="policies.html">Shipping &amp; Returns</a><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a></nav></footer>
+  </body>
+</html>

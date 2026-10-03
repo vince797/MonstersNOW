@@ -9,9 +9,10 @@ const {
   createStorybookCheckoutSession,
   storybookCheckoutErrorToResponse,
 } = require("../lib/stripe-checkout");
-const { recordCheckoutOrder } = require("../lib/order-library");
-const { getAdminMonsterAssets } = require("../lib/monster-submissions");
-const { listStories, supabaseRequest, validateStoryPublishReadiness } = require("../lib/story-library");
+const { attachCheckoutSession, recordCheckoutOrder } = require("../lib/order-library");
+const { deriveOrderAccess } = require("../lib/customer-orders");
+const { getAdminMonsterAssets, requireSubmission } = require("../lib/monster-submissions");
+const { listStories, validateStoryPublishReadiness } = require("../lib/story-library");
 const { buildHalloweenProof, verifyProof, STORY_ID, TITLE } = require("../lib/halloween-proof");
 
 module.exports = async function handler(request, response) {
@@ -91,24 +92,30 @@ module.exports = async function handler(request, response) {
       error.code = "story_not_ready";
       throw error;
     }
+    const access = deriveOrderAccess(submission);
+    submission.submissionId = access.submissionId;
     // Validate checkout configuration before sending intake email so an
     // unconfigured checkout path does not create duplicate operations work.
-    buildStorybookCheckoutSessionPayload(submission, request);
+    buildStorybookCheckoutSessionPayload(submission, request, { orderAccessToken: access.token });
+    await assertCheckoutMonsterOwnership(body, submission);
 
-    const order = await recordCheckoutOrder(submission, null);
-    if (!order || order.status !== "checkout_started") {
-      const error = new Error("This proof already has an order. Check your payment confirmation before trying again.");
-      error.name = "StorybookInterestError";
+    // Persist the initial order before opening a payment session. Stripe
+    // idempotency and the deterministic submission identity make retries safe.
+    const initialOrder = await recordCheckoutOrder(submission, null, { orderAccessTokenHash: access.tokenHash });
+    if (!initialOrder || initialOrder.status !== "checkout_started") {
+      const error = new Error("This order has already moved beyond checkout.");
       error.status = 409;
-      error.code = "order_already_processed";
+      error.code = "checkout_already_processed";
       throw error;
     }
-    const checkoutSession = await createStorybookCheckoutSession(submission, request);
-    await supabaseRequest(`/storybook_orders?submission_id=eq.${encodeURIComponent(submission.submissionId)}&status=eq.checkout_started`, {
-      method: "PATCH",
-      body: { stripe_checkout_session_id: checkoutSession.id, updated_at: new Date().toISOString() },
-      prefer: "return=representation",
-    });
+    const checkoutSession = await createStorybookCheckoutSession(submission, request, { orderAccessToken: access.token });
+    if (checkoutSession.livemode !== true || !/^cs_live_[A-Za-z0-9]+$/.test(checkoutSession.id || "")) {
+      const error = new Error("Stripe did not create a live checkout session.");
+      error.status = 502;
+      error.code = "invalid_live_checkout_session";
+      throw error;
+    }
+    const order = await attachCheckoutSession(submission.submissionId, checkoutSession.id);
     let intakeEmailId = null;
     try {
       const intakeEmail = await sendStorybookInterestEmail(submission);
@@ -133,7 +140,11 @@ module.exports = async function handler(request, response) {
       error.name === "StorybookInterestError"
         ? storybookInterestErrorToResponse
         : storybookCheckoutErrorToResponse;
-    const { status, payload } = mapper(error);
+    const mapped = mapper(error);
+    const status = error.status && error.name !== "StorybookCheckoutError" && error.name !== "StorybookInterestError" ? error.status : mapped.status;
+    const payload = error.status && error.name !== "StorybookCheckoutError" && error.name !== "StorybookInterestError"
+      ? { code: error.code || "storybook_checkout_failed", error: error.status < 500 ? error.message : "Storybook checkout could not be started." }
+      : mapped.payload;
 
     if (status >= 500 && error.code !== "live_checkout_disabled") {
       console.error("Storybook checkout failed", {
@@ -149,3 +160,28 @@ module.exports = async function handler(request, response) {
     return sendJson(response, status, payload);
   }
 };
+
+async function assertCheckoutMonsterOwnership(body, submission) {
+  if (!submission.monsterSubmissionId || !submission.selectedPreviewId || !body.monsterSubmissionToken) {
+    const error = new Error("Save and confirm the selected monster before checkout.");
+    error.status = 409;
+    error.code = "saved_monster_required";
+    throw error;
+  }
+  const saved = await requireSubmission(submission.monsterSubmissionId, body.monsterSubmissionToken);
+  const expected = {
+    selected_preview_id: submission.selectedPreviewId,
+    customer_email: submission.email,
+    child_name: submission.personalization.childName,
+    monster_name: submission.personalization.monsterName,
+    story_id: submission.story.id,
+    format_id: submission.format.id,
+  };
+  const mismatch = saved.status !== "ready" || Object.entries(expected).some(([key, value]) => String(saved[key] || "") !== String(value || ""));
+  if (mismatch) {
+    const error = new Error("The saved monster details changed. Confirm the monster again before checkout.");
+    error.status = 409;
+    error.code = "saved_monster_changed";
+    throw error;
+  }
+}

@@ -51,9 +51,12 @@ Add these Stripe variables for Production, Preview, and Development:
 STRIPE_SECRET_KEY
 STRIPE_STORYBOOK_SHIPPING_RATE_IDS
 STRIPE_WEBHOOK_SECRET
+STRIPE_AUTOMATIC_TAX_ENABLED
 STORYBOOK_CHECKOUT_ALLOWED_COUNTRIES
 STORYBOOK_CHECKOUT_SITE_URL
 STORYBOOK_LIVE_CHECKOUT_ENABLED
+STORYBOOK_CUSTOMER_SITE_URL
+ORDER_ACCESS_SECRET
 ```
 
 `STRIPE_STORYBOOK_SHIPPING_RATE_IDS` must contain one or more Stripe shipping
@@ -62,6 +65,11 @@ Use the production domain for `STORYBOOK_CHECKOUT_SITE_URL` in Production. Keep
 `STORYBOOK_LIVE_CHECKOUT_ENABLED` unset until the published master, final PDF
 renderer, and printer validation have passed an end-to-end proof order. Set it
 to `true` only when paid fulfillment is ready.
+Use the same origin for `STORYBOOK_CUSTOMER_SITE_URL`. `ORDER_ACCESS_SECRET`
+must be at least 32 random characters and remain stable across deployments;
+rotating it invalidates existing customer order links. Automatic tax is enabled
+unless `STRIPE_AUTOMATIC_TAX_ENABLED=false`, so configure Stripe Tax and the
+business address before live checkout.
 Create a live Stripe webhook destination at
 `https://www.monstersnow.com/api/stripe-webhook`, subscribe it to
 `checkout.session.completed`, `checkout.session.async_payment_succeeded`,
@@ -71,6 +79,11 @@ store its signing secret as `STRIPE_WEBHOOK_SECRET`. Successful events move only
 the matching initial order to paid and save its final totals and shipping details.
 Failed or expired sessions are cancelled. Refunds and disputes place a visible
 fulfillment block on the matching PaymentIntent.
+
+Apply every Supabase migration before enabling live checkout. The customer
+proof migration adds hashed portal credentials, proof-review state, and the
+private `customer-proofs` bucket. Browser clients never receive the Supabase
+secret key; proofs are exposed only through 15-minute signed URLs.
 
 Add these Resend variables for Production, Preview, and Development:
 

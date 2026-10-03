@@ -89,6 +89,8 @@ document.querySelector("#advance-order").addEventListener("click", advanceSelect
 document.querySelector("#approve-order-proof").addEventListener("click", approveSelectedOrderProof);
 document.querySelector("#revoke-order-proof").addEventListener("click", revokeSelectedOrderProof);
 document.querySelector("#send-order-lulu").addEventListener("click", sendSelectedOrderToLulu);
+document.querySelector("#publish-customer-proof").addEventListener("click", publishSelectedCustomerProof);
+document.querySelector("#copy-customer-proof-link").addEventListener("click", copySelectedCustomerProofLink);
 document.querySelector("#open-artwork-overview").addEventListener("click", openArtworkOverview);
 document.querySelector("#open-story-review").addEventListener("click", openStoryReview);
 document.querySelector("#close-artwork-overview").addEventListener("click", () => artworkDialog.close());
@@ -1747,6 +1749,7 @@ function renderOrderNextAction(order) {
 function renderProofApproval(order) {
   const approved = Boolean(order.proof_fingerprint && order.proof_approved_at);
   const submitted = Boolean(order.lulu_print_job_id);
+  const customerStatus = order.customer_proof_status || "not_ready";
   const state = document.querySelector("#proof-approval-state");
   const approve = document.querySelector("#approve-order-proof");
   const revoke = document.querySelector("#revoke-order-proof");
@@ -1759,20 +1762,81 @@ function renderProofApproval(order) {
   } else if (approved) {
     state.textContent = `Approved ${new Date(order.proof_approved_at).toLocaleString()} by ${order.proof_approved_by || "MonstersNOW admin"}.`;
     help.textContent = `Master v${order.master_story_version || "?"} · fingerprint ${order.proof_fingerprint.slice(0, 12)}… Final PDFs must pass Lulu validation before sending.`;
+  } else if (customerStatus === "approved") {
+    state.textContent = `Customer approved PDF ${order.customer_proof_fingerprint?.slice(0, 12) || ""}…`;
+    help.textContent = "Complete the final production check, then lock this exact proof for print handoff.";
+  } else if (customerStatus === "changes_requested") {
+    state.textContent = "Customer requested proof changes.";
+    help.textContent = order.customer_proof_revision_notes || "Prepare and publish a revised PDF for review.";
+  } else if (customerStatus === "ready") {
+    state.textContent = "Customer proof published · awaiting customer response.";
+    help.textContent = `PDF fingerprint ${order.customer_proof_fingerprint?.slice(0, 12) || ""}… Copy the private link if email delivery is handled separately.`;
   } else {
-    state.textContent = "This order has not been approved for printing.";
-    help.textContent = "Approval verifies all 32 final backgrounds, the selected monster, names, and the exact master version.";
+    state.textContent = "No customer proof has been published.";
+    help.textContent = "Upload the exact cover-and-interior PDF. Customer approval is required before final production approval.";
   }
   approve.hidden = approved || submitted;
-  approve.disabled = blocked || !["proofing", "approved"].includes(order.status);
+  approve.disabled = blocked || customerStatus !== "approved" || !["proofing", "approved"].includes(order.status);
   revoke.hidden = !approved || submitted;
+  document.querySelector("#customer-proof-upload").hidden = approved || submitted || order.status !== "proofing";
+  document.querySelector("#publish-customer-proof").disabled = blocked || order.status !== "proofing";
+  document.querySelector("#copy-customer-proof-link").hidden = !order.customer_proof_path;
   document.querySelector("#lulu-shipping-fields").hidden = !approved || submitted;
   send.disabled = blocked || !approved || submitted;
   send.title = blocked ? "Resolve the Stripe payment issue first." : approved ? "Validate the production PDFs and create the Lulu Sandbox print job." : "Approve the proof first.";
 }
 
+async function publishSelectedCustomerProof() {
+  if (!selectedOrder) return;
+  const fileInput = document.querySelector("#customer-proof-file");
+  const file = fileInput.files?.[0];
+  const message = document.querySelector("#order-detail-message");
+  if (!file || file.type !== "application/pdf") { message.textContent = "Choose the exact customer-review PDF first."; return; }
+  if (file.size > 20 * 1024 * 1024) { message.textContent = "Choose a PDF smaller than 20 MB."; return; }
+  if (!window.confirm("Publish this exact PDF for the customer? Publishing a revision invalidates the previous customer response.")) return;
+  const button = document.querySelector("#publish-customer-proof");
+  button.disabled = true;
+  message.textContent = "Fingerprinting and publishing the private proof…";
+  try {
+    const proofData = await readFileAsDataUrl(file);
+    const result = await apiRequest(`?resource=orders&id=${encodeURIComponent(selectedOrder.id)}`, {
+      method: "PATCH",
+      body: { action: "publish_customer_proof", proofData },
+    });
+    Object.assign(selectedOrder, result.order);
+    fileInput.value = "";
+    renderProofApproval(selectedOrder);
+    renderOrderNextAction(selectedOrder);
+    renderOrders(); renderDashboard();
+    const copied = result.order.customer_proof_link ? await copyText(result.order.customer_proof_link) : false;
+    message.textContent = copied
+      ? "Customer proof published and its private link copied."
+      : "Customer proof published. Use Copy private proof link to send it through your approved customer communication channel.";
+  } catch (error) { message.textContent = error.message; }
+  finally { renderProofApproval(selectedOrder); }
+}
+
+async function copySelectedCustomerProofLink() {
+  if (!selectedOrder) return;
+  const message = document.querySelector("#order-detail-message");
+  message.textContent = "Creating the private customer link…";
+  try {
+    const result = await apiRequest(`?resource=orders&id=${encodeURIComponent(selectedOrder.id)}`, { method: "PATCH", body: { action: "get_customer_proof_link" } });
+    const copied = await copyText(result.order.customer_proof_link);
+    message.textContent = copied ? "Private customer proof link copied." : "Private customer proof link is ready in the copy dialog.";
+  } catch (error) { message.textContent = error.message; }
+}
+
+async function copyText(value) {
+  if (navigator.clipboard?.writeText) {
+    try { await navigator.clipboard.writeText(value); return true; } catch {}
+  }
+  window.prompt("Copy this private customer proof link:", value);
+  return false;
+}
+
 async function approveSelectedOrderProof() {
-  if (!selectedOrder || !window.confirm("Approve this exact personalized book for printing? The saved master version, names, monster, and all 32 final illustrations will be fingerprinted.")) return;
+  if (!selectedOrder || !window.confirm("Lock the exact customer-approved PDF for production handoff?")) return;
   const button = document.querySelector("#approve-order-proof");
   const message = document.querySelector("#order-detail-message");
   button.disabled = true;

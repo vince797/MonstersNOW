@@ -2,5 +2,8 @@ User-agent: *
 Allow: /
 Disallow: /admin
 Disallow: /api/
+Disallow: /order
+Disallow: /success
+Disallow: /halloween-proof
 
 Sitemap: https://www.monstersnow.com/sitemap.xml

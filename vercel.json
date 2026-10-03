@@ -9,6 +9,7 @@
     { "source": "/api/halloween-checkout-status", "destination": "/api/storybook-interest?resource=halloween-checkout-status" },
     { "source": "/api/stripe-test-webhook", "destination": "/api/storybook-interest?resource=stripe-test-webhook" },
     { "source": "/api/stripe-webhook", "destination": "/api/storybook-interest?resource=stripe-webhook" },
+    { "source": "/api/customer-order", "destination": "/api/storybook-interest?resource=customer-order" },
     { "source": "/api/monster-submissions", "destination": "/api/storybook-interest?resource=monster-submissions" },
     { "source": "/api/lulu-sandbox-cost", "destination": "/api/lulu-sandbox-products?resource=cost" },
     { "source": "/api/lulu-sandbox-cover-dimensions", "destination": "/api/lulu-sandbox-products?resource=cover-dimensions" }
@@ -64,6 +65,32 @@
         {
           "key": "Cache-Control",
           "value": "private, no-store"
+        }
+      ]
+    },
+    {
+      "source": "/order",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "private, no-store"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "no-referrer"
+        }
+      ]
+    },
+    {
+      "source": "/success",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "private, no-store"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "no-referrer"
         }
       ]
     },

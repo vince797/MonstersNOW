@@ -41,16 +41,19 @@ test("paid live checkout updates only its matching initial order", async () => {
   process.env.SUPABASE_URL = "https://db.example.com";
   process.env.SUPABASE_SECRET_KEY = "mock";
   const calls = [];
-  global.fetch = async (url, options) => { calls.push({ url, options }); return { ok: true, json: async () => [] }; };
+  global.fetch = async (url, options = {}) => {
+    calls.push({ url, options });
+    if (!options.method || options.method === "GET") return { ok: true, json: async () => [{ id: "order-1", status: "checkout_started", amount_cents: 2499, currency: "USD" }] };
+    return { ok: true, json: async () => [{ id: "order-1", status: "paid" }] };
+  };
   try {
     const response = responseStub();
     await handler(signedRequest(checkoutEvent("checkout.session.completed")), response);
     assert.equal(response.code, 200);
-    assert.equal(calls.length, 1);
+    assert.equal(calls.length, 2);
     assert.match(calls[0].url, /stripe_checkout_session_id=eq.cs_live_mock/);
     assert.match(calls[0].url, /submission_id=eq.submission-123/);
-    assert.match(calls[0].url, /status=eq.checkout_started/);
-    const update = JSON.parse(calls[0].options.body);
+    const update = JSON.parse(calls[1].options.body);
     assert.equal(update.status, "paid");
     assert.equal(update.stripe_total_cents, 3198);
     assert.equal(update.stripe_shipping_cents, 599);
@@ -65,7 +68,7 @@ test("refund and dispute events flag the matching PaymentIntent", async () => {
   process.env.SUPABASE_URL = "https://db.example.com";
   process.env.SUPABASE_SECRET_KEY = "mock";
   const calls = [];
-  global.fetch = async (url, options) => { calls.push({ url, options }); return { ok: true, json: async () => [] }; };
+  global.fetch = async (url, options) => { calls.push({ url, options }); return { ok: true, json: async () => [{ id: "order-1" }] }; };
   try {
     const refund = responseStub();
     await handler(signedRequest({ livemode: true, created: 1789992000, type: "refund.created", data: { object: { id: "re_mock", payment_intent: "pi_123mock" } } }), refund);
@@ -86,16 +89,42 @@ test("failed live checkout cancels only the initial order and test metadata is r
   process.env.SUPABASE_URL = "https://db.example.com";
   process.env.SUPABASE_SECRET_KEY = "mock";
   const calls = [];
-  global.fetch = async (url, options) => { calls.push({ url, options }); return { ok: true, json: async () => [] }; };
+  global.fetch = async (url, options = {}) => {
+    calls.push({ url, options });
+    if (!options.method || options.method === "GET") return { ok: true, json: async () => [{ id: "order-1", status: "checkout_started", amount_cents: 2499, currency: "USD" }] };
+    return { ok: true, json: async () => [{ id: "order-1", status: "cancelled" }] };
+  };
   try {
     const failed = responseStub();
     await handler(signedRequest(checkoutEvent("checkout.session.expired", { payment_status: "unpaid" })), failed);
     assert.equal(failed.code, 200);
-    assert.equal(JSON.parse(calls[0].options.body).status, "cancelled");
+    assert.equal(JSON.parse(calls[1].options.body).status, "cancelled");
 
     const rejected = responseStub();
     await handler(signedRequest(checkoutEvent("checkout.session.completed", { metadata: { submission_id: "test-abc", test_order: "yes" } })), rejected);
     assert.equal(rejected.code, 400);
-    assert.equal(calls.length, 1);
+    assert.equal(calls.length, 2);
+  } finally { global.fetch = originalFetch; }
+});
+
+test("paid checkout with a subtotal mismatch is blocked from fulfillment", async () => {
+  const originalFetch = global.fetch;
+  process.env.STRIPE_WEBHOOK_SECRET = secret;
+  process.env.SUPABASE_URL = "https://db.example.com";
+  process.env.SUPABASE_SECRET_KEY = "mock";
+  const calls = [];
+  global.fetch = async (url, options = {}) => {
+    calls.push({ url, options });
+    if (!options.method || options.method === "GET") return { ok: true, json: async () => [{ id: "order-1", status: "checkout_started", amount_cents: 3999, currency: "USD" }] };
+    return { ok: true, json: async () => [{ id: "order-1", status: "checkout_started", payment_issue: "amount_mismatch" }] };
+  };
+  try {
+    const response = responseStub();
+    await handler(signedRequest(checkoutEvent("checkout.session.completed")), response);
+    assert.equal(response.code, 200);
+    assert.equal(response.body.fulfillmentBlocked, true);
+    const update = JSON.parse(calls[1].options.body);
+    assert.equal(update.payment_issue, "amount_mismatch");
+    assert.equal(update.status, undefined);
   } finally { global.fetch = originalFetch; }
 });

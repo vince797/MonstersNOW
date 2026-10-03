@@ -11,6 +11,7 @@ const { importManuscript } = require("../lib/manuscript-import");
 const { uploadStoryArtwork } = require("../lib/story-artwork");
 const { createMonsterSubmission, deleteAdminMonster, finalizeMonsterSubmission, listAdminMonsters } = require("../lib/monster-submissions");
 const { createAdminStoryProof } = require("../lib/admin-story-proof");
+const { getCustomerOrderView, reviewCustomerProof } = require("../lib/customer-orders");
 
 module.exports = async function handler(request, response) {
   const resource = firstQueryValue(request.query?.resource) || new URL(request.url, "https://monstersnow.com").searchParams.get("resource");
@@ -22,6 +23,21 @@ module.exports = async function handler(request, response) {
     "stripe-webhook": "../lib/stripe-webhook-handler",
   };
   if (Object.hasOwn(testHandlers, resource)) return require(testHandlers[resource])(request, response);
+  if (resource === "customer-order") {
+    response.setHeader("Cache-Control", "private, no-store");
+    try {
+      const token = bearerToken(request) || firstQueryValue(request.query?.token);
+      if (request.method === "GET") return sendJson(response, 200, { order: await getCustomerOrderView(token) });
+      if (request.method === "POST") return sendJson(response, 200, { order: await reviewCustomerProof(token, await readJsonBody(request)) });
+      return rejectUnsupportedMethod(request, response, ["GET", "POST"]);
+    } catch (error) {
+      if ((error.status || 500) >= 500) console.error("Customer order request failed", { code: error.code, message: error.message });
+      return sendJson(response, error.status || 500, {
+        code: error.code || "customer_order_failed",
+        error: error.status && error.status < 500 ? error.message : "The order could not be opened.",
+      });
+    }
+  }
   if (resource === "monster-submissions" && ["POST", "PATCH"].includes(request.method)) {
     try {
       const payload = await readJsonBody(request);
@@ -145,7 +161,7 @@ async function handleAdminStories(request, response) {
     if (resource === "orders") {
       if (request.method === "GET") return sendJson(response, 200, { orders: await listOrders() });
       if (request.method === "PATCH") {
-        const order = await updateOrder(id, await readJsonBody(request), { request });
+        const order = await updateOrder(id, await readJsonBody(request, { maxBytes: 28 * 1024 * 1024 }), { request });
         if (!order) return sendJson(response, 404, { error: "Order not found." });
         return sendJson(response, 200, { order });
       }
@@ -190,4 +206,10 @@ async function handleAdminStories(request, response) {
 
 function firstQueryValue(value) {
   return Array.isArray(value) ? value[0] : value || "";
+}
+
+function bearerToken(request) {
+  const value = request.headers?.get ? request.headers.get("authorization") : request.headers?.authorization;
+  const match = typeof value === "string" && value.match(/^Bearer\s+(.+)$/i);
+  return match ? match[1].trim() : "";
 }

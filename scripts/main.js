@@ -108,9 +108,13 @@ const maxFreePreviews = 3;
 const heicConverterUrl = "https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js";
 const demoMonsterImage = "assets/step-2-character.jpg?v=20260515-horns";
 const defaultPreviewStyle = "storybook";
-const halloweenStoryId = "halloween-monster-night";
-const halloweenStoryLabel = "Halloween Monster Night";
-const halloweenTestMode = new URLSearchParams(window.location.search).get("test") === "halloween";
+const createQuery = new URLSearchParams(window.location.search);
+const halloweenTestMode = createQuery.get("test") === "halloween";
+const availableStories = {
+  "halloween-monster-night": "Halloween Monster Night",
+};
+const selectedStoryId = Object.hasOwn(availableStories, createQuery.get("story")) ? createQuery.get("story") : "halloween-monster-night";
+const selectedStoryLabel = availableStories[selectedStoryId];
 const storybookInterestButtonText = "Review Your 32-Page Book";
 if (halloweenTestMode && storybookInterestButton) {
   storybookInterestButton.textContent = storybookInterestButtonText;
@@ -135,6 +139,7 @@ let generatedPreviews = [];
 let selectedPreviewId;
 let monsterConfirmed = false;
 let monsterSubmission;
+let checkoutSubmissionId;
 let isGeneratingPreview = false;
 let uploadDragDepth = 0;
 let uploadSelectionId = 0;
@@ -278,12 +283,10 @@ async function handleStorybookInterestSubmit(event) {
   const selectedFormat = getSelectedStorybookFormat();
   const featurePermission = getFeaturePermission();
   const selectedPreview = getSelectedPreview();
-  const submissionId = createClientSubmissionId();
+  const submissionId = checkoutSubmissionId ||= createClientSubmissionId();
   const submission = {
     submissionId,
     source: "create-form",
-    storyId: halloweenStoryId,
-    storyLabel: halloweenStoryLabel,
     testMode: halloweenTestMode,
     email,
     personalization,
@@ -292,6 +295,8 @@ async function handleStorybookInterestSubmit(event) {
     style: selectedPreview?.style || selectedMonsterStyle,
     monsterImage: selectedPreview?.image || null,
     featurePermission,
+    storyId: selectedStoryId,
+    storyLabel: selectedStoryLabel,
   };
 
   try {
@@ -301,8 +306,10 @@ async function handleStorybookInterestSubmit(event) {
       selectedPreviewId: submission.selectedPreviewId,
       format: selectedFormat.value,
       featurePermission,
+      storyId: selectedStoryId,
     });
     if (savedMonster?.id) submission.monsterSubmissionId = savedMonster.id;
+    if (savedMonster?.id && monsterSubmission?.token) submission.monsterSubmissionToken = monsterSubmission.token;
   } catch (error) {
     console.error(error);
     if (interestStatus) interestStatus.textContent = error.message || "Your monster could not be saved. Please try again.";
@@ -830,6 +837,7 @@ function resetPreviewState() {
   selectedPreviewId = undefined;
   monsterConfirmed = false;
   monsterSubmission = undefined;
+  checkoutSubmissionId = undefined;
   try { sessionStorage.removeItem("monstersnow_monster_submission"); } catch {}
   isGeneratingPreview = false;
 
@@ -1285,7 +1293,7 @@ async function ensureMonsterSubmission(drawing) {
   return monsterSubmission;
 }
 
-async function finalizeSavedMonster({ email, personalization, selectedPreviewId: previewId, format, featurePermission }) {
+async function finalizeSavedMonster({ email, personalization, selectedPreviewId: previewId, format, featurePermission, storyId }) {
   if (!previewId) throw new Error("Create and choose a monster preview before continuing.");
   if (!monsterSubmission?.id || !monsterSubmission?.token) return null;
   const response = await fetch("/api/monster-submissions", {
@@ -1298,7 +1306,7 @@ async function finalizeSavedMonster({ email, personalization, selectedPreviewId:
       email,
       childName: personalization.childName,
       monsterName: personalization.monsterName,
-      storyId: halloweenStoryId,
+      storyId,
       format,
       featurePermission,
     }),

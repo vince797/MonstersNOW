@@ -50,9 +50,12 @@ Stripe Checkout. Configure these Vercel environment variables:
 STRIPE_SECRET_KEY
 STRIPE_STORYBOOK_SHIPPING_RATE_IDS
 STRIPE_WEBHOOK_SECRET
+STRIPE_AUTOMATIC_TAX_ENABLED
 STORYBOOK_CHECKOUT_ALLOWED_COUNTRIES
 STORYBOOK_CHECKOUT_SITE_URL
 STORYBOOK_LIVE_CHECKOUT_ENABLED
+STORYBOOK_CUSTOMER_SITE_URL
+ORDER_ACCESS_SECRET
 ```
 
 `STRIPE_STORYBOOK_SHIPPING_RATE_IDS` is a comma-separated list of Stripe
@@ -62,8 +65,15 @@ to `true` only when paid fulfillment is ready. Register `https://www.monstersnow
 as a Stripe webhook for `checkout.session.completed`,
 `checkout.session.async_payment_succeeded`, `checkout.session.async_payment_failed`,
 `checkout.session.expired`, `refund.created`, and `charge.dispute.created`, then store its signing secret in
-`STRIPE_WEBHOOK_SECRET`. If checkout is not configured, the browser posts to
-`/api/storybook-interest` instead. Configure these variables to send that
+`STRIPE_WEBHOOK_SECRET`. Direct checkout stores its order before returning a
+Stripe URL. Customers use the private `order.html` portal to see redacted
+status, open a time-limited PDF proof, approve its exact fingerprint, or
+request changes. Apply every Supabase migration before enabling checkout,
+including the private customer-proof bucket migration. See
+`docs/DIRECT_COMMERCE_OPERATIONS.md` for the API contract and operator runbook.
+
+If checkout is not configured, the browser posts to `/api/storybook-interest`
+instead. Configure these variables to send that
 request by email through Resend:
 
 ```text
@@ -72,8 +82,8 @@ STORYBOOK_INTEREST_FROM_EMAIL
 STORYBOOK_INTEREST_TO_EMAIL
 ```
 
-If neither server path is configured, the browser falls back to a prefilled
-email draft so families can still contact MonstersNOW.
+If neither server path is configured, the browser clearly reports that no
+payment was taken and directs the family to contact MonstersNOW.
 
 ## Lulu sandbox
 
