@@ -7,8 +7,11 @@
       name="description"
       content="Upload a child's monster drawing to create a free MonstersNOW preview, printable coloring page, and personalized storybook."
     />
+    <link rel="canonical" href="https://www.monstersnow.com/create" />
     <title>Create Your Monster | MonstersNOW</title>
+    <link rel="icon" href="assets/monstersnow-logo-v2.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="styles.css?v=20261001-child-character" />
+    <link rel="stylesheet" href="storefront.css?v=20261002-public-storefront" />
   </head>
   <body>
     <a class="skip-link" href="#main-content">Skip to content</a>
@@ -43,6 +46,15 @@
               Choose a clear photo, create up to three monster previews, select
               your favorite, then review the personalized book before checkout.
             </p>
+            <div class="selected-story-card" id="selected-story" data-story-id="halloween-monster-night" role="group" aria-label="Selected story">
+              <img src="assets/storybook/cover-series/minimal-concepts/halloween-monster-night-v2-web.jpg" alt="" width="96" height="96" />
+              <span>
+                <small>Your selected story</small>
+                <strong id="selected-story-title">Halloween Monster Night</strong>
+                <em>32 pages · Ages 2–8 · Ready to personalize</em>
+              </span>
+              <a href="books.html#catalog">Change story</a>
+            </div>
           </div>
           <div class="create-flow-meta">
             <div class="free-includes" role="group" aria-label="Free MonstersNOW preview details">
@@ -101,7 +113,7 @@
               <li>iPhone HEIC photos convert automatically</li>
               <li>Artwork only when possible</li>
             </ul>
-            <p class="privacy-note">We do not publish children's artwork without permission.</p>
+            <p class="privacy-note">For adults: upload the drawing only—no child photo or personal details. Artwork stays private unless you explicitly choose to share it. <a href="privacy.html">How artwork is handled</a></p>
             <p class="converter-error" id="upload-error" role="alert" hidden></p>
 
             <button class="button primary converter-button" id="convert-button" type="button" disabled hidden>
@@ -159,8 +171,8 @@
               <section class="result-book-offer" id="result-book-offer" aria-labelledby="result-book-title" hidden>
                 <div class="book-offer-header">
                   <span class="result-label">Printed storybook</span>
-                  <h4 id="result-book-title">Turn this monster into a printed storybook.</h4>
-                  <p>Add the names, choose a format, and review all 32 pages before test checkout.</p>
+                  <h4 id="result-book-title">Personalize Halloween Monster Night.</h4>
+                  <p>Add the names, choose a format, and review all 32 pages before checkout.</p>
                 </div>
                 <form class="interest-form" id="storybook-interest-form">
                   <fieldset class="storybook-personalization">
@@ -228,6 +240,10 @@
                     </div>
                     <p>The names and selected character will appear in the personalized book proof.</p>
                   </fieldset>
+                  <div class="proof-promise" role="note">
+                    <strong>Nothing prints from this form.</strong>
+                    <span>You will review the cover, names, and every interior page before payment and production.</span>
+                  </div>
                   <div class="storybook-format-options" role="radiogroup" aria-label="Preferred storybook format">
                     <label class="storybook-format-choice">
                       <input type="radio" name="storybook-format" value="softcover" checked />
@@ -330,6 +346,6 @@
       </div>
     </footer>
 
-    <script src="scripts/main.js?v=20261001-child-character"></script>
+    <script src="scripts/main.js?v=20261002-public-storefront"></script>
   </body>
 </html>

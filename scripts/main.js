@@ -89,6 +89,18 @@ const featureMonster = document.querySelector("#feature-monster");
 const featureShowDrawing = document.querySelector("#feature-show-drawing");
 const featureDisplayName = document.querySelector("#feature-display-name");
 const featurePermissionFields = document.querySelector("#feature-permission-fields");
+const selectedStoryCard = document.querySelector("#selected-story");
+const selectedStoryTitle = document.querySelector("#selected-story-title");
+
+const publicStoryCatalog = {
+  "halloween-monster-night": {
+    id: "halloween-monster-night",
+    label: "Halloween Monster Night",
+    ready: true,
+  },
+};
+const requestedStoryId = new URLSearchParams(window.location.search).get("story");
+const selectedStory = publicStoryCatalog[requestedStoryId] || publicStoryCatalog["halloween-monster-night"];
 
 const allowedUploadTypes = new Set([
   "image/png",
@@ -110,6 +122,12 @@ const demoMonsterImage = "assets/step-2-character.jpg?v=20260515-horns";
 const defaultPreviewStyle = "storybook";
 const halloweenTestMode = new URLSearchParams(window.location.search).get("test") === "halloween";
 const storybookInterestButtonText = "Review Your 32-Page Book";
+if (selectedStoryCard && selectedStoryTitle) {
+  selectedStoryCard.dataset.storyId = selectedStory.id;
+  selectedStoryTitle.textContent = selectedStory.label;
+  const offerTitle = document.querySelector("#result-book-title");
+  if (offerTitle) offerTitle.textContent = `Personalize ${selectedStory.label}.`;
+}
 if (halloweenTestMode && storybookInterestButton) {
   storybookInterestButton.textContent = storybookInterestButtonText;
   const offerTitle = document.querySelector("#result-book-title");
@@ -287,6 +305,8 @@ async function handleStorybookInterestSubmit(event) {
     style: selectedPreview?.style || selectedMonsterStyle,
     monsterImage: selectedPreview?.image || null,
     featurePermission,
+    storyId: selectedStory.id,
+    storyLabel: selectedStory.label,
   };
 
   try {
@@ -296,6 +316,7 @@ async function handleStorybookInterestSubmit(event) {
       selectedPreviewId: submission.selectedPreviewId,
       format: selectedFormat.value,
       featurePermission,
+      storyId: selectedStory.id,
     });
     if (savedMonster?.id) submission.monsterSubmissionId = savedMonster.id;
   } catch (error) {
@@ -346,6 +367,8 @@ function persistStorybookInterest(submission, selectedFormat, featurePermission)
         previewId: submission.selectedPreviewId,
         style: submission.style,
         featurePermission,
+        storyId: submission.storyId,
+        storyLabel: submission.storyLabel,
         submittedAt: new Date().toISOString(),
       }),
     );
@@ -412,6 +435,7 @@ function openStorybookInterestEmail(email, selectedFormat, featurePermission, se
       `Preferred format: ${selectedFormat.label}`,
       `Child's first name: ${personalization.childName}`,
       `Monster's name: ${personalization.monsterName}`,
+      `Story: ${selectedStory.label}`,
       `Monster style: ${getPreviewStyleLabel(selectedPreview?.style || selectedMonsterStyle)}`,
       `Selected preview ID: ${selectedPreview?.id || selectedPreviewId || "Not provided"}`,
       `Feature finished monster: ${featurePermission.canFeatureMonster ? "Yes" : "No"}`,
@@ -1280,7 +1304,7 @@ async function ensureMonsterSubmission(drawing) {
   return monsterSubmission;
 }
 
-async function finalizeSavedMonster({ email, personalization, selectedPreviewId: previewId, format, featurePermission }) {
+async function finalizeSavedMonster({ email, personalization, selectedPreviewId: previewId, format, featurePermission, storyId }) {
   if (!previewId) throw new Error("Create and choose a monster preview before continuing.");
   if (!monsterSubmission?.id || !monsterSubmission?.token) return null;
   const response = await fetch("/api/monster-submissions", {
@@ -1293,7 +1317,7 @@ async function finalizeSavedMonster({ email, personalization, selectedPreviewId:
       email,
       childName: personalization.childName,
       monsterName: personalization.monsterName,
-      storyId: "halloween-monster-night",
+      storyId: storyId || selectedStory.id,
       format,
       featurePermission,
     }),
