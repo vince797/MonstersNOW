@@ -1,0 +1,1812 @@
+{
+  "status": "digital_production_candidate_complete",
+  "editorSelectionEnabled": true,
+  "productionSelectionEnabled": false,
+  "approval": {
+    "visualDirectionApproved": true,
+    "editableVariationsApproved": true,
+    "printReadyApproved": false
+  },
+  "profile": {
+    "id": "warm-curly-dark",
+    "label": "Curly dark",
+    "included": true,
+    "skinTone": "warm",
+    "hairColor": "dark-brown",
+    "hairStyle": "curly",
+    "ageBand": "7-8",
+    "ageBandLabel": "Ages 7–8",
+    "relativeHeight": "average",
+    "relativeHeightLabel": "About average height",
+    "mobilityAid": "wheelchair",
+    "mobilityAidLabel": "Wheelchair",
+    "key": "warm-curly-dark:7-8:average:wheelchair",
+    "synthetic": true,
+    "childName": "Maya",
+    "renderScale": 0.94
+  },
+  "sourceDrawing": {
+    "path": "assets/gallery/red-blue-monster-before-after-source-v1.jpg",
+    "nativePixels": [
+      588,
+      1280
+    ],
+    "cropPixels": {
+      "x": 119,
+      "y": 328,
+      "width": 350,
+      "height": 350
+    },
+    "cropMatchesApprovedGalleryPresentation": true
+  },
+  "output": {
+    "fullBleedPixels": [
+      2625,
+      2625
+    ],
+    "trimPixels": {
+      "x": 38,
+      "y": 38,
+      "width": 2550,
+      "height": 2550
+    },
+    "nominalDpi": 300,
+    "trimInches": [
+      8.5,
+      8.5
+    ],
+    "bleedInchesPerEdge": 0.125,
+    "safeInsetPixels": 150,
+    "colorSpace": "sRGB/RGB",
+    "transparencyFlattenedInPdf": true
+  },
+  "poseAssets": {
+    "doorway": "assets/storybook/halloween-monster-night/reference/wheelchair-profile-v1/doorway.png",
+    "square": "assets/storybook/halloween-monster-night/reference/wheelchair-profile-v1/town-square.png",
+    "parade": "assets/storybook/halloween-monster-night/reference/wheelchair-profile-v1/parade.png",
+    "garden": "assets/storybook/halloween-monster-night/reference/wheelchair-profile-v1/garden.png",
+    "candy-help": "assets/storybook/halloween-monster-night/reference/wheelchair-profile-v1/candy-help.png",
+    "trail-clue": "assets/storybook/halloween-monster-night/reference/wheelchair-profile-v1/trail-clue.png",
+    "ribbon-help": "assets/storybook/halloween-monster-night/reference/wheelchair-profile-v1/ribbon-help.png",
+    "star-look": "assets/storybook/halloween-monster-night/reference/wheelchair-profile-v1/star-look.png",
+    "welcome": "assets/storybook/halloween-monster-night/reference/wheelchair-profile-v1/welcome.png",
+    "window-clue": "assets/storybook/halloween-monster-night/reference/wheelchair-profile-v1/window-clue.png",
+    "celebrate": "assets/storybook/halloween-monster-night/reference/wheelchair-profile-v1/celebrate.png",
+    "sleepy-home": "assets/storybook/halloween-monster-night/reference/wheelchair-profile-v1/sleepy-home.png"
+  },
+  "pages": [
+    {
+      "pageNumber": 1,
+      "scene": "frontmatter",
+      "poseName": null,
+      "backgroundPlate": {
+        "path": "output/wheelchair-customization-v1/warm-curly-dark-7-8-average/backgrounds/01.png",
+        "sourcePixels": [
+          2625,
+          2625
+        ],
+        "placedPixels": [
+          2625,
+          2625
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300,
+        "characterFree": true
+      },
+      "childBox": null,
+      "monsterBox": {
+        "x": 1425,
+        "y": 528,
+        "width": 693,
+        "height": 1040,
+        "sourcePixels": [
+          1024,
+          1536
+        ],
+        "placedPixels": [
+          693,
+          1040
+        ],
+        "rasterScale": 0.6771,
+        "effectiveDpi": 443.1
+      },
+      "drawingBox": null,
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 2,
+      "scene": "frontmatter",
+      "poseName": null,
+      "backgroundPlate": {
+        "path": "output/wheelchair-customization-v1/warm-curly-dark-7-8-average/backgrounds/02.png",
+        "sourcePixels": [
+          2625,
+          2625
+        ],
+        "placedPixels": [
+          2625,
+          2625
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300,
+        "characterFree": true
+      },
+      "childBox": null,
+      "monsterBox": null,
+      "drawingBox": {
+        "x": 1138,
+        "y": 695,
+        "width": 350,
+        "height": 350,
+        "sourcePixels": [
+          350,
+          350
+        ],
+        "placedPixels": [
+          350,
+          350
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300,
+        "aspectRatioPreserved": true,
+        "sourceCrop": {
+          "x": 119,
+          "y": 328,
+          "width": 350,
+          "height": 350
+        }
+      },
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 3,
+      "scene": "frontmatter",
+      "poseName": null,
+      "backgroundPlate": {
+        "path": "output/wheelchair-customization-v1/warm-curly-dark-7-8-average/backgrounds/03.png",
+        "sourcePixels": [
+          2625,
+          2625
+        ],
+        "placedPixels": [
+          2625,
+          2625
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300,
+        "characterFree": true
+      },
+      "childBox": null,
+      "monsterBox": null,
+      "drawingBox": null,
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 4,
+      "scene": "doorway",
+      "poseName": "doorway",
+      "backgroundPlate": {
+        "path": "output/wheelchair-customization-v1/warm-curly-dark-7-8-average/backgrounds/04.png",
+        "sourcePixels": [
+          2625,
+          2625
+        ],
+        "placedPixels": [
+          2625,
+          2625
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300,
+        "characterFree": true
+      },
+      "childBox": {
+        "x": 1620,
+        "y": 941,
+        "width": 509,
+        "height": 627,
+        "sourcePixels": [
+          509,
+          627
+        ],
+        "placedPixels": [
+          509,
+          627
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300
+      },
+      "monsterBox": {
+        "x": 433,
+        "y": 458,
+        "width": 740,
+        "height": 1110,
+        "sourcePixels": [
+          1024,
+          1536
+        ],
+        "placedPixels": [
+          740,
+          1110
+        ],
+        "rasterScale": 0.7227,
+        "effectiveDpi": 415.1
+      },
+      "drawingBox": null,
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 5,
+      "scene": "doorway",
+      "poseName": "square",
+      "backgroundPlate": {
+        "path": "output/wheelchair-customization-v1/warm-curly-dark-7-8-average/backgrounds/05.png",
+        "sourcePixels": [
+          2625,
+          2625
+        ],
+        "placedPixels": [
+          2625,
+          2625
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300,
+        "characterFree": true
+      },
+      "childBox": {
+        "x": 489,
+        "y": 931,
+        "width": 526,
+        "height": 637,
+        "sourcePixels": [
+          526,
+          637
+        ],
+        "placedPixels": [
+          526,
+          637
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300
+      },
+      "monsterBox": {
+        "x": 1453,
+        "y": 458,
+        "width": 740,
+        "height": 1110,
+        "sourcePixels": [
+          1024,
+          1536
+        ],
+        "placedPixels": [
+          740,
+          1110
+        ],
+        "rasterScale": 0.7227,
+        "effectiveDpi": 415.1
+      },
+      "drawingBox": null,
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 6,
+      "scene": "square",
+      "poseName": "square",
+      "backgroundPlate": {
+        "path": "output/wheelchair-customization-v1/warm-curly-dark-7-8-average/backgrounds/06.png",
+        "sourcePixels": [
+          2625,
+          2625
+        ],
+        "placedPixels": [
+          2625,
+          2625
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300,
+        "characterFree": true
+      },
+      "childBox": {
+        "x": 489,
+        "y": 931,
+        "width": 526,
+        "height": 637,
+        "sourcePixels": [
+          526,
+          637
+        ],
+        "placedPixels": [
+          526,
+          637
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300
+      },
+      "monsterBox": {
+        "x": 1458,
+        "y": 472,
+        "width": 731,
+        "height": 1096,
+        "sourcePixels": [
+          1024,
+          1536
+        ],
+        "placedPixels": [
+          731,
+          1096
+        ],
+        "rasterScale": 0.7139,
+        "effectiveDpi": 420.2
+      },
+      "drawingBox": null,
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 7,
+      "scene": "square",
+      "poseName": "star-look",
+      "backgroundPlate": {
+        "path": "output/wheelchair-customization-v1/warm-curly-dark-7-8-average/backgrounds/07.png",
+        "sourcePixels": [
+          2625,
+          2625
+        ],
+        "placedPixels": [
+          2625,
+          2625
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300,
+        "characterFree": true
+      },
+      "childBox": {
+        "x": 1576,
+        "y": 939,
+        "width": 596,
+        "height": 629,
+        "sourcePixels": [
+          596,
+          629
+        ],
+        "placedPixels": [
+          596,
+          629
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300
+      },
+      "monsterBox": {
+        "x": 438,
+        "y": 472,
+        "width": 731,
+        "height": 1096,
+        "sourcePixels": [
+          1024,
+          1536
+        ],
+        "placedPixels": [
+          731,
+          1096
+        ],
+        "rasterScale": 0.7139,
+        "effectiveDpi": 420.2
+      },
+      "drawingBox": null,
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 8,
+      "scene": "wind",
+      "poseName": "star-look",
+      "backgroundPlate": {
+        "path": "output/wheelchair-customization-v1/warm-curly-dark-7-8-average/backgrounds/08.png",
+        "sourcePixels": [
+          2625,
+          2625
+        ],
+        "placedPixels": [
+          2625,
+          2625
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300,
+        "characterFree": true
+      },
+      "childBox": {
+        "x": 1576,
+        "y": 939,
+        "width": 596,
+        "height": 629,
+        "sourcePixels": [
+          596,
+          629
+        ],
+        "placedPixels": [
+          596,
+          629
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300
+      },
+      "monsterBox": {
+        "x": 470,
+        "y": 416,
+        "width": 768,
+        "height": 1152,
+        "sourcePixels": [
+          1024,
+          1536
+        ],
+        "placedPixels": [
+          768,
+          1152
+        ],
+        "rasterScale": 0.75,
+        "effectiveDpi": 400
+      },
+      "drawingBox": null,
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 9,
+      "scene": "wind",
+      "poseName": "window-clue",
+      "backgroundPlate": {
+        "path": "output/wheelchair-customization-v1/warm-curly-dark-7-8-average/backgrounds/09.png",
+        "sourcePixels": [
+          2625,
+          2625
+        ],
+        "placedPixels": [
+          2625,
+          2625
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300,
+        "characterFree": true
+      },
+      "childBox": {
+        "x": 511,
+        "y": 940,
+        "width": 483,
+        "height": 628,
+        "sourcePixels": [
+          483,
+          628
+        ],
+        "placedPixels": [
+          483,
+          628
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300
+      },
+      "monsterBox": {
+        "x": 1388,
+        "y": 416,
+        "width": 768,
+        "height": 1152,
+        "sourcePixels": [
+          1024,
+          1536
+        ],
+        "placedPixels": [
+          768,
+          1152
+        ],
+        "rasterScale": 0.75,
+        "effectiveDpi": 400
+      },
+      "drawingBox": null,
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 10,
+      "scene": "trail",
+      "poseName": "window-clue",
+      "backgroundPlate": {
+        "path": "output/wheelchair-customization-v1/warm-curly-dark-7-8-average/backgrounds/10.png",
+        "sourcePixels": [
+          2625,
+          2625
+        ],
+        "placedPixels": [
+          2625,
+          2625
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300,
+        "characterFree": true
+      },
+      "childBox": {
+        "x": 511,
+        "y": 940,
+        "width": 483,
+        "height": 628,
+        "sourcePixels": [
+          483,
+          628
+        ],
+        "placedPixels": [
+          483,
+          628
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300
+      },
+      "monsterBox": {
+        "x": 1346,
+        "y": 444,
+        "width": 749,
+        "height": 1124,
+        "sourcePixels": [
+          1024,
+          1536
+        ],
+        "placedPixels": [
+          749,
+          1124
+        ],
+        "rasterScale": 0.7318,
+        "effectiveDpi": 410
+      },
+      "drawingBox": null,
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 11,
+      "scene": "trail",
+      "poseName": "doorway",
+      "backgroundPlate": {
+        "path": "output/wheelchair-customization-v1/warm-curly-dark-7-8-average/backgrounds/11.png",
+        "sourcePixels": [
+          2625,
+          2625
+        ],
+        "placedPixels": [
+          2625,
+          2625
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300,
+        "characterFree": true
+      },
+      "childBox": {
+        "x": 1620,
+        "y": 941,
+        "width": 509,
+        "height": 627,
+        "sourcePixels": [
+          509,
+          627
+        ],
+        "placedPixels": [
+          509,
+          627
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300
+      },
+      "monsterBox": {
+        "x": 530,
+        "y": 444,
+        "width": 749,
+        "height": 1124,
+        "sourcePixels": [
+          1024,
+          1536
+        ],
+        "placedPixels": [
+          749,
+          1124
+        ],
+        "rasterScale": 0.7318,
+        "effectiveDpi": 410
+      },
+      "drawingBox": null,
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 12,
+      "scene": "porch",
+      "poseName": "candy-help",
+      "backgroundPlate": {
+        "path": "output/wheelchair-customization-v1/warm-curly-dark-7-8-average/backgrounds/12.png",
+        "sourcePixels": [
+          2625,
+          2625
+        ],
+        "placedPixels": [
+          2625,
+          2625
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300,
+        "characterFree": true
+      },
+      "childBox": {
+        "x": 1565,
+        "y": 982,
+        "width": 618,
+        "height": 586,
+        "sourcePixels": [
+          618,
+          586
+        ],
+        "placedPixels": [
+          618,
+          586
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300
+      },
+      "monsterBox": {
+        "x": 433,
+        "y": 458,
+        "width": 740,
+        "height": 1110,
+        "sourcePixels": [
+          1024,
+          1536
+        ],
+        "placedPixels": [
+          740,
+          1110
+        ],
+        "rasterScale": 0.7227,
+        "effectiveDpi": 415.1
+      },
+      "drawingBox": null,
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 13,
+      "scene": "porch",
+      "poseName": "candy-help",
+      "backgroundPlate": {
+        "path": "output/wheelchair-customization-v1/warm-curly-dark-7-8-average/backgrounds/13.png",
+        "sourcePixels": [
+          2625,
+          2625
+        ],
+        "placedPixels": [
+          2625,
+          2625
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300,
+        "characterFree": true
+      },
+      "childBox": {
+        "x": 443,
+        "y": 982,
+        "width": 618,
+        "height": 586,
+        "sourcePixels": [
+          618,
+          586
+        ],
+        "placedPixels": [
+          618,
+          586
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300
+      },
+      "monsterBox": {
+        "x": 1453,
+        "y": 458,
+        "width": 740,
+        "height": 1110,
+        "sourcePixels": [
+          1024,
+          1536
+        ],
+        "placedPixels": [
+          740,
+          1110
+        ],
+        "rasterScale": 0.7227,
+        "effectiveDpi": 415.1
+      },
+      "drawingBox": null,
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 14,
+      "scene": "gate",
+      "poseName": "trail-clue",
+      "backgroundPlate": {
+        "path": "output/wheelchair-customization-v1/warm-curly-dark-7-8-average/backgrounds/14.png",
+        "sourcePixels": [
+          2625,
+          2625
+        ],
+        "placedPixels": [
+          2625,
+          2625
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300,
+        "characterFree": true
+      },
+      "childBox": {
+        "x": 444,
+        "y": 949,
+        "width": 617,
+        "height": 619,
+        "sourcePixels": [
+          617,
+          619
+        ],
+        "placedPixels": [
+          617,
+          619
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300
+      },
+      "monsterBox": {
+        "x": 1458,
+        "y": 472,
+        "width": 731,
+        "height": 1096,
+        "sourcePixels": [
+          1024,
+          1536
+        ],
+        "placedPixels": [
+          731,
+          1096
+        ],
+        "rasterScale": 0.7139,
+        "effectiveDpi": 420.2
+      },
+      "drawingBox": null,
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 15,
+      "scene": "gate",
+      "poseName": "star-look",
+      "backgroundPlate": {
+        "path": "output/wheelchair-customization-v1/warm-curly-dark-7-8-average/backgrounds/15.png",
+        "sourcePixels": [
+          2625,
+          2625
+        ],
+        "placedPixels": [
+          2625,
+          2625
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300,
+        "characterFree": true
+      },
+      "childBox": {
+        "x": 1576,
+        "y": 939,
+        "width": 596,
+        "height": 629,
+        "sourcePixels": [
+          596,
+          629
+        ],
+        "placedPixels": [
+          596,
+          629
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300
+      },
+      "monsterBox": {
+        "x": 438,
+        "y": 472,
+        "width": 731,
+        "height": 1096,
+        "sourcePixels": [
+          1024,
+          1536
+        ],
+        "placedPixels": [
+          731,
+          1096
+        ],
+        "rasterScale": 0.7139,
+        "effectiveDpi": 420.2
+      },
+      "drawingBox": null,
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 16,
+      "scene": "moon-house",
+      "poseName": "doorway",
+      "backgroundPlate": {
+        "path": "output/wheelchair-customization-v1/warm-curly-dark-7-8-average/backgrounds/16.png",
+        "sourcePixels": [
+          2625,
+          2625
+        ],
+        "placedPixels": [
+          2625,
+          2625
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300,
+        "characterFree": true
+      },
+      "childBox": {
+        "x": 1620,
+        "y": 941,
+        "width": 509,
+        "height": 627,
+        "sourcePixels": [
+          509,
+          627
+        ],
+        "placedPixels": [
+          509,
+          627
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300
+      },
+      "monsterBox": {
+        "x": 470,
+        "y": 416,
+        "width": 768,
+        "height": 1152,
+        "sourcePixels": [
+          1024,
+          1536
+        ],
+        "placedPixels": [
+          768,
+          1152
+        ],
+        "rasterScale": 0.75,
+        "effectiveDpi": 400
+      },
+      "drawingBox": null,
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 17,
+      "scene": "moon-house",
+      "poseName": "square",
+      "backgroundPlate": {
+        "path": "output/wheelchair-customization-v1/warm-curly-dark-7-8-average/backgrounds/17.png",
+        "sourcePixels": [
+          2625,
+          2625
+        ],
+        "placedPixels": [
+          2625,
+          2625
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300,
+        "characterFree": true
+      },
+      "childBox": {
+        "x": 489,
+        "y": 931,
+        "width": 526,
+        "height": 637,
+        "sourcePixels": [
+          526,
+          637
+        ],
+        "placedPixels": [
+          526,
+          637
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300
+      },
+      "monsterBox": {
+        "x": 1388,
+        "y": 416,
+        "width": 768,
+        "height": 1152,
+        "sourcePixels": [
+          1024,
+          1536
+        ],
+        "placedPixels": [
+          768,
+          1152
+        ],
+        "rasterScale": 0.75,
+        "effectiveDpi": 400
+      },
+      "drawingBox": null,
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 18,
+      "scene": "window",
+      "poseName": "window-clue",
+      "backgroundPlate": {
+        "path": "output/wheelchair-customization-v1/warm-curly-dark-7-8-average/backgrounds/18.png",
+        "sourcePixels": [
+          2625,
+          2625
+        ],
+        "placedPixels": [
+          2625,
+          2625
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300,
+        "characterFree": true
+      },
+      "childBox": {
+        "x": 511,
+        "y": 940,
+        "width": 483,
+        "height": 628,
+        "sourcePixels": [
+          483,
+          628
+        ],
+        "placedPixels": [
+          483,
+          628
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300
+      },
+      "monsterBox": {
+        "x": 1346,
+        "y": 444,
+        "width": 749,
+        "height": 1124,
+        "sourcePixels": [
+          1024,
+          1536
+        ],
+        "placedPixels": [
+          749,
+          1124
+        ],
+        "rasterScale": 0.7318,
+        "effectiveDpi": 410
+      },
+      "drawingBox": null,
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 19,
+      "scene": "window",
+      "poseName": "square",
+      "backgroundPlate": {
+        "path": "output/wheelchair-customization-v1/warm-curly-dark-7-8-average/backgrounds/19.png",
+        "sourcePixels": [
+          2625,
+          2625
+        ],
+        "placedPixels": [
+          2625,
+          2625
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300,
+        "characterFree": true
+      },
+      "childBox": {
+        "x": 1611,
+        "y": 931,
+        "width": 526,
+        "height": 637,
+        "sourcePixels": [
+          526,
+          637
+        ],
+        "placedPixels": [
+          526,
+          637
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300
+      },
+      "monsterBox": {
+        "x": 530,
+        "y": 444,
+        "width": 749,
+        "height": 1124,
+        "sourcePixels": [
+          1024,
+          1536
+        ],
+        "placedPixels": [
+          749,
+          1124
+        ],
+        "rasterScale": 0.7318,
+        "effectiveDpi": 410
+      },
+      "drawingBox": null,
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 20,
+      "scene": "banner",
+      "poseName": "ribbon-help",
+      "backgroundPlate": {
+        "path": "output/wheelchair-customization-v1/warm-curly-dark-7-8-average/backgrounds/20.png",
+        "sourcePixels": [
+          2625,
+          2625
+        ],
+        "placedPixels": [
+          2625,
+          2625
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300,
+        "characterFree": true
+      },
+      "childBox": {
+        "x": 1533,
+        "y": 949,
+        "width": 683,
+        "height": 619,
+        "sourcePixels": [
+          683,
+          619
+        ],
+        "placedPixels": [
+          683,
+          619
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300
+      },
+      "monsterBox": {
+        "x": 433,
+        "y": 458,
+        "width": 740,
+        "height": 1110,
+        "sourcePixels": [
+          1024,
+          1536
+        ],
+        "placedPixels": [
+          740,
+          1110
+        ],
+        "rasterScale": 0.7227,
+        "effectiveDpi": 415.1
+      },
+      "drawingBox": null,
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 21,
+      "scene": "banner",
+      "poseName": "ribbon-help",
+      "backgroundPlate": {
+        "path": "output/wheelchair-customization-v1/warm-curly-dark-7-8-average/backgrounds/21.png",
+        "sourcePixels": [
+          2625,
+          2625
+        ],
+        "placedPixels": [
+          2625,
+          2625
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300,
+        "characterFree": true
+      },
+      "childBox": {
+        "x": 411,
+        "y": 949,
+        "width": 683,
+        "height": 619,
+        "sourcePixels": [
+          683,
+          619
+        ],
+        "placedPixels": [
+          683,
+          619
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300
+      },
+      "monsterBox": {
+        "x": 1453,
+        "y": 458,
+        "width": 740,
+        "height": 1110,
+        "sourcePixels": [
+          1024,
+          1536
+        ],
+        "placedPixels": [
+          740,
+          1110
+        ],
+        "rasterScale": 0.7227,
+        "effectiveDpi": 415.1
+      },
+      "drawingBox": null,
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 22,
+      "scene": "quiet-garden",
+      "poseName": "garden",
+      "backgroundPlate": {
+        "path": "output/wheelchair-customization-v1/warm-curly-dark-7-8-average/backgrounds/22.png",
+        "sourcePixels": [
+          2625,
+          2625
+        ],
+        "placedPixels": [
+          2625,
+          2625
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300,
+        "characterFree": true
+      },
+      "childBox": {
+        "x": 439,
+        "y": 955,
+        "width": 626,
+        "height": 613,
+        "sourcePixels": [
+          626,
+          613
+        ],
+        "placedPixels": [
+          626,
+          613
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300
+      },
+      "monsterBox": {
+        "x": 1458,
+        "y": 472,
+        "width": 731,
+        "height": 1096,
+        "sourcePixels": [
+          1024,
+          1536
+        ],
+        "placedPixels": [
+          731,
+          1096
+        ],
+        "rasterScale": 0.7139,
+        "effectiveDpi": 420.2
+      },
+      "drawingBox": null,
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 23,
+      "scene": "quiet-garden",
+      "poseName": "star-look",
+      "backgroundPlate": {
+        "path": "output/wheelchair-customization-v1/warm-curly-dark-7-8-average/backgrounds/23.png",
+        "sourcePixels": [
+          2625,
+          2625
+        ],
+        "placedPixels": [
+          2625,
+          2625
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300,
+        "characterFree": true
+      },
+      "childBox": {
+        "x": 1576,
+        "y": 939,
+        "width": 596,
+        "height": 629,
+        "sourcePixels": [
+          596,
+          629
+        ],
+        "placedPixels": [
+          596,
+          629
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300
+      },
+      "monsterBox": {
+        "x": 438,
+        "y": 472,
+        "width": 731,
+        "height": 1096,
+        "sourcePixels": [
+          1024,
+          1536
+        ],
+        "placedPixels": [
+          731,
+          1096
+        ],
+        "rasterScale": 0.7139,
+        "effectiveDpi": 420.2
+      },
+      "drawingBox": null,
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 24,
+      "scene": "golden-garden",
+      "poseName": "garden",
+      "backgroundPlate": {
+        "path": "output/wheelchair-customization-v1/warm-curly-dark-7-8-average/backgrounds/24.png",
+        "sourcePixels": [
+          2625,
+          2625
+        ],
+        "placedPixels": [
+          2625,
+          2625
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300,
+        "characterFree": true
+      },
+      "childBox": {
+        "x": 1561,
+        "y": 955,
+        "width": 626,
+        "height": 613,
+        "sourcePixels": [
+          626,
+          613
+        ],
+        "placedPixels": [
+          626,
+          613
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300
+      },
+      "monsterBox": {
+        "x": 470,
+        "y": 416,
+        "width": 768,
+        "height": 1152,
+        "sourcePixels": [
+          1024,
+          1536
+        ],
+        "placedPixels": [
+          768,
+          1152
+        ],
+        "rasterScale": 0.75,
+        "effectiveDpi": 400
+      },
+      "drawingBox": null,
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 25,
+      "scene": "golden-garden",
+      "poseName": "garden",
+      "backgroundPlate": {
+        "path": "output/wheelchair-customization-v1/warm-curly-dark-7-8-average/backgrounds/25.png",
+        "sourcePixels": [
+          2625,
+          2625
+        ],
+        "placedPixels": [
+          2625,
+          2625
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300,
+        "characterFree": true
+      },
+      "childBox": {
+        "x": 439,
+        "y": 955,
+        "width": 626,
+        "height": 613,
+        "sourcePixels": [
+          626,
+          613
+        ],
+        "placedPixels": [
+          626,
+          613
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300
+      },
+      "monsterBox": {
+        "x": 1388,
+        "y": 416,
+        "width": 768,
+        "height": 1152,
+        "sourcePixels": [
+          1024,
+          1536
+        ],
+        "placedPixels": [
+          768,
+          1152
+        ],
+        "rasterScale": 0.75,
+        "effectiveDpi": 400
+      },
+      "drawingBox": null,
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 26,
+      "scene": "return",
+      "poseName": "trail-clue",
+      "backgroundPlate": {
+        "path": "output/wheelchair-customization-v1/warm-curly-dark-7-8-average/backgrounds/26.png",
+        "sourcePixels": [
+          2625,
+          2625
+        ],
+        "placedPixels": [
+          2625,
+          2625
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300,
+        "characterFree": true
+      },
+      "childBox": {
+        "x": 444,
+        "y": 949,
+        "width": 617,
+        "height": 619,
+        "sourcePixels": [
+          617,
+          619
+        ],
+        "placedPixels": [
+          617,
+          619
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300
+      },
+      "monsterBox": {
+        "x": 1346,
+        "y": 444,
+        "width": 749,
+        "height": 1124,
+        "sourcePixels": [
+          1024,
+          1536
+        ],
+        "placedPixels": [
+          749,
+          1124
+        ],
+        "rasterScale": 0.7318,
+        "effectiveDpi": 410
+      },
+      "drawingBox": null,
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 27,
+      "scene": "return",
+      "poseName": "star-look",
+      "backgroundPlate": {
+        "path": "output/wheelchair-customization-v1/warm-curly-dark-7-8-average/backgrounds/27.png",
+        "sourcePixels": [
+          2625,
+          2625
+        ],
+        "placedPixels": [
+          2625,
+          2625
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300,
+        "characterFree": true
+      },
+      "childBox": {
+        "x": 1576,
+        "y": 939,
+        "width": 596,
+        "height": 629,
+        "sourcePixels": [
+          596,
+          629
+        ],
+        "placedPixels": [
+          596,
+          629
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300
+      },
+      "monsterBox": {
+        "x": 530,
+        "y": 444,
+        "width": 749,
+        "height": 1124,
+        "sourcePixels": [
+          1024,
+          1536
+        ],
+        "placedPixels": [
+          749,
+          1124
+        ],
+        "rasterScale": 0.7318,
+        "effectiveDpi": 410
+      },
+      "drawingBox": null,
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 28,
+      "scene": "lantern",
+      "poseName": "celebrate",
+      "backgroundPlate": {
+        "path": "output/wheelchair-customization-v1/warm-curly-dark-7-8-average/backgrounds/28.png",
+        "sourcePixels": [
+          2625,
+          2625
+        ],
+        "placedPixels": [
+          2625,
+          2625
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300,
+        "characterFree": true
+      },
+      "childBox": {
+        "x": 1611,
+        "y": 952,
+        "width": 527,
+        "height": 616,
+        "sourcePixels": [
+          527,
+          616
+        ],
+        "placedPixels": [
+          527,
+          616
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300
+      },
+      "monsterBox": {
+        "x": 433,
+        "y": 458,
+        "width": 740,
+        "height": 1110,
+        "sourcePixels": [
+          1024,
+          1536
+        ],
+        "placedPixels": [
+          740,
+          1110
+        ],
+        "rasterScale": 0.7227,
+        "effectiveDpi": 415.1
+      },
+      "drawingBox": null,
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 29,
+      "scene": "lantern",
+      "poseName": "welcome",
+      "backgroundPlate": {
+        "path": "output/wheelchair-customization-v1/warm-curly-dark-7-8-average/backgrounds/29.png",
+        "sourcePixels": [
+          2625,
+          2625
+        ],
+        "placedPixels": [
+          2625,
+          2625
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300,
+        "characterFree": true
+      },
+      "childBox": {
+        "x": 483,
+        "y": 939,
+        "width": 538,
+        "height": 629,
+        "sourcePixels": [
+          538,
+          629
+        ],
+        "placedPixels": [
+          538,
+          629
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300
+      },
+      "monsterBox": {
+        "x": 1453,
+        "y": 458,
+        "width": 740,
+        "height": 1110,
+        "sourcePixels": [
+          1024,
+          1536
+        ],
+        "placedPixels": [
+          740,
+          1110
+        ],
+        "rasterScale": 0.7227,
+        "effectiveDpi": 415.1
+      },
+      "drawingBox": null,
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 30,
+      "scene": "parade",
+      "poseName": "parade",
+      "backgroundPlate": {
+        "path": "output/wheelchair-customization-v1/warm-curly-dark-7-8-average/backgrounds/30.png",
+        "sourcePixels": [
+          2625,
+          2625
+        ],
+        "placedPixels": [
+          2625,
+          2625
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300,
+        "characterFree": true
+      },
+      "childBox": {
+        "x": 498,
+        "y": 937,
+        "width": 509,
+        "height": 631,
+        "sourcePixels": [
+          509,
+          631
+        ],
+        "placedPixels": [
+          509,
+          631
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300
+      },
+      "monsterBox": {
+        "x": 1458,
+        "y": 472,
+        "width": 731,
+        "height": 1096,
+        "sourcePixels": [
+          1024,
+          1536
+        ],
+        "placedPixels": [
+          731,
+          1096
+        ],
+        "rasterScale": 0.7139,
+        "effectiveDpi": 420.2
+      },
+      "drawingBox": null,
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 31,
+      "scene": "home",
+      "poseName": "sleepy-home",
+      "backgroundPlate": {
+        "path": "output/wheelchair-customization-v1/warm-curly-dark-7-8-average/backgrounds/31.png",
+        "sourcePixels": [
+          2625,
+          2625
+        ],
+        "placedPixels": [
+          2625,
+          2625
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300,
+        "characterFree": true
+      },
+      "childBox": {
+        "x": 1618,
+        "y": 949,
+        "width": 512,
+        "height": 619,
+        "sourcePixels": [
+          512,
+          619
+        ],
+        "placedPixels": [
+          512,
+          619
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300
+      },
+      "monsterBox": {
+        "x": 438,
+        "y": 472,
+        "width": 731,
+        "height": 1096,
+        "sourcePixels": [
+          1024,
+          1536
+        ],
+        "placedPixels": [
+          731,
+          1096
+        ],
+        "rasterScale": 0.7139,
+        "effectiveDpi": 420.2
+      },
+      "drawingBox": null,
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 32,
+      "scene": "frontmatter",
+      "poseName": null,
+      "backgroundPlate": {
+        "path": "output/wheelchair-customization-v1/warm-curly-dark-7-8-average/backgrounds/32.png",
+        "sourcePixels": [
+          2625,
+          2625
+        ],
+        "placedPixels": [
+          2625,
+          2625
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300,
+        "characterFree": true
+      },
+      "childBox": null,
+      "monsterBox": {
+        "x": 1525,
+        "y": 444,
+        "width": 749,
+        "height": 1124,
+        "sourcePixels": [
+          1024,
+          1536
+        ],
+        "placedPixels": [
+          749,
+          1124
+        ],
+        "rasterScale": 0.7318,
+        "effectiveDpi": 410
+      },
+      "drawingBox": {
+        "x": 475,
+        "y": 705,
+        "width": 350,
+        "height": 350,
+        "sourcePixels": [
+          350,
+          350
+        ],
+        "placedPixels": [
+          350,
+          350
+        ],
+        "rasterScale": 1,
+        "effectiveDpi": 300,
+        "aspectRatioPreserved": true,
+        "sourceCrop": {
+          "x": 119,
+          "y": 328,
+          "width": 350,
+          "height": 350
+        }
+      },
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    }
+  ],
+  "checks": {
+    "pageCount": 32,
+    "requiredChildPages": 28,
+    "distinctPosesUsed": 12,
+    "allCropSafe": true,
+    "allTextFits": true,
+    "movementNeutral": true,
+    "allBackgroundsNative300Dpi": true,
+    "allPlacedRasterAssetsAtLeast300EffectiveDpi": true,
+    "originalDrawingAspectRatioPreserved": true,
+    "supportedWheelchairProfile": true
+  },
+  "remainingProductionGate": [
+    "Approve the 32 final-size character-free background candidates and all composed pages; digital checks cannot supply human art approval.",
+    "Run the provider file-validation endpoint against the exact final interior and cover PDFs once final cover geometry is available.",
+    "Order and review a physical proof; no digital preflight can verify paper, binding, trim variance, or printed color.",
+    "Record production composition approval for every required child page after the physical-proof corrections are complete.",
+    "Do not enable other age, appearance, or accessibility profiles until their own complete assets and verification exist."
+  ]
+}

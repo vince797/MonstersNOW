@@ -7,6 +7,11 @@
     taller: "Taller than most children this age",
   };
   const mobilityLabels = { none: "", wheelchair: "Wheelchair shown in every scene" };
+  const wheelchairSupport = {
+    appearanceIds: ["warm-curly-dark", "deep-braids-black"],
+    ageBands: ["5-6", "7-8"],
+    relativeHeights: ["average", "taller"],
+  };
   const presetVisuals = {
     "warm-curly-dark": { avatarClass: "avatar-curly", skin: "#8f5538", hair: "#24150f" },
     "deep-coils-black": { avatarClass: "avatar-coils", skin: "#5c3426", hair: "#17100e" },
@@ -57,6 +62,46 @@
       relativeHeight: selected("child-relative-height", "average"),
       mobilityAid: selected("child-mobility-aid", "none"),
     };
+  }
+
+  function supportsWheelchair(profile) {
+    return Boolean(profile?.included
+      && wheelchairSupport.appearanceIds.includes(profile.id)
+      && wheelchairSupport.ageBands.includes(profile.ageBand)
+      && wheelchairSupport.relativeHeights.includes(profile.relativeHeight));
+  }
+
+  function refreshWheelchairControls() {
+    const wheelchair = document.querySelector('input[name="child-mobility-aid"][value="wheelchair"]');
+    const none = document.querySelector('input[name="child-mobility-aid"][value="none"]');
+    if (!wheelchair || !none) return;
+    let profile = getProfile();
+    const supported = supportsWheelchair(profile);
+    if (!supported && wheelchair.checked) {
+      none.checked = true;
+      profile = getProfile();
+    }
+    wheelchair.disabled = !supportsWheelchair(profile);
+    const wheelchairSelected = wheelchair.checked;
+    for (const input of document.querySelectorAll('input[name="child-character"]')) {
+      input.disabled = wheelchairSelected && input.value !== "none" && !wheelchairSupport.appearanceIds.includes(input.value);
+      input.closest("label")?.classList.toggle("is-unavailable", input.disabled);
+    }
+    for (const input of document.querySelectorAll('input[name="child-age-band"]')) {
+      input.disabled = wheelchairSelected && !wheelchairSupport.ageBands.includes(input.value);
+      input.closest("label")?.classList.toggle("is-unavailable", input.disabled);
+    }
+    for (const input of document.querySelectorAll('input[name="child-relative-height"]')) {
+      input.disabled = wheelchairSelected && !wheelchairSupport.relativeHeights.includes(input.value);
+      input.closest("label")?.classList.toggle("is-unavailable", input.disabled);
+    }
+    const label = wheelchair.closest("label");
+    label?.classList.toggle("is-unavailable", wheelchair.disabled);
+    label?.setAttribute("aria-disabled", wheelchair.disabled ? "true" : "false");
+    const copy = document.querySelector("#child-wheelchair-option-copy");
+    if (copy) copy.textContent = wheelchair.disabled
+      ? "Choose Curly dark or Braids, ages 5–8, and average or taller."
+      : "Preview available · print ordering pending physical proof";
   }
 
   function previewValues(profile) {
@@ -122,12 +167,15 @@
       "child-character": value.id,
       "child-age-band": value.ageBand,
       "child-relative-height": value.relativeHeight,
-      "child-mobility-aid": value.mobilityAid,
     };
     for (const [name, selectedValue] of Object.entries(controls)) {
       const input = [...document.querySelectorAll(`input[name="${name}"]`)].find((option) => option.value === selectedValue && !option.disabled);
       if (input) input.checked = true;
     }
+    refreshWheelchairControls();
+    const mobility = [...document.querySelectorAll('input[name="child-mobility-aid"]')].find((option) => option.value === value.mobilityAid && !option.disabled);
+    if (mobility) mobility.checked = true;
+    refreshWheelchairControls();
   }
 
   function updateHistoryControls(message = "") {
@@ -144,15 +192,18 @@
     const appearance = [...document.querySelectorAll('input[name="child-character"]')].find((input) => input.value === saved.id);
     const age = [...document.querySelectorAll('input[name="child-age-band"]')].find((input) => input.value === saved.ageBand);
     const height = [...document.querySelectorAll('input[name="child-relative-height"]')].find((input) => input.value === saved.relativeHeight);
-    const mobility = [...document.querySelectorAll('input[name="child-mobility-aid"]')].find((input) => input.value === saved.mobilityAid && !input.disabled);
     if (appearance) appearance.checked = true;
     if (age) age.checked = true;
     if (height) height.checked = true;
+    refreshWheelchairControls();
+    const mobility = [...document.querySelectorAll('input[name="child-mobility-aid"]')].find((input) => input.value === saved.mobilityAid && !input.disabled);
     if (mobility) mobility.checked = true;
+    refreshWheelchairControls();
   }
 
   function sync({ save = true, recordHistory = false, message = "" } = {}) {
     if (!root) return getProfile();
+    refreshWheelchairControls();
     const profile = getProfile();
     if (recordHistory && lastProfile && profileKey(lastProfile) !== profileKey(profile)) {
       history.push(compactProfile(lastProfile));
@@ -198,7 +249,7 @@
     return sync({ message: "Character reset to monster-only." });
   }
 
-  window.MonstersNowChildSelector = { getProfile, renderProfile, restore, sync, undo, reset, storageKey };
+  window.MonstersNowChildSelector = { getProfile, renderProfile, restore, sync, undo, reset, supportsWheelchair, storageKey, wheelchairSupport };
   if (!root) return;
   restore();
   root.addEventListener("change", () => sync({ recordHistory: true }));

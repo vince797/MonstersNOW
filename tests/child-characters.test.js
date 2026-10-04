@@ -3,7 +3,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 
-const { resolveChildCharacter } = require("../lib/child-characters");
+const { childProfileKey, isSupportedWheelchairProfile, resolveChildCharacter } = require("../lib/child-characters");
 const { buildStorybookInterestSubmission } = require("../lib/storybook-interest");
 const { buildHalloweenProof } = require("../lib/halloween-proof");
 
@@ -27,17 +27,26 @@ test("server validation rejects unsupported age or height values instead of sile
   assert.throws(() => buildStorybookInterestSubmission({ ...base, childCharacter: { ...base.childCharacter, ageBand: "2017-03-02" } }), /valid age range/i);
   assert.throws(() => buildStorybookInterestSubmission({ ...base, childCharacter: { ...base.childCharacter, relativeHeight: "121cm" } }), /valid relative height/i);
   assert.throws(() => buildStorybookInterestSubmission({ ...base, childCharacter: { ...base.childCharacter, mobilityAid: "diagnosis-detail" } }), /supported mobility option/i);
+  assert.throws(() => buildStorybookInterestSubmission({ ...base, childCharacter: { id: "deep-coils-black", ageBand: "7-8", relativeHeight: "taller", mobilityAid: "wheelchair" } }), /supported wheelchair appearance/i);
+});
+
+test("wheelchair support is an explicit eight-combination matrix with exact profile keys", () => {
+  const supported = resolveChildCharacter({ id: "deep-braids-black", ageBand: "7-8", relativeHeight: "taller", mobilityAid: "wheelchair" });
+  const unsupported = resolveChildCharacter({ id: "deep-braids-black", ageBand: "2-4", relativeHeight: "taller", mobilityAid: "wheelchair" });
+  assert.equal(isSupportedWheelchairProfile(supported), true);
+  assert.equal(isSupportedWheelchairProfile(unsupported), false);
+  assert.equal(childProfileKey(supported), "deep-braids-black:7-8:taller:wheelchair");
 });
 
 test("proof identity includes the full canonical child profile", () => {
   const proof = buildHalloweenProof({
-    personalization: { childName: "Sam", monsterName: "Noodle", childCharacter: { id: "deep-coils-black", ageBand: "2-4", relativeHeight: "shorter", mobilityAid: "wheelchair" } },
+    personalization: { childName: "Sam", monsterName: "Noodle", childCharacter: { id: "deep-braids-black", ageBand: "7-8", relativeHeight: "taller", mobilityAid: "wheelchair" } },
     monsterImage: pixel,
     format: "softcover",
   });
-  assert.equal(proof.childCharacter.hairStyle, "coils");
-  assert.equal(proof.childCharacter.ageBand, "2-4");
-  assert.equal(proof.childCharacter.relativeHeight, "shorter");
+  assert.equal(proof.childCharacter.hairStyle, "braids");
+  assert.equal(proof.childCharacter.ageBand, "7-8");
+  assert.equal(proof.childCharacter.relativeHeight, "taller");
   assert.equal(proof.childCharacter.mobilityAid, "wheelchair");
 });
 
@@ -49,7 +58,8 @@ test("selector UI exposes only supported controls and states the current renderi
   assert.match(html, /name="child-relative-height"/);
   assert.match(html, /name="child-mobility-aid" value="wheelchair" disabled/);
   assert.match(html, /No diagnosis or medical details needed/);
-  assert.match(html, /complete native-resolution digital candidate/i);
+  assert.match(html, /Curly dark or Braids/i);
+  assert.match(html, /ages 5–8/i);
   assert.doesNotMatch(html, /type="date"|name="child-(?:birthdate|date-of-birth|height-(?:cm|in))"/i);
   assert.match(html, />Appearance<|>Basics<|>Accessibility/);
   assert.match(html, /id="child-editor-undo" disabled/);
@@ -60,6 +70,7 @@ test("selector UI exposes only supported controls and states the current renderi
   assert.match(script, /function undo\(/);
   assert.match(script, /function reset\(/);
   assert.match(script, /mobility-\$\{profile\.mobilityAid/);
+  assert.match(script, /function supportsWheelchair/);
   assert.match(css, /\.child-preview-stage\.mobility-wheelchair/);
   assert.match(css, /\.child-live-preview \{[\s\S]*position: sticky/);
 });

@@ -311,7 +311,7 @@ async function main() {
     generatedAt: new Date().toISOString(),
     productionSelectionEnabled: false,
     approval: { artApproved: false, requiredNow: true },
-    profile: { key: "warm-curly-dark:5-6:wheelchair", synthetic: true, childName: "Maya", mobilityAid: "wheelchair" },
+    profile: { key: "warm-curly-dark:5-6:average:wheelchair", synthetic: true, childName: "Maya", mobilityAid: "wheelchair" },
     outputIntent: { width: pageSize, height: pageSize, nominalDpi: 300, trimInches: "8.5 × 8.5", safeMarginPixels: safeMargin },
     source: path.relative(root, sourcePath),
     pages: rendered.map(({ page, pose, path: renderedPath, width, height, placement, cropSafe }) => ({

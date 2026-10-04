@@ -3,11 +3,40 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { createCanvas, loadImage } = require("@napi-rs/canvas");
 const { buildHalloweenMasterPages } = require("../lib/halloween-master-pages");
+const { childProfileKey, isSupportedWheelchairProfile, resolveChildCharacter } = require("../lib/child-characters");
 
 const root = path.resolve(__dirname, "..");
 const referenceDir = path.join(root, "assets/storybook/halloween-monster-night/reference");
-const poseDir = path.join(referenceDir, "wheelchair-profile-v1");
-const outputDir = path.join(root, "output/wheelchair-production-candidate-v2");
+const appearanceId = argument("--appearance", "warm-curly-dark");
+const ageBand = argument("--age-band", "5-6");
+const relativeHeight = argument("--relative-height", "average");
+const selectedProfile = resolveChildCharacter({ id: appearanceId, ageBand, relativeHeight, mobilityAid: "wheelchair" });
+if (!isSupportedWheelchairProfile(selectedProfile)) throw new Error(`Unsupported wheelchair profile: ${appearanceId}:${ageBand}:${relativeHeight}`);
+const appearanceConfigs = {
+  "warm-curly-dark": {
+    label: "Curly dark",
+    poseDir: "wheelchair-profile-v1",
+    existingPoses: { doorway: "doorway.png", square: "town-square.png", parade: "parade.png", garden: "garden.png" },
+    sheets: [
+      { source: "wheelchair-child-pose-sheet-v2.png", poses: ["candy-help", "trail-clue", "ribbon-help", "star-look"] },
+      { source: "wheelchair-child-pose-sheet-v3.png", poses: ["welcome", "window-clue", "celebrate", "sleepy-home"] },
+    ],
+  },
+  "deep-braids-black": {
+    label: "Braids",
+    poseDir: "wheelchair-profile-deep-braids-black-v1",
+    existingPoses: {},
+    sheets: [
+      { source: "wheelchair-child-pose-sheet-braids-v1.png", poses: ["doorway", "square", "parade", "garden"] },
+      { source: "wheelchair-child-pose-sheet-braids-v2.png", poses: ["candy-help", "trail-clue", "ribbon-help", "star-look"] },
+      { source: "wheelchair-child-pose-sheet-braids-v3.png", poses: ["welcome", "window-clue", "celebrate", "sleepy-home"] },
+    ],
+  },
+};
+const appearance = appearanceConfigs[appearanceId];
+const poseDir = path.join(referenceDir, appearance.poseDir);
+const outputSlug = `${appearanceId}-${ageBand}-${relativeHeight}`;
+const outputDir = path.join(root, "output/wheelchair-customization-v1", outputSlug);
 const pageDir = path.join(outputDir, "pages");
 const backgroundDir = path.join(outputDir, "backgrounds");
 const fullSize = 2625;
@@ -16,24 +45,15 @@ const safeInset = 150;
 const safe = { x: trim.x + safeInset, y: trim.y + safeInset, right: trim.x + trim.width - safeInset, bottom: trim.y + trim.height - safeInset };
 const artBottom = trim.y + 1780;
 const sourceDrawingCrop = { x: 119, y: 328, width: 350, height: 350 };
+const childRenderScale = ({ "5-6": 0.88, "7-8": 1 }[ageBand]) * ({ average: 0.94, taller: 1 }[relativeHeight]);
 
-const newPoseSheets = [
-  {
-    source: "wheelchair-child-pose-sheet-v2.png",
-    poses: ["candy-help", "trail-clue", "ribbon-help", "star-look"],
-  },
-  {
-    source: "wheelchair-child-pose-sheet-v3.png",
-    poses: ["welcome", "window-clue", "celebrate", "sleepy-home"],
-  },
-];
+const newPoseSheets = appearance.sheets;
+const existingPoses = appearance.existingPoses;
 
-const existingPoses = {
-  doorway: "doorway.png",
-  square: "town-square.png",
-  parade: "parade.png",
-  garden: "garden.png",
-};
+function argument(name, fallback) {
+  const index = process.argv.indexOf(name);
+  return index >= 0 && process.argv[index + 1] ? process.argv[index + 1] : fallback;
+}
 
 const poseByPage = {
   4: "doorway", 5: "square", 6: "square", 7: "star-look",
@@ -225,7 +245,7 @@ function clampPlacement(x, y, width, height) {
 
 async function drawCharacter(ctx, image, placement, kind) {
   const requestedHeight = kind === "child" ? 680 + placement.scale * 17 : 620 + placement.scale * 14;
-  const targetHeight = Math.min(requestedHeight, image.height);
+  const targetHeight = Math.min(requestedHeight * (kind === "child" ? childRenderScale : 1), image.height);
   const ratio = image.width / image.height;
   let height = targetHeight; let width = height * ratio;
   const maxWidth = 980;
@@ -313,8 +333,8 @@ async function contactSheet(pageResults) {
   const thumb = 420; const gap = 34; const columns = 4; const rows = 8;
   const canvas = createCanvas(columns * thumb + (columns + 1) * gap, 190 + rows * thumb + (rows + 1) * gap);
   const ctx = canvas.getContext("2d"); ctx.fillStyle = "#f2ede5"; ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = "#18364c"; ctx.font = "900 56px sans-serif"; ctx.fillText("Halloween Monster Night - wheelchair production candidate v2", 42, 72);
-  ctx.fillStyle = "#a14e26"; ctx.font = "700 27px sans-serif"; ctx.fillText("32 pages - single Maya wheelchair profile - digital production candidate - approval required", 42, 122);
+  ctx.fillStyle = "#18364c"; ctx.font = "900 56px sans-serif"; ctx.fillText("Halloween Monster Night - editable wheelchair profile", 42, 72);
+  ctx.fillStyle = "#a14e26"; ctx.font = "700 27px sans-serif"; ctx.fillText(`${appearance.label} · ${ageBand} · ${relativeHeight} · 32 pages · print approval pending`, 42, 122);
   for (let index = 0; index < pageResults.length; index += 1) {
     const image = await loadImage(path.join(root, pageResults[index].outputPath));
     const x = gap + (index % columns) * (thumb + gap); const y = 170 + gap + Math.floor(index / columns) * (thumb + gap);
@@ -339,9 +359,10 @@ async function main() {
   const sheet = await contactSheet(results);
   const report = {
     status: "digital_production_candidate_complete",
+    editorSelectionEnabled: true,
     productionSelectionEnabled: false,
-    approval: { visualDirectionApproved: true, printReadyApproved: false },
-    profile: { key: "warm-curly-dark:5-6:wheelchair", synthetic: true, childName: "Maya", mobilityAid: "wheelchair" },
+    approval: { visualDirectionApproved: true, editableVariationsApproved: true, printReadyApproved: false },
+    profile: { ...selectedProfile, key: childProfileKey(selectedProfile), synthetic: true, childName: "Maya", renderScale: Number(childRenderScale.toFixed(4)) },
     sourceDrawing: { path: "assets/gallery/red-blue-monster-before-after-source-v1.jpg", nativePixels: [588, 1280], cropPixels: sourceDrawingCrop, cropMatchesApprovedGalleryPresentation: true },
     output: { fullBleedPixels: [fullSize, fullSize], trimPixels: trim, nominalDpi: 300, trimInches: [8.5, 8.5], bleedInchesPerEdge: 0.125, safeInsetPixels: safeInset, colorSpace: "sRGB/RGB", transparencyFlattenedInPdf: true },
     poseAssets: Object.fromEntries(Object.entries(poseInfo).map(([name, info]) => [name, path.relative(root, path.join(poseDir, info.file))])),
@@ -357,6 +378,7 @@ async function main() {
       allBackgroundsNative300Dpi: results.every((page) => page.backgroundPlate.rasterScale === 1 && page.backgroundPlate.effectiveDpi === 300),
       allPlacedRasterAssetsAtLeast300EffectiveDpi: results.every((page) => [page.childBox, page.monsterBox, page.drawingBox].filter(Boolean).every((box) => box.rasterScale <= 1 && box.effectiveDpi >= 300)),
       originalDrawingAspectRatioPreserved: results.filter((page) => page.drawingBox).every((page) => page.drawingBox.aspectRatioPreserved),
+      supportedWheelchairProfile: isSupportedWheelchairProfile(selectedProfile),
     },
     remainingProductionGate: [
       "Approve the 32 final-size character-free background candidates and all composed pages; digital checks cannot supply human art approval.",
@@ -378,7 +400,9 @@ async function main() {
     })),
     contactSheet: undefined,
   };
-  fs.writeFileSync(path.join(root, "docs/wheelchair-full-review-manifest.json"), `${JSON.stringify(committedManifest, null, 2)}\n`);
+  const manifestDir = path.join(root, "docs/wheelchair-profile-manifests");
+  fs.mkdirSync(manifestDir, { recursive: true });
+  fs.writeFileSync(path.join(manifestDir, `${outputSlug}.json`), `${JSON.stringify(committedManifest, null, 2)}\n`);
   process.stdout.write(`${reportPath}\n`);
 }
 

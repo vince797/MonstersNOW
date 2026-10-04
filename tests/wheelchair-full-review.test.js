@@ -8,14 +8,17 @@ const { buildHalloweenMasterPages } = require("../lib/halloween-master-pages");
 const { buildPersonalizedBook } = require("../lib/personalized-book");
 
 const root = path.resolve(__dirname, "..");
-const output = path.join(root, "output/wheelchair-production-candidate-v2");
+const outputRoot = path.join(root, "output/wheelchair-customization-v1");
+const output = path.join(outputRoot, "warm-curly-dark-5-6-average");
 
 test("approved wheelchair direction renders a complete native-resolution 32-page production candidate", () => {
   execFileSync(process.execPath, [path.join(root, "scripts/build-wheelchair-full-review.js")], { cwd: root });
   const report = JSON.parse(fs.readFileSync(path.join(output, "render-report.json"), "utf8"));
   assert.equal(report.status, "digital_production_candidate_complete");
   assert.equal(report.productionSelectionEnabled, false);
-  assert.deepEqual(report.approval, { visualDirectionApproved: true, printReadyApproved: false });
+  assert.deepEqual(report.approval, { visualDirectionApproved: true, editableVariationsApproved: true, printReadyApproved: false });
+  assert.equal(report.profile.key, "warm-curly-dark:5-6:average:wheelchair");
+  assert.equal(report.checks.supportedWheelchairProfile, true);
   assert.deepEqual(report.output.fullBleedPixels, [2625, 2625]);
   assert.deepEqual(report.output.trimPixels, { x: 38, y: 38, width: 2550, height: 2550 });
   assert.equal(report.output.bleedInchesPerEdge, 0.125);
@@ -38,6 +41,20 @@ test("approved wheelchair direction renders a complete native-resolution 32-page
   assert.match(report.remainingProductionGate.join(" "), /physical proof/i);
 });
 
+test("a second appearance and larger age-height choice use exact matching assets without enlarging rasters", () => {
+  execFileSync(process.execPath, [path.join(root, "scripts/build-wheelchair-full-review.js"), "--appearance", "deep-braids-black", "--age-band", "7-8", "--relative-height", "taller"], { cwd: root });
+  const curly = JSON.parse(fs.readFileSync(path.join(output, "render-report.json"), "utf8"));
+  const braidsOutput = path.join(outputRoot, "deep-braids-black-7-8-taller");
+  const braids = JSON.parse(fs.readFileSync(path.join(braidsOutput, "render-report.json"), "utf8"));
+  assert.equal(braids.profile.key, "deep-braids-black:7-8:taller:wheelchair");
+  assert.equal(braids.profile.renderScale, 1);
+  assert.ok(curly.profile.renderScale < braids.profile.renderScale);
+  assert.equal(new Set(Object.values(braids.poseAssets)).size, 12);
+  assert.ok(Object.values(braids.poseAssets).every((asset) => asset.includes("wheelchair-profile-deep-braids-black-v1")));
+  assert.ok(braids.pages.every((page) => [page.childBox, page.monsterBox, page.drawingBox].filter(Boolean).every((box) => box.rasterScale <= 1 && box.effectiveDpi >= 300)));
+  assert.ok(braids.pages.every((page) => page.cropSafe && page.textFits));
+});
+
 test("the full single-profile render contract stays blocked until print-ready approval", () => {
   const pages = buildHalloweenMasterPages().map((page, index) => ({
     ...page,
@@ -56,7 +73,7 @@ test("the full single-profile render contract stays blocked until print-ready ap
     selectedPreviewUrl: "https://assets.example/larry.png",
   }, {
     childImageUrl: "https://assets.example/wheelchair-profile-v1.png",
-    childProfileKey: "warm-curly-dark:5-6:wheelchair",
+    childProfileKey: "warm-curly-dark:5-6:average:wheelchair",
     childDepiction: "seated-wheelchair",
     childAssetComposition: "child-and-wheelchair",
     childAssetApproved: false,
