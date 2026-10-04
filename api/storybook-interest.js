@@ -187,10 +187,10 @@ module.exports = async function handler(request, response) {
 module.exports.config = { api: { bodyParser: false } };
 
 async function handleAdminStories(request, response) {
+  const resource = firstQueryValue(request.query?.resource) || "stories";
   try {
     assertAdminRequest(request);
     const id = firstQueryValue(request.query?.id);
-    const resource = firstQueryValue(request.query?.resource) || "stories";
 
     if (resource === "orders") {
       if (request.method === "GET") return sendJson(response, 200, { orders: await listOrders() });
