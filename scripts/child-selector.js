@@ -22,6 +22,20 @@
     "medium-curly-auburn": { avatarClass: "avatar-coils", skin: "#c88962", hair: "#8c3d25" },
     "deep-braids-black": { avatarClass: "avatar-braids", skin: "#70422f", hair: "#16110f" },
   };
+  const characterArt = {
+    "warm-curly-dark": "assets/child-characters/warm-curly-dark-v1.webp",
+    "deep-coils-black": "assets/child-characters/deep-coils-black-v1.webp",
+    "medium-wavy-brown": "assets/child-characters/medium-wavy-brown-v1.webp",
+    "golden-straight-black": "assets/child-characters/golden-straight-black-v1.webp",
+    "light-short-brown": "assets/child-characters/light-short-brown-v1.webp",
+    "light-wavy-blonde": "assets/child-characters/light-wavy-blonde-v1.webp",
+    "medium-curly-auburn": "assets/child-characters/medium-curly-auburn-v1.webp",
+    "deep-braids-black": "assets/child-characters/deep-braids-black-v1.webp",
+  };
+  const wheelchairCharacterArt = {
+    "warm-curly-dark": "assets/child-characters/warm-curly-dark-wheelchair-v1.webp",
+    "deep-braids-black": "assets/child-characters/deep-braids-black-wheelchair-v1.webp",
+  };
   const root = document.querySelector("[data-child-selector]");
   const defaultProfile = { id: "none", ageBand: "5-6", relativeHeight: "average", mobilityAid: "none" };
   const history = [];
@@ -33,6 +47,36 @@
 
   function selectedAppearance() {
     return document.querySelector('input[name="child-character"]:checked');
+  }
+
+  function skinGroupForAppearance(input) {
+    return input?.closest("[data-skin-group]")?.dataset.skinGroup || "";
+  }
+
+  function syncAppearanceBuilder(profile) {
+    const hairPicker = document.querySelector("#child-hair-picker");
+    const monsterOnly = document.querySelector(".child-monster-only-option");
+    const selectedInput = selectedAppearance();
+    const skinGroup = profile?.included ? skinGroupForAppearance(selectedInput) : "";
+    const skinInput = [...document.querySelectorAll('input[name="child-skin-tone"]')]
+      .find((input) => input.value === skinGroup);
+    for (const input of document.querySelectorAll('input[name="child-skin-tone"]')) {
+      input.checked = input === skinInput;
+      input.closest("label")?.classList.toggle("is-selected", input.checked);
+    }
+    for (const option of document.querySelectorAll(".child-character-option[data-skin-group]")) {
+      option.hidden = !skinGroup || option.dataset.skinGroup !== skinGroup;
+    }
+    if (hairPicker) hairPicker.hidden = !skinGroup;
+    monsterOnly?.classList.toggle("is-selected", !profile?.included);
+  }
+
+  function chooseFirstAppearanceForSkin(skinGroup) {
+    const current = selectedAppearance();
+    const currentGroup = skinGroupForAppearance(current);
+    if (current?.value !== "none" && currentGroup === skinGroup) return;
+    const firstMatch = document.querySelector(`.child-character-option[data-skin-group="${skinGroup}"] input[name="child-character"]`);
+    if (firstMatch) firstMatch.checked = true;
   }
 
   function getProfile() {
@@ -116,6 +160,8 @@
 
   function renderProfile(stage, avatar, profile) {
     if (!stage || !avatar) return;
+    const characterImage = stage.querySelector(".child-preview-character");
+    const fallbackFigure = stage.querySelector(".child-preview-figure");
     stage.className = "child-preview-stage";
     avatar.className = "child-avatar";
     avatar.removeAttribute("style");
@@ -123,15 +169,32 @@
     if (!profile?.included) {
       stage.classList.add("is-empty");
       avatar.classList.add("child-avatar-none");
-      avatar.textContent = "◇";
+      avatar.textContent = "✦";
+      if (characterImage) {
+        characterImage.hidden = true;
+        characterImage.removeAttribute("src");
+      }
+      if (fallbackFigure) fallbackFigure.hidden = false;
+      return;
+    }
+    const artSource = profile.mobilityAid === "wheelchair"
+      ? wheelchairCharacterArt[profile.id]
+      : characterArt[profile.id];
+    stage.classList.add(`age-${profile.ageBand || "5-6"}`, `height-${profile.relativeHeight || "average"}`);
+    stage.classList.add(`mobility-${profile.mobilityAid || "none"}`);
+    if (characterImage && artSource) {
+      characterImage.src = artSource;
+      characterImage.hidden = false;
+      if (fallbackFigure) fallbackFigure.hidden = true;
+      stage.classList.add("has-character-art");
       return;
     }
     const values = previewValues(profile);
     if (values.avatarClass) avatar.classList.add(values.avatarClass);
     avatar.style.setProperty("--skin", values.skin);
     avatar.style.setProperty("--hair", values.hair);
-    stage.classList.add(`age-${profile.ageBand || "5-6"}`, `height-${profile.relativeHeight || "average"}`);
-    stage.classList.add(`mobility-${profile.mobilityAid || "none"}`);
+    if (characterImage) characterImage.hidden = true;
+    if (fallbackFigure) fallbackFigure.hidden = false;
   }
 
   function persist(profile) {
@@ -193,6 +256,9 @@
     const age = [...document.querySelectorAll('input[name="child-age-band"]')].find((input) => input.value === saved.ageBand);
     const height = [...document.querySelectorAll('input[name="child-relative-height"]')].find((input) => input.value === saved.relativeHeight);
     if (appearance) appearance.checked = true;
+    const restoredGroup = skinGroupForAppearance(appearance);
+    const restoredSkin = [...document.querySelectorAll('input[name="child-skin-tone"]')].find((input) => input.value === restoredGroup);
+    if (restoredSkin) restoredSkin.checked = true;
     if (age) age.checked = true;
     if (height) height.checked = true;
     refreshWheelchairControls();
@@ -218,8 +284,9 @@
     for (const input of document.querySelectorAll('input[name="child-character"]')) {
       input.closest("label")?.classList.toggle("is-selected", input.checked);
     }
+    syncAppearanceBuilder(profile);
     if (details) details.hidden = !profile.included;
-    if (selection) selection.textContent = profile.included ? profile.label : "Monster only";
+    if (selection) selection.textContent = profile.included ? profile.label : "Monster-only story";
     if (title) title.textContent = profile.included ? profile.label : "Monster-only story";
     if (copy) {
       copy.textContent = profile.included
@@ -252,7 +319,10 @@
   window.MonstersNowChildSelector = { getProfile, renderProfile, restore, sync, undo, reset, supportsWheelchair, storageKey, wheelchairSupport };
   if (!root) return;
   restore();
-  root.addEventListener("change", () => sync({ recordHistory: true }));
+  root.addEventListener("change", (event) => {
+    if (event.target?.name === "child-skin-tone") chooseFirstAppearanceForSkin(event.target.value);
+    sync({ recordHistory: true });
+  });
   document.querySelector("#child-editor-undo")?.addEventListener("click", undo);
   document.querySelector("#child-editor-reset")?.addEventListener("click", reset);
   window.addEventListener("pageshow", () => { restore(); history.length = 0; lastProfile = null; sync({ save: false }); });

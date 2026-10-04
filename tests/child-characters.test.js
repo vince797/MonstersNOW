@@ -58,14 +58,18 @@ test("selector UI exposes only supported controls and states the current renderi
   assert.match(html, /name="child-age-band"/);
   assert.match(html, /name="child-relative-height"/);
   assert.match(html, /name="child-mobility-aid" value="wheelchair" disabled/);
-  assert.match(html, /href="#child-editor-start">Explore the child creator/);
-  assert.match(html, /id="result-book-offer" aria-labelledby="result-book-title">/);
-  assert.match(html, /Explore the child creator now/);
+  assert.doesNotMatch(html, /href="#child-editor-start">Explore the child creator/);
+  assert.equal((html.match(/data-monster-step-panel/g) || []).length, 2);
+  assert.match(html, /id="result-book-offer" aria-labelledby="result-book-title" hidden/);
+  assert.match(html, /id="back-to-monster"/);
   assert.match(html, /No diagnosis or medical details needed/);
   assert.match(html, /Curly dark or Braids/i);
   assert.match(html, /ages 5–8/i);
   assert.doesNotMatch(html, /type="date"|name="child-(?:birthdate|date-of-birth|height-(?:cm|in))"/i);
-  assert.match(html, />Appearance<|>Basics<|>Accessibility/);
+  assert.match(html, />Choose a look<|>Basics<|>Accessibility/);
+  assert.match(html, /name="child-skin-tone" value="light"/);
+  assert.match(html, /This does not identify race or ethnicity/);
+  assert.match(html, /id="child-hair-picker" hidden/);
   assert.match(html, /id="child-editor-undo" disabled/);
   assert.match(html, /id="child-editor-reset"/);
   assert.match(html, /Walkers, canes, prostheses, glasses, hearing aids, eye details, and outfit colors stay unavailable/i);
@@ -75,9 +79,33 @@ test("selector UI exposes only supported controls and states the current renderi
   assert.match(script, /function reset\(/);
   assert.match(script, /mobility-\$\{profile\.mobilityAid/);
   assert.match(script, /function supportsWheelchair/);
+  assert.match(script, /const characterArt = \{/);
+  assert.match(script, /function chooseFirstAppearanceForSkin/);
+  assert.match(script, /function syncAppearanceBuilder/);
+  assert.match(script, /const wheelchairCharacterArt = \{/);
+  assert.match(script, /child-preview-character/);
   assert.match(mainScript, /resultBookOffer\.hidden = false/);
+  assert.match(mainScript, /function showCharacterStep/);
+  assert.match(mainScript, /function showMonsterStep/);
   assert.match(css, /\.child-preview-stage\.mobility-wheelchair/);
   assert.match(css, /\.child-live-preview \{[\s\S]*position: sticky/);
+  assert.match(css, /\.child-character-option\.is-selected::after/);
+  assert.match(css, /\.child-preview-character/);
+  assert.match(html, /child-selector\.css\?v=20261004-character-studio-v6/);
+  assert.match(html, /scripts\/child-selector\.js\?v=20261004-character-art-v5/);
+});
+
+test("character studio includes lightweight changing storybook previews", () => {
+  const required = [
+    "warm-curly-dark", "deep-coils-black", "medium-wavy-brown", "golden-straight-black",
+    "light-short-brown", "light-wavy-blonde", "medium-curly-auburn", "deep-braids-black",
+    "warm-curly-dark-wheelchair", "deep-braids-black-wheelchair",
+  ];
+  for (const id of required) {
+    const asset = path.join(root, "assets", "child-characters", `${id}-v1.webp`);
+    assert.equal(fs.existsSync(asset), true, `${id} preview art should exist`);
+    assert.ok(fs.statSync(asset).size < 100_000, `${id} preview art should stay under 100KB`);
+  }
 });
 
 test("Halloween story directions keep wheelchair participation consistent and movement neutral", () => {

@@ -76,10 +76,12 @@ const styleButtons = [...document.querySelectorAll("[data-monster-style]")];
 const previewHistory = document.querySelector("#preview-history");
 const confirmMonsterButton = document.querySelector("#confirm-monster");
 const resultBookOffer = document.querySelector("#result-book-offer");
+const monsterCreatorHeader = document.querySelector("#monster-creator-header");
+const monsterCreatorPanels = [...document.querySelectorAll("[data-monster-step-panel]")];
+const backToMonsterButton = document.querySelector("#back-to-monster");
 const childEditorStart = document.querySelector("#child-editor-start");
 const childEditorKicker = document.querySelector("#child-editor-kicker");
 const bookOfferStatus = document.querySelector("#book-offer-status");
-const childEditorJump = document.querySelector("#jump-to-child-editor");
 const storybookInterestButton = document.querySelector("#storybook-interest");
 const storybookInterestForm = document.querySelector("#storybook-interest-form");
 const interestEmail = document.querySelector("#interest-email");
@@ -155,6 +157,7 @@ let previewsUsed = 0;
 let generatedPreviews = [];
 let selectedPreviewId;
 let monsterConfirmed = false;
+let isCharacterStepVisible = false;
 let monsterSubmission;
 let checkoutSubmissionId;
 let isGeneratingPreview = false;
@@ -244,23 +247,14 @@ if (confirmMonsterButton) {
     if (!selectedPreviewId || isGeneratingPreview) return;
     monsterConfirmed = true;
     confirmMonsterButton.textContent = "Monster Selected ✓";
-    resultBookOffer.hidden = false;
     storybookInterestButton.disabled = false;
     syncBookOfferStatus(true);
-    setConverterStage("personalize");
-    childEditorStart?.focus({ preventScroll: true });
-    if (resultBookOffer) {
-      window.setTimeout(() => {
-        window.scrollTo({ top: window.scrollY + resultBookOffer.getBoundingClientRect().top - 88, behavior: "auto" });
-      }, 0);
-    }
+    showCharacterStep();
   });
 }
 
-if (childEditorJump) {
-  childEditorJump.addEventListener("click", () => {
-    window.setTimeout(() => childEditorStart?.focus({ preventScroll: true }), 0);
-  });
+if (backToMonsterButton) {
+  backToMonsterButton.addEventListener("click", () => showMonsterStep());
 }
 
 if (interestEmail) {
@@ -753,6 +747,7 @@ function applyMonsterResult(result) {
 
   selectGeneratedPreview(preview.id);
   monsterConfirmed = false;
+  isCharacterStepVisible = false;
   setConverterStage("preview");
 
   if (downloadColoringButton) {
@@ -852,7 +847,7 @@ function selectGeneratedPreview(id, announce = false) {
 
   if (confirmMonsterButton) {
     confirmMonsterButton.hidden = false;
-    confirmMonsterButton.textContent = "Use This Monster";
+    confirmMonsterButton.textContent = "Use This Monster & Continue";
   }
 
   if (resultBookOffer) resultBookOffer.hidden = true;
@@ -872,6 +867,7 @@ function resetPreviewState() {
   generatedPreviews = [];
   selectedPreviewId = undefined;
   monsterConfirmed = false;
+  isCharacterStepVisible = false;
   monsterSubmission = undefined;
   checkoutSubmissionId = undefined;
   try { sessionStorage.removeItem("monstersnow_monster_submission"); } catch {}
@@ -891,7 +887,7 @@ function resetPreviewState() {
 
   if (confirmMonsterButton) {
     confirmMonsterButton.hidden = true;
-    confirmMonsterButton.textContent = "Use This Monster";
+    confirmMonsterButton.textContent = "Use This Monster & Continue";
   }
 
   if (downloadColoringButton) {
@@ -963,12 +959,10 @@ function syncPreviewControls() {
 
   if (confirmMonsterButton) {
     confirmMonsterButton.hidden = !hasPreview;
-    confirmMonsterButton.textContent = monsterConfirmed ? "Monster Selected ✓" : "Use This Monster";
+    confirmMonsterButton.textContent = monsterConfirmed ? "Monster Selected ✓" : "Use This Monster & Continue";
   }
 
-  if (resultBookOffer) {
-    resultBookOffer.hidden = false;
-  }
+  if (resultBookOffer) resultBookOffer.hidden = !isCharacterStepVisible;
 
   syncBookOfferStatus(hasPreview);
 
@@ -1107,19 +1101,43 @@ function setConverterStage(stage) {
   });
 }
 
+function showCharacterStep({ scroll = true } = {}) {
+  if (!monsterConfirmed || !resultBookOffer) return;
+  isCharacterStepVisible = true;
+  if (monsterCreatorHeader) monsterCreatorHeader.hidden = true;
+  monsterCreatorPanels.forEach((panel) => { panel.hidden = true; });
+  resultBookOffer.hidden = false;
+  setConverterStage("personalize");
+  window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}#child-editor-start`);
+  window.setTimeout(() => {
+    if (scroll) resultBookOffer.scrollIntoView({ behavior: "smooth", block: "start" });
+    childEditorStart?.focus({ preventScroll: true });
+  }, 0);
+}
+
+function showMonsterStep({ scroll = true } = {}) {
+  isCharacterStepVisible = false;
+  if (monsterCreatorHeader) monsterCreatorHeader.hidden = false;
+  monsterCreatorPanels.forEach((panel) => { panel.hidden = false; });
+  if (resultBookOffer) resultBookOffer.hidden = true;
+  setConverterStage(selectedPreviewId ? "preview" : "upload");
+  window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}#monster-upload`);
+  if (scroll) document.querySelector("#monster-upload")?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
 function syncBookOfferStatus(hasPreview = Boolean(selectedPreviewId)) {
   if (childEditorKicker) {
     childEditorKicker.textContent = monsterConfirmed
-      ? "Monster selected · personalize the story"
-      : "Optional studio · explore anytime";
+      ? "Monster selected · character step"
+      : "Optional story character";
   }
   if (!bookOfferStatus) return;
   if (monsterConfirmed) {
-    bookOfferStatus.textContent = "Your monster is selected. Finish the optional child profile and names, then review all 32 pages before checkout.";
+    bookOfferStatus.textContent = "Your monster is ready. Add an optional illustrated child character and names, then review all 32 pages before checkout.";
   } else if (hasPreview) {
-    bookOfferStatus.textContent = "Your child choices are saved. Choose one generated monster above to unlock the 32-page book review.";
+    bookOfferStatus.textContent = "Choose one generated monster to continue to the character step.";
   } else {
-    bookOfferStatus.textContent = "Explore the child creator now. Your choices stay on this device; select a generated monster later to unlock the 32-page book review.";
+    bookOfferStatus.textContent = "Create and choose a monster first, then continue to the optional child character.";
   }
 }
 
