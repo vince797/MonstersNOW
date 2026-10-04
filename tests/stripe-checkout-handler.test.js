@@ -89,7 +89,7 @@ test("checkout succeeds and records an order when optional intake email is not c
     const orderInsert = calls.find((call) => call.url.includes("/storybook_orders?on_conflict="));
     const storedOrder = JSON.parse(orderInsert.options.body)[0];
     assert.deepEqual(storedOrder.child_character, {
-      id: "light-short-brown", label: "Short brown", included: true, skinTone: "light", hairColor: "brown", hairStyle: "short",
+      id: "light-short-brown", label: "Tousled brown", included: true, gender: "boy", skinTone: "light", hairColor: "brown", hairStyle: "short",
       ageBand: "2-4", ageBandLabel: "Ages 2–4", relativeHeight: "shorter", relativeHeightLabel: "Shorter than most children this age",
       mobilityAid: "none", mobilityAidLabel: "No mobility aid",
     });
@@ -104,6 +104,7 @@ test("checkout succeeds and records an order when optional intake email is not c
     assert.match(stripeParams.get("success_url"), /order_token=mn_order_/);
     assert.equal(stripeParams.get("automatic_tax[enabled]"), "true");
     assert.equal(stripeParams.get("metadata[child_mobility_aid]"), "none");
+    assert.equal(stripeParams.get("metadata[child_gender]"), "boy");
     assert.match(response.body.warnings.join(" "), /order is still available in Admin/i);
   } finally { global.fetch = originalFetch; }
 });

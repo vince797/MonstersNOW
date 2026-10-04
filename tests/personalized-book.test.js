@@ -45,7 +45,7 @@ test("master copy becomes a pinned order-specific render manifest", () => {
   assert.equal(book.pages[0].child.scale, 33);
   assert.equal(book.pages[1].child, null);
   assert.deepEqual(book.childCharacter, {
-    id: "deep-braids-black", label: "Braids", included: true, skinTone: "deep", hairColor: "black", hairStyle: "braids",
+    id: "deep-braids-black", label: "Long braids", included: true, gender: "girl", skinTone: "deep", hairColor: "black", hairStyle: "braids",
     ageBand: "7-8", ageBandLabel: "Ages 7–8", relativeHeight: "taller", relativeHeightLabel: "Taller than most children this age",
     mobilityAid: "none", mobilityAidLabel: "No mobility aid",
   });

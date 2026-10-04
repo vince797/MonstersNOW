@@ -476,13 +476,13 @@ function getSelectedChildCharacter() {
   if (window.MonstersNowChildSelector?.getProfile) return window.MonstersNowChildSelector.getProfile();
   const input = childCharacterInputs.find((option) => option.checked);
   const labels = {
-    none: "Monster only", "warm-curly-dark": "Curly dark hair", "deep-coils-black": "Black coily hair",
-    "medium-wavy-brown": "Wavy brown hair", "golden-straight-black": "Straight black hair",
-    "light-short-brown": "Short brown hair", "light-wavy-blonde": "Wavy blonde hair",
-    "medium-curly-auburn": "Curly auburn hair", "deep-braids-black": "Black braids",
+    none: "Monster only", "warm-curly-dark": "Dark curls", "deep-coils-black": "Short coils",
+    "medium-wavy-brown": "Brown waves", "golden-straight-black": "Straight black bob",
+    "light-short-brown": "Tousled brown", "light-wavy-blonde": "Long blonde waves",
+    "medium-curly-auburn": "Auburn curls", "deep-braids-black": "Long braids",
   };
   const id = input?.value || "none";
-  return { id, label: labels[id] || labels.none, included: id !== "none" };
+  return { id, label: labels[id] || labels.none, included: id !== "none", gender: input?.dataset.gender || "" };
 }
 
 function syncChildCharacterPicker() {

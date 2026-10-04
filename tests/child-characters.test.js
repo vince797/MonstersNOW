@@ -12,12 +12,12 @@ const pixel = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAw
 
 test("child profiles use canonical appearance data plus privacy-minimized age and height choices", () => {
   assert.deepEqual(resolveChildCharacter({ id: "medium-wavy-brown", ageBand: "7-8", relativeHeight: "taller" }), {
-    id: "medium-wavy-brown", label: "Wavy brown", included: true, skinTone: "medium", hairColor: "brown", hairStyle: "wavy",
+    id: "medium-wavy-brown", label: "Brown waves", included: true, gender: "girl", skinTone: "medium", hairColor: "brown", hairStyle: "wavy",
     ageBand: "7-8", ageBandLabel: "Ages 7–8", relativeHeight: "taller", relativeHeightLabel: "Taller than most children this age",
     mobilityAid: "none", mobilityAidLabel: "No mobility aid",
   });
   assert.deepEqual(resolveChildCharacter("none"), {
-    id: "none", label: "Monster only", included: false, skinTone: "", hairColor: "", hairStyle: "",
+    id: "none", label: "Monster only", included: false, gender: "", skinTone: "", hairColor: "", hairStyle: "",
     ageBand: "", ageBandLabel: "", relativeHeight: "", relativeHeightLabel: "", mobilityAid: "", mobilityAidLabel: "",
   });
 });
@@ -63,13 +63,16 @@ test("selector UI exposes only supported controls and states the current renderi
   assert.match(html, /id="result-book-offer" aria-labelledby="result-book-title" hidden/);
   assert.match(html, /id="back-to-monster"/);
   assert.match(html, /No diagnosis or medical details needed/);
-  assert.match(html, /Curly dark or Braids/i);
+  assert.match(html, /Dark curls or Long braids/i);
   assert.match(html, /ages 5–8/i);
   assert.doesNotMatch(html, /type="date"|name="child-(?:birthdate|date-of-birth|height-(?:cm|in))"/i);
-  assert.match(html, />Choose a look<|>Basics<|>Accessibility/);
-  assert.match(html, /name="child-skin-tone" value="light"/);
-  assert.match(html, /This does not identify race or ethnicity/);
-  assert.match(html, /id="child-hair-picker" hidden/);
+  assert.match(html, />Choose a story character<|>Basics<|>Accessibility/);
+  assert.match(html, /name="child-gender" value="boy"/);
+  assert.match(html, /name="child-gender" value="girl"/);
+  assert.match(html, /id="child-look-picker" hidden/);
+  assert.match(html, /class="child-character-thumb"/);
+  assert.match(html, /data-gender="boy"/);
+  assert.match(html, /data-gender="girl"/);
   assert.match(html, /id="child-editor-undo" disabled/);
   assert.match(html, /id="child-editor-reset"/);
   assert.match(html, /Walkers, canes, prostheses, glasses, hearing aids, eye details, and outfit colors stay unavailable/i);
@@ -80,7 +83,7 @@ test("selector UI exposes only supported controls and states the current renderi
   assert.match(script, /mobility-\$\{profile\.mobilityAid/);
   assert.match(script, /function supportsWheelchair/);
   assert.match(script, /const characterArt = \{/);
-  assert.match(script, /function chooseFirstAppearanceForSkin/);
+  assert.match(script, /function chooseFirstAppearanceForGender/);
   assert.match(script, /function syncAppearanceBuilder/);
   assert.match(script, /const wheelchairCharacterArt = \{/);
   assert.match(script, /child-preview-character/);
@@ -93,12 +96,12 @@ test("selector UI exposes only supported controls and states the current renderi
   assert.match(mainScript, /function showCharacterStep/);
   assert.match(mainScript, /function showMonsterStep/);
   assert.match(css, /\.child-preview-stage\.mobility-wheelchair/);
-  assert.match(css, /\.child-live-preview \{[\s\S]*position: relative/);
+  assert.match(css, /\.child-live-preview \{[\s\S]*position: sticky/);
   assert.match(css, /\.child-character-option\.is-selected::after/);
   assert.match(css, /\.child-preview-character/);
-  assert.match(html, /child-selector\.css\?v=20261004-story-scene-v7/);
-  assert.match(html, /scripts\/child-selector\.js\?v=20261004-story-scene-v6/);
-  assert.match(html, /scripts\/main\.js\?v=20261004-story-scene-v6/);
+  assert.match(html, /child-selector\.css\?v=20261004-character-studio-v8/);
+  assert.match(html, /scripts\/child-selector\.js\?v=20261004-character-studio-v7/);
+  assert.match(html, /scripts\/main\.js\?v=20261004-character-studio-v9/);
 });
 
 test("character studio includes lightweight changing storybook previews", () => {

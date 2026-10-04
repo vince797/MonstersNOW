@@ -7,6 +7,7 @@
     taller: "Taller than most children this age",
   };
   const mobilityLabels = { none: "", wheelchair: "Wheelchair shown in every scene" };
+  const genderLabels = { boy: "Boy", girl: "Girl" };
   const wheelchairSupport = {
     appearanceIds: ["warm-curly-dark", "deep-braids-black"],
     ageBands: ["5-6", "7-8"],
@@ -49,33 +50,33 @@
     return document.querySelector('input[name="child-character"]:checked');
   }
 
-  function skinGroupForAppearance(input) {
-    return input?.closest("[data-skin-group]")?.dataset.skinGroup || "";
+  function genderForAppearance(input) {
+    return input?.dataset.gender || input?.closest("[data-gender]")?.dataset.gender || "";
   }
 
   function syncAppearanceBuilder(profile) {
-    const hairPicker = document.querySelector("#child-hair-picker");
+    const lookPicker = document.querySelector("#child-look-picker");
     const monsterOnly = document.querySelector(".child-monster-only-option");
     const selectedInput = selectedAppearance();
-    const skinGroup = profile?.included ? skinGroupForAppearance(selectedInput) : "";
-    const skinInput = [...document.querySelectorAll('input[name="child-skin-tone"]')]
-      .find((input) => input.value === skinGroup);
-    for (const input of document.querySelectorAll('input[name="child-skin-tone"]')) {
-      input.checked = input === skinInput;
+    const gender = profile?.included ? genderForAppearance(selectedInput) : "";
+    const genderInput = [...document.querySelectorAll('input[name="child-gender"]')]
+      .find((input) => input.value === gender);
+    for (const input of document.querySelectorAll('input[name="child-gender"]')) {
+      input.checked = input === genderInput;
       input.closest("label")?.classList.toggle("is-selected", input.checked);
     }
-    for (const option of document.querySelectorAll(".child-character-option[data-skin-group]")) {
-      option.hidden = !skinGroup || option.dataset.skinGroup !== skinGroup;
+    for (const option of document.querySelectorAll(".child-character-option[data-gender]")) {
+      option.hidden = !gender || option.dataset.gender !== gender;
     }
-    if (hairPicker) hairPicker.hidden = !skinGroup;
+    if (lookPicker) lookPicker.hidden = !gender;
     monsterOnly?.classList.toggle("is-selected", !profile?.included);
   }
 
-  function chooseFirstAppearanceForSkin(skinGroup) {
+  function chooseFirstAppearanceForGender(gender) {
     const current = selectedAppearance();
-    const currentGroup = skinGroupForAppearance(current);
-    if (current?.value !== "none" && currentGroup === skinGroup) return;
-    const firstMatch = document.querySelector(`.child-character-option[data-skin-group="${skinGroup}"] input[name="child-character"]`);
+    const currentGender = genderForAppearance(current);
+    if (current?.value !== "none" && currentGender === gender) return;
+    const firstMatch = document.querySelector(`.child-character-option[data-gender="${gender}"] input[name="child-character"]`);
     if (firstMatch) firstMatch.checked = true;
   }
 
@@ -87,6 +88,7 @@
         id: "none",
         label: "Monster only",
         included: false,
+        gender: "",
         skinTone: "",
         hairColor: "",
         hairStyle: "",
@@ -99,6 +101,7 @@
       id,
       label: input.dataset.label || "Child character",
       included: true,
+      gender: genderForAppearance(input),
       skinTone: input.dataset.skinTone || "",
       hairColor: input.dataset.hairColor || "",
       hairStyle: input.dataset.hairStyle || "",
@@ -144,7 +147,7 @@
     label?.setAttribute("aria-disabled", wheelchair.disabled ? "true" : "false");
     const copy = document.querySelector("#child-wheelchair-option-copy");
     if (copy) copy.textContent = wheelchair.disabled
-      ? "Choose Curly dark or Braids, ages 5–8, and average or taller."
+      ? "Choose Dark curls or Long braids, ages 5–8, and average or taller."
       : "Preview available · print ordering pending physical proof";
   }
 
@@ -258,9 +261,6 @@
     const age = [...document.querySelectorAll('input[name="child-age-band"]')].find((input) => input.value === saved.ageBand);
     const height = [...document.querySelectorAll('input[name="child-relative-height"]')].find((input) => input.value === saved.relativeHeight);
     if (appearance) appearance.checked = true;
-    const restoredGroup = skinGroupForAppearance(appearance);
-    const restoredSkin = [...document.querySelectorAll('input[name="child-skin-tone"]')].find((input) => input.value === restoredGroup);
-    if (restoredSkin) restoredSkin.checked = true;
     if (age) age.checked = true;
     if (height) height.checked = true;
     refreshWheelchairControls();
@@ -288,12 +288,12 @@
     }
     syncAppearanceBuilder(profile);
     if (details) details.hidden = !profile.included;
-    if (selection) selection.textContent = profile.included ? profile.label : "Monster-only story";
-    if (title) title.textContent = profile.included ? `${profile.label} joins the adventure` : "Their monster takes center stage";
+    if (selection) selection.textContent = profile.included ? `${genderLabels[profile.gender] || "Character"} · ${profile.label}` : "Monster-only story";
+    if (title) title.textContent = profile.included ? `${genderLabels[profile.gender] || "Their character"} joins the adventure` : "Their monster takes center stage";
     if (copy) {
       copy.textContent = profile.included
-        ? `${[ageLabels[profile.ageBand], heightLabels[profile.relativeHeight], mobilityLabels[profile.mobilityAid]].filter(Boolean).join(" · ")}. Previewed beside their chosen monster.`
-        : "Choose a skin tone to add a storybook co-star beside their monster.";
+        ? `${[profile.label, ageLabels[profile.ageBand], heightLabels[profile.relativeHeight], mobilityLabels[profile.mobilityAid]].filter(Boolean).join(" · ")}. Previewed beside their chosen monster.`
+        : "Choose a boy or girl to add a storybook co-star beside their monster.";
     }
     renderProfile(stage, avatar, profile);
     if (save) persist(profile);
@@ -322,7 +322,7 @@
   if (!root) return;
   restore();
   root.addEventListener("change", (event) => {
-    if (event.target?.name === "child-skin-tone") chooseFirstAppearanceForSkin(event.target.value);
+    if (event.target?.name === "child-gender") chooseFirstAppearanceForGender(event.target.value);
     sync({ recordHistory: true });
   });
   document.querySelector("#child-editor-undo")?.addEventListener("click", undo);

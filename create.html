@@ -11,7 +11,7 @@
     <title>Create Your Monster | MonstersNOW</title>
     <link rel="icon" href="assets/brand/monstersnow-icon-32-v1.png" type="image/png" sizes="32x32" />
     <link rel="stylesheet" href="styles.css?v=20261004-create-studio-v4" />
-    <link rel="stylesheet" href="child-selector.css?v=20261004-story-scene-v7" />
+    <link rel="stylesheet" href="child-selector.css?v=20261004-character-studio-v8" />
     <link rel="stylesheet" href="storefront.css?v=20261002-public-storefront" />
     <link rel="apple-touch-icon" href="assets/brand/monstersnow-icon-180-v1.png" />
     <link rel="stylesheet" href="brand.css?v=20261004-selected-logo" />
@@ -201,36 +201,33 @@
                       <div class="child-selector-layout">
                         <div class="child-editor-controls">
                           <details class="child-editor-section child-appearance-section" open>
-                            <summary><span>Choose a look</span><small>Start with a skin tone, then choose the closest hairstyle.</small></summary>
+                            <summary><span>Choose a story character</span><small>Pick a boy or girl, then choose the closest illustrated look.</small></summary>
                             <div class="child-appearance-builder">
                               <label class="child-monster-only-option is-selected">
                                 <input type="radio" name="child-character" value="none" data-label="Monster only" checked />
                                 <span class="child-avatar child-avatar-none" aria-hidden="true">✦</span>
                                 <span><b>Keep it monster-only</b><small>No child character in the illustrated scenes.</small></span>
                               </label>
-                              <fieldset class="child-skin-tone-picker">
-                                <legend>Skin tone</legend>
-                                <p>Choose the closest illustration shade. This does not identify race or ethnicity.</p>
-                                <div class="child-skin-tone-options" role="radiogroup" aria-label="Illustrated skin tone">
-                                  <label><input type="radio" name="child-skin-tone" value="light" /><span style="--tone:#f2c7a8" aria-hidden="true"></span><b>Light</b></label>
-                                  <label><input type="radio" name="child-skin-tone" value="golden" /><span style="--tone:#d4a071" aria-hidden="true"></span><b>Golden</b></label>
-                                  <label><input type="radio" name="child-skin-tone" value="medium" /><span style="--tone:#bd7b54" aria-hidden="true"></span><b>Medium</b></label>
-                                  <label><input type="radio" name="child-skin-tone" value="warm-brown" /><span style="--tone:#8f5538" aria-hidden="true"></span><b>Warm brown</b></label>
-                                  <label><input type="radio" name="child-skin-tone" value="deep" /><span style="--tone:#61382a" aria-hidden="true"></span><b>Deep</b></label>
+                              <fieldset class="child-gender-picker">
+                                <legend>Story character</legend>
+                                <p>Choose the illustrated character that will appear beside the monster.</p>
+                                <div class="child-gender-options" role="radiogroup" aria-label="Choose a boy or girl character">
+                                  <label><input type="radio" name="child-gender" value="boy" /><span aria-hidden="true">B</span><b>Boy</b><small>Show boy characters</small></label>
+                                  <label><input type="radio" name="child-gender" value="girl" /><span aria-hidden="true">G</span><b>Girl</b><small>Show girl characters</small></label>
                                 </div>
                               </fieldset>
-                              <fieldset class="child-hair-picker" id="child-hair-picker" hidden>
-                                <legend>Hair style</legend>
-                                <p>Choose the closest available illustrated character. The story preview updates instantly.</p>
-                                <div class="child-character-options" role="radiogroup" aria-label="Child hairstyle">
-                                  <label class="child-character-option" data-skin-group="warm-brown"><input type="radio" name="child-character" value="warm-curly-dark" data-label="Curly dark" data-skin-tone="warm" data-hair-color="dark-brown" data-hair-style="curly" data-skin="#8f5538" data-hair="#24150f" data-avatar-class="avatar-curly" /><span class="child-avatar avatar-curly" style="--skin:#8f5538;--hair:#24150f" aria-hidden="true"></span><b>Curly</b></label>
-                                  <label class="child-character-option" data-skin-group="deep"><input type="radio" name="child-character" value="deep-coils-black" data-label="Coils" data-skin-tone="deep" data-hair-color="black" data-hair-style="coils" data-skin="#5c3426" data-hair="#17100e" data-avatar-class="avatar-coils" /><span class="child-avatar avatar-coils" style="--skin:#5c3426;--hair:#17100e" aria-hidden="true"></span><b>Coils</b></label>
-                                  <label class="child-character-option" data-skin-group="medium"><input type="radio" name="child-character" value="medium-wavy-brown" data-label="Wavy brown" data-skin-tone="medium" data-hair-color="brown" data-hair-style="wavy" data-skin="#bd7b54" data-hair="#4a2818" data-avatar-class="avatar-wave" /><span class="child-avatar avatar-wave" style="--skin:#bd7b54;--hair:#4a2818" aria-hidden="true"></span><b>Wavy brown</b></label>
-                                  <label class="child-character-option" data-skin-group="golden"><input type="radio" name="child-character" value="golden-straight-black" data-label="Straight black" data-skin-tone="golden" data-hair-color="black" data-hair-style="straight" data-skin="#d4a071" data-hair="#171717" data-avatar-class="avatar-straight" /><span class="child-avatar avatar-straight" style="--skin:#d4a071;--hair:#171717" aria-hidden="true"></span><b>Straight black</b></label>
-                                  <label class="child-character-option" data-skin-group="light"><input type="radio" name="child-character" value="light-short-brown" data-label="Short brown" data-skin-tone="light" data-hair-color="brown" data-hair-style="short" data-skin="#f0c3a0" data-hair="#6a3d24" data-avatar-class="avatar-short" /><span class="child-avatar avatar-short" style="--skin:#f0c3a0;--hair:#6a3d24" aria-hidden="true"></span><b>Short brown</b></label>
-                                  <label class="child-character-option" data-skin-group="light"><input type="radio" name="child-character" value="light-wavy-blonde" data-label="Wavy blonde" data-skin-tone="light" data-hair-color="blonde" data-hair-style="wavy" data-skin="#f5ceb0" data-hair="#d9a83e" data-avatar-class="avatar-wave" /><span class="child-avatar avatar-wave" style="--skin:#f5ceb0;--hair:#d9a83e" aria-hidden="true"></span><b>Wavy blonde</b></label>
-                                  <label class="child-character-option" data-skin-group="medium"><input type="radio" name="child-character" value="medium-curly-auburn" data-label="Curly auburn" data-skin-tone="medium" data-hair-color="auburn" data-hair-style="curly" data-skin="#c88962" data-hair="#8c3d25" data-avatar-class="avatar-coils" /><span class="child-avatar avatar-coils" style="--skin:#c88962;--hair:#8c3d25" aria-hidden="true"></span><b>Curly auburn</b></label>
-                                  <label class="child-character-option" data-skin-group="deep"><input type="radio" name="child-character" value="deep-braids-black" data-label="Braids" data-skin-tone="deep" data-hair-color="black" data-hair-style="braids" data-skin="#70422f" data-hair="#16110f" data-avatar-class="avatar-braids" /><span class="child-avatar avatar-braids" style="--skin:#70422f;--hair:#16110f" aria-hidden="true"></span><b>Braids</b></label>
+                              <fieldset class="child-look-picker" id="child-look-picker" hidden>
+                                <legend>Choose the closest look</legend>
+                                <p>Each option is a complete illustrated character. Select one to update the live scene.</p>
+                                <div class="child-character-options" role="radiogroup" aria-label="Illustrated child character">
+                                  <label class="child-character-option" data-gender="boy"><input type="radio" name="child-character" value="light-short-brown" data-label="Tousled brown" data-gender="boy" data-skin-tone="light" data-hair-color="brown" data-hair-style="short" data-skin="#f0c3a0" data-hair="#6a3d24" data-avatar-class="avatar-short" /><span class="child-character-thumb" aria-hidden="true"><img src="assets/child-characters/light-short-brown-v1.webp" alt="" /></span><span class="child-character-option-copy"><b>Tousled brown</b><small>Light skin tone</small></span></label>
+                                  <label class="child-character-option" data-gender="boy"><input type="radio" name="child-character" value="warm-curly-dark" data-label="Dark curls" data-gender="boy" data-skin-tone="warm-brown" data-hair-color="dark-brown" data-hair-style="curly" data-skin="#8f5538" data-hair="#24150f" data-avatar-class="avatar-curly" /><span class="child-character-thumb" aria-hidden="true"><img src="assets/child-characters/warm-curly-dark-v1.webp" alt="" /></span><span class="child-character-option-copy"><b>Dark curls</b><small>Warm brown skin tone</small></span></label>
+                                  <label class="child-character-option" data-gender="boy"><input type="radio" name="child-character" value="deep-coils-black" data-label="Short coils" data-gender="boy" data-skin-tone="deep" data-hair-color="black" data-hair-style="coils" data-skin="#5c3426" data-hair="#17100e" data-avatar-class="avatar-coils" /><span class="child-character-thumb" aria-hidden="true"><img src="assets/child-characters/deep-coils-black-v1.webp" alt="" /></span><span class="child-character-option-copy"><b>Short coils</b><small>Deep skin tone</small></span></label>
+                                  <label class="child-character-option" data-gender="girl"><input type="radio" name="child-character" value="light-wavy-blonde" data-label="Long blonde waves" data-gender="girl" data-skin-tone="light" data-hair-color="blonde" data-hair-style="wavy" data-skin="#f5ceb0" data-hair="#d9a83e" data-avatar-class="avatar-wave" /><span class="child-character-thumb" aria-hidden="true"><img src="assets/child-characters/light-wavy-blonde-v1.webp" alt="" /></span><span class="child-character-option-copy"><b>Long blonde waves</b><small>Light skin tone</small></span></label>
+                                  <label class="child-character-option" data-gender="girl"><input type="radio" name="child-character" value="golden-straight-black" data-label="Straight black bob" data-gender="girl" data-skin-tone="golden" data-hair-color="black" data-hair-style="straight" data-skin="#d4a071" data-hair="#171717" data-avatar-class="avatar-straight" /><span class="child-character-thumb" aria-hidden="true"><img src="assets/child-characters/golden-straight-black-v1.webp" alt="" /></span><span class="child-character-option-copy"><b>Straight black bob</b><small>Golden skin tone</small></span></label>
+                                  <label class="child-character-option" data-gender="girl"><input type="radio" name="child-character" value="medium-wavy-brown" data-label="Brown waves" data-gender="girl" data-skin-tone="medium" data-hair-color="brown" data-hair-style="wavy" data-skin="#bd7b54" data-hair="#4a2818" data-avatar-class="avatar-wave" /><span class="child-character-thumb" aria-hidden="true"><img src="assets/child-characters/medium-wavy-brown-v1.webp" alt="" /></span><span class="child-character-option-copy"><b>Brown waves</b><small>Medium skin tone</small></span></label>
+                                  <label class="child-character-option" data-gender="girl"><input type="radio" name="child-character" value="medium-curly-auburn" data-label="Auburn curls" data-gender="girl" data-skin-tone="medium" data-hair-color="auburn" data-hair-style="curly" data-skin="#c88962" data-hair="#8c3d25" data-avatar-class="avatar-coils" /><span class="child-character-thumb" aria-hidden="true"><img src="assets/child-characters/medium-curly-auburn-v1.webp" alt="" /></span><span class="child-character-option-copy"><b>Auburn curls</b><small>Medium skin tone</small></span></label>
+                                  <label class="child-character-option" data-gender="girl"><input type="radio" name="child-character" value="deep-braids-black" data-label="Long braids" data-gender="girl" data-skin-tone="deep" data-hair-color="black" data-hair-style="braids" data-skin="#70422f" data-hair="#16110f" data-avatar-class="avatar-braids" /><span class="child-character-thumb" aria-hidden="true"><img src="assets/child-characters/deep-braids-black-v1.webp" alt="" /></span><span class="child-character-option-copy"><b>Long braids</b><small>Deep skin tone</small></span></label>
                                 </div>
                               </fieldset>
                             </div>
@@ -267,10 +264,10 @@
                               <p id="child-mobility-help">No diagnosis or medical details needed.</p>
                               <div class="child-segmented-options child-mobility-choices">
                                 <label><input type="radio" name="child-mobility-aid" value="none" checked /><span>No mobility aid</span></label>
-                                <label class="is-unavailable" aria-disabled="true"><input type="radio" name="child-mobility-aid" value="wheelchair" disabled /><span><strong>Wheelchair</strong><small id="child-wheelchair-option-copy">Choose Curly dark or Braids, ages 5–8, and average or taller.</small></span></label>
+                                <label class="is-unavailable" aria-disabled="true"><input type="radio" name="child-mobility-aid" value="wheelchair" disabled /><span><strong>Wheelchair</strong><small id="child-wheelchair-option-copy">Choose Dark curls or Long braids, ages 5–8, and average or taller.</small></span></label>
                               </div>
                             </fieldset>
-                            <p class="child-render-limit" id="child-mobility-blocker" role="note"><strong>Wheelchair preview:</strong> Curly dark and Braids support ages 5–6 or 7–8 and average or taller relative height. The child preview and composed pages keep the same approved wheelchair and seated proportions. Print ordering remains off until the final compositions and physical proof are approved. Walkers, canes, prostheses, glasses, hearing aids, eye details, and outfit colors stay unavailable until each has consistent approved art.</p>
+                            <p class="child-render-limit" id="child-mobility-blocker" role="note"><strong>Wheelchair preview:</strong> Dark curls and Long braids support ages 5–6 or 7–8 and average or taller relative height. The child preview and composed pages keep the same approved wheelchair and seated proportions. Print ordering remains off until the final compositions and physical proof are approved. Walkers, canes, prostheses, glasses, hearing aids, eye details, and outfit colors stay unavailable until each has consistent approved art.</p>
                           </div>
                         </details>
                           </div>
@@ -291,7 +288,7 @@
                           <div class="child-preview-copy" aria-live="polite">
                             <span>Scene one · The adventure begins</span>
                             <strong id="child-preview-title">Their monster takes center stage</strong>
-                            <p id="child-preview-details">Choose a skin tone to add a storybook co-star beside their monster.</p>
+                            <p id="child-preview-details">Choose a boy or girl to add a storybook co-star beside their monster.</p>
                           </div>
                         </aside>
                       </div>
@@ -440,7 +437,7 @@
       </div>
     </footer>
 
-    <script src="scripts/child-selector.js?v=20261004-story-scene-v6"></script>
-    <script src="scripts/main.js?v=20261004-preview-loading-v8"></script>
+    <script src="scripts/child-selector.js?v=20261004-character-studio-v7"></script>
+    <script src="scripts/main.js?v=20261004-character-studio-v9"></script>
   </body>
 </html>
