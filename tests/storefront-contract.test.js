@@ -37,6 +37,22 @@ test("the create flow displays and forwards the allowlisted story", () => {
   assert.match(script, /storyId: storyId \|\| selectedStory\.id/);
 });
 
+test("the create flow gives HEIC conversion and character generation prominent progress feedback", () => {
+  const create = read("create.html");
+  const script = read("scripts/main.js");
+  const styles = read("monster-uploader.css");
+
+  assert.match(create, /id="monster-progress" aria-live="polite" hidden/);
+  assert.match(create, /data-progress-step="1"/);
+  assert.match(create, /data-progress-step="3"/);
+  assert.match(script, /primeHeicConverterOnIntent\(\)/);
+  assert.match(script, /showMonsterProgress\(shouldConvertHeic \? "converting" : "preparing"\)/);
+  assert.match(script, /Promise\.any\(\[browserAttempt, delayedServerAttempt\]\)/);
+  assert.match(script, /HEIC conversion is taking longer than expected/);
+  assert.match(styles, /\.monster-progress-track i/);
+  assert.match(styles, /\.result-panel\.is-working \.monster-preview > img/);
+});
+
 test("public storefront remains isolated from admin and Etsy", () => {
   const publicFiles = [...publicPages, "storefront.css"];
   const combined = publicFiles.map(read).join("\n");

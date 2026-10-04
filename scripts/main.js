@@ -55,6 +55,12 @@ const convertButton = document.querySelector("#convert-button");
 const regenerateButton = document.querySelector("#regenerate-monster");
 const resultPanel = document.querySelector("#monster-result");
 const monsterPreviewBadge = document.querySelector("#monster-preview-badge");
+const monsterProgress = document.querySelector("#monster-progress");
+const monsterProgressKicker = document.querySelector("#monster-progress-kicker");
+const monsterProgressTitle = document.querySelector("#monster-progress-title");
+const monsterProgressDetail = document.querySelector("#monster-progress-detail");
+const monsterProgressElapsed = document.querySelector("#monster-progress-elapsed");
+const monsterProgressSteps = [...document.querySelectorAll("[data-progress-step]")];
 const downloadColoringButton = document.querySelector("#download-coloring");
 const coloringPageDialog = document.querySelector("#coloring-page-dialog");
 const coloringPagePreview = document.querySelector("#coloring-page-preview");
@@ -166,6 +172,9 @@ let storySceneMonsterVersion = 0;
 let uploadDragDepth = 0;
 let uploadSelectionId = 0;
 let heicConverterPromise;
+let isPreparingUpload = false;
+let monsterProgressTimer;
+let monsterProgressStartedAt = 0;
 
 if (monsterUpload && drawingPreview && monsterPreview && convertButton) {
   monsterUpload.addEventListener("change", () => {
@@ -175,6 +184,7 @@ if (monsterUpload && drawingPreview && monsterPreview && convertButton) {
   });
 
   bindUploadDropZone();
+  primeHeicConverterOnIntent();
   convertButton.addEventListener("click", requestMonsterPreview);
   regenerateButton?.addEventListener("click", requestMonsterPreview);
 
@@ -612,9 +622,21 @@ async function selectDrawingFile(file) {
 
   selectedDrawingFile = undefined;
   resetPreviewState();
+  isPreparingUpload = true;
   showUploadError("");
   if (replaceDrawingButton) replaceDrawingButton.hidden = true;
   setUploadActionStatus(shouldConvertHeic ? "Converting HEIC photo to JPEG..." : "Preparing drawing preview.");
+  showMonsterProgress(shouldConvertHeic ? "converting" : "preparing");
+  if (converterStatus) {
+    converterStatus.textContent = shouldConvertHeic ? "Converting the iPhone photo..." : "Preparing the drawing...";
+  }
+  if (converterNote) {
+    converterNote.textContent = shouldConvertHeic
+      ? "The HEIC photo is being converted before the monster can be created. You do not need to upload it again."
+      : "The drawing is being prepared for the character studio.";
+  }
+  syncPreviewControls();
+  scrollToResultPanel();
 
   if (convertButton) {
     convertButton.disabled = true;
@@ -631,6 +653,7 @@ async function selectDrawingFile(file) {
       return;
     }
 
+    isPreparingUpload = false;
     resetUpload();
     showUploadError(
       shouldConvertHeic
@@ -651,6 +674,7 @@ async function selectDrawingFile(file) {
   drawingPreviewUrl = URL.createObjectURL(normalizedFile);
   selectedDrawingFile = normalizedFile;
   resetPreviewState();
+  isPreparingUpload = false;
   drawingPreview.src = drawingPreviewUrl;
   drawingPreview.alt = shouldConvertHeic ? "Uploaded HEIC drawing converted to JPEG." : "Uploaded child monster drawing.";
   setConverterStage("preview");
@@ -684,6 +708,7 @@ async function selectDrawingFile(file) {
   setUploadActionStatus(
     shouldConvertHeic ? "HEIC converted. Creating your preview now." : "Drawing uploaded. Creating your preview now.",
   );
+  showMonsterProgress("creating");
   syncPreviewControls();
   requestMonsterPreview();
 }
@@ -709,6 +734,7 @@ async function requestMonsterPreview() {
   }
 
   isGeneratingPreview = true;
+  showMonsterProgress("creating");
   syncPreviewControls();
   setUploadActionStatus(`Creating your ${getPreviewStyleLabel(selectedMonsterStyle).toLowerCase()} preview.`);
 
@@ -732,6 +758,7 @@ async function requestMonsterPreview() {
     showMonsterGenerationError(error);
   } finally {
     isGeneratingPreview = false;
+    hideMonsterProgress();
     syncPreviewControls();
   }
 }
@@ -875,6 +902,8 @@ function resetPreviewState() {
   checkoutSubmissionId = undefined;
   try { sessionStorage.removeItem("monstersnow_monster_submission"); } catch {}
   isGeneratingPreview = false;
+  isPreparingUpload = false;
+  hideMonsterProgress();
 
   if (monsterPreview) {
     monsterPreview.src = demoMonsterImage;
@@ -928,7 +957,7 @@ function updateStyleButtons() {
 
 function syncPreviewControls() {
   const remaining = Math.max(0, maxFreePreviews - previewsUsed);
-  const canGenerate = Boolean(selectedDrawingFile) && remaining > 0 && !isGeneratingPreview;
+  const canGenerate = Boolean(selectedDrawingFile) && remaining > 0 && !isGeneratingPreview && !isPreparingUpload;
   const hasPreview = generatedPreviews.length > 0;
   const shouldShowConvertButton = Boolean(selectedDrawingFile) && !hasPreview;
   const primaryText = previewsUsed === 0 ? "Create Preview" : "Try Another Version";
@@ -981,7 +1010,7 @@ function syncPreviewControls() {
 
   updatePreviewPresentation(hasPreview);
   uploadDrop?.classList.toggle("has-file", Boolean(selectedDrawingFile));
-  resultPanel?.setAttribute("aria-busy", isGeneratingPreview ? "true" : "false");
+  resultPanel?.setAttribute("aria-busy", isGeneratingPreview || isPreparingUpload ? "true" : "false");
 
   if (previewCount) {
     previewCount.textContent = selectedDrawingFile
@@ -1074,6 +1103,88 @@ function setUploadActionStatus(message) {
   if (uploadActionStatus) {
     uploadActionStatus.textContent = message;
   }
+}
+
+function primeHeicConverterOnIntent() {
+  if (!uploadDrop) return;
+
+  const prime = () => {
+    loadHeicConverter().catch(() => {
+      // The server fallback remains available if the browser converter cannot load.
+    });
+  };
+
+  uploadDrop.addEventListener("pointerenter", prime, { once: true });
+  uploadDrop.addEventListener("pointerdown", prime, { once: true });
+  uploadDrop.addEventListener("focusin", prime, { once: true });
+}
+
+function showMonsterProgress(phase) {
+  if (!monsterProgress) return;
+
+  const progressCopy = {
+    preparing: {
+      kicker: "Preparing artwork",
+      title: "Getting the drawing ready",
+      detail: "Checking the image and preparing it for the character studio.",
+      step: 1,
+    },
+    converting: {
+      kicker: "Preparing iPhone photo",
+      title: "Converting the HEIC image",
+      detail: "High-resolution iPhone photos need an extra step. This can take up to 20 seconds.",
+      step: 1,
+    },
+    convertingFallback: {
+      kicker: "Still preparing the photo",
+      title: "Trying a faster conversion",
+      detail: "We switched methods automatically. You don’t need to upload the drawing again.",
+      step: 1,
+    },
+    creating: {
+      kicker: "Creating their character",
+      title: "Bringing their monster to life",
+      detail: "The artwork is ready. We’re now building the storybook character—usually 30–60 seconds.",
+      step: 2,
+    },
+  };
+  const copy = progressCopy[phase] || progressCopy.preparing;
+
+  monsterProgress.hidden = false;
+  monsterProgress.dataset.phase = phase;
+  resultPanel?.classList.add("is-working");
+  if (monsterProgressKicker) monsterProgressKicker.textContent = copy.kicker;
+  if (monsterProgressTitle) monsterProgressTitle.textContent = copy.title;
+  if (monsterProgressDetail) monsterProgressDetail.textContent = copy.detail;
+
+  monsterProgressSteps.forEach((item) => {
+    const step = Number(item.dataset.progressStep);
+    item.classList.toggle("is-complete", step < copy.step);
+    item.classList.toggle("is-active", step === copy.step);
+  });
+
+  if (!monsterProgressStartedAt) monsterProgressStartedAt = Date.now();
+  updateMonsterProgressElapsed();
+  if (!monsterProgressTimer) {
+    monsterProgressTimer = window.setInterval(updateMonsterProgressElapsed, 1000);
+  }
+}
+
+function updateMonsterProgressElapsed() {
+  if (!monsterProgressElapsed || !monsterProgressStartedAt) return;
+
+  const elapsed = Math.max(0, Math.floor((Date.now() - monsterProgressStartedAt) / 1000));
+  monsterProgressElapsed.textContent = elapsed < 3
+    ? "Just started"
+    : `${elapsed} seconds elapsed · Still working`;
+}
+
+function hideMonsterProgress() {
+  if (monsterProgress) monsterProgress.hidden = true;
+  resultPanel?.classList.remove("is-working");
+  if (monsterProgressTimer) window.clearInterval(monsterProgressTimer);
+  monsterProgressTimer = undefined;
+  monsterProgressStartedAt = 0;
 }
 
 function scrollToResultPanel({ focus = false, delay = 0 } = {}) {
@@ -1305,12 +1416,30 @@ function getConvertedJpegName(filename) {
 }
 
 async function convertHeicToJpeg(file) {
-  try {
-    return await convertHeicToJpegInBrowser(file);
-  } catch (error) {
+  let fallbackTimer;
+  let serverAttempt;
+  const getServerAttempt = () => {
+    if (!serverAttempt) serverAttempt = convertHeicToJpegOnServer(file);
+    return serverAttempt;
+  };
+  const browserAttempt = convertHeicToJpegInBrowser(file).catch((error) => {
     console.warn("Browser HEIC conversion failed; trying server fallback.", error);
-    setUploadActionStatus("Finishing HEIC conversion...");
-    return convertHeicToJpegOnServer(file);
+    setUploadActionStatus("Switching to the backup HEIC converter...");
+    showMonsterProgress("convertingFallback");
+    return getServerAttempt();
+  });
+  const delayedServerAttempt = new Promise((resolve) => {
+    fallbackTimer = window.setTimeout(resolve, 6000);
+  }).then(() => {
+    setUploadActionStatus("HEIC conversion is taking longer than expected. Trying a faster method...");
+    showMonsterProgress("convertingFallback");
+    return getServerAttempt();
+  });
+
+  try {
+    return await Promise.any([browserAttempt, delayedServerAttempt]);
+  } finally {
+    if (fallbackTimer) window.clearTimeout(fallbackTimer);
   }
 }
 

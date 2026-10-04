@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="storefront.css?v=20261002-public-storefront" />
     <link rel="apple-touch-icon" href="assets/brand/monstersnow-icon-180-v1.png" />
     <link rel="stylesheet" href="brand.css?v=20261004-selected-logo" />
-    <link rel="stylesheet" href="monster-uploader.css?v=20261004-monster-studio-v5" />
+    <link rel="stylesheet" href="monster-uploader.css?v=20261004-conversion-progress-v7" />
   </head>
   <body class="brand-theme">
     <a class="skip-link" href="#main-content">Skip to content</a>
@@ -161,6 +161,19 @@
             </div>
             <div class="converter-preview monster-preview">
               <span class="preview-badge" id="monster-preview-badge">Example preview</span>
+              <div class="monster-progress" id="monster-progress" aria-live="polite" hidden>
+                <span class="monster-progress-spinner" aria-hidden="true"><i></i></span>
+                <small id="monster-progress-kicker">Preparing artwork</small>
+                <strong id="monster-progress-title">Getting the drawing ready</strong>
+                <p id="monster-progress-detail">This may take a moment. Please keep this tab open.</p>
+                <div class="monster-progress-track" aria-hidden="true"><i></i></div>
+                <ol class="monster-progress-steps" aria-label="Monster creation progress">
+                  <li data-progress-step="1"><i>1</i><span>Photo</span></li>
+                  <li data-progress-step="2"><i>2</i><span>Character</span></li>
+                  <li data-progress-step="3"><i>3</i><span>Finish</span></li>
+                </ol>
+                <em id="monster-progress-elapsed">Just started</em>
+              </div>
               <img
                 id="monster-preview"
                 src="assets/step-2-character.jpg?v=20260515-horns"
@@ -182,7 +195,7 @@
                 <span>Free coloring page</span>
                 <span>Softcover or hardcover</span>
               </div>
-              <div class="preview-history" id="preview-history" aria-label="Generated monster versions" hidden></div>
+              <div class="preview-history" id="preview-history" role="group" aria-label="Generated monster versions" hidden></div>
               <button class="button primary choose-monster-button" id="confirm-monster" type="button" hidden>
                 Use This Monster &amp; Continue
               </button>
@@ -463,6 +476,6 @@
     </footer>
 
     <script src="scripts/child-selector.js?v=20261004-story-scene-v6"></script>
-    <script src="scripts/main.js?v=20261004-story-scene-v6"></script>
+    <script src="scripts/main.js?v=20261004-conversion-progress-v7"></script>
   </body>
 </html>
