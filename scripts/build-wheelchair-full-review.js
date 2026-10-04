@@ -7,13 +7,15 @@ const { buildHalloweenMasterPages } = require("../lib/halloween-master-pages");
 const root = path.resolve(__dirname, "..");
 const referenceDir = path.join(root, "assets/storybook/halloween-monster-night/reference");
 const poseDir = path.join(referenceDir, "wheelchair-profile-v1");
-const outputDir = path.join(root, "output/wheelchair-full-review");
+const outputDir = path.join(root, "output/wheelchair-production-candidate-v2");
 const pageDir = path.join(outputDir, "pages");
+const backgroundDir = path.join(outputDir, "backgrounds");
 const fullSize = 2625;
 const trim = { x: 38, y: 38, width: 2550, height: 2550 };
 const safeInset = 150;
 const safe = { x: trim.x + safeInset, y: trim.y + safeInset, right: trim.x + trim.width - safeInset, bottom: trim.y + trim.height - safeInset };
 const artBottom = trim.y + 1780;
+const sourceDrawingCrop = { x: 119, y: 328, width: 350, height: 350 };
 
 const newPoseSheets = [
   {
@@ -60,6 +62,7 @@ const sceneTitles = {
 function ensureDirs() {
   fs.mkdirSync(poseDir, { recursive: true });
   fs.mkdirSync(pageDir, { recursive: true });
+  fs.mkdirSync(backgroundDir, { recursive: true });
 }
 
 function alphaBounds(ctx, width, height, threshold = 4) {
@@ -141,7 +144,8 @@ function drawBackground(ctx, pageNumber) {
   gradient.addColorStop(0, top); gradient.addColorStop(0.75, bottom); gradient.addColorStop(1, "#e8ba73");
   ctx.fillStyle = gradient; ctx.fillRect(0, 0, fullSize, fullSize);
   ctx.fillStyle = "rgba(255,255,255,.7)";
-  for (let i = 0; i < 14; i += 1) { ctx.beginPath(); ctx.arc(110 + (i * 347) % 2400, 100 + (i * 211) % 740, i % 3 === 0 ? 9 : 5, 0, Math.PI * 2); ctx.fill(); }
+  const pageOffset = pageNumber * 83;
+  for (let i = 0; i < 14; i += 1) { ctx.beginPath(); ctx.arc(110 + (pageOffset + i * 347) % 2400, 100 + (pageOffset + i * 211) % 740, i % 3 === 0 ? 9 : 5, 0, Math.PI * 2); ctx.fill(); }
   if (["doorway", "porch", "moon-house", "home"].includes(scene)) {
     ctx.fillStyle = "#efd0a2"; ctx.fillRect(110, 380, 650, 1050); ctx.fillStyle = "#653b34"; ctx.fillRect(245, 520, 380, 910);
   }
@@ -166,6 +170,21 @@ function drawBackground(ctx, pageNumber) {
   ctx.fillStyle = "rgba(255,255,255,.08)"; ctx.fillRect(trim.x, trim.y, trim.width, artBottom - trim.y);
 }
 
+function renderBackgroundPlate(pageNumber) {
+  const canvas = createCanvas(fullSize, fullSize);
+  drawBackground(canvas.getContext("2d"), pageNumber);
+  const outputPath = path.join(backgroundDir, `${String(pageNumber).padStart(2, "0")}.png`);
+  fs.writeFileSync(outputPath, canvas.toBuffer("image/png"));
+  return {
+    path: path.relative(root, outputPath),
+    sourcePixels: [fullSize, fullSize],
+    placedPixels: [fullSize, fullSize],
+    rasterScale: 1,
+    effectiveDpi: 300,
+    characterFree: true,
+  };
+}
+
 function wrap(ctx, text, width) {
   const paragraphs = text.split(/\n+/).filter(Boolean); const lines = [];
   for (const paragraph of paragraphs) {
@@ -183,9 +202,9 @@ function wrap(ctx, text, width) {
 function drawText(ctx, pageNumber, text, scene) {
   const panelY = artBottom;
   ctx.fillStyle = "#fffaf2"; ctx.fillRect(0, panelY, fullSize, fullSize - panelY);
-  ctx.fillStyle = "#e76d2f"; roundedRect(ctx, safe.x, panelY + 55, 570, 66, 33); ctx.fill();
-  ctx.fillStyle = "#fff"; ctx.font = "900 26px sans-serif"; ctx.fillText("REFERENCE REVIEW - NOT PRINT READY", safe.x + 28, panelY + 99);
-  ctx.fillStyle = "#18364c"; ctx.font = "800 31px sans-serif"; ctx.fillText(`Page ${pageNumber} / 32`, safe.x + 620, panelY + 98);
+  ctx.fillStyle = "#e76d2f"; roundedRect(ctx, safe.x, panelY + 55, 650, 66, 33); ctx.fill();
+  ctx.fillStyle = "#fff"; ctx.font = "900 26px sans-serif"; ctx.fillText("DIGITAL CANDIDATE · APPROVAL REQUIRED", safe.x + 28, panelY + 99);
+  ctx.fillStyle = "#18364c"; ctx.font = "800 31px sans-serif"; ctx.fillText(`Page ${pageNumber} / 32`, safe.x + 700, panelY + 98);
   const title = sceneTitles[scene] || (pageNumber === 1 ? "Halloween Monster Night" : pageNumber === 32 ? "My Monster" : "Storybook review");
   ctx.font = "900 66px sans-serif"; ctx.fillText(title, safe.x, panelY + 200);
   let size = 43; let lines;
@@ -205,7 +224,8 @@ function clampPlacement(x, y, width, height) {
 }
 
 async function drawCharacter(ctx, image, placement, kind) {
-  const targetHeight = kind === "child" ? 680 + placement.scale * 17 : 620 + placement.scale * 14;
+  const requestedHeight = kind === "child" ? 680 + placement.scale * 17 : 620 + placement.scale * 14;
+  const targetHeight = Math.min(requestedHeight, image.height);
   const ratio = image.width / image.height;
   let height = targetHeight; let width = height * ratio;
   const maxWidth = 980;
@@ -217,7 +237,36 @@ async function drawCharacter(ctx, image, placement, kind) {
   if (placement.facing === "left") { ctx.translate(box.x + box.width, 0); ctx.scale(-1, 1); ctx.drawImage(image, 0, box.y, box.width, box.height); }
   else ctx.drawImage(image, box.x, box.y, box.width, box.height);
   ctx.restore();
-  return box;
+  const rasterScale = Math.max(box.width / image.width, box.height / image.height);
+  return {
+    ...box,
+    sourcePixels: [image.width, image.height],
+    placedPixels: [box.width, box.height],
+    rasterScale: Number(rasterScale.toFixed(4)),
+    effectiveDpi: Number((300 / rasterScale).toFixed(1)),
+  };
+}
+
+function drawCroppedImage(ctx, image, source, bounds) {
+  const rasterScale = Math.min(bounds.width / source.width, bounds.height / source.height, 1);
+  const width = Math.round(source.width * rasterScale);
+  const height = Math.round(source.height * rasterScale);
+  const box = {
+    x: Math.round(bounds.x + (bounds.width - width) / 2),
+    y: Math.round(bounds.y + (bounds.height - height) / 2),
+    width,
+    height,
+  };
+  ctx.drawImage(image, source.x, source.y, source.width, source.height, box.x, box.y, box.width, box.height);
+  return {
+    ...box,
+    sourcePixels: [source.width, source.height],
+    placedPixels: [box.width, box.height],
+    rasterScale: Number(rasterScale.toFixed(4)),
+    effectiveDpi: Number((300 / rasterScale).toFixed(1)),
+    aspectRatioPreserved: true,
+    sourceCrop: source,
+  };
 }
 
 function overlapArea(a, b) {
@@ -228,16 +277,19 @@ function overlapArea(a, b) {
 
 async function composePage(page, pageNumber, assets) {
   const canvas = createCanvas(fullSize, fullSize); const ctx = canvas.getContext("2d");
-  drawBackground(ctx, pageNumber);
+  const backgroundPlate = renderBackgroundPlate(pageNumber);
+  const background = await loadImage(path.join(root, backgroundPlate.path));
+  ctx.drawImage(background, 0, 0, fullSize, fullSize);
   const scene = sceneFor(pageNumber);
   const text = page.text.replaceAll("{child_name}", "Maya").replaceAll("{monster_name}", "Larry");
-  let childBox = null; let monsterBox = null; let poseName = null;
+  let childBox = null; let monsterBox = null; let drawingBox = null; let poseName = null;
   if (pageNumber === 2) {
     const drawing = await loadImage(path.join(root, "assets/gallery/red-blue-monster-before-after-source-v1.jpg"));
-    ctx.drawImage(drawing, 720, 430, 1120, 1120);
+    drawingBox = drawCroppedImage(ctx, drawing, sourceDrawingCrop, { x: 800, y: 520, width: 1025, height: 700 });
   } else if (pageNumber === 32) {
     const drawing = await loadImage(path.join(root, "assets/gallery/red-blue-monster-before-after-source-v1.jpg"));
-    ctx.drawImage(drawing, 220, 430, 1000, 1000); ctx.drawImage(assets.monster, 1450, 300, 760, 1140);
+    drawingBox = drawCroppedImage(ctx, drawing, sourceDrawingCrop, { x: 370, y: 600, width: 560, height: 560 });
+    monsterBox = await drawCharacter(ctx, assets.monster, { x: 73, scale: 36, facing: "right" }, "monster");
   } else if (page.monsterRequired) {
     if (page.monsterPlacement.layer === "behind") monsterBox = await drawCharacter(ctx, assets.monster, page.monsterPlacement, "monster");
     if (page.childRequired) {
@@ -249,10 +301,10 @@ async function composePage(page, pageNumber, assets) {
   const textResult = drawText(ctx, pageNumber, text, scene);
   const outputPath = path.join(pageDir, `${String(pageNumber).padStart(2, "0")}.png`);
   fs.writeFileSync(outputPath, canvas.toBuffer("image/png"));
-  const cropSafe = [childBox, monsterBox].filter(Boolean).every((box) => box.x >= safe.x && box.y >= safe.y && box.x + box.width <= safe.right && box.y + box.height <= artBottom - 40);
+  const cropSafe = [childBox, monsterBox, drawingBox].filter(Boolean).every((box) => box.x >= safe.x && box.y >= safe.y && box.x + box.width <= safe.right && box.y + box.height <= artBottom - 40);
   return {
     pageNumber, scene, text, outputPath: path.relative(root, outputPath), poseName,
-    childBox, monsterBox, cropSafe, textFits: textResult.fits,
+    backgroundPlate, childBox, monsterBox, drawingBox, cropSafe, textFits: textResult.fits,
     characterOverlapPixels: childBox && monsterBox ? overlapArea(childBox, monsterBox) : 0,
   };
 }
@@ -261,8 +313,8 @@ async function contactSheet(pageResults) {
   const thumb = 420; const gap = 34; const columns = 4; const rows = 8;
   const canvas = createCanvas(columns * thumb + (columns + 1) * gap, 190 + rows * thumb + (rows + 1) * gap);
   const ctx = canvas.getContext("2d"); ctx.fillStyle = "#f2ede5"; ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = "#18364c"; ctx.font = "900 56px sans-serif"; ctx.fillText("Halloween Monster Night - wheelchair profile review", 42, 72);
-  ctx.fillStyle = "#a14e26"; ctx.font = "700 27px sans-serif"; ctx.fillText("32 pages - synthetic Maya profile - visual direction approved - not print ready", 42, 122);
+  ctx.fillStyle = "#18364c"; ctx.font = "900 56px sans-serif"; ctx.fillText("Halloween Monster Night - wheelchair production candidate v2", 42, 72);
+  ctx.fillStyle = "#a14e26"; ctx.font = "700 27px sans-serif"; ctx.fillText("32 pages - single Maya wheelchair profile - digital production candidate - approval required", 42, 122);
   for (let index = 0; index < pageResults.length; index += 1) {
     const image = await loadImage(path.join(root, pageResults[index].outputPath));
     const x = gap + (index % columns) * (thumb + gap); const y = 170 + gap + Math.floor(index / columns) * (thumb + gap);
@@ -286,11 +338,12 @@ async function main() {
   for (let index = 0; index < masterPages.length; index += 1) results.push(await composePage(masterPages[index], index + 1, assets));
   const sheet = await contactSheet(results);
   const report = {
-    status: "full_review_complete",
+    status: "digital_production_candidate_complete",
     productionSelectionEnabled: false,
     approval: { visualDirectionApproved: true, printReadyApproved: false },
     profile: { key: "warm-curly-dark:5-6:wheelchair", synthetic: true, childName: "Maya", mobilityAid: "wheelchair" },
-    output: { fullBleedPixels: [fullSize, fullSize], trimPixels: trim, nominalDpi: 300, trimInches: [8.5, 8.5], bleedInchesPerEdge: 0.125, safeInsetPixels: safeInset },
+    sourceDrawing: { path: "assets/gallery/red-blue-monster-before-after-source-v1.jpg", nativePixels: [588, 1280], cropPixels: sourceDrawingCrop, cropMatchesApprovedGalleryPresentation: true },
+    output: { fullBleedPixels: [fullSize, fullSize], trimPixels: trim, nominalDpi: 300, trimInches: [8.5, 8.5], bleedInchesPerEdge: 0.125, safeInsetPixels: safeInset, colorSpace: "sRGB/RGB", transparencyFlattenedInPdf: true },
     poseAssets: Object.fromEntries(Object.entries(poseInfo).map(([name, info]) => [name, path.relative(root, path.join(poseDir, info.file))])),
     pages: results,
     contactSheet: sheet,
@@ -301,23 +354,27 @@ async function main() {
       allCropSafe: results.every((page) => page.cropSafe),
       allTextFits: results.every((page) => page.textFits),
       movementNeutral: results.every((page) => !/\bMaya\b[^.!?]{0,48}\b(?:walk|walked|walking|stand|stood|standing|run|ran|running|jump|jumped|jumping|climb|climbed|climbing|march|marched|marching)\b/i.test(page.text)),
+      allBackgroundsNative300Dpi: results.every((page) => page.backgroundPlate.rasterScale === 1 && page.backgroundPlate.effectiveDpi === 300),
+      allPlacedRasterAssetsAtLeast300EffectiveDpi: results.every((page) => [page.childBox, page.monsterBox, page.drawingBox].filter(Boolean).every((box) => box.rasterScale <= 1 && box.effectiveDpi >= 300)),
+      originalDrawingAspectRatioPreserved: results.filter((page) => page.drawingBox).every((page) => page.drawingBox.aspectRatioPreserved),
     },
     remainingProductionGate: [
-      "Replace synthetic scene backgrounds with approved final background plates for all 32 pages.",
-      "Complete print color, preflight, and physical proof review.",
-      "Record production composition approval for every required child page.",
+      "Approve the 32 final-size character-free background candidates and all composed pages; digital checks cannot supply human art approval.",
+      "Run the provider file-validation endpoint against the exact final interior and cover PDFs once final cover geometry is available.",
+      "Order and review a physical proof; no digital preflight can verify paper, binding, trim variance, or printed color.",
+      "Record production composition approval for every required child page after the physical-proof corrections are complete.",
       "Do not enable other age, appearance, or accessibility profiles until their own complete assets and verification exist.",
     ],
   };
-  if (report.checks.pageCount !== 32 || report.checks.requiredChildPages !== 28 || report.checks.distinctPosesUsed < 10 || !report.checks.allCropSafe || !report.checks.allTextFits || !report.checks.movementNeutral) {
+  if (report.checks.pageCount !== 32 || report.checks.requiredChildPages !== 28 || report.checks.distinctPosesUsed < 10 || !report.checks.allCropSafe || !report.checks.allTextFits || !report.checks.movementNeutral || !report.checks.allBackgroundsNative300Dpi || !report.checks.allPlacedRasterAssetsAtLeast300EffectiveDpi || !report.checks.originalDrawingAspectRatioPreserved) {
     throw new Error(`Full review checks failed: ${JSON.stringify(report.checks)}`);
   }
   const reportPath = path.join(outputDir, "render-report.json");
   fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`);
   const committedManifest = {
     ...report,
-    pages: report.pages.map(({ pageNumber, scene, poseName, childBox, monsterBox, cropSafe, textFits, characterOverlapPixels }) => ({
-      pageNumber, scene, poseName, childBox, monsterBox, cropSafe, textFits, characterOverlapPixels,
+    pages: report.pages.map(({ pageNumber, scene, poseName, backgroundPlate, childBox, monsterBox, drawingBox, cropSafe, textFits, characterOverlapPixels }) => ({
+      pageNumber, scene, poseName, backgroundPlate, childBox, monsterBox, drawingBox, cropSafe, textFits, characterOverlapPixels,
     })),
     contactSheet: undefined,
   };

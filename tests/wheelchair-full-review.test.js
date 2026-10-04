@@ -8,30 +8,33 @@ const { buildHalloweenMasterPages } = require("../lib/halloween-master-pages");
 const { buildPersonalizedBook } = require("../lib/personalized-book");
 
 const root = path.resolve(__dirname, "..");
-const output = path.join(root, "output/wheelchair-full-review");
+const output = path.join(root, "output/wheelchair-production-candidate-v2");
 
-test("approved wheelchair direction renders a complete crop-safe 32-page reference book", () => {
+test("approved wheelchair direction renders a complete native-resolution 32-page production candidate", () => {
   execFileSync(process.execPath, [path.join(root, "scripts/build-wheelchair-full-review.js")], { cwd: root });
   const report = JSON.parse(fs.readFileSync(path.join(output, "render-report.json"), "utf8"));
-  assert.equal(report.status, "full_review_complete");
+  assert.equal(report.status, "digital_production_candidate_complete");
   assert.equal(report.productionSelectionEnabled, false);
   assert.deepEqual(report.approval, { visualDirectionApproved: true, printReadyApproved: false });
   assert.deepEqual(report.output.fullBleedPixels, [2625, 2625]);
   assert.deepEqual(report.output.trimPixels, { x: 38, y: 38, width: 2550, height: 2550 });
   assert.equal(report.output.bleedInchesPerEdge, 0.125);
-  assert.deepEqual(report.checks, {
-    pageCount: 32,
-    requiredChildPages: 28,
-    distinctPosesUsed: 12,
-    allCropSafe: true,
-    allTextFits: true,
-    movementNeutral: true,
-  });
+  assert.equal(report.checks.pageCount, 32);
+  assert.equal(report.checks.requiredChildPages, 28);
+  assert.equal(report.checks.distinctPosesUsed, 12);
+  assert.equal(report.checks.allCropSafe, true);
+  assert.equal(report.checks.allTextFits, true);
+  assert.equal(report.checks.movementNeutral, true);
+  assert.equal(report.checks.allBackgroundsNative300Dpi, true);
+  assert.equal(report.checks.allPlacedRasterAssetsAtLeast300EffectiveDpi, true);
+  assert.equal(report.checks.originalDrawingAspectRatioPreserved, true);
   for (const page of report.pages) {
     const png = PNG.sync.read(fs.readFileSync(path.join(root, page.outputPath)));
     assert.deepEqual([png.width, png.height], [2625, 2625]);
   }
-  assert.match(report.remainingProductionGate.join(" "), /final background plates/i);
+  assert.ok(report.pages.every((page) => page.backgroundPlate.sourcePixels.join("x") === "2625x2625"));
+  assert.ok(report.pages.every((page) => [page.childBox, page.monsterBox, page.drawingBox].filter(Boolean).every((box) => box.effectiveDpi >= 300)));
+  assert.match(report.remainingProductionGate.join(" "), /background candidates/i);
   assert.match(report.remainingProductionGate.join(" "), /physical proof/i);
 });
 

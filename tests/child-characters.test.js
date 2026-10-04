@@ -49,7 +49,7 @@ test("selector UI exposes only supported controls and states the current renderi
   assert.match(html, /name="child-relative-height"/);
   assert.match(html, /name="child-mobility-aid" value="wheelchair" disabled/);
   assert.match(html, /No diagnosis or medical details needed/);
-  assert.match(html, /approved visual direction and a complete synthetic review book/i);
+  assert.match(html, /complete native-resolution digital candidate/i);
   assert.doesNotMatch(html, /type="date"|name="child-(?:birthdate|date-of-birth|height-(?:cm|in))"/i);
   assert.match(html, />Appearance<|>Basics<|>Accessibility/);
   assert.match(html, /id="child-editor-undo" disabled/);
