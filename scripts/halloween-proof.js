@@ -19,7 +19,6 @@ try {
     document.querySelector("#proof-child-profile-title").textContent = childProfile.label;
     document.querySelector("#proof-child-profile-copy").textContent = [
       childProfile.ageBandLabel,
-      childProfile.relativeHeightLabel,
       childProfile.mobilityAid !== "none" ? childProfile.mobilityAidLabel : "",
       "Saved with this proof. Finished child art remains blocked until a matching transparent render asset is approved.",
     ].filter(Boolean).join(" · ");

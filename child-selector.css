@@ -501,13 +501,9 @@
   display: none;
 }
 
-/* Age changes proportions; relative height only fine-tunes the completed figure. */
-.child-preview-stage.age-2-4 .child-preview-character { --age-scale-x: 1.12; --age-scale-y: .9; }
-.child-preview-stage.age-5-6 .child-preview-character { --age-scale-x: 1; --age-scale-y: 1; }
-.child-preview-stage.age-7-8 .child-preview-character { --age-scale-x: .94; --age-scale-y: 1.08; }
-.child-preview-stage.height-shorter .child-preview-character { --height-scale: .94; }
-.child-preview-stage.height-average .child-preview-character { --height-scale: 1; }
-.child-preview-stage.height-taller .child-preview-character { --height-scale: 1.04; }
+/* The two launch bands change illustrated proportions; exact height is not collected. */
+.child-preview-stage.age-3-5 .child-preview-character { --age-scale-x: 1.07; --age-scale-y: .94; }
+.child-preview-stage.age-6-8 .child-preview-character { --age-scale-x: .96; --age-scale-y: 1.06; }
 .child-preview-stage.mobility-wheelchair .child-preview-character {
   right: 1%;
   width: 49%;
@@ -525,9 +521,6 @@
   position: relative;
 }
 
-.child-preview-stage.height-shorter .child-preview-figure { --figure-scale: 0.88; }
-.child-preview-stage.height-average .child-preview-figure { --figure-scale: 1; }
-.child-preview-stage.height-taller .child-preview-figure { --figure-scale: 1.1; }
 .child-live-preview .child-preview-figure {
   position: absolute;
   z-index: 4;
@@ -535,9 +528,8 @@
   bottom: 30%;
   transform: scale(calc(var(--figure-scale) * 1.7));
 }
-.child-preview-stage.age-2-4 .child-preview-body { height: 42px; width: 48px; }
-.child-preview-stage.age-5-6 .child-preview-body { height: 50px; width: 46px; }
-.child-preview-stage.age-7-8 .child-preview-body { height: 58px; width: 44px; }
+.child-preview-stage.age-3-5 .child-preview-body { height: 45px; width: 48px; }
+.child-preview-stage.age-6-8 .child-preview-body { height: 57px; width: 44px; }
 
 .child-preview-figure .child-avatar {
   z-index: 1;

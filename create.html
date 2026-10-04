@@ -58,7 +58,7 @@
               <span>
                 <small>Your selected story</small>
                 <strong id="selected-story-title">Halloween Monster Night</strong>
-                <em>32 pages · Ages 2–8 · Ready to personalize</em>
+                <em>32 pages · Ages 3–8 · Ready to personalize</em>
               </span>
               <a href="books.html#catalog">Change story</a>
             </div>
@@ -237,21 +237,12 @@
                           <div class="child-editor-section-body child-basics-grid">
                             <fieldset>
                               <legend>Age range</legend>
-                              <p>Changes the character's illustrated proportions and stance—not just their size.</p>
+                              <p>Choose the closest illustrated age band. No birthdate or exact height is needed.</p>
                               <div class="child-segmented-options child-age-options">
-                                <label><input type="radio" name="child-age-band" value="2-4" /><span><strong>Ages 2–4</strong><small>Toddler proportions</small></span></label>
-                                <label><input type="radio" name="child-age-band" value="5-6" checked /><span><strong>Ages 5–6</strong><small>Younger-child proportions</small></span></label>
-                                <label><input type="radio" name="child-age-band" value="7-8" /><span><strong>Ages 7–8</strong><small>Older-child proportions</small></span></label>
+                                <label><input type="radio" name="child-age-band" value="3-5" /><span><strong>Ages 3–5</strong><small>Younger-child proportions</small></span></label>
+                                <label><input type="radio" name="child-age-band" value="6-8" checked /><span><strong>Ages 6–8</strong><small>Older-child proportions</small></span></label>
                               </div>
-                            </fieldset>
-                            <fieldset>
-                              <legend>Relative height</legend>
-                              <p>Fine-tunes stature within the selected age range—no measurement needed.</p>
-                              <div class="child-segmented-options">
-                                <label><input type="radio" name="child-relative-height" value="shorter" /><span>Shorter</span></label>
-                                <label><input type="radio" name="child-relative-height" value="average" checked /><span>About average</span></label>
-                                <label><input type="radio" name="child-relative-height" value="taller" /><span>Taller</span></label>
-                              </div>
+                              <small id="child-age-reselection" class="child-render-limit" hidden>We saved an older age range for this character. Please choose Ages 3–5 or Ages 6–8 before continuing.</small>
                             </fieldset>
                           </div>
                         </details>
@@ -263,10 +254,10 @@
                               <p id="child-mobility-help">No diagnosis or medical details needed.</p>
                               <div class="child-segmented-options child-mobility-choices">
                                 <label><input type="radio" name="child-mobility-aid" value="none" checked /><span>No mobility aid</span></label>
-                                <label class="is-unavailable" aria-disabled="true"><input type="radio" name="child-mobility-aid" value="wheelchair" disabled /><span><strong>Wheelchair</strong><small id="child-wheelchair-option-copy">Choose Dark curls or Long braids, ages 5–8, and average or taller.</small></span></label>
+                                <label class="is-unavailable" aria-disabled="true"><input type="radio" name="child-mobility-aid" value="wheelchair" disabled /><span><strong>Wheelchair</strong><small id="child-wheelchair-option-copy">Choose Dark curls or Long braids and Ages 6–8.</small></span></label>
                               </div>
                             </fieldset>
-                            <p class="child-render-limit" id="child-mobility-blocker" role="note"><strong>Wheelchair preview:</strong> Dark curls and Long braids support ages 5–6 or 7–8 and average or taller relative height. The child preview and composed pages keep the same approved wheelchair and seated proportions. Print ordering remains off until the final compositions and physical proof are approved. Walkers, canes, prostheses, glasses, hearing aids, eye details, and outfit colors stay unavailable until each has consistent approved art.</p>
+                            <p class="child-render-limit" id="child-mobility-blocker" role="note"><strong>Wheelchair preview:</strong> Dark curls and Long braids currently support Ages 6–8. The child preview and composed pages keep the same approved wheelchair and seated proportions. Print ordering remains off until the final compositions and physical proof are approved. Other mobility aids and appearance details stay unavailable until each has consistent approved art.</p>
                           </div>
                         </details>
                           </div>

@@ -14,6 +14,7 @@ const { createMonsterSubmission, deleteAdminMonster, finalizeMonsterSubmission, 
 const { createAdminStoryProof } = require("../lib/admin-story-proof");
 const { getCustomerOrderView, reviewCustomerProof } = require("../lib/customer-orders");
 const { confirmBookReviewUpload, createBookReviewUpload, listBookReviewFiles } = require("../lib/book-review-files");
+const { createPoseJob, getPoseJob, listPoseJobsForAdmin, updatePoseJob } = require("../lib/storybook-pose-jobs");
 
 module.exports = async function handler(request, response) {
   const resource = firstQueryValue(request.query?.resource) || new URL(request.url, "https://monstersnow.com").searchParams.get("resource");
@@ -138,7 +139,7 @@ module.exports = async function handler(request, response) {
     }
   }
 
-  if (["GET", "PUT", "PATCH", "DELETE"].includes(request.method)) {
+  if (["GET", "PUT", "PATCH", "DELETE"].includes(request.method) || (request.method === "POST" && resource === "pose-jobs")) {
     return handleAdminStories(request, response);
   }
 
@@ -205,7 +206,19 @@ async function handleAdminStories(request, response) {
     if (resource === "monsters") {
       if (request.method === "GET") {
         response.setHeader("Cache-Control", "private, no-store");
-        return sendJson(response, 200, { monsters: await listAdminMonsters() });
+        const [monsters, poseJobs] = await Promise.all([
+          listAdminMonsters(),
+          listPoseJobsForAdmin().catch((error) => {
+            if (["42P01", "PGRST205"].includes(error.code)) return [];
+            throw error;
+          }),
+        ]);
+        const jobsBySubmission = poseJobs.reduce((map, job) => {
+          if (!map.has(job.submissionId)) map.set(job.submissionId, []);
+          map.get(job.submissionId).push(job);
+          return map;
+        }, new Map());
+        return sendJson(response, 200, { monsters: monsters.map((monster) => ({ ...monster, poseJobs: jobsBySubmission.get(monster.id) || [] })) });
       }
       if (request.method === "DELETE") {
         const deleted = await deleteAdminMonster(id);
@@ -213,6 +226,21 @@ async function handleAdminStories(request, response) {
         return sendJson(response, 200, { deleted: true, id });
       }
       return rejectUnsupportedMethod(request, response, ["GET", "DELETE"]);
+    }
+
+    if (resource === "pose-jobs") {
+      if (request.method === "GET") {
+        const job = id ? await getPoseJob(id) : null;
+        if (id && !job) return sendJson(response, 404, { error: "Pose job not found." });
+        return sendJson(response, 200, id ? { poseJob: job } : { poseJobs: await listPoseJobsForAdmin(firstQueryValue(request.query?.submission_id)) });
+      }
+      if (request.method === "POST") return sendJson(response, 201, { poseJob: await createPoseJob(await readJsonBody(request)) });
+      if (request.method === "PATCH") {
+        const job = await updatePoseJob(id, await readJsonBody(request, { maxBytes: 8 * 1024 * 1024 }));
+        if (!job) return sendJson(response, 404, { error: "Pose job not found." });
+        return sendJson(response, 200, { poseJob: job });
+      }
+      return rejectUnsupportedMethod(request, response, ["GET", "POST", "PATCH"]);
     }
 
     if (request.method === "DELETE") return rejectUnsupportedMethod(request, response, ["GET", "PUT", "PATCH"]);

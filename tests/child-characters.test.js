@@ -10,12 +10,16 @@ const { buildHalloweenProof } = require("../lib/halloween-proof");
 const root = path.resolve(__dirname, "..");
 const pixel = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aD1sAAAAASUVORK5CYII=";
 
-test("child profiles use canonical appearance data plus privacy-minimized age and height choices", () => {
-  assert.deepEqual(resolveChildCharacter({ id: "medium-wavy-brown", ageBand: "7-8", relativeHeight: "taller" }), {
+test("launch profiles use two fixed age bands while legacy profiles stay explicit", () => {
+  assert.deepEqual(resolveChildCharacter({ id: "medium-wavy-brown", ageBand: "6-8" }), {
     id: "medium-wavy-brown", label: "Brown waves", included: true, gender: "girl", skinTone: "medium", hairColor: "brown", hairStyle: "wavy",
-    ageBand: "7-8", ageBandLabel: "Ages 7–8", relativeHeight: "taller", relativeHeightLabel: "Taller than most children this age",
-    mobilityAid: "none", mobilityAidLabel: "No mobility aid",
+    ageBand: "6-8", ageBandLabel: "Ages 6–8", relativeHeight: "standard", relativeHeightLabel: "Standard illustrated proportions",
+    mobilityAid: "none", mobilityAidLabel: "No mobility aid", profileVersion: "launch-v2", legacyProfile: false, requiresAgeBandReselection: false,
   });
+  const legacy = resolveChildCharacter({ id: "medium-wavy-brown", ageBand: "5-6", relativeHeight: "taller" });
+  assert.equal(legacy.ageBand, "5-6");
+  assert.equal(legacy.relativeHeight, "taller");
+  assert.equal(legacy.requiresAgeBandReselection, true);
   assert.deepEqual(resolveChildCharacter("none"), {
     id: "none", label: "Monster only", included: false, gender: "", skinTone: "", hairColor: "", hairStyle: "",
     ageBand: "", ageBandLabel: "", relativeHeight: "", relativeHeightLabel: "", mobilityAid: "", mobilityAidLabel: "",
@@ -27,26 +31,28 @@ test("server validation rejects unsupported age or height values instead of sile
   assert.throws(() => buildStorybookInterestSubmission({ ...base, childCharacter: { ...base.childCharacter, ageBand: "2017-03-02" } }), /valid age range/i);
   assert.throws(() => buildStorybookInterestSubmission({ ...base, childCharacter: { ...base.childCharacter, relativeHeight: "121cm" } }), /valid relative height/i);
   assert.throws(() => buildStorybookInterestSubmission({ ...base, childCharacter: { ...base.childCharacter, mobilityAid: "diagnosis-detail" } }), /supported mobility option/i);
-  assert.throws(() => buildStorybookInterestSubmission({ ...base, childCharacter: { id: "deep-coils-black", ageBand: "7-8", relativeHeight: "taller", mobilityAid: "wheelchair" } }), /supported wheelchair appearance/i);
+  assert.throws(() => buildStorybookInterestSubmission({ ...base, childCharacter: { id: "deep-coils-black", ageBand: "3-5", mobilityAid: "wheelchair" } }), /supported wheelchair appearance/i);
+  assert.throws(() => buildStorybookInterestSubmission({ ...base, childCharacter: { id: "light-short-brown", ageBand: "5-6", relativeHeight: "average" } }), /older age range/i);
 });
 
-test("wheelchair support is an explicit eight-combination matrix with exact profile keys", () => {
-  const supported = resolveChildCharacter({ id: "deep-braids-black", ageBand: "7-8", relativeHeight: "taller", mobilityAid: "wheelchair" });
+test("wheelchair support is bounded to approved launch profiles and preserves legacy keys", () => {
+  const supported = resolveChildCharacter({ id: "deep-braids-black", ageBand: "6-8", mobilityAid: "wheelchair" });
   const unsupported = resolveChildCharacter({ id: "deep-braids-black", ageBand: "2-4", relativeHeight: "taller", mobilityAid: "wheelchair" });
   assert.equal(isSupportedWheelchairProfile(supported), true);
   assert.equal(isSupportedWheelchairProfile(unsupported), false);
-  assert.equal(childProfileKey(supported), "deep-braids-black:7-8:taller:wheelchair");
+  assert.equal(childProfileKey(supported), "deep-braids-black:6-8:wheelchair");
+  assert.equal(childProfileKey(resolveChildCharacter({ id: "deep-braids-black", ageBand: "7-8", relativeHeight: "taller", mobilityAid: "wheelchair" })), "deep-braids-black:7-8:taller:wheelchair");
 });
 
-test("proof identity includes the full canonical child profile", () => {
+test("proof identity includes the launch child profile", () => {
   const proof = buildHalloweenProof({
-    personalization: { childName: "Sam", monsterName: "Noodle", childCharacter: { id: "deep-braids-black", ageBand: "7-8", relativeHeight: "taller", mobilityAid: "wheelchair" } },
+    personalization: { childName: "Sam", monsterName: "Noodle", childCharacter: { id: "deep-braids-black", ageBand: "6-8", mobilityAid: "wheelchair" } },
     monsterImage: pixel,
     format: "softcover",
   });
   assert.equal(proof.childCharacter.hairStyle, "braids");
-  assert.equal(proof.childCharacter.ageBand, "7-8");
-  assert.equal(proof.childCharacter.relativeHeight, "taller");
+  assert.equal(proof.childCharacter.ageBand, "6-8");
+  assert.equal(proof.childCharacter.relativeHeight, "standard");
   assert.equal(proof.childCharacter.mobilityAid, "wheelchair");
 });
 
@@ -56,7 +62,9 @@ test("selector UI exposes only supported controls and states the current renderi
   const mainScript = fs.readFileSync(path.join(root, "scripts/main.js"), "utf8");
   const css = fs.readFileSync(path.join(root, "child-selector.css"), "utf8");
   assert.match(html, /name="child-age-band"/);
-  assert.match(html, /name="child-relative-height"/);
+  assert.doesNotMatch(html, /name="child-relative-height"/);
+  assert.match(html, /value="3-5"/);
+  assert.match(html, /value="6-8"/);
   assert.match(html, /name="child-mobility-aid" value="wheelchair" disabled/);
   assert.doesNotMatch(html, /href="#child-editor-start">Explore the child creator/);
   assert.equal((html.match(/data-monster-step-panel/g) || []).length, 2);
@@ -64,7 +72,7 @@ test("selector UI exposes only supported controls and states the current renderi
   assert.match(html, /id="back-to-monster"/);
   assert.match(html, /No diagnosis or medical details needed/);
   assert.match(html, /Dark curls or Long braids/i);
-  assert.match(html, /ages 5–8/i);
+  assert.match(html, /Ages 6–8/i);
   assert.doesNotMatch(html, /type="date"|name="child-(?:birthdate|date-of-birth|height-(?:cm|in))"/i);
   assert.match(html, />Choose a story character<|>Basics<|>Accessibility/);
   assert.match(html, /name="child-gender" value="boy"/);
@@ -75,7 +83,7 @@ test("selector UI exposes only supported controls and states the current renderi
   assert.match(html, /data-gender="girl"/);
   assert.match(html, /id="child-editor-undo" disabled/);
   assert.match(html, /id="child-editor-reset"/);
-  assert.match(html, /Walkers, canes, prostheses, glasses, hearing aids, eye details, and outfit colors stay unavailable/i);
+  assert.match(html, /Other mobility aids and appearance details stay unavailable/i);
   assert.match(script, /monstersnow_child_character_profile_v1/);
   assert.match(script, /localStorage\.setItem/);
   assert.match(script, /function undo\(/);
@@ -100,10 +108,10 @@ test("selector UI exposes only supported controls and states the current renderi
   assert.match(mainScript, /function showCharacterStep/);
   assert.match(mainScript, /function showMonsterStep/);
   assert.match(css, /\.child-preview-stage\.mobility-wheelchair/);
-  assert.match(css, /Age changes proportions; relative height only fine-tunes/);
-  assert.match(css, /\.child-preview-stage\.age-2-4 \.child-preview-character \{ --age-scale-x: 1\.12; --age-scale-y: \.9; \}/);
-  assert.match(css, /\.child-preview-stage\.age-7-8 \.child-preview-character \{ --age-scale-x: \.94; --age-scale-y: 1\.08; \}/);
-  assert.match(html, /Changes the character's illustrated proportions and stance—not just their size/);
+  assert.match(css, /The two launch bands change illustrated proportions; exact height is not collected/);
+  assert.match(css, /\.child-preview-stage\.age-3-5 \.child-preview-character \{ --age-scale-x: 1\.07; --age-scale-y: \.94; \}/);
+  assert.match(css, /\.child-preview-stage\.age-6-8 \.child-preview-character \{ --age-scale-x: \.96; --age-scale-y: 1\.06; \}/);
+  assert.match(html, /Choose the closest illustrated age band/);
   assert.match(html, /id="child-age-profile"/);
   assert.match(css, /\.child-live-preview \{[\s\S]*position: sticky/);
   assert.match(css, /\.child-character-option\.is-selected::after/);

@@ -27,7 +27,7 @@ test("checkout succeeds and records an order when optional intake email is not c
   const proofInput = {
     submissionId,
     email: "parent@example.com",
-    personalization: { childName: "Sam", monsterName: "Noodle", childCharacter: { id: "light-short-brown", ageBand: "2-4", relativeHeight: "shorter" } },
+    personalization: { childName: "Sam", monsterName: "Noodle", childCharacter: { id: "light-short-brown", ageBand: "3-5" } },
     format: "softcover",
     source: "create-form",
     monsterImage,
@@ -54,6 +54,7 @@ test("checkout succeeds and records an order when optional intake email is not c
       }] };
     }
     if (url.includes("/monster_previews?")) return { ok: true, json: async () => [{ id: previewId, preview_path: `${monsterSubmissionId}/previews/${previewId}.png`, variation_number: 1, style_id: "storybook" }] };
+    if (url.includes("/storybook_pose_jobs?")) return { ok: true, json: async () => [] };
     if (url.includes("/storage/v1/object/sign/")) return { ok: true, json: async () => ({ signedURL: "/object/sign/monster.png?token=mock" }) };
     if (url.includes("/master_stories?")) return { ok: true, json: async () => [{
       id: "story-1", slug: "halloween-monster-night", status: "published",
@@ -90,8 +91,8 @@ test("checkout succeeds and records an order when optional intake email is not c
     const storedOrder = JSON.parse(orderInsert.options.body)[0];
     assert.deepEqual(storedOrder.child_character, {
       id: "light-short-brown", label: "Tousled brown", included: true, gender: "boy", skinTone: "light", hairColor: "brown", hairStyle: "short",
-      ageBand: "2-4", ageBandLabel: "Ages 2–4", relativeHeight: "shorter", relativeHeightLabel: "Shorter than most children this age",
-      mobilityAid: "none", mobilityAidLabel: "No mobility aid",
+      ageBand: "3-5", ageBandLabel: "Ages 3–5", relativeHeight: "standard", relativeHeightLabel: "Standard illustrated proportions",
+      mobilityAid: "none", mobilityAidLabel: "No mobility aid", profileVersion: "launch-v2", legacyProfile: false, requiresAgeBandReselection: false,
     });
     assert.equal(storedOrder.story_id, "halloween-monster-night");
     assert.equal(storedOrder.selected_preview_id, previewId);

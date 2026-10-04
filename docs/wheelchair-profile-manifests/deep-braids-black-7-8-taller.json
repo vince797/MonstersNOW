@@ -9,17 +9,21 @@
   },
   "profile": {
     "id": "deep-braids-black",
-    "label": "Braids",
+    "label": "Long braids",
     "included": true,
+    "gender": "girl",
     "skinTone": "deep",
     "hairColor": "black",
     "hairStyle": "braids",
     "ageBand": "7-8",
-    "ageBandLabel": "Ages 7–8",
+    "ageBandLabel": "Legacy ages 7–8",
     "relativeHeight": "taller",
     "relativeHeightLabel": "Taller than most children this age",
     "mobilityAid": "wheelchair",
     "mobilityAidLabel": "Wheelchair",
+    "profileVersion": "legacy-v1",
+    "legacyProfile": true,
+    "requiresAgeBandReselection": true,
     "key": "deep-braids-black:7-8:taller:wheelchair",
     "synthetic": true,
     "childName": "Maya",
@@ -94,22 +98,7 @@
         "characterFree": true
       },
       "childBox": null,
-      "monsterBox": {
-        "x": 1425,
-        "y": 528,
-        "width": 693,
-        "height": 1040,
-        "sourcePixels": [
-          1024,
-          1536
-        ],
-        "placedPixels": [
-          693,
-          1040
-        ],
-        "rasterScale": 0.6771,
-        "effectiveDpi": 443.1
-      },
+      "monsterBox": null,
       "drawingBox": null,
       "cropSafe": true,
       "textFits": true,

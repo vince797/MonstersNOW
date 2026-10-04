@@ -1,22 +1,16 @@
 (() => {
   const storageKey = "monstersnow_child_character_profile_v1";
-  const ageLabels = { "2-4": "Ages 2–4", "5-6": "Ages 5–6", "7-8": "Ages 7–8" };
+  const ageLabels = { "3-5": "Ages 3–5", "6-8": "Ages 6–8" };
   const ageDescriptions = {
-    "2-4": "toddler proportions",
-    "5-6": "younger-child proportions",
-    "7-8": "older-child proportions",
+    "3-5": "younger-child proportions",
+    "6-8": "older-child proportions",
   };
-  const heightLabels = {
-    shorter: "Shorter than most children this age",
-    average: "About average height",
-    taller: "Taller than most children this age",
-  };
+  const legacyAgeBands = new Set(["2-4", "5-6", "7-8"]);
   const mobilityLabels = { none: "", wheelchair: "Wheelchair shown in every scene" };
   const genderLabels = { boy: "Boy", girl: "Girl" };
   const wheelchairSupport = {
     appearanceIds: ["warm-curly-dark", "deep-braids-black"],
-    ageBands: ["5-6", "7-8"],
-    relativeHeights: ["average", "taller"],
+    ageBands: ["6-8"],
   };
   const presetVisuals = {
     "warm-curly-dark": { avatarClass: "avatar-curly", skin: "#8f5538", hair: "#24150f" },
@@ -43,9 +37,10 @@
     "deep-braids-black": "assets/child-characters/deep-braids-black-wheelchair-v1.webp",
   };
   const root = document.querySelector("[data-child-selector]");
-  const defaultProfile = { id: "none", ageBand: "5-6", relativeHeight: "average", mobilityAid: "none" };
+  const defaultProfile = { id: "none", ageBand: "6-8", relativeHeight: "standard", mobilityAid: "none" };
   const history = [];
   let lastProfile = null;
+  let legacyAgeRequiresReselection = false;
 
   function selected(name, fallback = "") {
     return document.querySelector(`input[name="${name}"]:checked`)?.value || fallback;
@@ -110,17 +105,18 @@
       skinTone: input.dataset.skinTone || "",
       hairColor: input.dataset.hairColor || "",
       hairStyle: input.dataset.hairStyle || "",
-      ageBand: selected("child-age-band", "5-6"),
-      relativeHeight: selected("child-relative-height", "average"),
+      ageBand: legacyAgeRequiresReselection ? "" : selected("child-age-band", "6-8"),
+      relativeHeight: "standard",
       mobilityAid: selected("child-mobility-aid", "none"),
+      profileVersion: "launch-v2",
+      requiresAgeBandReselection: legacyAgeRequiresReselection,
     };
   }
 
   function supportsWheelchair(profile) {
     return Boolean(profile?.included
       && wheelchairSupport.appearanceIds.includes(profile.id)
-      && wheelchairSupport.ageBands.includes(profile.ageBand)
-      && wheelchairSupport.relativeHeights.includes(profile.relativeHeight));
+      && wheelchairSupport.ageBands.includes(profile.ageBand));
   }
 
   function refreshWheelchairControls() {
@@ -143,16 +139,12 @@
       input.disabled = wheelchairSelected && !wheelchairSupport.ageBands.includes(input.value);
       input.closest("label")?.classList.toggle("is-unavailable", input.disabled);
     }
-    for (const input of document.querySelectorAll('input[name="child-relative-height"]')) {
-      input.disabled = wheelchairSelected && !wheelchairSupport.relativeHeights.includes(input.value);
-      input.closest("label")?.classList.toggle("is-unavailable", input.disabled);
-    }
     const label = wheelchair.closest("label");
     label?.classList.toggle("is-unavailable", wheelchair.disabled);
     label?.setAttribute("aria-disabled", wheelchair.disabled ? "true" : "false");
     const copy = document.querySelector("#child-wheelchair-option-copy");
     if (copy) copy.textContent = wheelchair.disabled
-      ? "Choose Dark curls or Long braids, ages 5–8, and average or taller."
+      ? "Choose Dark curls or Long braids and Ages 6–8."
       : "Preview available · print ordering pending physical proof";
   }
 
@@ -190,7 +182,7 @@
     const artSource = profile.mobilityAid === "wheelchair"
       ? wheelchairCharacterArt[profile.id]
       : characterArt[profile.id];
-    stage.classList.add(`age-${profile.ageBand || "5-6"}`, `height-${profile.relativeHeight || "average"}`);
+    stage.classList.add(`age-${profile.ageBand || "6-8"}`, "height-standard");
     stage.classList.add(`mobility-${profile.mobilityAid || "none"}`);
     if (characterImage && artSource) {
       characterImage.src = artSource;
@@ -200,7 +192,7 @@
       if (ageProfile) {
         ageProfile.hidden = false;
         const label = ageProfile.querySelector("strong");
-        if (label) label.textContent = ageLabels[profile.ageBand] || ageLabels["5-6"];
+        if (label) label.textContent = ageLabels[profile.ageBand] || ageLabels["6-8"];
       }
       if (fallbackFigure) fallbackFigure.hidden = true;
       stage.classList.add("has-character-art");
@@ -220,7 +212,8 @@
       localStorage.setItem(storageKey, JSON.stringify({
         id: profile.id,
         ageBand: profile.ageBand,
-        relativeHeight: profile.relativeHeight,
+        relativeHeight: "standard",
+        profileVersion: "launch-v2",
         mobilityAid: profile.mobilityAid,
       }));
     } catch (error) {
@@ -231,15 +224,15 @@
   function compactProfile(profile) {
     return {
       id: profile?.id || "none",
-      ageBand: profile?.ageBand || "5-6",
-      relativeHeight: profile?.relativeHeight || "average",
+      ageBand: profile?.ageBand || "6-8",
+      relativeHeight: "standard",
       mobilityAid: profile?.mobilityAid || "none",
     };
   }
 
   function profileKey(profile) {
     const value = compactProfile(profile);
-    return [value.id, value.ageBand, value.relativeHeight, value.mobilityAid].join(":");
+    return [value.id, value.ageBand, value.mobilityAid].join(":");
   }
 
   function applyProfile(profile) {
@@ -247,7 +240,6 @@
     const controls = {
       "child-character": value.id,
       "child-age-band": value.ageBand,
-      "child-relative-height": value.relativeHeight,
     };
     for (const [name, selectedValue] of Object.entries(controls)) {
       const input = [...document.querySelectorAll(`input[name="${name}"]`)].find((option) => option.value === selectedValue && !option.disabled);
@@ -272,10 +264,11 @@
     if (!saved || typeof saved !== "object") return;
     const appearance = [...document.querySelectorAll('input[name="child-character"]')].find((input) => input.value === saved.id);
     const age = [...document.querySelectorAll('input[name="child-age-band"]')].find((input) => input.value === saved.ageBand);
-    const height = [...document.querySelectorAll('input[name="child-relative-height"]')].find((input) => input.value === saved.relativeHeight);
     if (appearance) appearance.checked = true;
-    if (age) age.checked = true;
-    if (height) height.checked = true;
+    legacyAgeRequiresReselection = legacyAgeBands.has(saved.ageBand);
+    if (legacyAgeRequiresReselection) {
+      for (const input of document.querySelectorAll('input[name="child-age-band"]')) input.checked = false;
+    } else if (age) age.checked = true;
     refreshWheelchairControls();
     const mobility = [...document.querySelectorAll('input[name="child-mobility-aid"]')].find((input) => input.value === saved.mobilityAid && !input.disabled);
     if (mobility) mobility.checked = true;
@@ -294,6 +287,7 @@
     const selection = document.querySelector("#child-character-selection");
     const title = document.querySelector("#child-preview-title");
     const copy = document.querySelector("#child-preview-details");
+    const ageReselection = document.querySelector("#child-age-reselection");
     const stage = document.querySelector("#child-preview-stage");
     const avatar = document.querySelector("#child-preview-avatar");
     for (const input of document.querySelectorAll('input[name="child-character"]')) {
@@ -305,9 +299,12 @@
     if (title) title.textContent = profile.included ? `${genderLabels[profile.gender] || "Their character"} joins the adventure` : "Their monster takes center stage";
     if (copy) {
       copy.textContent = profile.included
-        ? `${[profile.label, `${ageLabels[profile.ageBand]} with ${ageDescriptions[profile.ageBand]}`, heightLabels[profile.relativeHeight], mobilityLabels[profile.mobilityAid]].filter(Boolean).join(" · ")}. Previewed beside their chosen monster.`
+        ? profile.requiresAgeBandReselection
+          ? `${profile.label}. Choose a current age band to continue; the older saved range was preserved and not remapped.`
+          : `${[profile.label, `${ageLabels[profile.ageBand]} with ${ageDescriptions[profile.ageBand]}`, mobilityLabels[profile.mobilityAid]].filter(Boolean).join(" · ")}. Previewed beside their chosen monster.`
         : "Choose a boy or girl to add a storybook co-star beside their monster.";
     }
+    if (ageReselection) ageReselection.hidden = !profile.requiresAgeBandReselection;
     renderProfile(stage, avatar, profile);
     if (save) persist(profile);
     lastProfile = compactProfile(profile);
@@ -336,6 +333,7 @@
   restore();
   root.addEventListener("change", (event) => {
     if (event.target?.name === "child-gender") chooseFirstAppearanceForGender(event.target.value);
+    if (event.target?.name === "child-age-band") legacyAgeRequiresReselection = false;
     sync({ recordHistory: true });
   });
   document.querySelector("#child-editor-undo")?.addEventListener("click", undo);

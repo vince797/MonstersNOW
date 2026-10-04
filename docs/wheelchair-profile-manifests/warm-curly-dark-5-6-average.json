@@ -9,17 +9,21 @@
   },
   "profile": {
     "id": "warm-curly-dark",
-    "label": "Curly dark",
+    "label": "Dark curls",
     "included": true,
-    "skinTone": "warm",
+    "gender": "boy",
+    "skinTone": "warm-brown",
     "hairColor": "dark-brown",
     "hairStyle": "curly",
     "ageBand": "5-6",
-    "ageBandLabel": "Ages 5–6",
+    "ageBandLabel": "Legacy ages 5–6",
     "relativeHeight": "average",
     "relativeHeightLabel": "About average height",
     "mobilityAid": "wheelchair",
     "mobilityAidLabel": "Wheelchair",
+    "profileVersion": "legacy-v1",
+    "legacyProfile": true,
+    "requiresAgeBandReselection": true,
     "key": "warm-curly-dark:5-6:average:wheelchair",
     "synthetic": true,
     "childName": "Maya",
@@ -94,22 +98,7 @@
         "characterFree": true
       },
       "childBox": null,
-      "monsterBox": {
-        "x": 1425,
-        "y": 528,
-        "width": 693,
-        "height": 1040,
-        "sourcePixels": [
-          1024,
-          1536
-        ],
-        "placedPixels": [
-          693,
-          1040
-        ],
-        "rasterScale": 0.6771,
-        "effectiveDpi": 443.1
-      },
+      "monsterBox": null,
       "drawingBox": null,
       "cropSafe": true,
       "textFits": true,

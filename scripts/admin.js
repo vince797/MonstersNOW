@@ -754,7 +754,7 @@ function buildMonsterCard(monster) {
   const canFeatureDrawing = Boolean(monster.featurePermission?.canFeatureDrawing);
   const latestOrder = monster.orders?.[0];
   article.className = "monster-library-card";
-  article.innerHTML = '<div class="monster-library-images"><figure data-original><div class="monster-image-empty">No drawing</div><figcaption>Original drawing</figcaption></figure><span class="monster-transform-arrow" aria-hidden="true">→<small>transformed</small></span><figure data-preview><div class="monster-image-empty">No generated preview</div><figcaption>Storybook monster</figcaption></figure></div><div class="monster-library-info"><header><div><p class="eyebrow">Saved character</p><h3></h3></div><span data-status></span></header><dl><div><dt>Child</dt><dd data-child></dd></div><div><dt>Customer</dt><dd data-customer></dd></div><div><dt>Story</dt><dd data-story></dd></div><div><dt>Books</dt><dd data-orders></dd></div></dl><div class="monster-permission"></div><div class="monster-library-actions"></div><small data-updated></small></div>';
+  article.innerHTML = '<div class="monster-library-images"><figure data-original><div class="monster-image-empty">No drawing</div><figcaption>Original drawing</figcaption></figure><span class="monster-transform-arrow" aria-hidden="true">→<small>transformed</small></span><figure data-preview><div class="monster-image-empty">No generated preview</div><figcaption>Storybook monster</figcaption></figure></div><div class="monster-library-info"><header><div><p class="eyebrow">Saved character</p><h3></h3></div><span data-status></span></header><dl><div><dt>Child</dt><dd data-child></dd></div><div><dt>Customer</dt><dd data-customer></dd></div><div><dt>Story</dt><dd data-story></dd></div><div><dt>Books</dt><dd data-orders></dd></div></dl><div class="monster-permission"></div><div class="monster-pose-production"></div><div class="monster-library-actions"></div><small data-updated></small></div>';
   article.querySelector("h3").textContent = monster.monsterName || "Unnamed monster";
   article.querySelector("[data-status]").textContent = monsterStatusLabel(monster.status);
   article.querySelector("[data-status]").className = `monster-library-status is-${monster.status || "draft"}`;
@@ -769,6 +769,7 @@ function buildMonsterCard(monster) {
   const permission = article.querySelector(".monster-permission");
   permission.innerHTML = `<strong>${canFeature ? "Gallery permission granted" : "Private — no gallery permission"}</strong><span>${canFeature ? (canFeatureDrawing ? "Monster and original drawing may be featured." : "Finished monster only; original remains private.") : "Nothing from this submission should appear publicly."}</span>`;
   permission.classList.toggle("can-feature", canFeature);
+  renderMonsterPoseProduction(article.querySelector(".monster-pose-production"), monster);
   const actions = article.querySelector(".monster-library-actions");
   if (monster.selectedPreviewUrl) actions.append(downloadButton(monster.selectedPreviewUrl, "Download monster"));
   if (monster.originalUrl) actions.append(downloadButton(monster.originalUrl, "Open drawing"));
@@ -791,6 +792,125 @@ function buildMonsterCard(monster) {
   actions.append(deleteButton);
   return article;
 }
+
+function renderMonsterPoseProduction(container, monster) {
+  const job = monster.poseJobs?.[0];
+  if (!job) {
+    container.innerHTML = '<div><strong>Book pose production</strong><span>No internal pose plan yet. Creating a plan does not call the image provider.</span></div><button class="button secondary" type="button">Create bounded plan</button>';
+    const button = container.querySelector("button");
+    button.disabled = !monster.hasSelectedPreview || !monster.storyId;
+    button.addEventListener("click", () => createMonsterPosePlan(monster, button));
+    return;
+  }
+  const progress = job.progress || {};
+  const readiness = job.readiness || { blockers: [] };
+  container.innerHTML = '<details><summary><span><strong></strong><small></small></span><em></em></summary><div class="monster-pose-body"><p data-source></p><div class="monster-pose-meter"><span></span></div><div class="monster-pose-assets"></div><div class="monster-pose-review-actions"></div><ul class="monster-pose-blockers"></ul></div></details>';
+  container.querySelector("summary strong").textContent = `Pose production · ${String(job.status || "planned").replaceAll("_", " ")}`;
+  container.querySelector("summary small").textContent = `${progress.approvedAssets || 0}/${progress.totalAssets || 0} assets · ${progress.approvedScenes || 0}/${progress.totalScenes || 32} pages`;
+  container.querySelector("summary em").textContent = `${formatMoney(job.estimatedCostCents || 0)} est. / ${formatMoney(job.costCapCents || 0)} cap`;
+  container.querySelector("[data-source]").textContent = `Pinned portrait ${shortId(job.sourcePreviewId)} · story v${job.storyVersion}. Generation is one asset per approved action and remains disabled until provider spend is authorized.`;
+  const percent = progress.totalAssets ? Math.round(((progress.approvedAssets || 0) / progress.totalAssets) * 100) : 0;
+  container.querySelector(".monster-pose-meter span").style.width = `${percent}%`;
+  const assetList = container.querySelector(".monster-pose-assets");
+  assetList.replaceChildren(...job.assets.map((asset) => buildPoseAssetRow(monster, job, asset)));
+  const reviewActions = container.querySelector(".monster-pose-review-actions");
+  if (job.plan?.identityContract?.child?.included && !job.childAnchorAttached) {
+    const upload = document.createElement("label"); upload.className = "button secondary"; upload.textContent = "Attach approved child";
+    const input = document.createElement("input"); input.type = "file"; input.accept = "image/png,image/jpeg,image/webp"; input.hidden = true;
+    input.addEventListener("change", async () => { const file = input.files?.[0]; if (!file) return; await updateMonsterPoseJob(monster, job, { action: "record_child_anchor", image: await fileToDataUrl(file) }); });
+    upload.append(input); reviewActions.append(upload);
+  }
+  if (job.generationEnabled && job.assets.some((asset) => asset.status === "queued" && asset.attempts < asset.maxAttempts)) {
+    reviewActions.append(poseActionButton("Generate next pose", async () => {
+      if (!window.confirm("Generate exactly one queued pose now? The job reserves up to $0.03 for this provider edit and will not batch additional images.")) return;
+      await updateMonsterPoseJob(monster, job, { action: "generate_next", spendApproved: true });
+    }));
+  }
+  if (job.plan?.scaleContract?.calibrationStatus !== "approved") reviewActions.append(poseActionButton("Approve physical scale", () => approvePoseScale(monster, job)));
+  const nextScene = job.scenes?.find((scene) => scene.status === "review");
+  if (nextScene) reviewActions.append(poseActionButton(`Review page ${nextScene.pageNumber}`, () => approvePoseScene(monster, job, nextScene)));
+  if (readiness.ready && job.status !== "approved") reviewActions.append(poseActionButton("Approve pose set", () => approveMonsterPoseJob(monster, job), "primary"));
+  const blockers = container.querySelector(".monster-pose-blockers");
+  blockers.replaceChildren(...(readiness.blockers || []).map((message) => { const item = document.createElement("li"); item.textContent = message; return item; }));
+}
+
+function buildPoseAssetRow(monster, job, asset) {
+  const row = document.createElement("article");
+  row.className = `monster-pose-asset is-${asset.status}`;
+  row.innerHTML = '<div class="monster-pose-thumb"><span></span></div><div><strong></strong><small></small></div><div class="monster-pose-asset-actions"></div>';
+  if (asset.url) {
+    const image = document.createElement("img"); image.src = asset.url; image.alt = "";
+    row.querySelector(".monster-pose-thumb").replaceChildren(image);
+  } else row.querySelector(".monster-pose-thumb span").textContent = asset.subjectType === "child" ? "Child" : "Monster";
+  row.querySelector("strong").textContent = asset.poseId.replaceAll("_", " ");
+  row.querySelector("small").textContent = `${asset.subjectType} · ${asset.kind.replaceAll("_", " ")} · ${asset.status} · ${asset.attempts}/${asset.maxAttempts} attempts`;
+  const actions = row.querySelector(".monster-pose-asset-actions");
+  if (["queued", "failed", "blocked", "review"].includes(asset.status) && asset.attempts < asset.maxAttempts) {
+    const upload = document.createElement("label");
+    upload.className = "button secondary"; upload.textContent = asset.url ? "Replace PNG" : "Upload PNG";
+    const input = document.createElement("input"); input.type = "file"; input.accept = "image/png"; input.hidden = true;
+    input.addEventListener("change", () => uploadPoseAsset(monster, job, asset, input)); upload.append(input); actions.append(upload);
+  }
+  if (asset.status === "review") actions.append(poseActionButton("Approve asset", () => approvePoseAsset(monster, job, asset)));
+  return row;
+}
+
+function poseActionButton(label, run, type = "secondary") {
+  const button = document.createElement("button"); button.type = "button"; button.className = `button ${type}`; button.textContent = label;
+  button.addEventListener("click", async () => { button.disabled = true; try { await run(); } catch (error) { document.querySelector("#monsters-status").textContent = error.message; } finally { button.disabled = false; } });
+  return button;
+}
+
+async function createMonsterPosePlan(monster, button) {
+  button.disabled = true; document.querySelector("#monsters-status").textContent = "Creating a bounded internal plan…";
+  try {
+    const result = await apiRequest("?resource=pose-jobs", { method: "POST", body: { submissionId: monster.id, selectedPreviewId: monster.selectedPreviewId, storyId: monster.storyId } });
+    monster.poseJobs = [result.poseJob]; renderMonsters(); document.querySelector("#monsters-status").textContent = "Pose plan created. No paid generation was run.";
+  } catch (error) { document.querySelector("#monsters-status").textContent = error.message; button.disabled = false; }
+}
+
+async function uploadPoseAsset(monster, job, asset, input) {
+  const file = input.files?.[0]; if (!file) return;
+  const image = await fileToDataUrl(file);
+  await updateMonsterPoseJob(monster, job, { action: "record_asset", assetKey: asset.key, image, source: "manual_upload" });
+}
+
+async function approvePoseAsset(monster, job, asset) {
+  if (!window.confirm("Confirm that this transparent PNG preserves the exact approved identity/anatomy and has clean edges.")) return;
+  const boundsText = window.prompt("Reviewed visual bounds as x,y,width,height percentages", "0,0,100,100");
+  if (!boundsText) return;
+  const [xPercent, yPercent, widthPercent, heightPercent] = boundsText.split(",").map(Number);
+  const approvedBy = window.prompt("Reviewer name"); if (!approvedBy) return;
+  await updateMonsterPoseJob(monster, job, { action: "approve_asset", assetKey: asset.key, approvedBy, cleanEdges: true, visualBounds: { xPercent, yPercent, widthPercent, heightPercent } });
+}
+
+async function approvePoseScale(monster, job) {
+  const ratio = window.prompt("Monster height ÷ standing child height (physical story scale, not page pixels)", "0.9"); if (!ratio) return;
+  const approvedBy = window.prompt("Reviewer name"); if (!approvedBy) return;
+  await updateMonsterPoseJob(monster, job, { action: "approve_scale", monsterHeightToStandingChildHeight: Number(ratio), approvedBy });
+}
+
+async function approvePoseScene(monster, job, scene) {
+  if (!window.confirm(`Page ${scene.pageNumber}: confirm identity, anatomy, relative scale, camera depth, measured bounds, grounding, eyelines, and interaction clearance all pass in the composed proof.`)) return;
+  const approvedBy = window.prompt("Reviewer name"); if (!approvedBy) return;
+  const qa = { identity: true, anatomy: true, relativeScale: true, cameraDepth: true, boundingBoxes: true, grounding: true, eyeline: true, interactionClearance: true };
+  await updateMonsterPoseJob(monster, job, { action: "approve_scene", pageNumber: scene.pageNumber, approvedBy, qa });
+}
+
+async function approveMonsterPoseJob(monster, job) {
+  const approvedBy = window.prompt("Final pose-set reviewer name"); if (!approvedBy) return;
+  await updateMonsterPoseJob(monster, job, { action: "approve_job", approvedBy });
+}
+
+async function updateMonsterPoseJob(monster, job, body) {
+  document.querySelector("#monsters-status").textContent = "Updating pose production…";
+  const result = await apiRequest(`?resource=pose-jobs&id=${encodeURIComponent(job.id)}`, { method: "PATCH", body });
+  monster.poseJobs = [result.poseJob, ...(monster.poseJobs || []).filter((item) => item.id !== job.id)];
+  renderMonsters(); document.querySelector("#monsters-status").textContent = "Pose production updated.";
+}
+
+function fileToDataUrl(file) { return new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(reader.result); reader.onerror = () => reject(new Error("The pose PNG could not be read.")); reader.readAsDataURL(file); }); }
+function shortId(value) { const text = String(value || ""); return text ? `${text.slice(0, 8)}…` : "missing"; }
 
 async function deleteMonster(monster, button) {
   const name = monster.monsterName || "this unnamed monster";
@@ -1842,7 +1962,12 @@ function openOrderDetail(order) {
   selectedOrder = order;
   document.querySelector("#order-detail-id").textContent = `Order ${order.id}`;
   document.querySelector("#order-detail-age").textContent = `${orderNeedsAttention(order) ? "Needs follow-up · " : "Updated "}${relativeAge(order.updated_at || order.created_at)}`;
-  const fields = { Customer: order.customer_email, Child: order.child_name, "Child character": order.child_character?.label || "Monster only", Monster: order.monster_name, Story: order.story_label, Format: order.format_id, Style: order.monster_style, Total: formatMoney(order.stripe_total_cents ?? order.amount_cents, order.currency || "USD"), Created: new Date(order.created_at).toLocaleString(), Paid: order.stripe_paid_at ? new Date(order.stripe_paid_at).toLocaleString() : "Not verified", "Stripe checkout": order.stripe_checkout_session_id || "Not recorded", "Payment intent": order.stripe_payment_intent_id || "Not recorded", "Payment issue": order.payment_issue?.replaceAll("_", " ") || "None", "Preview ID": order.selected_preview_id || "Not recorded" };
+  const childProfile = order.child_character || {};
+  const legacyAge = ["2-4", "5-6", "7-8"].includes(childProfile.ageBand);
+  const childProfileLabel = childProfile.included === false || childProfile.id === "none"
+    ? "Monster only"
+    : `${childProfile.label || "Illustrated child"} · ${childProfile.ageBand || "age not selected"}${legacyAge ? " · legacy age — reselect 3–5 or 6–8" : ""}${childProfile.mobilityAid === "wheelchair" ? " · wheelchair" : ""}`;
+  const fields = { Customer: order.customer_email, Child: order.child_name, "Child character": childProfileLabel, Monster: order.monster_name, Story: order.story_label, Format: order.format_id, Style: order.monster_style, Total: formatMoney(order.stripe_total_cents ?? order.amount_cents, order.currency || "USD"), Created: new Date(order.created_at).toLocaleString(), Paid: order.stripe_paid_at ? new Date(order.stripe_paid_at).toLocaleString() : "Not verified", "Stripe checkout": order.stripe_checkout_session_id || "Not recorded", "Payment intent": order.stripe_payment_intent_id || "Not recorded", "Payment issue": order.payment_issue?.replaceAll("_", " ") || "None", "Preview ID": order.selected_preview_id || "Not recorded" };
   const list = document.querySelector("#order-detail-fields");
   list.replaceChildren();
   Object.entries(fields).forEach(([label, value]) => { const term = document.createElement("dt"); const detail = document.createElement("dd"); term.textContent = label; detail.textContent = value || "—"; list.append(term, detail); });
