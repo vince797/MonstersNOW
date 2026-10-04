@@ -1053,7 +1053,7 @@ function resetUpload() {
   }
 
   if (uploadMeta) {
-    uploadMeta.textContent = "PNG, JPG, HEIC, WebP, or GIF under 8 MB";
+    uploadMeta.textContent = "Tap to browse, or drop the drawing here";
   }
 
   setUploadActionStatus("Upload a drawing to create the first preview.");

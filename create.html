@@ -10,11 +10,12 @@
     <link rel="canonical" href="https://www.monstersnow.com/create" />
     <title>Create Your Monster | MonstersNOW</title>
     <link rel="icon" href="assets/brand/monstersnow-icon-32-v1.png" type="image/png" sizes="32x32" />
-    <link rel="stylesheet" href="styles.css?v=20261004-create-studio-v4" />
+    <link rel="stylesheet" href="styles.css?v=20261004-monster-studio-v5" />
     <link rel="stylesheet" href="child-selector.css?v=20261004-story-scene-v7" />
     <link rel="stylesheet" href="storefront.css?v=20261002-public-storefront" />
     <link rel="apple-touch-icon" href="assets/brand/monstersnow-icon-180-v1.png" />
     <link rel="stylesheet" href="brand.css?v=20261004-selected-logo" />
+    <link rel="stylesheet" href="monster-uploader.css?v=20261004-monster-studio-v5" />
   </head>
   <body class="brand-theme">
     <a class="skip-link" href="#main-content">Skip to content</a>
@@ -41,45 +42,82 @@
       <section class="create-flow-section" id="converter" aria-labelledby="converter-title">
         <div class="create-flow-header" id="monster-creator-header">
           <div class="create-flow-copy">
-            <p class="eyebrow">Create your monster</p>
-            <h1 id="converter-title">Upload their drawing.</h1>
+            <p class="eyebrow">Monster Studio · Step 1 of 4</p>
+            <h1 id="converter-title">Let’s bring their monster to life.</h1>
             <p>
-              Bring their idea to life, build an optional storybook child, and
-              see every page before anything is ordered.
+              Add the drawing and choose its personality. We’ll turn the original
+              idea into a polished storybook character—without losing what makes it theirs.
             </p>
-            <div class="create-jump-actions">
-              <a class="button primary" href="#monster-upload">Start with a drawing</a>
-            </div>
-            <div class="selected-story-card" id="selected-story" data-story-id="halloween-monster-night" role="group" aria-label="Selected story">
-              <img src="assets/storybook/cover-series/minimal-concepts/halloween-monster-night-v2-web.jpg" alt="" width="96" height="96" />
-              <span>
-                <small>Your selected story</small>
-                <strong id="selected-story-title">Halloween Monster Night</strong>
-                <em>32 pages · Ages 2–8 · Ready to personalize</em>
-              </span>
-              <a href="books.html#catalog">Change story</a>
+            <div class="create-promise-row" role="group" aria-label="Monster creation benefits">
+              <span><i aria-hidden="true">✓</i> Free to try</span>
+              <span><i aria-hidden="true">✓</i> Three versions</span>
+              <span><i aria-hidden="true">✓</i> No purchase required</span>
             </div>
           </div>
           <div class="create-flow-meta">
-            <div class="free-includes" role="group" aria-label="Free MonstersNOW preview details">
-              <span><strong>3</strong> preview versions</span>
-              <span><strong>$0</strong> coloring page</span>
-              <span><strong>Personalized</strong> storybook</span>
+            <div class="selected-story-card" id="selected-story" data-story-id="halloween-monster-night" role="group" aria-label="Selected story">
+              <img src="assets/storybook/cover-series/minimal-concepts/halloween-monster-night-v2-web.jpg" alt="" width="96" height="96" />
+              <span>
+                <small>Creating for</small>
+                <strong id="selected-story-title">Halloween Monster Night</strong>
+                <em>32 pages · Ages 2–8</em>
+              </span>
+              <a href="books.html#catalog">Change</a>
             </div>
             <ol class="converter-flow" aria-label="Creation progress">
-              <li class="is-active" data-flow-step="upload"><i>1</i>Upload</li>
-              <li data-flow-step="preview"><i>2</i>Create</li>
-              <li data-flow-step="personalize"><i>3</i>Child</li>
-              <li data-flow-step="review"><i>4</i>Review</li>
+              <li class="is-active" data-flow-step="upload"><i>1</i><span>Monster</span></li>
+              <li data-flow-step="preview"><i>2</i><span>Preview</span></li>
+              <li data-flow-step="personalize"><i>3</i><span>Child</span></li>
+              <li data-flow-step="review"><i>4</i><span>Book</span></li>
             </ol>
           </div>
         </div>
 
         <div class="converter-tool" data-converter>
           <form class="upload-panel" data-monster-step-panel novalidate>
+            <div class="studio-panel-heading">
+              <span class="studio-step-number">1</span>
+              <div>
+                <small>Your original artwork</small>
+                <h2>Add their drawing</h2>
+                <p>A clear phone photo works perfectly.</p>
+              </div>
+            </div>
+
+            <label class="upload-drop" for="monster-upload">
+              <i class="upload-drop-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" role="img"><path d="M12 16V5m0 0L8 9m4-4 4 4M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4" /></svg>
+              </i>
+              <span>Choose artwork</span>
+              <strong>Upload or take a picture</strong>
+              <small>Tap to browse, or drop the drawing here</small>
+              <em>PNG, JPG, HEIC, WebP or GIF · 8 MB max</em>
+            </label>
+            <input
+              id="monster-upload"
+              type="file"
+              accept="image/png,image/jpeg,image/webp,image/gif,image/heic,image/heif,image/heic-sequence,image/heif-sequence,.heic,.heif"
+            />
+
+            <div class="upload-original-card">
+              <span>A great photo looks like this</span>
+              <div class="converter-preview drawing-preview">
+                <img
+                  id="drawing-preview"
+                  src="assets/step-1-drawing.jpg"
+                  alt="Sample child monster drawing."
+                />
+              </div>
+              <ul class="upload-tips" aria-label="Upload tips">
+                <li>Bright light</li>
+                <li>Straight on</li>
+                <li>Fill the frame</li>
+              </ul>
+            </div>
+
             <div class="variation-controls" role="group" aria-label="Monster preview options">
               <div>
-                <span>Monster style</span>
+                <span>Choose a personality</span>
                 <p id="preview-count">Choose a style. Upload once, then try up to three versions.</p>
               </div>
               <div class="style-options" role="group" aria-label="Choose a monster preview style">
@@ -101,23 +139,7 @@
                 </button>
               </div>
             </div>
-            <label class="upload-drop" for="monster-upload">
-              <span>Drawing</span>
-              <strong>Upload or take a picture</strong>
-              <small>PNG, JPG, HEIC, WebP, or GIF under 8 MB</small>
-            </label>
-            <input
-              id="monster-upload"
-              type="file"
-              accept="image/png,image/jpeg,image/webp,image/gif,image/heic,image/heif,image/heic-sequence,image/heif-sequence,.heic,.heif"
-            />
-            <ul class="upload-tips" aria-label="Upload tips">
-              <li>Bright, straight-on photo</li>
-              <li>Drawing fills most of the frame</li>
-              <li>iPhone HEIC photos convert automatically</li>
-              <li>Artwork only when possible</li>
-            </ul>
-            <p class="privacy-note">For adults: upload the drawing only—no child photo or personal details. Artwork stays private unless you explicitly choose to share it. <a href="privacy.html">How artwork is handled</a></p>
+            <p class="privacy-note"><strong>Private by default.</strong> Upload the artwork only—no child photo or personal details. <a href="privacy.html">How artwork is handled</a></p>
             <p class="converter-error" id="upload-error" role="alert" hidden></p>
 
             <button class="button primary converter-button" id="convert-button" type="button" disabled hidden>
@@ -126,17 +148,17 @@
             <p class="upload-action-status" id="upload-action-status" role="status">
               Upload a drawing and the first preview starts automatically.
             </p>
-
-            <div class="converter-preview drawing-preview">
-              <img
-                id="drawing-preview"
-                src="assets/step-1-drawing.jpg"
-                alt="Sample child monster drawing."
-              />
-            </div>
           </form>
 
           <div class="result-panel is-example-preview" id="monster-result" data-monster-step-panel aria-live="polite" tabindex="-1">
+            <div class="studio-panel-heading">
+              <span class="studio-step-number">2</span>
+              <div>
+                <small>Your storybook character</small>
+                <h2>Meet their monster</h2>
+                <p>Your preview appears here automatically.</p>
+              </div>
+            </div>
             <div class="converter-preview monster-preview">
               <span class="preview-badge" id="monster-preview-badge">Example preview</span>
               <img
@@ -147,10 +169,10 @@
             </div>
             <div class="result-content">
               <span class="result-label">Monster preview</span>
-              <h2 id="converter-status">Upload a drawing to begin.</h2>
+              <h2 id="converter-status">Ready when they are.</h2>
               <p id="converter-note">
-                The preview keeps the child's shape, colors, and expression in
-                the Soft 3D Storybook Monster style.
+                Add a drawing on the left. The first character preview starts
+                automatically and keeps their shapes, colors, and personality.
               </p>
               <button class="button secondary replace-drawing-button" id="replace-drawing" type="button" hidden>
                 Choose a Different Photo
