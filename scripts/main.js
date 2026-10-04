@@ -1170,25 +1170,47 @@ function removeConnectedWhiteBackground(source) {
         const queue = new Int32Array(width * height);
         let head = 0;
         let tail = 0;
-        const isBackground = (pixel) => {
+        const cornerPixels = [0, width - 1, (height - 1) * width, width * height - 1];
+        const opaqueCorners = cornerPixels.filter((pixel) => data[pixel * 4 + 3] > 0);
+        const cornerColor = opaqueCorners.length
+          ? opaqueCorners.reduce((color, pixel) => {
+              const offset = pixel * 4;
+              color.red += data[offset];
+              color.green += data[offset + 1];
+              color.blue += data[offset + 2];
+              return color;
+            }, { red: 0, green: 0, blue: 0 })
+          : { red: 255, green: 255, blue: 255 };
+        const cornerCount = Math.max(1, opaqueCorners.length);
+        cornerColor.red /= cornerCount;
+        cornerColor.green /= cornerCount;
+        cornerColor.blue /= cornerCount;
+        const isBackground = (pixel, seed = false) => {
           const offset = pixel * 4;
           const red = data[offset];
           const green = data[offset + 1];
           const blue = data[offset + 2];
-          return data[offset + 3] > 0 && Math.min(red, green, blue) > 224 && Math.max(red, green, blue) - Math.min(red, green, blue) < 36;
+          if (data[offset + 3] === 0) return true;
+          const darkest = Math.min(red, green, blue);
+          const chroma = Math.max(red, green, blue) - darkest;
+          const cornerDistance = Math.hypot(red - cornerColor.red, green - cornerColor.green, blue - cornerColor.blue);
+          const nearWhite = darkest > 222 && chroma < 48;
+          const cornerMatch = cornerDistance < (seed ? 62 : 92);
+          const softNeutral = !seed && darkest > 178 && chroma < 42;
+          return nearWhite || cornerMatch || softNeutral;
         };
-        const enqueue = (pixel) => {
-          if (visited[pixel] || !isBackground(pixel)) return;
+        const enqueue = (pixel, seed = false) => {
+          if (visited[pixel] || !isBackground(pixel, seed)) return;
           visited[pixel] = 1;
           queue[tail++] = pixel;
         };
         for (let x = 0; x < width; x += 1) {
-          enqueue(x);
-          enqueue((height - 1) * width + x);
+          enqueue(x, true);
+          enqueue((height - 1) * width + x, true);
         }
         for (let y = 0; y < height; y += 1) {
-          enqueue(y * width);
-          enqueue(y * width + width - 1);
+          enqueue(y * width, true);
+          enqueue(y * width + width - 1, true);
         }
         while (head < tail) {
           const pixel = queue[head++];
@@ -1198,6 +1220,22 @@ function removeConnectedWhiteBackground(source) {
           if (x < width - 1) enqueue(pixel + 1);
           if (pixel >= width) enqueue(pixel - width);
           if (pixel < width * (height - 1)) enqueue(pixel + width);
+        }
+        for (let pixel = 0; pixel < width * height; pixel += 1) {
+          const offset = pixel * 4;
+          if (visited[pixel] || data[offset + 3] === 0) continue;
+          const x = pixel % width;
+          const y = Math.floor(pixel / width);
+          let transparentNeighbors = 0;
+          for (let nearbyY = Math.max(0, y - 1); nearbyY <= Math.min(height - 1, y + 1); nearbyY += 1) {
+            for (let nearbyX = Math.max(0, x - 1); nearbyX <= Math.min(width - 1, x + 1); nearbyX += 1) {
+              if (nearbyX === x && nearbyY === y) continue;
+              if (visited[nearbyY * width + nearbyX]) transparentNeighbors += 1;
+            }
+          }
+          if (transparentNeighbors > 0) {
+            data[offset + 3] = Math.min(data[offset + 3], transparentNeighbors >= 3 ? 150 : 205);
+          }
         }
         context.putImageData(pixels, 0, 0);
         resolve(canvas.toDataURL("image/webp", .92));

@@ -90,8 +90,13 @@ test("selector UI exposes only supported controls and states the current renderi
   assert.match(html, /id="child-preview-monster"/);
   assert.match(mainScript, /function syncStorySceneMonster/);
   assert.match(mainScript, /function removeConnectedWhiteBackground/);
+  assert.match(mainScript, /cornerDistance/);
+  assert.match(mainScript, /transparentNeighbors/);
   assert.match(css, /storybook-forest-stage-v1\.webp/);
   assert.match(css, /@keyframes story-character-arrival/);
+  assert.doesNotMatch(css, /@keyframes story-sparkle/);
+  assert.doesNotMatch(html, /child-scene-sparkles/);
+  assert.match(html, /child-monster-ground-shadow/);
   assert.match(mainScript, /resultBookOffer\.hidden = false/);
   assert.match(mainScript, /function showCharacterStep/);
   assert.match(mainScript, /function showMonsterStep/);
@@ -99,9 +104,9 @@ test("selector UI exposes only supported controls and states the current renderi
   assert.match(css, /\.child-live-preview \{[\s\S]*position: sticky/);
   assert.match(css, /\.child-character-option\.is-selected::after/);
   assert.match(css, /\.child-preview-character/);
-  assert.match(html, /child-selector\.css\?v=20261004-character-studio-v8/);
+  assert.match(html, /child-selector\.css\?v=20261004-scene-blend-v9/);
   assert.match(html, /scripts\/child-selector\.js\?v=20261004-character-studio-v7/);
-  assert.match(html, /scripts\/main\.js\?v=20261004-character-studio-v9/);
+  assert.match(html, /scripts\/main\.js\?v=20261004-scene-blend-v10/);
 });
 
 test("character studio includes lightweight changing storybook previews", () => {
