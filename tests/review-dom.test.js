@@ -256,3 +256,159 @@ test('customer approval stays closed when either reviewer requested revisions or
   assert.equal(window.document.querySelector('#customer-proof-form').hidden,true);
  }finally{dom.window.close();}
 });
+
+const settleAdmin = async () => { for (let n = 0; n < 8; n++) await new Promise(resolve => setImmediate(resolve)); };
+function adminResourceFixture(w, respond, calls) {
+ w.sessionStorage.setItem('monstersnow_admin_password', 'synthetic-local-test');
+ w.fetch = async (url, options = {}) => {
+  if (url.endsWith('/production-status.json')) return { ok:true, json:async () => JSON.parse(fs.readFileSync(path.join(root,url),'utf8')) };
+  const resource = new URL(url,'https://review.invalid').searchParams.get('resource') || 'stories';
+  calls.push({resource, method: options.method || 'GET'});
+  return respond(resource);
+ };
+}
+const adminOk = payload => ({ok:true,status:200,json:async()=>payload});
+const adminFailure = (code = 'PGRST301', error = 'JWT issued at future') => ({ok:false,status:401,json:async()=>({code,error})});
+const savedMonsterFixtures = [1,2,3].map(n => ({id:`sample-${n}`,monsterName:`Sample monster ${n}`,status:'ready',orders:[],createdAt:'2026-10-03T00:00:00Z'}));
+
+test('orders failure preserves the three loaded monsters and retries only failed reads without duplicate requests', async () => {
+ const calls = []; let orderReady = false, releaseRetry;
+ const {dom,window,errors} = runtime('admin.html', w => adminResourceFixture(w, resource => {
+  if (resource === 'orders') {
+   if (!orderReady) return adminFailure();
+   return new Promise(resolve => { releaseRetry = () => resolve(adminOk({orders:[]})); });
+  }
+  return adminOk(resource === 'monsters' ? {monsters:savedMonsterFixtures} : {stories:[]});
+ }, calls));
+ try {
+  await settleAdmin(); const doc = window.document;
+  assert.equal(doc.querySelector('#admin-app').hidden,false);
+  assert.equal(doc.querySelector('#admin-login').hidden,true);
+  assert.equal(doc.querySelectorAll('.monster-library-card').length,3);
+  assert.equal(doc.querySelector('#nav-order-count').textContent,'—');
+  assert.equal(doc.querySelector('#metric-orders').textContent,'—');
+  assert.match(doc.querySelector('#orders-empty').textContent,/could not be loaded/);
+  assert.match(doc.querySelector('#customers-empty').textContent,/could not be loaded/);
+  assert.match(doc.querySelector('#admin-data-status').textContent,/Orders and customers unavailable/);
+  assert.equal(window.sessionStorage.getItem('monstersnow_admin_password'),'synthetic-local-test');
+  assert.deepEqual(calls,[{resource:'stories',method:'GET'},{resource:'orders',method:'GET'},{resource:'monsters',method:'GET'}]);
+  doc.querySelector('[data-admin-view="monsters"]').click();
+  orderReady = true;
+  doc.querySelector('#retry-admin-sections').click();
+  doc.querySelector('#retry-admin-sections').click();
+  await settleAdmin(); assert.equal(calls.length,4);
+  releaseRetry(); await settleAdmin();
+  assert.equal(doc.querySelector('#admin-data-status').hidden,true);
+  assert.equal(doc.querySelector('#admin-connection-state').textContent,'Connected');
+  assert.equal(doc.querySelector('#monsters-admin').hidden,false);
+  assert.equal(doc.querySelectorAll('.monster-library-card').length,3);
+  assert.equal(doc.querySelector('#nav-order-count').textContent,'0');
+  assert.match(doc.querySelector('#orders-empty').textContent,/No orders yet/);
+  assert.ok(calls.every(call => call.method === 'GET'));
+  assert.deepEqual(errors,[]);
+ } finally {dom.window.close();}
+});
+
+test('unavailable monsters are distinguished from an empty library and available books remain usable', async () => {
+ const calls = [];
+ const {dom,window,errors} = runtime('admin.html', w => adminResourceFixture(w, resource => resource === 'monsters' ? adminFailure() : adminOk(resource === 'orders' ? {orders:[]} : {stories:[master]}), calls));
+ try {
+  await settleAdmin(); const doc = window.document;
+  assert.equal(doc.querySelector('#admin-app').hidden,false);
+  assert.equal(doc.querySelector('#monster-metric-total').textContent,'—');
+  assert.equal(doc.querySelector('#nav-monster-count').textContent,'—');
+  assert.match(doc.querySelector('#monsters-empty').textContent,/could not be loaded/);
+  assert.doesNotMatch(doc.querySelector('#monsters-empty').textContent,/No saved monsters/);
+  doc.querySelector('#monster-search').value='test';
+  doc.querySelector('#monster-search').dispatchEvent(new window.Event('input'));
+  assert.match(doc.querySelector('#monsters-status').textContent,/unavailable, not empty/);
+  assert.equal(doc.querySelectorAll('.story-list-item').length,1);
+  assert.ok(calls.every(call=>call.method==='GET'));
+  assert.deepEqual(errors,[]);
+ } finally {dom.window.close();}
+});
+
+test('books failure does not hide a successful monster library or silently create a catalog', async () => {
+ const calls = [];
+ const {dom,window,errors} = runtime('admin.html', w => adminResourceFixture(w, resource => resource === 'stories' ? adminFailure() : adminOk(resource === 'orders' ? {orders:[]} : {monsters:savedMonsterFixtures}), calls));
+ try {
+  await settleAdmin(); const doc=window.document;
+  assert.equal(doc.querySelector('#admin-app').hidden,false);
+  assert.equal(doc.querySelectorAll('.monster-library-card').length,3);
+  assert.match(doc.querySelector('#story-empty').textContent,/could not be loaded/);
+  assert.equal(doc.querySelector('#metric-published').textContent,'—');
+  assert.match(doc.querySelector('#attention-list').textContent,/Some checks unavailable/);
+  assert.ok(calls.every(call=>call.method==='GET'));
+  assert.deepEqual(errors,[]);
+ } finally {dom.window.close();}
+});
+
+test('a shared database rejection keeps login recoverable without blaming the device or prescribing key rotation', async () => {
+ const calls=[];
+ const {dom,window,errors}=runtime('admin.html',w=>adminResourceFixture(w,()=>adminFailure(),calls));
+ try {
+  await settleAdmin();const doc=window.document;
+  assert.equal(doc.querySelector('#admin-app').hidden,true);
+  assert.equal(doc.querySelector('#admin-login').hidden,false);
+  assert.equal(doc.querySelector('#admin-login-form button[type="submit"]').disabled,false);
+  assert.equal(window.sessionStorage.getItem('monstersnow_admin_password'),'synthetic-local-test');
+  assert.match(doc.querySelector('#admin-login-status').textContent,/does not use your device clock/);
+  assert.doesNotMatch(doc.querySelector('#admin-login-status').textContent,/update.*key|rotate|incorrect password/i);
+  assert.deepEqual(errors,[]);
+ } finally {dom.window.close();}
+});
+
+test('an explicit rejected admin password blocks all partial results and removes the session', async () => {
+ const calls=[];
+ const {dom,window,errors}=runtime('admin.html',w=>adminResourceFixture(w,resource=>resource==='orders'?adminFailure('invalid_admin_password','Incorrect admin password.'):adminOk(resource==='stories'?{stories:[]}:{monsters:savedMonsterFixtures}),calls));
+ try {
+  await settleAdmin();const doc=window.document;
+  assert.equal(doc.querySelector('#admin-app').hidden,true);
+  assert.equal(doc.querySelector('#admin-login').hidden,false);
+  assert.equal(doc.querySelectorAll('.monster-library-card').length,0);
+  assert.equal(window.sessionStorage.getItem('monstersnow_admin_password'),null);
+  assert.match(doc.querySelector('#admin-login-status').textContent,/password wasn’t accepted/);
+  assert.deepEqual(errors,[]);
+ } finally {dom.window.close();}
+});
+
+test('signing out during a section retry prevents the delayed response from reopening private data', async () => {
+ const calls=[];let delayed=false,release;
+ const {dom,window,errors}=runtime('admin.html',w=>adminResourceFixture(w,resource=>{
+  if(resource==='orders') return delayed?new Promise(resolve=>{release=()=>resolve(adminOk({orders:[order]}));}):adminFailure();
+  return adminOk(resource==='stories'?{stories:[]}:{monsters:savedMonsterFixtures});
+ },calls));
+ try {
+  await settleAdmin();const doc=window.document;
+  delayed=true;doc.querySelector('#retry-admin-sections').click();await settleAdmin();
+  doc.querySelector('#admin-sign-out').click();release();await settleAdmin();
+  assert.equal(doc.querySelector('#admin-app').hidden,true);
+  assert.equal(doc.querySelector('#admin-login').hidden,false);
+  assert.equal(window.sessionStorage.getItem('monstersnow_admin_password'),null);
+  assert.equal(doc.querySelectorAll('.monster-library-card,.order-board-card').length,0);
+  assert.equal(doc.querySelector('#admin-login-status').textContent,'Signed out.');
+  assert.deepEqual(errors,[]);
+ } finally {dom.window.close();}
+});
+
+test('monster order summaries cannot open an editable order until complete order data loads', async () => {
+ const calls=[]; let orderReady=false;
+ const linkedMonster={...savedMonsterFixtures[0],orders:[{id:order.id,story_label:'Sample summary',status:'proofing',created_at:order.created_at}]};
+ const {dom,window,errors}=runtime('admin.html',w=>adminResourceFixture(w,resource=>{
+  if(resource==='orders') return orderReady?adminOk({orders:[{...order,notes:'Preserve these production notes'}]}):adminFailure();
+  return adminOk(resource==='stories'?{stories:[master]}:{monsters:[linkedMonster]});
+ },calls));
+ try {
+  await settleAdmin();const doc=window.document;
+  let button=[...doc.querySelectorAll('.monster-library-actions button')].find(b=>b.textContent==='View connected book');
+  assert.equal(button.disabled,true); button.click();
+  assert.equal(doc.querySelector('#order-detail').open,false);
+  assert.ok(calls.every(call=>call.method==='GET'));
+  orderReady=true;doc.querySelector('#retry-admin-sections').click();await settleAdmin();
+  button=[...doc.querySelectorAll('.monster-library-actions button')].find(b=>b.textContent==='View connected book');
+  assert.equal(button.disabled,false);button.click();
+  assert.equal(doc.querySelector('#order-detail').open,true);
+  assert.equal(doc.querySelector('#order-detail-notes').value,'Preserve these production notes');
+  assert.deepEqual(errors,[]);
+ } finally {dom.window.close();}
+});

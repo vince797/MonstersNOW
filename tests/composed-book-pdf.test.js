@@ -201,7 +201,7 @@ test('cover geometry and template hashes are verified and template guides are no
 
 test('candidate poses, prop renditions, and exact foot anchors preserve verified pixels within the storage cap', async t => {
   const opts = await options();
-  const monsterFile = 'assets/characters/candidates/sample-monster-v1/purple-wave-candidate.png';
+  const monsterFile = 'assets/characters/candidates/sample-monster-v2/purple-wave-soft-plush-review.png';
   const monsterBytes = await fs.readFile(path.join(ROOT, monsterFile)), monsterImage = `data:image/png;base64,${monsterBytes.toString('base64')}`;
   const composition = await buildHalloweenProofWithGeometry({ personalization: { childName: 'Sample Alex', monsterName: 'Moxie', childCharacter: 'warm-curly-dark' }, selectedPreviewId: 'test-exact-monster', monsterImage, format: 'softcover' });
   const assetResolver = createLocalAssetResolver({ root: ROOT, bindings: { [monsterImage]: monsterFile } });

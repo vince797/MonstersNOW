@@ -1,0 +1,31 @@
+{
+  "id": "synthetic-plush-style-review-v2",
+  "source": "purple-wave-soft-plush-review.png",
+  "sha256": "9329298fa69871a9d6201db317060f4bab8ebf87960b3da2d0b45c6a4cababfa",
+  "width": 1143,
+  "height": 1376,
+  "alphaGeometry": {
+    "version": "monster-alpha128-geometry-v1",
+    "selectedPreviewId": "synthetic-plush-style-review-v2",
+    "sourceSha256": "9329298fa69871a9d6201db317060f4bab8ebf87960b3da2d0b45c6a4cababfa",
+    "alphaThreshold": 128,
+    "available": true,
+    "width": 1143,
+    "height": 1376,
+    "bounds": {
+      "left": 64,
+      "top": 88,
+      "right": 1117,
+      "bottom": 1296
+    },
+    "anchor": {
+      "x": 0.5,
+      "y": 0.9418604651162791
+    }
+  },
+  "status": "candidate",
+  "styleDirectionApproved": true,
+  "styleDirectionApprovalDate": "2026-10-04",
+  "productionApproved": false,
+  "usage": "Synthetic review only. Style-direction approval does not approve final artwork, print files, or any customer order."
+}

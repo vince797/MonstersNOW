@@ -5796,6 +5796,9 @@ main > section {
 .customer-order-progress li.is-current span { color: #fff; background: #ff5a1f; box-shadow: 0 0 0 5px rgba(255, 90, 31, .14); }
 .customer-proof-panel { padding: clamp(24px, 5vw, 48px); border-radius: 26px; background: linear-gradient(145deg, #fff8e9, #effbfb); border: 1px solid rgba(15, 52, 76, .12); }
 .customer-proof-panel h2 { margin: 6px 0 10px; }
+.admin-data-status { margin: 1rem 0; padding: 1rem; border: 1px solid #dba84b; border-radius: 12px; background: #fff8e8; color: #503d19; }
+.admin-data-status p { margin: 0 0 .75rem; }
+.admin-data-status[hidden] { display: none; }
 .customer-proof-panel > .button { margin-top: 12px; }
 .customer-proof-panel form { display: grid; gap: 16px; margin-top: 24px; padding-top: 22px; border-top: 1px solid rgba(15, 52, 76, .12); }
 .customer-proof-panel textarea { width: 100%; margin-top: 8px; }

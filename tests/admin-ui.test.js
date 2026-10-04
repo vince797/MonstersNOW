@@ -10,7 +10,7 @@ const publicPolish = fs.readFileSync(path.join(root, "home-polish.css"), "utf8")
 const adminScript = fs.readFileSync(path.join(root, "scripts/admin.js"), "utf8");
 
 test("admin workspace uses a readable system typeface without changing the storefront brand", () => {
-  assert.match(adminMarkup, /styles\.css\?v=20261002-admin-system-type/);
+  assert.match(adminMarkup, /styles\.css\?v=20261004-admin-resilience-v1/);
   assert.match(styles, /--admin-ui-font: Inter, ui-sans-serif, system-ui/);
   assert.match(styles, /\.admin-page strong \{[\s\S]*font-family: var\(--admin-ui-font\)/);
   assert.doesNotMatch(styles, /Admin Fredoka/);
@@ -19,7 +19,8 @@ test("admin workspace uses a readable system typeface without changing the store
 
 test("admin sign-in does not blame the device for a server credential timestamp error", () => {
   assert.doesNotMatch(adminScript, /Your device clock appears out of sync/);
-  assert.match(adminScript, /Your device clock is not the cause/);
+  assert.match(adminScript, /This request does not use your device clock/);
+  assert.doesNotMatch(adminScript, /update the Supabase secret key/);
   assert.match(adminScript, /error\.code = result\.code/);
   assert.match(adminScript, /error\.status = response\.status/);
 });

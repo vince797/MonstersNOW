@@ -42,12 +42,21 @@ test('synthetic routes never save or echo personal or uploaded data; no network 
   assert.equal(upload.submission.id, '11111111-1111-4111-8111-111111111111');
   const gen = await route(req('/api/convert-monster','POST',{ drawing:'NEVER_SAVE_ME' }));
   assert.equal(gen.status, 200); const generated = await gen.json(); assert.equal(generated.synthetic,true); assert.match(generated.monsterImage,/^data:image\/png;base64,/);
+  const approvedStyleFixture = fs.readFileSync(path.join(__dirname, '../assets/characters/candidates/sample-monster-v2/purple-wave-soft-plush-review.png'));
+  assert.deepEqual(Buffer.from(generated.monsterImage.split(',')[1], 'base64'), approvedStyleFixture);
   const result = await route(req('/api/halloween-proof','POST',{ personalization:{ childName:'NEVER_ECHO_ME',monsterName:'NEVER_ECHO_ME',childCharacter:{id:'deep-braids-black'} },format:'softcover',monsterImage:'NEVER_SAVE_ME' }));
   assert.equal(result.status, 200); const json = await result.json();
   assert.equal(json.proof.childName,'Sample'); assert.equal(json.proof.monsterName,'Fizz'); assert.equal(json.proof.format,'softcover'); assert.equal(json.proof.pages.length,32); assert.equal(json.proof.reviewOnly,true); assert.equal(json.proof.productionReady,false);
+  assert.match(json.proof.monsterImage, /sample-monster-v2\/purple-wave-soft-plush-review\.png$/);
+  const monsterLayer = json.proof.pages[3].layers.find(layer => layer.type === 'monster');
+  assert.equal(monsterLayer.scale, 46); assert.equal(monsterLayer.anchor.y, 1296 / 1376);
   assert.ok(!JSON.stringify(json).includes('NEVER_'));
   assert.ok(Buffer.byteLength(JSON.stringify(json)) < 512 * 1024);
   const orders = await (await route(req('/api/storybook-interest?resource=orders'))).json(); assert.equal(orders.orders[0].customer_email, 'sample@example.test');
+  assert.equal(orders.orders[0].monster_assets.monsterGeometry.anchor.y, 1296 / 1376);
+  assert.equal(orders.orders[0].monster_assets.selectedPreviewSha256, monsterLayer.alphaGeometry.sourceSha256);
+  const books = await (await route(req('/api/storybook-interest'))).json();
+  assert.equal(books.stories[0].pages[6].backgroundCrop, 'center', 'Admin fixture retains the complete star crop');
   assert.equal((await route(req('/api/storybook-interest?resource=orders','PATCH',{id:'sample-order'}))).status,403);
  } finally { global.fetch = originalFetch; }
 });

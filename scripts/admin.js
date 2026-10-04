@@ -32,6 +32,9 @@ const pagesContainer = document.querySelector("#story-pages");
 let stories = [];
 let orders = [];
 let monsters = [];
+const libraryLoadErrors = { stories: null, orders: null, monsters: null };
+let libraryLoadInFlight = false;
+let libraryLoadGeneration = 0;
 let manuscriptFile = null;
 let storyDirty = false;
 let loadingStory = false;
@@ -161,6 +164,7 @@ async function loadProductionReadiness() {
 loadProductionReadiness();
 document.querySelector("#toggle-admin-password").addEventListener("click", togglePassword);
 document.querySelector("#admin-sign-out").addEventListener("click", signOut);
+document.querySelector("#retry-admin-sections").addEventListener("click", () => openLibrary({ retryOnly: true }));
 document.querySelector("#order-filter").addEventListener("change", renderOrders);
 document.querySelectorAll("[data-admin-view]").forEach((button) => button.addEventListener("click", () => showView(button.dataset.adminView)));
 document.querySelectorAll("[data-open-stories]").forEach((button) => button.addEventListener("click", () => showView("stories")));
@@ -217,20 +221,38 @@ document.querySelector("#dashboard-date").textContent = new Intl.DateTimeFormat(
   day: "numeric",
 }).format(new Date());
 
-async function openLibrary() {
+async function openLibrary({ retryOnly = false } = {}) {
+  if (libraryLoadInFlight) return;
+  libraryLoadInFlight = true;
+  const generation = ++libraryLoadGeneration;
   const submitButton = loginForm.querySelector('button[type="submit"]');
+  const retryButton = document.querySelector("#retry-admin-sections");
+  const wasOpen = !adminApp.hidden;
+  const resources = Object.keys(libraryLoadErrors).filter((resource) => !retryOnly || libraryLoadErrors[resource]);
   loginStatus.className = "is-pending";
   loginStatus.textContent = "Opening story library...";
   submitButton.disabled = true;
+  retryButton.disabled = true;
   try {
-    const [storyResult, orderResult, monsterResult] = await Promise.all([apiRequest(), apiRequest("?resource=orders"), apiRequest("?resource=monsters")]);
-    stories = storyResult.stories || [];
-    orders = orderResult.orders || [];
-    monsters = monsterResult.monsters || [];
-    if (Object.keys(CATALOG_COVERS).some((slug) => !stories.some((story) => story.slug === slug))) {
-      const catalogResult = await setupCatalog();
-      stories = catalogResult?.stories || stories;
+    const results = await Promise.allSettled(resources.map((resource) => apiRequest(resource === "stories" ? "" : `?resource=${resource}`)));
+    if (generation !== libraryLoadGeneration) return;
+    // A database 401 is not a rejected admin password. Only this explicit
+    // application-authentication failure may discard the session.
+    const authenticationFailure = results.find((result) => result.status === "rejected" && result.reason?.code === "invalid_admin_password");
+    if (authenticationFailure) throw authenticationFailure.reason;
+    results.forEach((result, index) => {
+      const resource = resources[index];
+      libraryLoadErrors[resource] = result.status === "rejected" ? result.reason : null;
+      const records = result.status === "fulfilled" && Array.isArray(result.value[resource]) ? result.value[resource] : [];
+      if (resource === "stories") stories = records;
+      if (resource === "orders") orders = records;
+      if (resource === "monsters") monsters = records;
+    });
+    if (!wasOpen && results.every((result) => result.status === "rejected")) {
+      throw results[0].reason;
     }
+    // Opening/retrying the dashboard is read-only. Catalog creation is an
+    // explicit action through the existing Set up catalog button.
     sessionStorage.setItem("monstersnow_admin_password", adminPassword);
     loginStatus.className = "";
     login.hidden = true;
@@ -241,24 +263,61 @@ async function openLibrary() {
     renderCustomers();
     renderMonsters();
     renderProductionHub();
-    showView("dashboard");
+    renderLibraryLoadStatus();
+    if (!wasOpen) showView("dashboard");
   } catch (error) {
-    sessionStorage.removeItem("monstersnow_admin_password");
-    console.error("Admin sign-in failed", error);
+    if (generation !== libraryLoadGeneration) return;
+    if (error?.code === "invalid_admin_password") {
+      sessionStorage.removeItem("monstersnow_admin_password");
+      clearLibraryData();
+      adminApp.hidden = true;
+      login.hidden = false;
+    }
     loginStatus.className = "is-error";
     loginStatus.textContent = formatAdminLoginError(error);
     passwordInput.focus();
     passwordInput.select();
   } finally {
-    submitButton.disabled = false;
+    if (generation === libraryLoadGeneration) {
+      libraryLoadInFlight = false;
+      submitButton.disabled = false;
+      retryButton.disabled = false;
+    }
   }
+}
+
+function renderLibraryLoadStatus() {
+  const unavailable = Object.keys(libraryLoadErrors).filter((resource) => libraryLoadErrors[resource]);
+  const notice = document.querySelector("#admin-data-status");
+  notice.hidden = unavailable.length === 0;
+  document.querySelector("#admin-data-status-message").textContent = unavailable.length
+    ? `${unavailable.map((resource) => resource === "stories" ? "Books" : resource === "orders" ? "Orders and customers" : "Monsters").join(", ")} unavailable. Other loaded sections remain usable. ${formatAdminLoginError(libraryLoadErrors[unavailable[0]])}` : "";
+  document.querySelector("#admin-connection-state").textContent = unavailable.length ? "Partially loaded" : "Connected";
+}
+
+function renderUnavailableResource(resource, container, emptyState, counters = []) {
+  if (!libraryLoadErrors[resource]) return false;
+  container.replaceChildren();
+  emptyState.hidden = false;
+  emptyState.querySelector("strong, h2").textContent = "This section could not be loaded";
+  emptyState.querySelector("p").textContent = "Its records have not been counted. Use Retry unavailable sections above.";
+  counters.forEach((id) => { document.getElementById(id).textContent = "—"; });
+  return true;
+}
+
+function clearLibraryData() {
+  stories = []; orders = []; monsters = [];
+  selectedOrder = null;
+  Object.keys(libraryLoadErrors).forEach((resource) => { libraryLoadErrors[resource] = null; });
+  ["#monster-library", "#orders-list", "#orders-board", "#customer-list", "#story-list"].forEach((selector) => document.querySelector(selector).replaceChildren());
+  [orderDialog, artworkDialog, storyReviewDialog, commandDialog].forEach((dialog) => { if (dialog.open) dialog.close(); });
 }
 
 function formatAdminLoginError(error) {
   const message = String(error?.message || "").toLowerCase();
   const code = String(error?.code || "").toLowerCase();
   if (message.includes("issued at future") || message.includes("not yet valid") || message.includes("clock")) {
-    return "The MonstersNOW database credential has a timestamp problem. Your device clock is not the cause. Try again shortly; if it continues, update the Supabase secret key in Vercel.";
+    return "The database rejected the server token’s timestamp. This request does not use your device clock. The server credential and database service timing need checking; retry shortly.";
   }
   if (code === "invalid_admin_password" || message.includes("password")) {
     return "That password wasn’t accepted. Check it and try again.";
@@ -407,7 +466,15 @@ function renderDashboard() {
   document.querySelector("#nav-monster-count").textContent = monsters.length;
   document.querySelector("#nav-customer-count").textContent = new Set(orders.map((order) => order.customer_email?.toLowerCase()).filter(Boolean)).size;
   document.querySelector("#nav-production-count").textContent = productionReport?.checks?.filter((check) => check.status !== "pass").length || 0;
+  if (libraryLoadErrors.orders) ["metric-orders", "metric-production", "nav-order-count", "nav-customer-count"].forEach((id) => { document.getElementById(id).textContent = "—"; });
+  if (libraryLoadErrors.stories) ["metric-published", "metric-drafts", "nav-story-count"].forEach((id) => { document.getElementById(id).textContent = "—"; });
+  if (libraryLoadErrors.monsters) document.querySelector("#nav-monster-count").textContent = "—";
   const recent = document.querySelector("#recent-stories");
+  if (libraryLoadErrors.stories) {
+    recent.innerHTML = '<div class="admin-inline-empty"><strong>Books unavailable</strong><span>Retry the section to load its records.</span></div>';
+    renderAttentionList();
+    return;
+  }
   if (!stories.length) {
     recent.innerHTML = '<div class="admin-inline-empty"><strong>No stories yet</strong><span>Create the Halloween story to get started.</span></div>';
     renderAttentionList();
@@ -550,7 +617,7 @@ function renderProductionHub(error = null) {
   }));
   if (!reportChecks.length) checksContainer.innerHTML = '<div class="admin-inline-empty"><strong>Preflight data unavailable</strong><span>Run the production preflight to refresh this section.</span></div>';
   ["paid", "proofing", "printing", "shipped"].forEach((orderStatus) => {
-    document.querySelector(`#workload-${orderStatus}`).textContent = orders.filter((order) => order.status === orderStatus).length;
+    document.querySelector(`#workload-${orderStatus}`).textContent = libraryLoadErrors.orders ? "—" : orders.filter((order) => order.status === orderStatus).length;
   });
 }
 
@@ -564,7 +631,9 @@ function renderAttentionList() {
     if (ready < 32 || artworkReady < 32) attention.push({ type: "story", title: story.title_template, detail: `${ready}/32 copy · ${artworkReady}/32 artwork`, story });
   });
   const list = document.querySelector("#attention-list");
-  if (!attention.length) { list.innerHTML = '<div class="admin-inline-empty"><strong>Nothing urgent</strong><span>Orders and story checks will appear here.</span></div>'; return; }
+  if (!attention.length) { list.innerHTML = libraryLoadErrors.orders || libraryLoadErrors.stories
+    ? '<div class="admin-inline-empty"><strong>Some checks unavailable</strong><span>Retry unavailable sections before reviewing the work queue.</span></div>'
+    : '<div class="admin-inline-empty"><strong>Nothing urgent</strong><span>Orders and story checks will appear here.</span></div>'; return; }
   list.replaceChildren(...attention.slice(0, 8).map((item) => {
     const button = document.createElement("button");
     button.type = "button";
@@ -577,6 +646,9 @@ function renderAttentionList() {
 }
 
 function renderStoryList() {
+  if (renderUnavailableResource("stories", storyList, empty, ["story-count"])) { editor.hidden = true; renderDashboard(); return; }
+  empty.querySelector("h2").textContent = "Create the first master story";
+  empty.querySelector("p").textContent = "Start with the Halloween adventure or the evergreen flagship story.";
   storyCount.textContent = String(stories.length);
   const query = document.querySelector("#story-search").value.trim().toLowerCase();
   const filter = document.querySelector("#story-filter").value;
@@ -604,6 +676,12 @@ function renderStoryList() {
 }
 
 function renderOrders() {
+  if (renderUnavailableResource("orders", document.querySelector("#orders-list"), document.querySelector("#orders-empty"), ["queue-all", "queue-attention", "queue-paid", "queue-printing"])) {
+    document.querySelector("#orders-board").replaceChildren();
+    return;
+  }
+  document.querySelector("#orders-empty strong").textContent = "No orders yet";
+  document.querySelector("#orders-empty p").textContent = "New storybook checkouts will appear here automatically.";
   const filter = document.querySelector("#order-filter").value;
   const query = document.querySelector("#order-search").value.trim().toLowerCase();
   const matchesQuickFilter = (order) => orderQuickFilter === "all"
@@ -686,6 +764,9 @@ function orderNeedsAttention(order) {
 }
 
 function renderCustomers() {
+  if (renderUnavailableResource("orders", document.querySelector("#customer-list"), document.querySelector("#customers-empty"))) return;
+  document.querySelector("#customers-empty strong").textContent = "No customer records yet";
+  document.querySelector("#customers-empty p").textContent = "Customers appear after a checkout record is created.";
   const query = document.querySelector("#customer-search").value.trim().toLowerCase();
   const groups = new Map();
   orders.forEach((order) => {
@@ -713,6 +794,10 @@ function renderCustomers() {
 }
 
 function renderMonsters() {
+  if (renderUnavailableResource("monsters", document.querySelector("#monster-library"), document.querySelector("#monsters-empty"), ["monster-metric-total", "monster-metric-ready", "monster-metric-books", "monster-metric-gallery"])) {
+    document.querySelector("#monsters-status").textContent = "Saved monster records are unavailable, not empty.";
+    return;
+  }
   const query = document.querySelector("#monster-search").value.trim().toLowerCase();
   const filter = document.querySelector("#monster-filter").value;
   const sort = document.querySelector("#monster-sort").value;
@@ -773,9 +858,13 @@ function buildMonsterCard(monster) {
     orderButton.type = "button";
     orderButton.className = "button secondary";
     orderButton.textContent = monster.orders.length > 1 ? `View ${monster.orders.length} books` : "View connected book";
+    orderButton.disabled = Boolean(libraryLoadErrors.orders) || !orders.some((order) => order.id === latestOrder.id);
+    if (orderButton.disabled) orderButton.title = "Load the complete order record before viewing or editing it.";
     orderButton.addEventListener("click", () => {
+      const completeOrder = orders.find((order) => order.id === latestOrder.id);
+      if (libraryLoadErrors.orders || !completeOrder) return;
       showView("orders");
-      openOrderDetail(orders.find((order) => order.id === latestOrder.id) || latestOrder);
+      openOrderDetail(completeOrder);
     });
     actions.append(orderButton);
   }
@@ -1572,6 +1661,11 @@ function signOut() {
   if (savingStory) { editorStatus.textContent = "Wait for the story to finish saving before signing out."; return; }
   if (storyDirty && !window.confirm("Sign out and discard unsaved story changes?")) return;
   storyDirty = false;
+  libraryLoadGeneration += 1;
+  libraryLoadInFlight = false;
+  loginForm.querySelector('button[type="submit"]').disabled = false;
+  document.querySelector("#retry-admin-sections").disabled = false;
+  clearLibraryData();
   clearTimeout(storyAutosaveTimer);
   sessionStorage.removeItem("monstersnow_admin_password");
   adminPassword = "";
