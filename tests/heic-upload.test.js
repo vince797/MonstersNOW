@@ -26,8 +26,8 @@ test("upload progress stays customer-friendly while HEIC handling remains intern
 });
 
 test("create flow cache-busts the corrected upload script", () => {
-  assert.match(createPage, /scripts\/main\.js\?v=20261004-upload-timeout-v7/);
-  assert.doesNotMatch(createPage, /scripts\/main\.js\?v=20261004-story-scene-v6/);
+  assert.match(createPage, /scripts\/main\.js\?v=20261004-preview-loading-v8/);
+  assert.doesNotMatch(createPage, /scripts\/main\.js\?v=20261004-upload-timeout-v7/);
 });
 
 test("HEIC server conversion logs start, completion, rejection, and failure", () => {

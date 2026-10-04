@@ -2217,6 +2217,55 @@ main > section {
   opacity: 0.78;
 }
 
+.is-generating-preview .monster-preview {
+  background:
+    radial-gradient(circle at 50% 44%, rgba(127, 75, 185, 0.14), transparent 34%),
+    linear-gradient(160deg, #f6effd, #fff8ee);
+}
+
+.is-generating-preview .monster-preview img {
+  opacity: 0;
+}
+
+.is-generating-preview .monster-preview::before {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 58px;
+  height: 58px;
+  content: "";
+  border: 6px solid rgba(59, 29, 109, 0.16);
+  border-top-color: var(--orange);
+  border-radius: 50%;
+  animation: monster-preview-spin 900ms linear infinite;
+  transform: translate(-50%, -66%);
+}
+
+.is-generating-preview .monster-preview::after {
+  position: absolute;
+  top: calc(50% + 42px);
+  left: 50%;
+  content: "Creating your monster";
+  color: var(--navy);
+  font-size: 0.86rem;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+@keyframes monster-preview-spin {
+  to { transform: translate(-50%, -66%) rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .is-generating-preview .monster-preview::before {
+    animation: none;
+    border-color: rgba(59, 29, 109, 0.2);
+    border-top-color: var(--orange);
+  }
+}
+
 .preview-badge {
   position: absolute;
   top: 12px;

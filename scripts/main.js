@@ -990,11 +990,18 @@ function syncPreviewControls() {
 }
 
 function updatePreviewPresentation(hasPreview) {
+  const isCreatingFirstPreview = isGeneratingPreview && !hasPreview;
+
   resultPanel?.classList.toggle("has-generated-preview", hasPreview);
-  resultPanel?.classList.toggle("is-example-preview", !hasPreview);
+  resultPanel?.classList.toggle("is-example-preview", !hasPreview && !isCreatingFirstPreview);
+  resultPanel?.classList.toggle("is-generating-preview", isCreatingFirstPreview);
 
   if (monsterPreviewBadge) {
-    monsterPreviewBadge.textContent = hasPreview ? "Your preview" : "Example preview";
+    monsterPreviewBadge.textContent = hasPreview
+      ? "Your preview"
+      : isCreatingFirstPreview
+        ? "Creating preview"
+        : "Example preview";
   }
 }
 
