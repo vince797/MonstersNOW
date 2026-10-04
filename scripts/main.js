@@ -80,6 +80,7 @@ const monsterCreatorHeader = document.querySelector("#monster-creator-header");
 const monsterCreatorPanels = [...document.querySelectorAll("[data-monster-step-panel]")];
 const backToMonsterButton = document.querySelector("#back-to-monster");
 const childEditorStart = document.querySelector("#child-editor-start");
+const childPreviewMonster = document.querySelector("#child-preview-monster");
 const childEditorKicker = document.querySelector("#child-editor-kicker");
 const bookOfferStatus = document.querySelector("#book-offer-status");
 const storybookInterestButton = document.querySelector("#storybook-interest");
@@ -161,6 +162,7 @@ let isCharacterStepVisible = false;
 let monsterSubmission;
 let checkoutSubmissionId;
 let isGeneratingPreview = false;
+let storySceneMonsterVersion = 0;
 let uploadDragDepth = 0;
 let uploadSelectionId = 0;
 let heicConverterPromise;
@@ -829,6 +831,7 @@ function selectGeneratedPreview(id, announce = false) {
   monsterConfirmed = false;
   monsterPreview.src = preview.image;
   monsterPreview.alt = `${getPreviewStyleLabel(preview.style)} generated monster character preview.`;
+  syncStorySceneMonster();
   coloringPageUrl = preview.coloringPage;
   updatePreviewPresentation(true);
 
@@ -1104,6 +1107,7 @@ function setConverterStage(stage) {
 function showCharacterStep({ scroll = true } = {}) {
   if (!monsterConfirmed || !resultBookOffer) return;
   isCharacterStepVisible = true;
+  syncStorySceneMonster();
   if (monsterCreatorHeader) monsterCreatorHeader.hidden = true;
   monsterCreatorPanels.forEach((panel) => { panel.hidden = true; });
   resultBookOffer.hidden = false;
@@ -1113,6 +1117,91 @@ function showCharacterStep({ scroll = true } = {}) {
     if (scroll) resultBookOffer.scrollIntoView({ behavior: "smooth", block: "start" });
     childEditorStart?.focus({ preventScroll: true });
   }, 0);
+}
+
+function syncStorySceneMonster() {
+  if (!childPreviewMonster) return;
+  const preview = getSelectedPreview();
+  const source = preview?.image || monsterPreview?.currentSrc || monsterPreview?.src || "";
+  if (!source) {
+    childPreviewMonster.hidden = true;
+    childPreviewMonster.removeAttribute("src");
+    return;
+  }
+  const version = ++storySceneMonsterVersion;
+  childPreviewMonster.src = source;
+  childPreviewMonster.hidden = false;
+  childPreviewMonster.classList.add("is-processing");
+  childPreviewMonster.classList.remove("is-arriving");
+  removeConnectedWhiteBackground(source).then((transparentSource) => {
+    if (version !== storySceneMonsterVersion || !transparentSource) return;
+    childPreviewMonster.src = transparentSource;
+    childPreviewMonster.classList.remove("is-processing");
+    window.requestAnimationFrame(() => childPreviewMonster.classList.add("is-arriving"));
+  }).catch(() => {
+    if (version !== storySceneMonsterVersion) return;
+    childPreviewMonster.classList.remove("is-processing");
+    window.requestAnimationFrame(() => childPreviewMonster.classList.add("is-arriving"));
+  });
+}
+
+function removeConnectedWhiteBackground(source) {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => {
+      try {
+        const scale = Math.min(1, 900 / Math.max(image.naturalWidth, image.naturalHeight));
+        const width = Math.max(1, Math.round(image.naturalWidth * scale));
+        const height = Math.max(1, Math.round(image.naturalHeight * scale));
+        const canvas = document.createElement("canvas");
+        const context = canvas.getContext("2d", { willReadFrequently: true });
+        canvas.width = width;
+        canvas.height = height;
+        context.drawImage(image, 0, 0, width, height);
+        const pixels = context.getImageData(0, 0, width, height);
+        const data = pixels.data;
+        const visited = new Uint8Array(width * height);
+        const queue = new Int32Array(width * height);
+        let head = 0;
+        let tail = 0;
+        const isBackground = (pixel) => {
+          const offset = pixel * 4;
+          const red = data[offset];
+          const green = data[offset + 1];
+          const blue = data[offset + 2];
+          return data[offset + 3] > 0 && Math.min(red, green, blue) > 224 && Math.max(red, green, blue) - Math.min(red, green, blue) < 36;
+        };
+        const enqueue = (pixel) => {
+          if (visited[pixel] || !isBackground(pixel)) return;
+          visited[pixel] = 1;
+          queue[tail++] = pixel;
+        };
+        for (let x = 0; x < width; x += 1) {
+          enqueue(x);
+          enqueue((height - 1) * width + x);
+        }
+        for (let y = 0; y < height; y += 1) {
+          enqueue(y * width);
+          enqueue(y * width + width - 1);
+        }
+        while (head < tail) {
+          const pixel = queue[head++];
+          data[pixel * 4 + 3] = 0;
+          const x = pixel % width;
+          if (x > 0) enqueue(pixel - 1);
+          if (x < width - 1) enqueue(pixel + 1);
+          if (pixel >= width) enqueue(pixel - width);
+          if (pixel < width * (height - 1)) enqueue(pixel + width);
+        }
+        context.putImageData(pixels, 0, 0);
+        resolve(canvas.toDataURL("image/webp", .92));
+      } catch (error) {
+        reject(error);
+      }
+    };
+    image.onerror = reject;
+    image.src = source;
+  });
 }
 
 function showMonsterStep({ scroll = true } = {}) {

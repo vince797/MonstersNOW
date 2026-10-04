@@ -185,6 +185,8 @@
     if (characterImage && artSource) {
       characterImage.src = artSource;
       characterImage.hidden = false;
+      characterImage.classList.remove("is-arriving");
+      window.requestAnimationFrame(() => characterImage.classList.add("is-arriving"));
       if (fallbackFigure) fallbackFigure.hidden = true;
       stage.classList.add("has-character-art");
       return;
@@ -287,11 +289,11 @@
     syncAppearanceBuilder(profile);
     if (details) details.hidden = !profile.included;
     if (selection) selection.textContent = profile.included ? profile.label : "Monster-only story";
-    if (title) title.textContent = profile.included ? profile.label : "Monster-only story";
+    if (title) title.textContent = profile.included ? `${profile.label} joins the adventure` : "Their monster takes center stage";
     if (copy) {
       copy.textContent = profile.included
-        ? `${[ageLabels[profile.ageBand], heightLabels[profile.relativeHeight], mobilityLabels[profile.mobilityAid]].filter(Boolean).join(" · ")}. Saved with the book profile.`
-        : "No child character will appear in illustrated scenes.";
+        ? `${[ageLabels[profile.ageBand], heightLabels[profile.relativeHeight], mobilityLabels[profile.mobilityAid]].filter(Boolean).join(" · ")}. Previewed beside their chosen monster.`
+        : "Choose a skin tone to add a storybook co-star beside their monster.";
     }
     renderProfile(stage, avatar, profile);
     if (save) persist(profile);

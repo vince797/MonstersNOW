@@ -84,15 +84,21 @@ test("selector UI exposes only supported controls and states the current renderi
   assert.match(script, /function syncAppearanceBuilder/);
   assert.match(script, /const wheelchairCharacterArt = \{/);
   assert.match(script, /child-preview-character/);
+  assert.match(html, /id="child-preview-monster"/);
+  assert.match(mainScript, /function syncStorySceneMonster/);
+  assert.match(mainScript, /function removeConnectedWhiteBackground/);
+  assert.match(css, /storybook-forest-stage-v1\.webp/);
+  assert.match(css, /@keyframes story-character-arrival/);
   assert.match(mainScript, /resultBookOffer\.hidden = false/);
   assert.match(mainScript, /function showCharacterStep/);
   assert.match(mainScript, /function showMonsterStep/);
   assert.match(css, /\.child-preview-stage\.mobility-wheelchair/);
-  assert.match(css, /\.child-live-preview \{[\s\S]*position: sticky/);
+  assert.match(css, /\.child-live-preview \{[\s\S]*position: relative/);
   assert.match(css, /\.child-character-option\.is-selected::after/);
   assert.match(css, /\.child-preview-character/);
-  assert.match(html, /child-selector\.css\?v=20261004-character-studio-v6/);
-  assert.match(html, /scripts\/child-selector\.js\?v=20261004-character-art-v5/);
+  assert.match(html, /child-selector\.css\?v=20261004-story-scene-v7/);
+  assert.match(html, /scripts\/child-selector\.js\?v=20261004-story-scene-v6/);
+  assert.match(html, /scripts\/main\.js\?v=20261004-story-scene-v6/);
 });
 
 test("character studio includes lightweight changing storybook previews", () => {
