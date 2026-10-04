@@ -1,0 +1,132 @@
+/* Selected MonstersNow.com identity. Public colors are scoped so admin controls,
+   customer artwork, and print/proof assets retain their own styling. */
+.brand-theme {
+  --brand-purple: #3b1d6d;
+  --brand-orange: #ff8a00;
+  --brand-teal: #21c7c6;
+  --brand-paper: #faf9f6;
+  --navy: var(--brand-purple);
+  --ink: #291c3c;
+  --muted: #635c70;
+  --teal: #006b70;
+  --teal-dark: #00575b;
+  --orange: var(--brand-orange);
+  --orange-dark: #a44300;
+  --purple: var(--brand-purple);
+  --paper: var(--brand-paper);
+  --line: #e5dfec;
+  --storefront-ink: #291c3c;
+  --storefront-teal: #006b70;
+  --storefront-teal-dark: #00575b;
+  --storefront-orange-dark: #a44300;
+  --storefront-paper: var(--brand-paper);
+  background: var(--brand-paper);
+}
+
+.brand-theme .site-header { border-bottom-color: #e5dfec; }
+.brand-theme .brand,
+.brand-theme .brand picture { width: 300px; min-width: 0; }
+.brand-theme .brand img { width: 100%; height: auto; }
+.brand-theme .footer-brand { padding: 12px; background: var(--brand-paper); }
+.brand-theme .footer-brand img { width: 200px; height: auto; }
+.brand-theme .footer-brand picture { width: auto; }
+
+.brand-theme .seasonal-banner {
+  background: var(--brand-purple);
+}
+.brand-theme .seasonal-banner strong { color: var(--brand-teal); }
+.brand-theme .hero,
+.brand-theme .books-hero,
+.brand-theme .monsters-hero,
+.brand-theme .about-page-hero,
+.brand-theme .create-flow-section,
+.brand-theme .checkout-status-section,
+.brand-theme .policy-hero,
+.brand-theme .book-page-cta,
+.brand-theme .cta-section {
+  background:
+    radial-gradient(circle at 86% 12%, rgba(33, 199, 198, .16), transparent 32%),
+    radial-gradient(circle at 6% 90%, rgba(255, 138, 0, .13), transparent 30%),
+    linear-gradient(135deg, #291448, #3b1d6d 68%, #422278);
+}
+.brand-theme .hero h1 span,
+.brand-theme .about-page-hero h1 span { color: var(--brand-orange); }
+.brand-theme .hero .eyebrow,
+.brand-theme .books-hero .eyebrow,
+.brand-theme .monsters-hero .eyebrow,
+.brand-theme .about-page-hero .eyebrow,
+.brand-theme .create-flow-copy .eyebrow,
+.brand-theme .policy-hero .eyebrow,
+.brand-theme .book-page-cta .eyebrow,
+.brand-theme .cta-section .eyebrow { color: var(--brand-teal); }
+
+/* Orange is an accent/surface; dark purple text meets AA on the orange CTA. */
+.brand-theme .button.primary,
+.brand-theme .header-button {
+  color: #291448;
+  background: var(--brand-orange);
+  box-shadow: 0 10px 24px rgba(59, 29, 109, .16);
+}
+.brand-theme .button.primary:hover,
+.brand-theme .button.primary:focus-visible,
+.brand-theme .header-button:hover,
+.brand-theme .header-button:focus-visible { color: #291448; background: #ffac47; }
+.brand-theme .button.secondary { border-color: #c9bbdc; color: var(--brand-purple); }
+.brand-theme .hero .button.secondary,
+.brand-theme .books-hero .button.secondary,
+.brand-theme .monsters-hero .button.secondary { border-color: #b4a3cf; color: #fff; background: rgba(255, 255, 255, .09); }
+.brand-theme .hero .button.secondary:hover,
+.brand-theme .books-hero .button.secondary:hover,
+.brand-theme .monsters-hero .button.secondary:hover { background: rgba(255, 255, 255, .18); }
+.brand-theme .site-nav a:hover,
+.brand-theme .site-nav a:focus-visible,
+.brand-theme .site-nav a[aria-current="page"] { color: var(--brand-purple); }
+.brand-theme .site-nav a::after { background: var(--brand-orange); }
+.brand-theme .site-nav.is-open a:hover,
+.brand-theme .site-nav.is-open a:focus-visible { background: #f0eaf8; }
+.brand-theme :is(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid #006b70;
+  outline-offset: 3px;
+}
+.brand-theme :is(.hero, .books-hero, .monsters-hero, .about-page-hero, .create-flow-section, .site-footer) :focus-visible {
+  outline-color: var(--brand-teal);
+}
+.brand-theme .site-footer {
+  background: #2d1752;
+  border-top-color: var(--brand-teal);
+}
+.brand-theme .site-footer nav a:hover,
+.brand-theme .site-footer nav a:focus-visible,
+.brand-theme .site-footer nav a[aria-current="page"] { color: #ffac47; }
+
+/* The wide wordmark needs more room than the former compact mark. */
+@media (max-width: 1440px) {
+  .brand-theme .brand { grid-column: 1; }
+  .brand-theme .nav-toggle { display: block; grid-column: 2; grid-row: 1; justify-self: end; }
+  .brand-theme .header-actions { grid-column: 3; grid-row: 1; }
+  .brand-theme .site-nav { display: none; grid-column: 1 / -1; order: 4; padding: 12px 0 8px; border-top: 1px solid var(--line); }
+  .brand-theme .site-nav.is-open { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .brand-theme .site-nav a { justify-content: center; padding: 10px; border-radius: 8px; }
+}
+@media (max-width: 760px) {
+  .brand-theme .brand,
+  .brand-theme .brand picture { width: 260px; }
+  .brand-theme .site-header { gap: 10px; }
+  .brand-theme .site-nav.is-open { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .brand-theme .header-button { min-height: 44px; }
+}
+@media (min-width: 521px) and (max-width: 680px) {
+  .brand-theme .header-button { max-width: 142px; padding-inline: 12px; font-size: .8rem; text-align: center; line-height: 1.2; }
+}
+@media (max-width: 520px) {
+  .brand-theme .site-header { padding: 6px 12px; grid-template-columns: minmax(0, 1fr) auto auto; }
+  .brand-theme .brand,
+  .brand-theme .brand picture { width: 156px; max-width: 100%; }
+  .brand-theme .nav-toggle { width: 44px; height: 44px; }
+  .brand-theme .header-button { min-width: 68px; color: transparent; }
+  .brand-theme .header-button::after { color: #291448; }
+}
+
+/* Only the marks change inside the private workspace. */
+.admin-page .admin-login-brand img { width: 270px; height: auto; }
+.admin-page .admin-rail-brand img { width: 160px; height: auto; padding: 8px; }

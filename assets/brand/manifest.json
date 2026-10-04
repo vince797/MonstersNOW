@@ -1,0 +1,42 @@
+{
+  "source": "User-selected MonstersNow.com logo exports",
+  "processing": "Trim near-transparent extraction padding (alpha < 8); preserve visible artwork and colors; add proportional clear space; resize for web.",
+  "assets": [
+    {
+      "path": "assets/brand/monstersnow-primary-v1.png",
+      "width": 960,
+      "height": 228,
+      "source_sha256": "ea262d545f3e69c0264c42ab98ce339c893856ddc6635622158e8e47f8b802fe",
+      "content_bbox": [
+        66,
+        132,
+        2120,
+        582
+      ]
+    },
+    {
+      "path": "assets/brand/monstersnow-stacked-v1.png",
+      "width": 640,
+      "height": 331,
+      "source_sha256": "bdc1ca33aeeab0b4dfb72463a7b3fc49952bc81c5de8a4ce78173100ad86e2c3",
+      "content_bbox": [
+        42,
+        17,
+        1732,
+        871
+      ]
+    },
+    {
+      "path": "assets/brand/monstersnow-icon-v1.png",
+      "width": 192,
+      "height": 192,
+      "source_sha256": "47fe4f20707db088ce728743e5abdc5360e5a71fb5d290ca838afaeaea73d5ad",
+      "content_bbox": [
+        125,
+        137,
+        1127,
+        1133
+      ]
+    }
+  ]
+}
