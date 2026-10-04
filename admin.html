@@ -6,6 +6,7 @@
     <meta name="robots" content="noindex, nofollow" />
     <title>Dashboard | MonstersNOW Admin</title>
     <link rel="stylesheet" href="styles.css?v=20261002-admin-system-type" />
+    <link rel="stylesheet" href="admin-books.css?v=20261004-book-workspace" />
     <link rel="icon" href="assets/brand/monstersnow-icon-32-v1.png" type="image/png" sizes="32x32" />
     <link rel="apple-touch-icon" href="assets/brand/monstersnow-icon-180-v1.png" />
     <link rel="stylesheet" href="brand.css?v=20261004-selected-logo" />
@@ -55,10 +56,10 @@
             <span class="admin-nav-label">Workspace</span>
             <button class="is-active" type="button" data-admin-view="dashboard"><span aria-hidden="true">⌂</span>Overview</button>
             <button type="button" data-admin-view="orders"><span aria-hidden="true">↗</span>Orders <em id="nav-order-count">0</em></button>
-            <button type="button" data-admin-view="stories"><span aria-hidden="true">▤</span>Books <em id="nav-story-count">0</em></button>
-            <button type="button" data-admin-view="production"><span aria-hidden="true">◇</span>Production <em id="nav-production-count">0</em></button>
+            <button type="button" data-admin-view="stories"><span aria-hidden="true">▤</span>Books &amp; stories <em id="nav-story-count">0</em></button>
+            <button type="button" data-admin-view="production"><span aria-hidden="true">◇</span>Review &amp; print <em id="nav-production-count">0</em></button>
             <span class="admin-nav-label">Library</span>
-            <button type="button" data-admin-view="monsters"><span aria-hidden="true">●</span>Monsters <em id="nav-monster-count">0</em></button>
+            <button type="button" data-admin-view="monsters"><span aria-hidden="true">●</span>Artwork &amp; monsters <em id="nav-monster-count">0</em></button>
             <button type="button" data-admin-view="customers"><span aria-hidden="true">♙</span>Customers <em id="nav-customer-count">0</em></button>
           </nav>
           <div class="admin-rail-footer">
@@ -196,6 +197,27 @@
               </div>
             </div>
           </details>
+
+          <section class="book-workspace-summary" id="book-workspace-summary" aria-labelledby="book-workspace-title">
+            <header class="book-workspace-heading">
+              <div>
+                <p class="eyebrow">Book workspace</p>
+                <h3 id="book-workspace-title">Status, files, and next action</h3>
+              </div>
+              <span id="book-workspace-state">Draft</span>
+            </header>
+            <div class="book-workspace-grid" aria-label="Current book status">
+              <div><span>Status</span><strong id="book-summary-status">Draft</strong><small id="book-summary-version">Version 1</small></div>
+              <div><span>Story copy</span><strong id="book-summary-copy">0/32</strong><small>pages with copy and art direction</small></div>
+              <div><span>Approved art</span><strong id="book-summary-art">0/32</strong><small>clean background plates</small></div>
+              <div class="book-next-action"><span>Next action</span><strong id="book-summary-next">Complete the master story</strong><small id="book-summary-next-help">Drafts stay private until deliberately published.</small></div>
+            </div>
+            <details class="book-review-files" open>
+              <summary><span><strong>Review files</strong><small id="book-review-files-summary">Checking preserved PDFs…</small></span><span>Files &amp; previews</span></summary>
+              <div id="book-review-files-list" class="book-review-files-list"></div>
+              <p id="book-review-files-status" class="book-review-files-status" role="status" aria-live="polite"></p>
+            </details>
+          </section>
 
           <div class="page-editor-heading">
             <div><p class="eyebrow">Page editor</p><h3 id="selected-page-title">Page 1</h3></div>

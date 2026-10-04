@@ -32,6 +32,8 @@ const pagesContainer = document.querySelector("#story-pages");
 let stories = [];
 let orders = [];
 let monsters = [];
+let bookReviewFiles = [];
+let bookReviewFilesError = "";
 let manuscriptFile = null;
 let storyDirty = false;
 let loadingStory = false;
@@ -216,10 +218,19 @@ async function openLibrary() {
   loginStatus.textContent = "Opening story library...";
   submitButton.disabled = true;
   try {
-    const [storyResult, orderResult, monsterResult] = await Promise.all([apiRequest(), apiRequest("?resource=orders"), apiRequest("?resource=monsters")]);
+    const reviewFilesPromise = apiRequest("?resource=book-review-files")
+      .catch((error) => ({ files: [], error: error.message || "Review files are unavailable." }));
+    const [storyResult, orderResult, monsterResult, reviewFilesResult] = await Promise.all([
+      apiRequest(),
+      apiRequest("?resource=orders"),
+      apiRequest("?resource=monsters"),
+      reviewFilesPromise,
+    ]);
     stories = storyResult.stories || [];
     orders = orderResult.orders || [];
     monsters = monsterResult.monsters || [];
+    bookReviewFiles = reviewFilesResult.files || [];
+    bookReviewFilesError = reviewFilesResult.error || "";
     if (Object.keys(CATALOG_COVERS).some((slug) => !stories.some((story) => story.slug === slug))) {
       const catalogResult = await setupCatalog();
       stories = catalogResult?.stories || stories;
@@ -272,9 +283,9 @@ function showView(view) {
   const viewCopy = {
     dashboard: ["Overview", "A clear view of the work that needs you."],
     orders: ["Orders", "Move every book from payment to delivery."],
-    stories: ["Books", "Write, review, and publish the master catalog."],
-    production: ["Production", "Prepare print files and clear release gates."],
-    monsters: ["Monsters", "Manage reusable characters and permissions."],
+    stories: ["Books & stories", "Draft and review master books without making them public."],
+    production: ["Review & print", "Prepare review files and clear print-release gates."],
+    monsters: ["Artwork & monsters", "Manage reusable characters, original drawings, and permissions."],
     customers: ["Customers", "See families, books, and order history together."],
   };
   const [title, context] = viewCopy[view] || viewCopy.dashboard;
@@ -314,8 +325,8 @@ function renderAdminCommand() {
   const items = [
     { type: "Go to", title: "Overview", detail: "Workspace summary", keywords: "dashboard home", run: () => showView("dashboard") },
     { type: "Go to", title: "Orders", detail: "Fulfillment queue", keywords: "orders fulfillment", run: () => showView("orders") },
-    { type: "Go to", title: "Books", detail: "Master catalog", keywords: "stories books", run: () => showView("stories") },
-    { type: "Go to", title: "Production", detail: "Print readiness", keywords: "production print", run: () => showView("production") },
+    { type: "Go to", title: "Books & stories", detail: "Draft and review masters", keywords: "stories books", run: () => showView("stories") },
+    { type: "Go to", title: "Review & print", detail: "Review files and print readiness", keywords: "production print review", run: () => showView("production") },
     ...stories.map((story) => ({
       type: "Book",
       title: story.title_template,
@@ -889,6 +900,141 @@ function editStory(story = null) {
   document.querySelector("#story-save-state").textContent = story?.id ? "Saved" : "New draft · not saved";
   refreshPageTools();
   renderStoryList();
+}
+
+function renderBookWorkspace(story = currentStory(), cards = [...pagesContainer.children]) {
+  const slug = document.querySelector("#story-slug").value.trim() || story?.slug || "";
+  const status = story?.status || "draft";
+  const version = story?.version || 1;
+  const copyReady = cards.filter((card) => [...card.querySelectorAll("textarea")].every((area) => area.value.trim())).length;
+  const artReady = cards.filter((card) => card.dataset.artworkUrl
+    && card.dataset.backgroundPlateConfirmed === "true"
+    && Number(card.dataset.backgroundPlateVersion || 0) >= 2
+    && ["approved", "final"].includes(card.dataset.artworkStatus)).length;
+  const files = bookReviewFiles.filter((file) => file.storySlug === slug);
+  const preservedFiles = files.filter((file) => file.uploaded).length;
+  let nextAction = "Complete the remaining master copy.";
+  let nextHelp = "Drafts stay private until deliberately published.";
+  if (copyReady === 32 && cards.length === 32 && files.some((file) => !file.uploaded)) {
+    nextAction = "Preserve and inspect the review PDFs.";
+    nextHelp = "These files are review candidates, not approved print masters.";
+  } else if (copyReady === 32 && cards.length === 32 && artReady < 32) {
+    nextAction = "Replace references with clean background plates.";
+    nextHelp = preservedFiles ? "Use the preserved PDFs for continuity review; keep sample characters out of master art." : "Upload, inspect, and approve each character-free background plate.";
+  } else if (copyReady === 32 && cards.length === 32 && artReady === 32) {
+    nextAction = "Run the final master review.";
+    nextHelp = "Publishing and print release remain separate deliberate steps.";
+  }
+
+  document.querySelector("#book-workspace-state").textContent = status === "published" ? "Published" : "Private draft";
+  document.querySelector("#book-summary-status").textContent = status === "published" ? "Published" : "Draft";
+  document.querySelector("#book-summary-version").textContent = `Version ${version}`;
+  document.querySelector("#book-summary-copy").textContent = `${copyReady}/32`;
+  document.querySelector("#book-summary-art").textContent = `${artReady}/32`;
+  document.querySelector("#book-summary-next").textContent = nextAction;
+  document.querySelector("#book-summary-next-help").textContent = nextHelp;
+  renderBookReviewFiles(slug);
+}
+
+function renderBookReviewFiles(storySlug) {
+  const list = document.querySelector("#book-review-files-list");
+  const summary = document.querySelector("#book-review-files-summary");
+  const status = document.querySelector("#book-review-files-status");
+  const files = bookReviewFiles.filter((file) => file.storySlug === storySlug);
+  status.textContent = "";
+  status.className = "book-review-files-status";
+  if (bookReviewFilesError) {
+    summary.textContent = "Review storage could not be checked";
+    list.innerHTML = `<p class="admin-inline-empty">${escapeHtml(bookReviewFilesError)}</p>`;
+    return;
+  }
+  if (!files.length) {
+    summary.textContent = "No preserved review PDFs assigned to this book";
+    list.innerHTML = '<p class="admin-inline-empty">Use “Download review PDF” to generate a fresh editorial proof from the latest saved copy.</p>';
+    return;
+  }
+
+  const preserved = files.filter((file) => file.uploaded).length;
+  summary.textContent = `${preserved}/${files.length} preserved · private review materials`;
+  list.replaceChildren(...files.map((file) => {
+    const article = document.createElement("article");
+    article.className = `book-review-file ${file.uploaded ? "is-preserved" : "is-pending"}`;
+    article.innerHTML = '<header><div><small data-category></small><strong data-label></strong></div><span data-state></span></header><p data-description></p><dl><div><dt>Length</dt><dd data-pages></dd></div><div><dt>File size</dt><dd data-size></dd></div><div><dt>Review status</dt><dd data-review-status></dd></div></dl><div class="book-review-file-next"><small>Next action</small><p data-next></p></div><div class="book-review-file-actions"></div>';
+    article.querySelector("[data-category]").textContent = file.category;
+    article.querySelector("[data-label]").textContent = file.label;
+    article.querySelector("[data-state]").textContent = file.uploaded ? "Preserved" : "Pending upload";
+    article.querySelector("[data-description]").textContent = file.description;
+    article.querySelector("[data-pages]").textContent = `${file.pages} pages`;
+    article.querySelector("[data-size]").textContent = formatFileSize(file.size);
+    article.querySelector("[data-review-status]").textContent = file.status;
+    article.querySelector("[data-next]").textContent = file.nextAction;
+    const actions = article.querySelector(".book-review-file-actions");
+    if (file.uploaded && file.downloadUrl) {
+      const link = document.createElement("a");
+      link.className = "button secondary";
+      link.href = file.downloadUrl;
+      link.target = "_blank";
+      link.rel = "noopener";
+      link.textContent = "Open PDF";
+      actions.append(link);
+    } else {
+      const input = document.createElement("input");
+      const label = document.createElement("label");
+      input.type = "file";
+      input.accept = "application/pdf,.pdf";
+      input.hidden = true;
+      label.className = "button secondary";
+      label.textContent = "Choose exact PDF";
+      label.append(input);
+      input.addEventListener("change", () => uploadBookReviewFile(file, input));
+      actions.append(label);
+    }
+    return article;
+  }));
+}
+
+async function uploadBookReviewFile(metadata, input) {
+  const file = input.files?.[0];
+  const output = document.querySelector("#book-review-files-status");
+  if (!file) return;
+  if (file.type !== "application/pdf" || file.size > 20 * 1024 * 1024) {
+    output.className = "book-review-files-status is-error";
+    output.textContent = "Choose the exact PDF review file, no larger than 20 MB.";
+    input.value = "";
+    return;
+  }
+  input.disabled = true;
+  output.className = "book-review-files-status is-pending";
+  output.textContent = `Verifying ${file.name}…`;
+  try {
+    const digest = await crypto.subtle.digest("SHA-256", await file.arrayBuffer());
+    const sha256 = [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
+    const prepared = await apiRequest("?resource=book-review-upload", {
+      method: "POST",
+      body: { id: metadata.id, name: file.name, type: file.type, size: file.size, sha256 },
+    });
+    output.textContent = `Preserving ${file.name}…`;
+    const formData = new FormData();
+    formData.append("cacheControl", "0");
+    formData.append("", file);
+    const upload = await fetch(prepared.signedUrl, { method: "PUT", headers: { "x-upsert": "false" }, body: formData });
+    if (!upload.ok) {
+      const error = await upload.json().catch(() => ({}));
+      throw new Error(error.message || error.error || "The review PDF could not be preserved.");
+    }
+    const confirmed = await apiRequest("?resource=book-review-confirm", { method: "POST", body: { id: metadata.id } });
+    bookReviewFiles = bookReviewFiles.map((item) => item.id === metadata.id ? confirmed.file : item);
+    renderBookWorkspace();
+    const refreshedOutput = document.querySelector("#book-review-files-status");
+    refreshedOutput.className = "book-review-files-status is-success";
+    refreshedOutput.textContent = `${file.name} is preserved for private review.`;
+  } catch (error) {
+    output.className = "book-review-files-status is-error";
+    output.textContent = error.message;
+  } finally {
+    input.disabled = false;
+    input.value = "";
+  }
 }
 
 async function setupCatalog({ announce = false } = {}) {
@@ -1640,6 +1786,7 @@ function refreshPageTools() {
   const ready = cards.filter((card) => [...card.querySelectorAll("textarea")].every((area) => area.value.trim())).length;
   const artworkReady = cards.filter((card) => card.dataset.artworkUrl && card.dataset.backgroundPlateConfirmed === "true" && ["approved", "final"].includes(card.dataset.artworkStatus)).length;
   const referenceCount = new Set(cards.map((card) => card.dataset.referenceArtworkUrl).filter(Boolean)).size;
+  renderBookWorkspace(currentStory(), cards);
   document.querySelector("#page-progress").textContent = `${ready}/32 copy · ${artworkReady}/32 final art${referenceCount ? ` · ${referenceCount} existing spread references` : ""}`;
   document.querySelector("#add-page").disabled = cards.length >= 32;
   document.querySelector("#page-nav").replaceChildren(...cards.map((card, index) => {

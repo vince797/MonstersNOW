@@ -13,6 +13,7 @@ const { uploadStoryArtwork } = require("../lib/story-artwork");
 const { createMonsterSubmission, deleteAdminMonster, finalizeMonsterSubmission, listAdminMonsters } = require("../lib/monster-submissions");
 const { createAdminStoryProof } = require("../lib/admin-story-proof");
 const { getCustomerOrderView, reviewCustomerProof } = require("../lib/customer-orders");
+const { confirmBookReviewUpload, createBookReviewUpload, listBookReviewFiles } = require("../lib/book-review-files");
 
 module.exports = async function handler(request, response) {
   const resource = firstQueryValue(request.query?.resource) || new URL(request.url, "https://monstersnow.com").searchParams.get("resource");
@@ -102,6 +103,38 @@ module.exports = async function handler(request, response) {
         code: error.code || "catalog_setup_failed",
         error: error.message || "The catalog books could not be created.",
       });
+    }
+  }
+
+  if (resource === "book-review-files") {
+    try {
+      assertAdminRequest(request);
+      if (request.method !== "GET") return rejectUnsupportedMethod(request, response, ["GET"]);
+      response.setHeader("Cache-Control", "private, no-store");
+      return sendJson(response, 200, { files: await listBookReviewFiles(firstQueryValue(request.query?.story_slug)) });
+    } catch (error) {
+      return sendJson(response, error.status || 500, { code: error.code || "review_files_failed", error: error.message || "Review files could not be opened." });
+    }
+  }
+
+  if (resource === "book-review-upload") {
+    try {
+      assertAdminRequest(request);
+      if (request.method !== "POST") return rejectUnsupportedMethod(request, response, ["POST"]);
+      return sendJson(response, 200, await createBookReviewUpload(await readJsonBody(request)));
+    } catch (error) {
+      return sendJson(response, error.status || 500, { code: error.code || "review_upload_failed", error: error.message || "The review upload could not be prepared." });
+    }
+  }
+
+  if (resource === "book-review-confirm") {
+    try {
+      assertAdminRequest(request);
+      if (request.method !== "POST") return rejectUnsupportedMethod(request, response, ["POST"]);
+      const payload = await readJsonBody(request);
+      return sendJson(response, 200, { file: await confirmBookReviewUpload(payload.id) });
+    } catch (error) {
+      return sendJson(response, error.status || 500, { code: error.code || "review_confirm_failed", error: error.message || "The review upload could not be confirmed." });
     }
   }
 
