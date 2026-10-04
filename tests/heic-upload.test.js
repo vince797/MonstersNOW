@@ -6,6 +6,7 @@ const test = require("node:test");
 const root = path.join(__dirname, "..");
 const mainScript = fs.readFileSync(path.join(root, "scripts", "main.js"), "utf8");
 const heicHandler = fs.readFileSync(path.join(root, "api", "convert-heic.js"), "utf8");
+const createPage = fs.readFileSync(path.join(root, "create.html"), "utf8");
 
 test("HEIC conversion cannot leave the upload UI waiting forever", () => {
   assert.match(mainScript, /heicConverterLoadTimeoutMs\s*=\s*8000/);
@@ -22,6 +23,11 @@ test("upload progress stays customer-friendly while HEIC handling remains intern
   assert.match(mainScript, /setUploadActionStatus\("Still loading your photo\.\.\."\)/);
   assert.match(mainScript, /setUploadActionStatus\("Photo loaded\. Creating your preview now\."\)/);
   assert.doesNotMatch(mainScript, /setUploadActionStatus\([^\n]*HEIC/);
+});
+
+test("create flow cache-busts the corrected upload script", () => {
+  assert.match(createPage, /scripts\/main\.js\?v=20261004-upload-timeout-v7/);
+  assert.doesNotMatch(createPage, /scripts\/main\.js\?v=20261004-story-scene-v6/);
 });
 
 test("HEIC server conversion logs start, completion, rejection, and failure", () => {
