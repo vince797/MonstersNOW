@@ -99,8 +99,9 @@
 .brand-theme .site-footer nav a:focus-visible,
 .brand-theme .site-footer nav a[aria-current="page"] { color: #ffac47; }
 
-/* The wide wordmark needs more room than the former compact mark. */
-@media (max-width: 1440px) {
+/* The wide wordmark still fits beside the primary navigation on common
+   laptop widths; collapse only where the shared header also needs it. */
+@media (max-width: 1320px) {
   .brand-theme .brand { grid-column: 1; }
   .brand-theme .nav-toggle { display: block; grid-column: 2; grid-row: 1; justify-self: end; }
   .brand-theme .header-actions { grid-column: 3; grid-row: 1; }

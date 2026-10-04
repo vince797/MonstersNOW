@@ -1190,7 +1190,7 @@ a {
   display: flex;
   align-items: center;
 }
-.nav-toggle { display: none; width: 46px; height: 42px; padding: 9px; border: 1px solid var(--line); border-radius: 9px; background: #fff; cursor: pointer; }
+.nav-toggle { display: none; width: 46px; height: 44px; padding: 9px; border: 1px solid var(--line); border-radius: 9px; background: #fff; cursor: pointer; }
 .nav-toggle span { display: block; width: 100%; height: 2px; margin: 4px 0; border-radius: 2px; background: var(--navy); transition: transform 160ms ease, opacity 160ms ease; }
 .nav-toggle b { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 .nav-toggle[aria-expanded="true"] span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
@@ -4329,6 +4329,14 @@ main > section {
   }
 }
 
+/* Landscape tablets have enough room to keep this focused two-column story
+   without inheriting the taller stacked layout used by portrait tablets. */
+@media (min-width: 900px) and (max-width: 1320px) {
+  .seasonal-section {
+    grid-template-columns: minmax(320px, 0.95fr) minmax(300px, 0.55fr);
+  }
+}
+
 @media (max-width: 1080px) {
   .hero {
     grid-template-columns: 1fr;
@@ -4787,7 +4795,7 @@ main > section {
   }
 
   .hero .button.secondary {
-    min-height: auto;
+    min-height: 44px;
     padding: 6px 10px;
     border: 0;
     background: transparent;
