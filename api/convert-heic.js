@@ -8,17 +8,30 @@ module.exports = async function handler(request, response) {
     return rejectUnsupportedMethod(request, response, ["POST"]);
   }
 
+  const startedAt = Date.now();
+  console.info("HEIC conversion request started", {
+    contentLength: Number(request.headers?.["content-length"] || 0),
+  });
+
   let payload;
 
   try {
     payload = await readJsonBody(request, { maxBytes: 12 * 1024 * 1024 });
   } catch (error) {
+    console.warn("HEIC conversion request rejected", {
+      durationMs: Date.now() - startedAt,
+      reason: error.code || "invalid_json",
+    });
     return sendJson(response, error.status || 400, { code: error.code || "invalid_json", error: error.status === 413 ? error.message : "Invalid JSON body" });
   }
 
   const image = payload?.image;
 
   if (!isSafeHeicDataUrl(image)) {
+    console.warn("HEIC conversion request rejected", {
+      durationMs: Date.now() - startedAt,
+      reason: "invalid_or_oversized_image",
+    });
     return sendJson(response, 400, {
       error: "Upload a HEIC or HEIF image under 8 MB.",
     });
@@ -32,11 +45,18 @@ module.exports = async function handler(request, response) {
       quality: 0.9,
     });
 
+    console.info("HEIC conversion completed", {
+      durationMs: Date.now() - startedAt,
+      inputBytes: inputBuffer.length,
+      outputBytes: jpegBuffer.length,
+    });
+
     return sendJson(response, 200, {
       image: `data:image/jpeg;base64,${Buffer.from(jpegBuffer).toString("base64")}`,
     });
   } catch (error) {
     console.error("HEIC conversion failed", {
+      durationMs: Date.now() - startedAt,
       name: error?.name,
       message: error?.message,
     });

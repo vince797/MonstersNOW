@@ -126,6 +126,9 @@ const heicUploadTypes = new Set(["image/heic", "image/heif", "image/heic-sequenc
 const maxUploadBytes = 8 * 1024 * 1024;
 const maxFreePreviews = 3;
 const heicConverterUrl = "https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js";
+const heicConverterLoadTimeoutMs = 8000;
+const heicBrowserConversionTimeoutMs = 15000;
+const heicServerConversionTimeoutMs = 25000;
 const demoMonsterImage = "assets/step-2-character.jpg?v=20260515-horns";
 const defaultPreviewStyle = "storybook";
 const halloweenTestMode = createQuery.get("test") === "halloween";
@@ -614,7 +617,7 @@ async function selectDrawingFile(file) {
   resetPreviewState();
   showUploadError("");
   if (replaceDrawingButton) replaceDrawingButton.hidden = true;
-  setUploadActionStatus(shouldConvertHeic ? "Converting HEIC photo to JPEG..." : "Preparing drawing preview.");
+  setUploadActionStatus("Loading your photo...");
 
   if (convertButton) {
     convertButton.disabled = true;
@@ -634,7 +637,7 @@ async function selectDrawingFile(file) {
     resetUpload();
     showUploadError(
       shouldConvertHeic
-        ? "HEIC photo could not be converted. Please save it as JPG or PNG and upload again."
+        ? "This photo could not be prepared. Please save it as JPG or PNG and upload again."
         : "This image could not be prepared. Please try a different file.",
     );
     return;
@@ -652,7 +655,7 @@ async function selectDrawingFile(file) {
   selectedDrawingFile = normalizedFile;
   resetPreviewState();
   drawingPreview.src = drawingPreviewUrl;
-  drawingPreview.alt = shouldConvertHeic ? "Uploaded HEIC drawing converted to JPEG." : "Uploaded child monster drawing.";
+  drawingPreview.alt = "Uploaded child monster drawing.";
   setConverterStage("preview");
   showUploadError("");
 
@@ -663,7 +666,7 @@ async function selectDrawingFile(file) {
 
   if (uploadMeta) {
     uploadMeta.textContent = shouldConvertHeic
-      ? `${formatBytes(file.size)} HEIC converted to JPEG`
+      ? `${formatBytes(file.size)} photo ready`
       : `${formatBytes(file.size)} selected`;
   }
 
@@ -676,14 +679,10 @@ async function selectDrawingFile(file) {
   }
 
   if (converterNote) {
-    converterNote.textContent = shouldConvertHeic
-      ? `HEIC photo converted. Creating a ${getPreviewStyleLabel(selectedMonsterStyle).toLowerCase()} preview now.`
-      : `Creating a ${getPreviewStyleLabel(selectedMonsterStyle).toLowerCase()} preview now.`;
+    converterNote.textContent = `Creating a ${getPreviewStyleLabel(selectedMonsterStyle).toLowerCase()} preview now.`;
   }
 
-  setUploadActionStatus(
-    shouldConvertHeic ? "HEIC converted. Creating your preview now." : "Drawing uploaded. Creating your preview now.",
-  );
+  setUploadActionStatus("Photo loaded. Creating your preview now.");
   syncPreviewControls();
   requestMonsterPreview();
 }
@@ -1306,10 +1305,14 @@ function getConvertedJpegName(filename) {
 
 async function convertHeicToJpeg(file) {
   try {
-    return await convertHeicToJpegInBrowser(file);
+    return await withTimeout(
+      convertHeicToJpegInBrowser(file),
+      heicBrowserConversionTimeoutMs,
+      "Browser HEIC conversion timed out.",
+    );
   } catch (error) {
     console.warn("Browser HEIC conversion failed; trying server fallback.", error);
-    setUploadActionStatus("Finishing HEIC conversion...");
+    setUploadActionStatus("Still loading your photo...");
     return convertHeicToJpegOnServer(file);
   }
 }
@@ -1332,13 +1335,18 @@ async function convertHeicToJpegInBrowser(file) {
 
 async function convertHeicToJpegOnServer(file) {
   const image = await fileToDataUrl(file);
-  const response = await fetch("/api/convert-heic", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
+  const response = await fetchWithTimeout(
+    "/api/convert-heic",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ image }),
     },
-    body: JSON.stringify({ image }),
-  });
+    heicServerConversionTimeoutMs,
+    "HEIC conversion took too long. Please save the photo as JPG or PNG and upload it again.",
+  );
   const result = await response.json().catch(() => ({
     error: "HEIC converter did not return a readable response.",
   }));
@@ -1376,22 +1384,59 @@ function loadHeicConverter() {
   if (!heicConverterPromise) {
     heicConverterPromise = new Promise((resolve, reject) => {
       const script = document.createElement("script");
+      const loadTimeout = window.setTimeout(() => {
+        script.remove();
+        heicConverterPromise = undefined;
+        reject(new Error("HEIC converter took too long to load."));
+      }, heicConverterLoadTimeoutMs);
 
       script.src = heicConverterUrl;
       script.async = true;
       script.addEventListener("load", () => {
+        window.clearTimeout(loadTimeout);
         if (typeof window.heic2any === "function") {
           resolve(window.heic2any);
         } else {
+          heicConverterPromise = undefined;
           reject(new Error("HEIC converter loaded without exposing heic2any."));
         }
       });
-      script.addEventListener("error", () => reject(new Error("HEIC converter could not be loaded.")));
+      script.addEventListener("error", () => {
+        window.clearTimeout(loadTimeout);
+        heicConverterPromise = undefined;
+        reject(new Error("HEIC converter could not be loaded."));
+      });
       document.head.append(script);
     });
   }
 
   return heicConverterPromise;
+}
+
+function withTimeout(promise, timeoutMs, message) {
+  let timeout;
+  const timeoutPromise = new Promise((_, reject) => {
+    timeout = window.setTimeout(() => reject(new Error(message)), timeoutMs);
+  });
+
+  return Promise.race([promise, timeoutPromise]).finally(() => window.clearTimeout(timeout));
+}
+
+async function fetchWithTimeout(url, options, timeoutMs, message) {
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } catch (error) {
+    if (error?.name === "AbortError") {
+      throw new Error(message);
+    }
+
+    throw error;
+  } finally {
+    window.clearTimeout(timeout);
+  }
 }
 
 async function prepareImageForUpload(file) {
