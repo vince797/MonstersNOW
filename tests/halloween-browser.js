@@ -88,6 +88,21 @@ const server = http.createServer(async (req, res) => {
     await page.locator("label").filter({ has: page.locator('input[name="child-age-band"][value="7-8"]') }).click();
     await page.locator("label").filter({ has: page.locator('input[name="child-relative-height"][value="taller"]') }).click();
     await page.getByText("Ages 7–8 · Taller than most children this age. Saved with the book profile.").waitFor();
+    await page.locator(".child-accessibility-section > summary").click();
+    const editorTargets = await page.locator("#child-editor-undo, #child-editor-reset, .child-editor-section > summary").evaluateAll((elements) => elements.map((element) => ({
+      width: element.getBoundingClientRect().width,
+      height: element.getBoundingClientRect().height,
+    })));
+    assert.ok(editorTargets.every((target) => target.height >= 44 && target.width >= 44), JSON.stringify(editorTargets));
+    await page.screenshot({ path: path.join(output, "child-editor-mobile-selected.png"), fullPage: true });
+    await page.locator("#child-editor-reset").click();
+    assert.equal(await page.locator('input[name="child-character"][value="none"]').isChecked(), true);
+    await page.getByText("Character reset to monster-only.").waitFor();
+    await page.locator("#child-editor-undo").click();
+    await page.getByText("Last character change undone.").waitFor();
+    assert.equal(await page.locator('input[name="child-character"][value="deep-coils-black"]').isChecked(), true);
+    assert.equal(await page.locator('input[name="child-age-band"][value="7-8"]').isChecked(), true);
+    assert.equal(await page.locator('input[name="child-relative-height"][value="taller"]').isChecked(), true);
     const savedProfile = await page.evaluate(() => JSON.parse(localStorage.getItem("monstersnow_child_character_profile_v1")));
     assert.deepEqual(savedProfile, { id: "deep-coils-black", ageBand: "7-8", relativeHeight: "taller", mobilityAid: "none" });
     await page.setViewportSize({ width: 1280, height: 900 });

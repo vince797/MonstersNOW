@@ -1,0 +1,328 @@
+#!/usr/bin/env node
+const fs = require("node:fs");
+const path = require("node:path");
+const { createCanvas, loadImage } = require("@napi-rs/canvas");
+const { buildHalloweenMasterPages } = require("../lib/halloween-master-pages");
+
+const root = path.resolve(__dirname, "..");
+const referenceDir = path.join(root, "assets/storybook/halloween-monster-night/reference");
+const poseDir = path.join(referenceDir, "wheelchair-profile-v1");
+const outputDir = path.join(root, "output/wheelchair-full-review");
+const pageDir = path.join(outputDir, "pages");
+const fullSize = 2625;
+const trim = { x: 38, y: 38, width: 2550, height: 2550 };
+const safeInset = 150;
+const safe = { x: trim.x + safeInset, y: trim.y + safeInset, right: trim.x + trim.width - safeInset, bottom: trim.y + trim.height - safeInset };
+const artBottom = trim.y + 1780;
+
+const newPoseSheets = [
+  {
+    source: "wheelchair-child-pose-sheet-v2.png",
+    poses: ["candy-help", "trail-clue", "ribbon-help", "star-look"],
+  },
+  {
+    source: "wheelchair-child-pose-sheet-v3.png",
+    poses: ["welcome", "window-clue", "celebrate", "sleepy-home"],
+  },
+];
+
+const existingPoses = {
+  doorway: "doorway.png",
+  square: "town-square.png",
+  parade: "parade.png",
+  garden: "garden.png",
+};
+
+const poseByPage = {
+  4: "doorway", 5: "square", 6: "square", 7: "star-look",
+  8: "star-look", 9: "window-clue", 10: "window-clue", 11: "doorway",
+  12: "candy-help", 13: "candy-help", 14: "trail-clue", 15: "star-look",
+  16: "doorway", 17: "square", 18: "window-clue", 19: "square",
+  20: "ribbon-help", 21: "ribbon-help", 22: "garden", 23: "star-look",
+  24: "garden", 25: "garden", 26: "trail-clue", 27: "star-look",
+  28: "celebrate", 29: "welcome", 30: "parade", 31: "sleepy-home",
+};
+
+const sceneRanges = [
+  [4, 5, "doorway"], [6, 7, "square"], [8, 9, "wind"], [10, 11, "trail"],
+  [12, 13, "porch"], [14, 15, "gate"], [16, 17, "moon-house"], [18, 19, "window"],
+  [20, 21, "banner"], [22, 23, "quiet-garden"], [24, 25, "golden-garden"],
+  [26, 27, "return"], [28, 29, "lantern"], [30, 30, "parade"], [31, 31, "home"],
+];
+
+const sceneTitles = {
+  doorway: "A special Halloween", square: "The Monster Star", wind: "Whoosh!", trail: "The golden trail",
+  porch: "Treats everywhere", gate: "One more searcher", "moon-house": "A brave hello", window: "A clue in the window",
+  banner: "The tangled sign", "quiet-garden": "The quiet garden", "golden-garden": "One kind act",
+  return: "Bringing back the light", lantern: "Monster of the Night", parade: "The Pumpkin Parade", home: "Home again",
+};
+
+function ensureDirs() {
+  fs.mkdirSync(poseDir, { recursive: true });
+  fs.mkdirSync(pageDir, { recursive: true });
+}
+
+function alphaBounds(ctx, width, height, threshold = 4) {
+  const data = ctx.getImageData(0, 0, width, height).data;
+  let left = width; let top = height; let right = -1; let bottom = -1;
+  for (let y = 0; y < height; y += 1) {
+    for (let x = 0; x < width; x += 1) {
+      if (data[(y * width + x) * 4 + 3] <= threshold) continue;
+      left = Math.min(left, x); top = Math.min(top, y); right = Math.max(right, x); bottom = Math.max(bottom, y);
+    }
+  }
+  if (right < left) throw new Error("Pose quadrant is empty.");
+  return { left, top, right, bottom };
+}
+
+async function splitSheet(sheet) {
+  const source = await loadImage(path.join(referenceDir, sheet.source));
+  const quadrants = [
+    { x: 0, y: 0, width: 656, height: 590 },
+    { x: 656, y: 0, width: 656, height: 590 },
+    { x: 0, y: 590, width: 656, height: 609 },
+    { x: 656, y: 590, width: 656, height: 609 },
+  ];
+  const results = {};
+  for (let index = 0; index < quadrants.length; index += 1) {
+    const q = quadrants[index];
+    const quadrant = createCanvas(q.width, q.height);
+    const qctx = quadrant.getContext("2d");
+    qctx.drawImage(source, q.x, q.y, q.width, q.height, 0, 0, q.width, q.height);
+    const bounds = alphaBounds(qctx, q.width, q.height);
+    const padding = 24;
+    const width = bounds.right - bounds.left + 1;
+    const height = bounds.bottom - bounds.top + 1;
+    const canvas = createCanvas(width + padding * 2, height + padding * 2);
+    canvas.getContext("2d").drawImage(quadrant, bounds.left, bounds.top, width, height, padding, padding, width, height);
+    const name = sheet.poses[index];
+    const file = `${name}.png`;
+    fs.writeFileSync(path.join(poseDir, file), canvas.toBuffer("image/png"));
+    results[name] = { file, width: canvas.width, height: canvas.height, alphaPadding: padding };
+  }
+  return results;
+}
+
+function roundedRect(ctx, x, y, width, height, radius) {
+  const r = Math.min(radius, width / 2, height / 2);
+  ctx.beginPath(); ctx.moveTo(x + r, y); ctx.lineTo(x + width - r, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + r); ctx.lineTo(x + width, y + height - r);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - r, y + height); ctx.lineTo(x + r, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - r); ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
+}
+
+function star(ctx, x, y, outer, color = "#ffd35f") {
+  ctx.fillStyle = color; ctx.beginPath();
+  for (let i = 0; i < 10; i += 1) {
+    const angle = -Math.PI / 2 + i * Math.PI / 5;
+    const radius = i % 2 ? outer * 0.44 : outer;
+    const px = x + Math.cos(angle) * radius; const py = y + Math.sin(angle) * radius;
+    if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+  }
+  ctx.closePath(); ctx.fill();
+}
+
+function sceneFor(pageNumber) {
+  return sceneRanges.find(([start, end]) => pageNumber >= start && pageNumber <= end)?.[2] || "frontmatter";
+}
+
+function drawBackground(ctx, pageNumber) {
+  const scene = sceneFor(pageNumber);
+  const palettes = {
+    frontmatter: ["#241350", "#563283"], doorway: ["#65458e", "#e99443"], square: ["#2c2f69", "#724886"],
+    wind: ["#273665", "#75568b"], trail: ["#26395b", "#536d80"], porch: ["#70486c", "#d6813d"],
+    gate: ["#384767", "#6d8352"], "moon-house": ["#263d67", "#466f84"], window: ["#19375b", "#416276"],
+    banner: ["#173a49", "#4b7153"], "quiet-garden": ["#102c45", "#335a4d"], "golden-garden": ["#19424a", "#977238"],
+    return: ["#18364c", "#3e6070"], lantern: ["#39265d", "#c16d2f"], parade: ["#17285c", "#5d4282"], home: ["#33244d", "#9b653e"],
+  };
+  const [top, bottom] = palettes[scene];
+  const gradient = ctx.createLinearGradient(0, 0, 0, fullSize);
+  gradient.addColorStop(0, top); gradient.addColorStop(0.75, bottom); gradient.addColorStop(1, "#e8ba73");
+  ctx.fillStyle = gradient; ctx.fillRect(0, 0, fullSize, fullSize);
+  ctx.fillStyle = "rgba(255,255,255,.7)";
+  for (let i = 0; i < 14; i += 1) { ctx.beginPath(); ctx.arc(110 + (i * 347) % 2400, 100 + (i * 211) % 740, i % 3 === 0 ? 9 : 5, 0, Math.PI * 2); ctx.fill(); }
+  if (["doorway", "porch", "moon-house", "home"].includes(scene)) {
+    ctx.fillStyle = "#efd0a2"; ctx.fillRect(110, 380, 650, 1050); ctx.fillStyle = "#653b34"; ctx.fillRect(245, 520, 380, 910);
+  }
+  if (["square", "lantern"].includes(scene)) {
+    ctx.fillStyle = "#ee7c2e"; ctx.beginPath(); ctx.arc(460, 620, 210, 0, Math.PI * 2); ctx.fill(); star(ctx, 460, 620, 90, "#fff2a0");
+  }
+  if (["wind", "trail", "return"].includes(scene)) {
+    ctx.strokeStyle = "rgba(255,210,85,.85)"; ctx.lineWidth = 26; ctx.beginPath(); ctx.moveTo(130, 970); ctx.bezierCurveTo(700, 450, 1320, 1280, 2420, 500); ctx.stroke();
+  }
+  if (["quiet-garden", "golden-garden", "banner"].includes(scene)) {
+    ctx.fillStyle = "rgba(25,70,45,.85)";
+    for (let i = 0; i < 8; i += 1) { ctx.beginPath(); ctx.arc(100 + i * 360, 1240 + (i % 2) * 80, 160, 0, Math.PI * 2); ctx.fill(); }
+    ctx.fillStyle = "rgba(230,214,165,.55)"; ctx.beginPath(); ctx.ellipse(1320, 1510, 1180, 310, 0, 0, Math.PI * 2); ctx.fill();
+  }
+  if (scene === "window") {
+    ctx.fillStyle = "rgba(235,242,250,.3)"; ctx.fillRect(210, 330, 650, 840); star(ctx, 530, 650, 120, "#ffe28a");
+  }
+  if (scene === "banner") {
+    ctx.fillStyle = "#ef853a"; ctx.fillRect(160, 460, 1030, 120); ctx.fillStyle = "#fff7d5"; ctx.font = "900 46px sans-serif"; ctx.fillText("PUMPKIN PARADE", 230, 540);
+  }
+  if (["parade", "lantern"].includes(scene)) { star(ctx, 380, 370, 64); star(ctx, 700, 260, 44); star(ctx, 1050, 390, 52); }
+  ctx.fillStyle = "rgba(255,255,255,.08)"; ctx.fillRect(trim.x, trim.y, trim.width, artBottom - trim.y);
+}
+
+function wrap(ctx, text, width) {
+  const paragraphs = text.split(/\n+/).filter(Boolean); const lines = [];
+  for (const paragraph of paragraphs) {
+    let line = "";
+    for (const word of paragraph.split(/\s+/)) {
+      const candidate = line ? `${line} ${word}` : word;
+      if (line && ctx.measureText(candidate).width > width) { lines.push(line); line = word; } else line = candidate;
+    }
+    if (line) lines.push(line); lines.push("");
+  }
+  if (lines.at(-1) === "") lines.pop();
+  return lines;
+}
+
+function drawText(ctx, pageNumber, text, scene) {
+  const panelY = artBottom;
+  ctx.fillStyle = "#fffaf2"; ctx.fillRect(0, panelY, fullSize, fullSize - panelY);
+  ctx.fillStyle = "#e76d2f"; roundedRect(ctx, safe.x, panelY + 55, 570, 66, 33); ctx.fill();
+  ctx.fillStyle = "#fff"; ctx.font = "900 26px sans-serif"; ctx.fillText("REFERENCE REVIEW - NOT PRINT READY", safe.x + 28, panelY + 99);
+  ctx.fillStyle = "#18364c"; ctx.font = "800 31px sans-serif"; ctx.fillText(`Page ${pageNumber} / 32`, safe.x + 620, panelY + 98);
+  const title = sceneTitles[scene] || (pageNumber === 1 ? "Halloween Monster Night" : pageNumber === 32 ? "My Monster" : "Storybook review");
+  ctx.font = "900 66px sans-serif"; ctx.fillText(title, safe.x, panelY + 200);
+  let size = 43; let lines;
+  do { ctx.font = `500 ${size}px sans-serif`; lines = wrap(ctx, text, safe.right - safe.x); size -= 1; } while (lines.length * (size + 15) > 470 && size > 29);
+  const lineHeight = size + 17; let y = panelY + 280;
+  for (const line of lines) { if (line) ctx.fillText(line, safe.x, y); y += line ? lineHeight : Math.round(lineHeight * 0.45); }
+  return { fontSize: size + 1, lineCount: lines.length, bottom: y, fits: y <= trim.y + trim.height - 55 };
+}
+
+function clampPlacement(x, y, width, height) {
+  const maxBottom = artBottom - 45;
+  return {
+    x: Math.round(Math.min(Math.max(x, safe.x), safe.right - width)),
+    y: Math.round(Math.min(Math.max(y, safe.y), maxBottom - height)),
+    width: Math.round(width), height: Math.round(height),
+  };
+}
+
+async function drawCharacter(ctx, image, placement, kind) {
+  const targetHeight = kind === "child" ? 680 + placement.scale * 17 : 620 + placement.scale * 14;
+  const ratio = image.width / image.height;
+  let height = targetHeight; let width = height * ratio;
+  const maxWidth = 980;
+  if (width > maxWidth) { const factor = maxWidth / width; width *= factor; height *= factor; }
+  const centerX = trim.x + trim.width * placement.x / 100;
+  const baseline = trim.y + 1530;
+  const box = clampPlacement(centerX - width / 2, baseline - height, width, height);
+  ctx.save();
+  if (placement.facing === "left") { ctx.translate(box.x + box.width, 0); ctx.scale(-1, 1); ctx.drawImage(image, 0, box.y, box.width, box.height); }
+  else ctx.drawImage(image, box.x, box.y, box.width, box.height);
+  ctx.restore();
+  return box;
+}
+
+function overlapArea(a, b) {
+  const width = Math.max(0, Math.min(a.x + a.width, b.x + b.width) - Math.max(a.x, b.x));
+  const height = Math.max(0, Math.min(a.y + a.height, b.y + b.height) - Math.max(a.y, b.y));
+  return width * height;
+}
+
+async function composePage(page, pageNumber, assets) {
+  const canvas = createCanvas(fullSize, fullSize); const ctx = canvas.getContext("2d");
+  drawBackground(ctx, pageNumber);
+  const scene = sceneFor(pageNumber);
+  const text = page.text.replaceAll("{child_name}", "Maya").replaceAll("{monster_name}", "Larry");
+  let childBox = null; let monsterBox = null; let poseName = null;
+  if (pageNumber === 2) {
+    const drawing = await loadImage(path.join(root, "assets/gallery/red-blue-monster-before-after-source-v1.jpg"));
+    ctx.drawImage(drawing, 720, 430, 1120, 1120);
+  } else if (pageNumber === 32) {
+    const drawing = await loadImage(path.join(root, "assets/gallery/red-blue-monster-before-after-source-v1.jpg"));
+    ctx.drawImage(drawing, 220, 430, 1000, 1000); ctx.drawImage(assets.monster, 1450, 300, 760, 1140);
+  } else if (page.monsterRequired) {
+    if (page.monsterPlacement.layer === "behind") monsterBox = await drawCharacter(ctx, assets.monster, page.monsterPlacement, "monster");
+    if (page.childRequired) {
+      poseName = poseByPage[pageNumber];
+      childBox = await drawCharacter(ctx, assets.poses[poseName], page.childPlacement, "child");
+    }
+    if (page.monsterPlacement.layer !== "behind") monsterBox = await drawCharacter(ctx, assets.monster, page.monsterPlacement, "monster");
+  }
+  const textResult = drawText(ctx, pageNumber, text, scene);
+  const outputPath = path.join(pageDir, `${String(pageNumber).padStart(2, "0")}.png`);
+  fs.writeFileSync(outputPath, canvas.toBuffer("image/png"));
+  const cropSafe = [childBox, monsterBox].filter(Boolean).every((box) => box.x >= safe.x && box.y >= safe.y && box.x + box.width <= safe.right && box.y + box.height <= artBottom - 40);
+  return {
+    pageNumber, scene, text, outputPath: path.relative(root, outputPath), poseName,
+    childBox, monsterBox, cropSafe, textFits: textResult.fits,
+    characterOverlapPixels: childBox && monsterBox ? overlapArea(childBox, monsterBox) : 0,
+  };
+}
+
+async function contactSheet(pageResults) {
+  const thumb = 420; const gap = 34; const columns = 4; const rows = 8;
+  const canvas = createCanvas(columns * thumb + (columns + 1) * gap, 190 + rows * thumb + (rows + 1) * gap);
+  const ctx = canvas.getContext("2d"); ctx.fillStyle = "#f2ede5"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = "#18364c"; ctx.font = "900 56px sans-serif"; ctx.fillText("Halloween Monster Night - wheelchair profile review", 42, 72);
+  ctx.fillStyle = "#a14e26"; ctx.font = "700 27px sans-serif"; ctx.fillText("32 pages - synthetic Maya profile - visual direction approved - not print ready", 42, 122);
+  for (let index = 0; index < pageResults.length; index += 1) {
+    const image = await loadImage(path.join(root, pageResults[index].outputPath));
+    const x = gap + (index % columns) * (thumb + gap); const y = 170 + gap + Math.floor(index / columns) * (thumb + gap);
+    ctx.fillStyle = "#fff"; ctx.fillRect(x - 5, y - 5, thumb + 10, thumb + 10); ctx.drawImage(image, x, y, thumb, thumb);
+  }
+  const outputPath = path.join(outputDir, "wheelchair-full-review-contact-sheet.png");
+  fs.writeFileSync(outputPath, canvas.toBuffer("image/png"));
+  return { path: path.relative(root, outputPath), width: canvas.width, height: canvas.height };
+}
+
+async function main() {
+  ensureDirs();
+  const poseInfo = {};
+  for (const [name, file] of Object.entries(existingPoses)) poseInfo[name] = { file };
+  for (const sheet of newPoseSheets) Object.assign(poseInfo, await splitSheet(sheet));
+  const poses = {};
+  for (const [name, info] of Object.entries(poseInfo)) poses[name] = await loadImage(path.join(poseDir, info.file));
+  const assets = { poses, monster: await loadImage(path.join(root, "assets/gallery/larry-three-leg-gallery-v1.png")) };
+  const masterPages = buildHalloweenMasterPages();
+  const results = [];
+  for (let index = 0; index < masterPages.length; index += 1) results.push(await composePage(masterPages[index], index + 1, assets));
+  const sheet = await contactSheet(results);
+  const report = {
+    status: "full_review_complete",
+    productionSelectionEnabled: false,
+    approval: { visualDirectionApproved: true, printReadyApproved: false },
+    profile: { key: "warm-curly-dark:5-6:wheelchair", synthetic: true, childName: "Maya", mobilityAid: "wheelchair" },
+    output: { fullBleedPixels: [fullSize, fullSize], trimPixels: trim, nominalDpi: 300, trimInches: [8.5, 8.5], bleedInchesPerEdge: 0.125, safeInsetPixels: safeInset },
+    poseAssets: Object.fromEntries(Object.entries(poseInfo).map(([name, info]) => [name, path.relative(root, path.join(poseDir, info.file))])),
+    pages: results,
+    contactSheet: sheet,
+    checks: {
+      pageCount: results.length,
+      requiredChildPages: results.filter((page) => page.childBox).length,
+      distinctPosesUsed: new Set(results.map((page) => page.poseName).filter(Boolean)).size,
+      allCropSafe: results.every((page) => page.cropSafe),
+      allTextFits: results.every((page) => page.textFits),
+      movementNeutral: results.every((page) => !/\bMaya\b[^.!?]{0,48}\b(?:walk|walked|walking|stand|stood|standing|run|ran|running|jump|jumped|jumping|climb|climbed|climbing|march|marched|marching)\b/i.test(page.text)),
+    },
+    remainingProductionGate: [
+      "Replace synthetic scene backgrounds with approved final background plates for all 32 pages.",
+      "Complete print color, preflight, and physical proof review.",
+      "Record production composition approval for every required child page.",
+      "Do not enable other age, appearance, or accessibility profiles until their own complete assets and verification exist.",
+    ],
+  };
+  if (report.checks.pageCount !== 32 || report.checks.requiredChildPages !== 28 || report.checks.distinctPosesUsed < 10 || !report.checks.allCropSafe || !report.checks.allTextFits || !report.checks.movementNeutral) {
+    throw new Error(`Full review checks failed: ${JSON.stringify(report.checks)}`);
+  }
+  const reportPath = path.join(outputDir, "render-report.json");
+  fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`);
+  const committedManifest = {
+    ...report,
+    pages: report.pages.map(({ pageNumber, scene, poseName, childBox, monsterBox, cropSafe, textFits, characterOverlapPixels }) => ({
+      pageNumber, scene, poseName, childBox, monsterBox, cropSafe, textFits, characterOverlapPixels,
+    })),
+    contactSheet: undefined,
+  };
+  fs.writeFileSync(path.join(root, "docs/wheelchair-full-review-manifest.json"), `${JSON.stringify(committedManifest, null, 2)}\n`);
+  process.stdout.write(`${reportPath}\n`);
+}
+
+main().catch((error) => { console.error(error); process.exitCode = 1; });

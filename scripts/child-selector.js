@@ -18,6 +18,9 @@
     "deep-braids-black": { avatarClass: "avatar-braids", skin: "#70422f", hair: "#16110f" },
   };
   const root = document.querySelector("[data-child-selector]");
+  const defaultProfile = { id: "none", ageBand: "5-6", relativeHeight: "average", mobilityAid: "none" };
+  const history = [];
+  let lastProfile = null;
 
   function selected(name, fallback = "") {
     return document.querySelector(`input[name="${name}"]:checked`)?.value || fallback;
@@ -99,6 +102,41 @@
     }
   }
 
+  function compactProfile(profile) {
+    return {
+      id: profile?.id || "none",
+      ageBand: profile?.ageBand || "5-6",
+      relativeHeight: profile?.relativeHeight || "average",
+      mobilityAid: profile?.mobilityAid || "none",
+    };
+  }
+
+  function profileKey(profile) {
+    const value = compactProfile(profile);
+    return [value.id, value.ageBand, value.relativeHeight, value.mobilityAid].join(":");
+  }
+
+  function applyProfile(profile) {
+    const value = compactProfile(profile);
+    const controls = {
+      "child-character": value.id,
+      "child-age-band": value.ageBand,
+      "child-relative-height": value.relativeHeight,
+      "child-mobility-aid": value.mobilityAid,
+    };
+    for (const [name, selectedValue] of Object.entries(controls)) {
+      const input = [...document.querySelectorAll(`input[name="${name}"]`)].find((option) => option.value === selectedValue && !option.disabled);
+      if (input) input.checked = true;
+    }
+  }
+
+  function updateHistoryControls(message = "") {
+    const undo = document.querySelector("#child-editor-undo");
+    const status = document.querySelector("#child-editor-action-status");
+    if (undo) undo.disabled = history.length === 0;
+    if (status) status.textContent = message;
+  }
+
   function restore() {
     let saved;
     try { saved = JSON.parse(localStorage.getItem(storageKey) || "null"); } catch { return; }
@@ -113,9 +151,13 @@
     if (mobility) mobility.checked = true;
   }
 
-  function sync({ save = true } = {}) {
+  function sync({ save = true, recordHistory = false, message = "" } = {}) {
     if (!root) return getProfile();
     const profile = getProfile();
+    if (recordHistory && lastProfile && profileKey(lastProfile) !== profileKey(profile)) {
+      history.push(compactProfile(lastProfile));
+      if (history.length > 20) history.shift();
+    }
     const details = document.querySelector("#child-character-details");
     const selection = document.querySelector("#child-character-selection");
     const title = document.querySelector("#child-preview-title");
@@ -135,14 +177,33 @@
     }
     renderProfile(stage, avatar, profile);
     if (save) persist(profile);
+    lastProfile = compactProfile(profile);
+    updateHistoryControls(message);
     root.dispatchEvent(new CustomEvent("childprofilechange", { detail: profile }));
     return profile;
   }
 
-  window.MonstersNowChildSelector = { getProfile, renderProfile, restore, sync, storageKey };
+  function undo() {
+    const previous = history.pop();
+    if (!previous) return getProfile();
+    applyProfile(previous);
+    return sync({ message: "Last character change undone." });
+  }
+
+  function reset() {
+    const current = getProfile();
+    if (profileKey(current) === profileKey(defaultProfile)) return current;
+    history.push(compactProfile(current));
+    applyProfile(defaultProfile);
+    return sync({ message: "Character reset to monster-only." });
+  }
+
+  window.MonstersNowChildSelector = { getProfile, renderProfile, restore, sync, undo, reset, storageKey };
   if (!root) return;
   restore();
-  root.addEventListener("change", () => sync());
-  window.addEventListener("pageshow", () => { restore(); sync({ save: false }); });
+  root.addEventListener("change", () => sync({ recordHistory: true }));
+  document.querySelector("#child-editor-undo")?.addEventListener("click", undo);
+  document.querySelector("#child-editor-reset")?.addEventListener("click", reset);
+  window.addEventListener("pageshow", () => { restore(); history.length = 0; lastProfile = null; sync({ save: false }); });
   sync({ save: false });
 })();

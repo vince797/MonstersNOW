@@ -49,13 +49,19 @@ test("selector UI exposes only supported controls and states the current renderi
   assert.match(html, /name="child-relative-height"/);
   assert.match(html, /name="child-mobility-aid" value="wheelchair" disabled/);
   assert.match(html, /No diagnosis or medical details needed/);
-  assert.match(html, /cannot be selected until approved seated child-and-wheelchair assets/i);
+  assert.match(html, /approved visual direction and a complete synthetic review book/i);
   assert.doesNotMatch(html, /type="date"|name="child-(?:birthdate|date-of-birth|height-(?:cm|in))"/i);
-  assert.match(html, /Walkers, canes, prostheses, glasses, and outfit colors are not offered until each has consistent approved art/);
+  assert.match(html, />Appearance<|>Basics<|>Accessibility/);
+  assert.match(html, /id="child-editor-undo" disabled/);
+  assert.match(html, /id="child-editor-reset"/);
+  assert.match(html, /Walkers, canes, prostheses, glasses, hearing aids, eye details, and outfit colors stay unavailable/i);
   assert.match(script, /monstersnow_child_character_profile_v1/);
   assert.match(script, /localStorage\.setItem/);
+  assert.match(script, /function undo\(/);
+  assert.match(script, /function reset\(/);
   assert.match(script, /mobility-\$\{profile\.mobilityAid/);
   assert.match(css, /\.child-preview-stage\.mobility-wheelchair/);
+  assert.match(css, /\.child-live-preview \{[\s\S]*position: sticky/);
 });
 
 test("Halloween story directions keep wheelchair participation consistent and movement neutral", () => {
@@ -63,6 +69,6 @@ test("Halloween story directions keep wheelchair participation consistent and mo
   assert.match(manuscript, /same wheelchair visible with seated proportions on every child page/i);
   assert.match(manuscript, /step-free route/i);
   assert.match(manuscript, /move, join, follow, or lead/i);
-  assert.doesNotMatch(manuscript, /\{child_name\}\s+(?:stands|walks|runs|jumps|climbs|hurried)\b/i);
+  assert.doesNotMatch(manuscript, /\{child_name\}\s+(?:stands|walks|runs|jumps|climbs|hurried|marched)\b/i);
   assert.match(manuscript, /never frame disability as tragedy, pity, a lesson for others, or something to cure/i);
 });

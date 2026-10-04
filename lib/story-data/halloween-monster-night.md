@@ -318,7 +318,7 @@ The keeper stepped aside.
 **Final story text:**  
 The music started, and off they went.
 
-`{monster_name}` led the Pumpkin Parade. `{child_name}` marched alongside. Behind them came the little pumpkin, the little moon, and a whole street full of waving neighbors.
+`{monster_name}` led the Pumpkin Parade with `{child_name}` alongside. Behind them came the little pumpkin, the little moon, and a whole street full of waving neighbors.
 
 By the time they got home, the bucket was full.
 

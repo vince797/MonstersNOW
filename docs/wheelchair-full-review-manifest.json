@@ -1,0 +1,668 @@
+{
+  "status": "full_review_complete",
+  "productionSelectionEnabled": false,
+  "approval": {
+    "visualDirectionApproved": true,
+    "printReadyApproved": false
+  },
+  "profile": {
+    "key": "warm-curly-dark:5-6:wheelchair",
+    "synthetic": true,
+    "childName": "Maya",
+    "mobilityAid": "wheelchair"
+  },
+  "output": {
+    "fullBleedPixels": [
+      2625,
+      2625
+    ],
+    "trimPixels": {
+      "x": 38,
+      "y": 38,
+      "width": 2550,
+      "height": 2550
+    },
+    "nominalDpi": 300,
+    "trimInches": [
+      8.5,
+      8.5
+    ],
+    "bleedInchesPerEdge": 0.125,
+    "safeInsetPixels": 150
+  },
+  "poseAssets": {
+    "doorway": "assets/storybook/halloween-monster-night/reference/wheelchair-profile-v1/doorway.png",
+    "square": "assets/storybook/halloween-monster-night/reference/wheelchair-profile-v1/town-square.png",
+    "parade": "assets/storybook/halloween-monster-night/reference/wheelchair-profile-v1/parade.png",
+    "garden": "assets/storybook/halloween-monster-night/reference/wheelchair-profile-v1/garden.png",
+    "candy-help": "assets/storybook/halloween-monster-night/reference/wheelchair-profile-v1/candy-help.png",
+    "trail-clue": "assets/storybook/halloween-monster-night/reference/wheelchair-profile-v1/trail-clue.png",
+    "ribbon-help": "assets/storybook/halloween-monster-night/reference/wheelchair-profile-v1/ribbon-help.png",
+    "star-look": "assets/storybook/halloween-monster-night/reference/wheelchair-profile-v1/star-look.png",
+    "welcome": "assets/storybook/halloween-monster-night/reference/wheelchair-profile-v1/welcome.png",
+    "window-clue": "assets/storybook/halloween-monster-night/reference/wheelchair-profile-v1/window-clue.png",
+    "celebrate": "assets/storybook/halloween-monster-night/reference/wheelchair-profile-v1/celebrate.png",
+    "sleepy-home": "assets/storybook/halloween-monster-night/reference/wheelchair-profile-v1/sleepy-home.png"
+  },
+  "pages": [
+    {
+      "pageNumber": 1,
+      "scene": "frontmatter",
+      "poseName": null,
+      "childBox": null,
+      "monsterBox": {
+        "x": 1425,
+        "y": 528,
+        "width": 693,
+        "height": 1040
+      },
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 2,
+      "scene": "frontmatter",
+      "poseName": null,
+      "childBox": null,
+      "monsterBox": null,
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 3,
+      "scene": "frontmatter",
+      "poseName": null,
+      "childBox": null,
+      "monsterBox": null,
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 4,
+      "scene": "doorway",
+      "poseName": "doorway",
+      "childBox": {
+        "x": 1391,
+        "y": 378,
+        "width": 966,
+        "height": 1190
+      },
+      "monsterBox": {
+        "x": 433,
+        "y": 458,
+        "width": 740,
+        "height": 1110
+      },
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 5,
+      "scene": "doorway",
+      "poseName": "square",
+      "childBox": {
+        "x": 262,
+        "y": 381,
+        "width": 980,
+        "height": 1187
+      },
+      "monsterBox": {
+        "x": 1453,
+        "y": 458,
+        "width": 740,
+        "height": 1110
+      },
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 6,
+      "scene": "square",
+      "poseName": "square",
+      "childBox": {
+        "x": 268,
+        "y": 395,
+        "width": 969,
+        "height": 1173
+      },
+      "monsterBox": {
+        "x": 1458,
+        "y": 472,
+        "width": 731,
+        "height": 1096
+      },
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 7,
+      "scene": "square",
+      "poseName": "star-look",
+      "childBox": {
+        "x": 1384,
+        "y": 534,
+        "width": 980,
+        "height": 1034
+      },
+      "monsterBox": {
+        "x": 438,
+        "y": 472,
+        "width": 731,
+        "height": 1096
+      },
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 8,
+      "scene": "wind",
+      "poseName": "star-look",
+      "childBox": {
+        "x": 1384,
+        "y": 534,
+        "width": 980,
+        "height": 1034
+      },
+      "monsterBox": {
+        "x": 470,
+        "y": 416,
+        "width": 768,
+        "height": 1152
+      },
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 9,
+      "scene": "wind",
+      "poseName": "window-clue",
+      "childBox": {
+        "x": 275,
+        "y": 327,
+        "width": 954,
+        "height": 1241
+      },
+      "monsterBox": {
+        "x": 1388,
+        "y": 416,
+        "width": 768,
+        "height": 1152
+      },
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 10,
+      "scene": "trail",
+      "poseName": "window-clue",
+      "childBox": {
+        "x": 288,
+        "y": 361,
+        "width": 928,
+        "height": 1207
+      },
+      "monsterBox": {
+        "x": 1346,
+        "y": 444,
+        "width": 749,
+        "height": 1124
+      },
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 11,
+      "scene": "trail",
+      "poseName": "doorway",
+      "childBox": {
+        "x": 1384,
+        "y": 361,
+        "width": 980,
+        "height": 1207
+      },
+      "monsterBox": {
+        "x": 530,
+        "y": 444,
+        "width": 749,
+        "height": 1124
+      },
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 12,
+      "scene": "porch",
+      "poseName": "candy-help",
+      "childBox": {
+        "x": 1384,
+        "y": 639,
+        "width": 980,
+        "height": 929
+      },
+      "monsterBox": {
+        "x": 433,
+        "y": 458,
+        "width": 740,
+        "height": 1110
+      },
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 13,
+      "scene": "porch",
+      "poseName": "candy-help",
+      "childBox": {
+        "x": 262,
+        "y": 639,
+        "width": 980,
+        "height": 929
+      },
+      "monsterBox": {
+        "x": 1453,
+        "y": 458,
+        "width": 740,
+        "height": 1110
+      },
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 14,
+      "scene": "gate",
+      "poseName": "trail-clue",
+      "childBox": {
+        "x": 262,
+        "y": 585,
+        "width": 980,
+        "height": 983
+      },
+      "monsterBox": {
+        "x": 1458,
+        "y": 472,
+        "width": 731,
+        "height": 1096
+      },
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 15,
+      "scene": "gate",
+      "poseName": "star-look",
+      "childBox": {
+        "x": 1384,
+        "y": 534,
+        "width": 980,
+        "height": 1034
+      },
+      "monsterBox": {
+        "x": 438,
+        "y": 472,
+        "width": 731,
+        "height": 1096
+      },
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 16,
+      "scene": "moon-house",
+      "poseName": "doorway",
+      "childBox": {
+        "x": 1384,
+        "y": 361,
+        "width": 980,
+        "height": 1207
+      },
+      "monsterBox": {
+        "x": 470,
+        "y": 416,
+        "width": 768,
+        "height": 1152
+      },
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 17,
+      "scene": "moon-house",
+      "poseName": "square",
+      "childBox": {
+        "x": 262,
+        "y": 381,
+        "width": 980,
+        "height": 1187
+      },
+      "monsterBox": {
+        "x": 1388,
+        "y": 416,
+        "width": 768,
+        "height": 1152
+      },
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 18,
+      "scene": "window",
+      "poseName": "window-clue",
+      "childBox": {
+        "x": 288,
+        "y": 361,
+        "width": 928,
+        "height": 1207
+      },
+      "monsterBox": {
+        "x": 1346,
+        "y": 444,
+        "width": 749,
+        "height": 1124
+      },
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 19,
+      "scene": "window",
+      "poseName": "square",
+      "childBox": {
+        "x": 1384,
+        "y": 381,
+        "width": 980,
+        "height": 1187
+      },
+      "monsterBox": {
+        "x": 530,
+        "y": 444,
+        "width": 749,
+        "height": 1124
+      },
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 20,
+      "scene": "banner",
+      "poseName": "ribbon-help",
+      "childBox": {
+        "x": 1384,
+        "y": 680,
+        "width": 980,
+        "height": 888
+      },
+      "monsterBox": {
+        "x": 433,
+        "y": 458,
+        "width": 740,
+        "height": 1110
+      },
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 21,
+      "scene": "banner",
+      "poseName": "ribbon-help",
+      "childBox": {
+        "x": 262,
+        "y": 680,
+        "width": 980,
+        "height": 888
+      },
+      "monsterBox": {
+        "x": 1453,
+        "y": 458,
+        "width": 740,
+        "height": 1110
+      },
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 22,
+      "scene": "quiet-garden",
+      "poseName": "garden",
+      "childBox": {
+        "x": 262,
+        "y": 608,
+        "width": 980,
+        "height": 960
+      },
+      "monsterBox": {
+        "x": 1458,
+        "y": 472,
+        "width": 731,
+        "height": 1096
+      },
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 23,
+      "scene": "quiet-garden",
+      "poseName": "star-look",
+      "childBox": {
+        "x": 1384,
+        "y": 534,
+        "width": 980,
+        "height": 1034
+      },
+      "monsterBox": {
+        "x": 438,
+        "y": 472,
+        "width": 731,
+        "height": 1096
+      },
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 24,
+      "scene": "golden-garden",
+      "poseName": "garden",
+      "childBox": {
+        "x": 1384,
+        "y": 608,
+        "width": 980,
+        "height": 960
+      },
+      "monsterBox": {
+        "x": 470,
+        "y": 416,
+        "width": 768,
+        "height": 1152
+      },
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 25,
+      "scene": "golden-garden",
+      "poseName": "garden",
+      "childBox": {
+        "x": 262,
+        "y": 608,
+        "width": 980,
+        "height": 960
+      },
+      "monsterBox": {
+        "x": 1388,
+        "y": 416,
+        "width": 768,
+        "height": 1152
+      },
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 26,
+      "scene": "return",
+      "poseName": "trail-clue",
+      "childBox": {
+        "x": 262,
+        "y": 585,
+        "width": 980,
+        "height": 983
+      },
+      "monsterBox": {
+        "x": 1346,
+        "y": 444,
+        "width": 749,
+        "height": 1124
+      },
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 27,
+      "scene": "return",
+      "poseName": "star-look",
+      "childBox": {
+        "x": 1384,
+        "y": 534,
+        "width": 980,
+        "height": 1034
+      },
+      "monsterBox": {
+        "x": 530,
+        "y": 444,
+        "width": 749,
+        "height": 1124
+      },
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 28,
+      "scene": "lantern",
+      "poseName": "celebrate",
+      "childBox": {
+        "x": 1384,
+        "y": 422,
+        "width": 980,
+        "height": 1146
+      },
+      "monsterBox": {
+        "x": 433,
+        "y": 458,
+        "width": 740,
+        "height": 1110
+      },
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 29,
+      "scene": "lantern",
+      "poseName": "welcome",
+      "childBox": {
+        "x": 262,
+        "y": 422,
+        "width": 980,
+        "height": 1146
+      },
+      "monsterBox": {
+        "x": 1453,
+        "y": 458,
+        "width": 740,
+        "height": 1110
+      },
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 30,
+      "scene": "parade",
+      "poseName": "parade",
+      "childBox": {
+        "x": 279,
+        "y": 395,
+        "width": 946,
+        "height": 1173
+      },
+      "monsterBox": {
+        "x": 1458,
+        "y": 472,
+        "width": 731,
+        "height": 1096
+      },
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 31,
+      "scene": "home",
+      "poseName": "sleepy-home",
+      "childBox": {
+        "x": 1389,
+        "y": 395,
+        "width": 970,
+        "height": 1173
+      },
+      "monsterBox": {
+        "x": 438,
+        "y": 472,
+        "width": 731,
+        "height": 1096
+      },
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    },
+    {
+      "pageNumber": 32,
+      "scene": "frontmatter",
+      "poseName": null,
+      "childBox": null,
+      "monsterBox": null,
+      "cropSafe": true,
+      "textFits": true,
+      "characterOverlapPixels": 0
+    }
+  ],
+  "checks": {
+    "pageCount": 32,
+    "requiredChildPages": 28,
+    "distinctPosesUsed": 12,
+    "allCropSafe": true,
+    "allTextFits": true,
+    "movementNeutral": true
+  },
+  "remainingProductionGate": [
+    "Replace synthetic scene backgrounds with approved final background plates for all 32 pages.",
+    "Complete print color, preflight, and physical proof review.",
+    "Record production composition approval for every required child page.",
+    "Do not enable other age, appearance, or accessibility profiles until their own complete assets and verification exist."
+  ]
+}
