@@ -9,12 +9,13 @@ const styles = fs.readFileSync(path.join(root, "styles.css"), "utf8");
 const publicPolish = fs.readFileSync(path.join(root, "home-polish.css"), "utf8");
 const adminScript = fs.readFileSync(path.join(root, "scripts/admin.js"), "utf8");
 
-test("admin workspace uses a readable system typeface without changing the storefront brand", () => {
+test("admin workspace and homepage collection use the readable system typeface", () => {
   assert.match(adminMarkup, /styles\.css\?v=20261002-admin-system-type/);
   assert.match(styles, /--admin-ui-font: Inter, ui-sans-serif, system-ui/);
   assert.match(styles, /\.admin-page strong \{[\s\S]*font-family: var\(--admin-ui-font\)/);
   assert.doesNotMatch(styles, /Admin Fredoka/);
-  assert.match(publicPolish, /font-family: "Fredoka"/);
+  assert.doesNotMatch(publicPolish, /Fredoka|Arial Rounded MT Bold/);
+  assert.match(publicPolish, /\.books-section \.section-heading h2 \{[\s\S]*font-family: inherit/);
 });
 
 test("admin sign-in does not blame the device for a server credential timestamp error", () => {
