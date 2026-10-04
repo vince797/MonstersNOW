@@ -89,9 +89,8 @@ test("selector UI exposes only supported controls and states the current renderi
   assert.match(script, /child-preview-character/);
   assert.match(html, /id="child-preview-monster"/);
   assert.match(mainScript, /function syncStorySceneMonster/);
-  assert.match(mainScript, /function removeConnectedWhiteBackground/);
-  assert.match(mainScript, /cornerDistance/);
-  assert.match(mainScript, /transparentNeighbors/);
+  assert.match(html, /scripts\/monster-cutout\.js/);
+  assert.match(mainScript, /MonstersNowCutout\?\.removeConnectedBackground/);
   assert.match(css, /storybook-forest-stage-v1\.webp/);
   assert.match(css, /@keyframes story-character-arrival/);
   assert.doesNotMatch(css, /@keyframes story-sparkle/);
@@ -109,9 +108,9 @@ test("selector UI exposes only supported controls and states the current renderi
   assert.match(css, /\.child-live-preview \{[\s\S]*position: sticky/);
   assert.match(css, /\.child-character-option\.is-selected::after/);
   assert.match(css, /\.child-preview-character/);
-  assert.match(html, /child-selector\.css\?v=20261004-age-profiles-v10/);
-  assert.match(html, /scripts\/child-selector\.js\?v=20261004-age-profiles-v8/);
-  assert.match(html, /scripts\/main\.js\?v=20261004-scene-blend-v10/);
+  assert.match(html, /child-selector\.css\?v=20261005-age-personality-v11/);
+  assert.match(html, /scripts\/child-selector\.js\?v=20261005-age-personality-v9/);
+  assert.match(html, /scripts\/main\.js\?v=20261005-personality-studio-v2/);
 });
 
 test("character studio includes lightweight changing storybook previews", () => {

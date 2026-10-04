@@ -6098,24 +6098,52 @@ main > section {
 
 /* Keep Create Studio overrides last in the cascade. */
 body .create-flow-section {
-  gap: clamp(24px, 4vw, 46px);
-  padding-top: clamp(30px, 5vw, 66px);
+  gap: clamp(20px, 2.8vw, 34px);
+  padding-top: clamp(22px, 3vw, 38px);
   background:
     radial-gradient(circle at 82% 5%, rgba(255, 122, 24, .42), transparent 24%),
     radial-gradient(circle at 7% 38%, rgba(139, 83, 255, .34), transparent 27%),
     linear-gradient(142deg, #211044 0%, #41156f 48%, #651a74 72%, #b63f47 116%);
 }
-body .create-flow-header { max-width: 1280px; grid-template-columns: minmax(0,1.08fr) minmax(380px,.72fr); align-items: center; }
+body .create-flow-header { max-width: 1280px; grid-template-columns: minmax(0,1fr) minmax(390px,.74fr); align-items: start; gap: clamp(24px,4vw,58px); }
 body .create-flow-copy .eyebrow { color: #ffb25f; }
-body .create-flow-copy h1 { max-width: 11ch; font-size: clamp(3.2rem,6vw,6rem); letter-spacing: -.055em; }
-body .create-flow-copy p:not(.eyebrow) { max-width: 38rem; color: rgba(255,255,255,.86); font-size: clamp(1.05rem,1.5vw,1.3rem); }
+body .create-flow-copy h1 { max-width: 11ch; margin-bottom: 10px; font-size: clamp(3rem,5vw,4.9rem); letter-spacing: -.055em; }
+body .create-flow-copy p:not(.eyebrow) { max-width: 38rem; color: rgba(255,255,255,.86); font-size: clamp(1rem,1.25vw,1.16rem); }
+body .create-flow-meta { gap: 10px; }
+body .create-flow-meta .free-includes { grid-template-columns: repeat(2,minmax(0,1fr)); }
+body .create-flow-meta .selected-story-card { width: 100%; max-width: none; margin: 0; padding: 8px; }
+body .create-flow-meta .selected-story-card img { width: 60px; height: 60px; }
 body .converter-flow { max-width: 560px; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 6px; }
-body .converter-flow li { min-height: 50px; padding: 7px 11px; background: rgba(24,7,48,.38); border-color: rgba(255,255,255,.25); }
+body .converter-flow li { min-height: 46px; padding: 6px 9px; background: rgba(24,7,48,.38); border-color: rgba(255,255,255,.25); }
 body .create-flow-section .converter-tool { max-width: 1280px; grid-template-columns: minmax(330px,.58fr) minmax(600px,1.08fr); gap: 22px; }
 
-@media (max-width: 1320px) {
+body .variation-heading { display: grid; gap: 5px; }
+body .variation-controls .variation-heading > span { margin: 0; }
+body .variation-controls { gap: 9px; padding: 10px; }
+body .variation-controls p { margin: 0; }
+body .variation-controls .style-option { min-height: 52px; padding: 8px 10px; }
+body .variation-controls .next-personality-status { color: #54227c; font-weight: 900; }
+body .selected-preview-personality {
+  display: inline-flex;
+  width: fit-content;
+  margin-top: 7px;
+  padding: 5px 9px;
+  border: 1px solid #c8abe5;
+  border-radius: 999px;
+  background: #f7efff;
+  color: #54227c;
+  font-size: .76rem;
+  font-weight: 900;
+}
+body .selected-preview-personality[hidden] { display: none; }
+
+@media (max-width: 1040px) {
   body .create-flow-header { grid-template-columns: 1fr; }
   body .create-flow-copy h1 { max-width: 13ch; }
+  body .create-flow-meta { grid-template-columns: minmax(0,1fr) minmax(0,1fr); align-items: start; }
+  body .create-flow-meta .free-includes { grid-column: 1; }
+  body .create-flow-meta .selected-story-card { grid-column: 1; }
+  body .create-flow-meta .converter-flow { grid-column: 2; grid-row: 1 / span 2; align-self: stretch; }
 }
 @media (max-width: 980px) {
   body .create-flow-section .converter-tool { grid-template-columns: 1fr; }
@@ -6123,6 +6151,10 @@ body .create-flow-section .converter-tool { max-width: 1280px; grid-template-col
 @media (max-width: 700px) {
   body .create-flow-section { padding-top: 26px; }
   body .create-flow-copy h1 { max-width: none; font-size: clamp(3rem,16vw,4.5rem); }
+  body .create-flow-meta { grid-template-columns: 1fr; }
+  body .create-flow-meta .free-includes,
+  body .create-flow-meta .selected-story-card,
+  body .create-flow-meta .converter-flow { grid-column: 1; grid-row: auto; }
   body .converter-flow { grid-template-columns: repeat(4,minmax(0,1fr)); }
   body .converter-flow li { display: grid; justify-items: center; gap: 3px; min-width: 0; padding: 6px 2px; font-size: .68rem; text-align: center; }
 }

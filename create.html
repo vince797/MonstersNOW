@@ -10,8 +10,8 @@
     <link rel="canonical" href="https://www.monstersnow.com/create" />
     <title>Create Your Monster | MonstersNOW</title>
     <link rel="icon" href="assets/brand/monstersnow-icon-32-v1.png" type="image/png" sizes="32x32" />
-    <link rel="stylesheet" href="styles.css?v=20261004-create-studio-v4" />
-    <link rel="stylesheet" href="child-selector.css?v=20261004-age-profiles-v10" />
+    <link rel="stylesheet" href="styles.css?v=20261005-personality-studio-v2" />
+    <link rel="stylesheet" href="child-selector.css?v=20261005-age-personality-v11" />
     <link rel="stylesheet" href="storefront.css?v=20261002-public-storefront" />
     <link rel="apple-touch-icon" href="assets/brand/monstersnow-icon-180-v1.png" />
     <link rel="stylesheet" href="brand.css?v=20261004-selected-logo" />
@@ -47,8 +47,11 @@
               Bring their idea to life, build an optional storybook child, and
               see every page before anything is ordered.
             </p>
-            <div class="create-jump-actions">
-              <a class="button primary" href="#monster-upload">Start with a drawing</a>
+          </div>
+          <div class="create-flow-meta">
+            <div class="free-includes" role="group" aria-label="Free MonstersNOW preview details">
+              <span><strong>3</strong> preview versions</span>
+              <span><strong>$0</strong> coloring page</span>
             </div>
             <div class="selected-story-card" id="selected-story" data-story-id="halloween-monster-night" role="group" aria-label="Selected story">
               <img src="assets/storybook/cover-series/minimal-concepts/halloween-monster-night-v2-web.jpg" alt="" width="96" height="96" />
@@ -58,13 +61,6 @@
                 <em>32 pages · Ages 2–8 · Ready to personalize</em>
               </span>
               <a href="books.html#catalog">Change story</a>
-            </div>
-          </div>
-          <div class="create-flow-meta">
-            <div class="free-includes" role="group" aria-label="Free MonstersNOW preview details">
-              <span><strong>3</strong> preview versions</span>
-              <span><strong>$0</strong> coloring page</span>
-              <span><strong>Personalized</strong> storybook</span>
             </div>
             <ol class="converter-flow" aria-label="Creation progress">
               <li class="is-active" data-flow-step="upload"><i>1</i>Upload</li>
@@ -78,26 +74,28 @@
         <div class="converter-tool" data-converter>
           <form class="upload-panel" data-monster-step-panel novalidate>
             <div class="variation-controls" role="group" aria-label="Monster preview options">
-              <div>
-                <span>Monster style</span>
-                <p id="preview-count">Choose a style. Upload once, then try up to three versions.</p>
+              <div class="variation-heading">
+                <span>Personality + pose for next preview</span>
+                <p>Every option uses the same Soft 3D Storybook art style. A new choice takes effect only when the next preview is created.</p>
+                <p class="next-personality-status" id="next-personality-status">Classic is ready for the first preview.</p>
+                <p id="preview-count">Upload once, then try up to three versions.</p>
               </div>
-              <div class="style-options" role="group" aria-label="Choose a monster preview style">
+              <div class="style-options" role="group" aria-label="Choose the personality and pose for the next monster preview">
                 <button class="style-option is-active" type="button" data-monster-style="storybook" aria-pressed="true">
-                  <strong>Storybook</strong>
-                  <small>Soft 3D keepsake</small>
+                  <strong>Classic</strong>
+                  <small>Balanced + faithful</small>
                 </button>
                 <button class="style-option" type="button" data-monster-style="cute" aria-pressed="false">
-                  <strong>Cute</strong>
-                  <small>Softer face</small>
+                  <strong>Gentle</strong>
+                  <small>Warm + welcoming</small>
                 </button>
                 <button class="style-option" type="button" data-monster-style="silly" aria-pressed="false">
-                  <strong>Silly</strong>
-                  <small>Goofy expression</small>
+                  <strong>Playful</strong>
+                  <small>Goofy + energetic</small>
                 </button>
                 <button class="style-option" type="button" data-monster-style="adventure" aria-pressed="false">
-                  <strong>Adventure</strong>
-                  <small>Braver pose</small>
+                  <strong>Brave</strong>
+                  <small>Confident + ready</small>
                 </button>
               </div>
             </div>
@@ -147,10 +145,11 @@
             </div>
             <div class="result-content">
               <span class="result-label">Monster preview</span>
+              <span class="selected-preview-personality" id="selected-preview-personality" hidden></span>
               <h2 id="converter-status">Upload a drawing to begin.</h2>
               <p id="converter-note">
-                The preview keeps the child's shape, colors, and expression in
-                the Soft 3D Storybook Monster style.
+                Classic is ready for the first preview. Every personality keeps
+                the same Soft 3D Storybook art style.
               </p>
               <button class="button secondary replace-drawing-button" id="replace-drawing" type="button" hidden>
                 Choose a Different Photo
@@ -438,7 +437,8 @@
       </div>
     </footer>
 
-    <script src="scripts/child-selector.js?v=20261004-age-profiles-v8"></script>
-    <script src="scripts/main.js?v=20261004-scene-blend-v10"></script>
+    <script src="scripts/child-selector.js?v=20261005-age-personality-v9"></script>
+    <script src="scripts/monster-cutout.js?v=20261004-cutout-v1"></script>
+    <script src="scripts/main.js?v=20261005-personality-studio-v2"></script>
   </body>
 </html>

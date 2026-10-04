@@ -63,8 +63,10 @@ const coloringPageClose = document.querySelector("#coloring-page-close");
 const coloringPageDone = document.querySelector("#coloring-page-done");
 const converterStatus = document.querySelector("#converter-status");
 const converterNote = document.querySelector("#converter-note");
+const selectedPreviewPersonality = document.querySelector("#selected-preview-personality");
 const replaceDrawingButton = document.querySelector("#replace-drawing");
 const previewCount = document.querySelector("#preview-count");
+const nextPersonalityStatus = document.querySelector("#next-personality-status");
 const uploadActionStatus = document.querySelector("#upload-action-status");
 const uploadError = document.querySelector("#upload-error");
 const uploadDrop = document.querySelector(".upload-drop");
@@ -153,6 +155,12 @@ const previewStyleLabels = {
   silly: "Soft 3D Silly Monster",
   adventure: "Soft 3D Adventure Monster",
 };
+const previewPersonalityLabels = {
+  storybook: "Classic",
+  cute: "Gentle",
+  silly: "Playful",
+  adventure: "Brave",
+};
 let drawingPreviewUrl;
 let selectedDrawingFile;
 let coloringPageUrl;
@@ -221,17 +229,14 @@ if (monsterUpload && drawingPreview && monsterPreview && convertButton) {
       selectedMonsterStyle = normalizePreviewStyle(button.dataset.monsterStyle);
       updateStyleButtons();
 
-      if (selectedDrawingFile && previewsUsed < maxFreePreviews && converterNote && !isGeneratingPreview) {
-        converterNote.textContent = `${getPreviewStyleLabel(selectedMonsterStyle)} selected. Create another version when ready.`;
-      }
-
       if (isGeneratingPreview) {
-        setUploadActionStatus(`${getPreviewStyleLabel(selectedMonsterStyle)} selected for the next version.`);
+        setUploadActionStatus(`${getPreviewPersonalityLabel(selectedMonsterStyle)} is queued for the next preview. The preview being created will not change.`);
       } else if (selectedDrawingFile && previewsUsed < maxFreePreviews) {
-        setUploadActionStatus(`${getPreviewStyleLabel(selectedMonsterStyle)} selected. Try another version when ready.`);
+        setUploadActionStatus(`${getPreviewPersonalityLabel(selectedMonsterStyle)} is queued for the next preview. Your selected preview has not changed.`);
       } else if (!selectedDrawingFile) {
-        setUploadActionStatus(`${getPreviewStyleLabel(selectedMonsterStyle)} selected. Upload a drawing to start automatically.`);
+        setUploadActionStatus(`${getPreviewPersonalityLabel(selectedMonsterStyle)} is ready for the first preview. Upload a drawing to start automatically.`);
       }
+      syncPreviewControls();
     });
   });
 
@@ -679,7 +684,7 @@ async function selectDrawingFile(file) {
   }
 
   if (converterNote) {
-    converterNote.textContent = `Creating a ${getPreviewStyleLabel(selectedMonsterStyle).toLowerCase()} preview now.`;
+    converterNote.textContent = `Creating a ${getPreviewPersonalityLabel(selectedMonsterStyle)} personality preview in the shared Soft 3D Storybook art style.`;
   }
 
   setUploadActionStatus("Photo loaded. Creating your preview now.");
@@ -709,10 +714,10 @@ async function requestMonsterPreview() {
 
   isGeneratingPreview = true;
   syncPreviewControls();
-  setUploadActionStatus(`Creating your ${getPreviewStyleLabel(selectedMonsterStyle).toLowerCase()} preview.`);
+  setUploadActionStatus(`Creating your ${getPreviewPersonalityLabel(selectedMonsterStyle)} personality preview.`);
 
   if (converterStatus) {
-    converterStatus.textContent = `Creating ${getPreviewStyleLabel(selectedMonsterStyle).toLowerCase()} preview...`;
+    converterStatus.textContent = `Creating ${getPreviewPersonalityLabel(selectedMonsterStyle)} preview...`;
   }
 
   if (converterNote) {
@@ -761,14 +766,14 @@ function applyMonsterResult(result) {
   }
 
   if (converterStatus) {
-    converterStatus.textContent = `${getPreviewStyleLabel(style)} preview ready.`;
+    converterStatus.textContent = `${getPreviewPersonalityLabel(style)} preview ready.`;
   }
 
   if (converterNote) {
     converterNote.textContent = `Choose this version, download the free coloring page, or try another version. ${describeRemainingPreviews(remaining)}`;
   }
 
-  setUploadActionStatus(`${getPreviewStyleLabel(style)} preview ready below. ${describeRemainingPreviews(remaining)}`);
+  setUploadActionStatus(`${getPreviewPersonalityLabel(style)} preview ready below. ${describeRemainingPreviews(remaining)}`);
   scrollToResultPanel({ focus: true, delay: 120 });
 }
 
@@ -802,6 +807,7 @@ function renderPreviewHistory() {
     const image = document.createElement("img");
     const label = document.createElement("span");
     const styleLabel = getPreviewStyleLabel(preview.style);
+    const personalityLabel = getPreviewPersonalityLabel(preview.style);
 
     button.type = "button";
     button.className = "preview-choice";
@@ -812,7 +818,7 @@ function renderPreviewHistory() {
     image.src = preview.image;
     image.alt = `${styleLabel} monster preview ${index + 1}.`;
 
-    label.textContent = `${index + 1}. ${styleLabel}`;
+    label.textContent = `${index + 1}. ${personalityLabel}`;
 
     button.append(image, label);
     previewHistory.append(button);
@@ -833,6 +839,11 @@ function selectGeneratedPreview(id, announce = false) {
   syncStorySceneMonster();
   coloringPageUrl = preview.coloringPage;
   updatePreviewPresentation(true);
+
+  if (selectedPreviewPersonality) {
+    selectedPreviewPersonality.hidden = false;
+    selectedPreviewPersonality.textContent = `Selected preview · ${getPreviewPersonalityLabel(preview.style)}`;
+  }
 
   previewHistory?.querySelectorAll(".preview-choice").forEach((button) => {
     button.setAttribute("aria-pressed", button.dataset.previewId === id ? "true" : "false");
@@ -855,11 +866,11 @@ function selectGeneratedPreview(id, announce = false) {
   if (resultBookOffer) resultBookOffer.hidden = true;
 
   if (announce && converterStatus) {
-    converterStatus.textContent = `${getPreviewStyleLabel(preview.style)} preview selected.`;
+    converterStatus.textContent = `${getPreviewPersonalityLabel(preview.style)} preview selected.`;
   }
 
   if (announce) {
-    setUploadActionStatus(`${getPreviewStyleLabel(preview.style)} preview selected.`);
+    setUploadActionStatus(`${getPreviewPersonalityLabel(preview.style)} preview selected. Personality changes above apply only to the next generated preview.`);
   }
 }
 
@@ -878,6 +889,11 @@ function resetPreviewState() {
   if (monsterPreview) {
     monsterPreview.src = demoMonsterImage;
     monsterPreview.alt = "Example generated monster character.";
+  }
+
+  if (selectedPreviewPersonality) {
+    selectedPreviewPersonality.hidden = true;
+    selectedPreviewPersonality.textContent = "";
   }
 
   updatePreviewPresentation(false);
@@ -985,7 +1001,16 @@ function syncPreviewControls() {
   if (previewCount) {
     previewCount.textContent = selectedDrawingFile
       ? describeRemainingPreviews(remaining)
-      : `Choose a style. Upload once, then try up to ${maxFreePreviews} versions.`;
+      : `Upload once, then try up to ${maxFreePreviews} versions.`;
+  }
+
+  if (nextPersonalityStatus) {
+    const personality = getPreviewPersonalityLabel(selectedMonsterStyle);
+    nextPersonalityStatus.textContent = isGeneratingPreview
+      ? `${personality} is queued for the next preview.`
+      : selectedDrawingFile && hasPreview
+        ? `${personality} will be used when you create the next preview.`
+        : `${personality} is ready for the first preview.`;
   }
 }
 
@@ -1011,6 +1036,10 @@ function normalizePreviewStyle(style) {
 
 function getPreviewStyleLabel(style) {
   return previewStyleLabels[normalizePreviewStyle(style)];
+}
+
+function getPreviewPersonalityLabel(style) {
+  return previewPersonalityLabels[normalizePreviewStyle(style)];
 }
 
 function describeRemainingPreviews(remaining) {
@@ -1139,7 +1168,13 @@ function syncStorySceneMonster() {
   childPreviewMonster.hidden = false;
   childPreviewMonster.classList.add("is-processing");
   childPreviewMonster.classList.remove("is-arriving");
-  removeConnectedWhiteBackground(source).then((transparentSource) => {
+  const cutout = window.MonstersNowCutout?.removeConnectedBackground;
+  if (!cutout) {
+    childPreviewMonster.classList.remove("is-processing");
+    window.requestAnimationFrame(() => childPreviewMonster.classList.add("is-arriving"));
+    return;
+  }
+  cutout(source).then((transparentSource) => {
     if (version !== storySceneMonsterVersion || !transparentSource) return;
     childPreviewMonster.src = transparentSource;
     childPreviewMonster.classList.remove("is-processing");
@@ -1148,103 +1183,6 @@ function syncStorySceneMonster() {
     if (version !== storySceneMonsterVersion) return;
     childPreviewMonster.classList.remove("is-processing");
     window.requestAnimationFrame(() => childPreviewMonster.classList.add("is-arriving"));
-  });
-}
-
-function removeConnectedWhiteBackground(source) {
-  return new Promise((resolve, reject) => {
-    const image = new Image();
-    image.onload = () => {
-      try {
-        const scale = Math.min(1, 900 / Math.max(image.naturalWidth, image.naturalHeight));
-        const width = Math.max(1, Math.round(image.naturalWidth * scale));
-        const height = Math.max(1, Math.round(image.naturalHeight * scale));
-        const canvas = document.createElement("canvas");
-        const context = canvas.getContext("2d", { willReadFrequently: true });
-        canvas.width = width;
-        canvas.height = height;
-        context.drawImage(image, 0, 0, width, height);
-        const pixels = context.getImageData(0, 0, width, height);
-        const data = pixels.data;
-        const visited = new Uint8Array(width * height);
-        const queue = new Int32Array(width * height);
-        let head = 0;
-        let tail = 0;
-        const cornerPixels = [0, width - 1, (height - 1) * width, width * height - 1];
-        const opaqueCorners = cornerPixels.filter((pixel) => data[pixel * 4 + 3] > 0);
-        const cornerColor = opaqueCorners.length
-          ? opaqueCorners.reduce((color, pixel) => {
-              const offset = pixel * 4;
-              color.red += data[offset];
-              color.green += data[offset + 1];
-              color.blue += data[offset + 2];
-              return color;
-            }, { red: 0, green: 0, blue: 0 })
-          : { red: 255, green: 255, blue: 255 };
-        const cornerCount = Math.max(1, opaqueCorners.length);
-        cornerColor.red /= cornerCount;
-        cornerColor.green /= cornerCount;
-        cornerColor.blue /= cornerCount;
-        const isBackground = (pixel, seed = false) => {
-          const offset = pixel * 4;
-          const red = data[offset];
-          const green = data[offset + 1];
-          const blue = data[offset + 2];
-          if (data[offset + 3] === 0) return true;
-          const darkest = Math.min(red, green, blue);
-          const chroma = Math.max(red, green, blue) - darkest;
-          const cornerDistance = Math.hypot(red - cornerColor.red, green - cornerColor.green, blue - cornerColor.blue);
-          const nearWhite = darkest > 222 && chroma < 48;
-          const cornerMatch = cornerDistance < (seed ? 62 : 92);
-          const softNeutral = !seed && darkest > 178 && chroma < 42;
-          return nearWhite || cornerMatch || softNeutral;
-        };
-        const enqueue = (pixel, seed = false) => {
-          if (visited[pixel] || !isBackground(pixel, seed)) return;
-          visited[pixel] = 1;
-          queue[tail++] = pixel;
-        };
-        for (let x = 0; x < width; x += 1) {
-          enqueue(x, true);
-          enqueue((height - 1) * width + x, true);
-        }
-        for (let y = 0; y < height; y += 1) {
-          enqueue(y * width, true);
-          enqueue(y * width + width - 1, true);
-        }
-        while (head < tail) {
-          const pixel = queue[head++];
-          data[pixel * 4 + 3] = 0;
-          const x = pixel % width;
-          if (x > 0) enqueue(pixel - 1);
-          if (x < width - 1) enqueue(pixel + 1);
-          if (pixel >= width) enqueue(pixel - width);
-          if (pixel < width * (height - 1)) enqueue(pixel + width);
-        }
-        for (let pixel = 0; pixel < width * height; pixel += 1) {
-          const offset = pixel * 4;
-          if (visited[pixel] || data[offset + 3] === 0) continue;
-          const x = pixel % width;
-          const y = Math.floor(pixel / width);
-          let transparentNeighbors = 0;
-          for (let nearbyY = Math.max(0, y - 1); nearbyY <= Math.min(height - 1, y + 1); nearbyY += 1) {
-            for (let nearbyX = Math.max(0, x - 1); nearbyX <= Math.min(width - 1, x + 1); nearbyX += 1) {
-              if (nearbyX === x && nearbyY === y) continue;
-              if (visited[nearbyY * width + nearbyX]) transparentNeighbors += 1;
-            }
-          }
-          if (transparentNeighbors > 0) {
-            data[offset + 3] = Math.min(data[offset + 3], transparentNeighbors >= 3 ? 150 : 205);
-          }
-        }
-        context.putImageData(pixels, 0, 0);
-        resolve(canvas.toDataURL("image/webp", .92));
-      } catch (error) {
-        reject(error);
-      }
-    };
-    image.onerror = reject;
-    image.src = source;
   });
 }
 
@@ -1536,11 +1474,13 @@ async function ensureMonsterSubmission(drawing) {
     body: JSON.stringify({ drawing, filename: selectedDrawingFile?.name || "monster-drawing.jpg" }),
   });
   const result = await response.json().catch(() => ({ error: "The upload service did not return a readable response." }));
-  if (!response.ok && (response.status >= 500 || result.code === "PGRST205" || result.code === "story_database_error")) {
-    console.warn("Private monster persistence is unavailable; continuing with the existing in-session preview flow.");
-    return null;
+  if (!response.ok || !result.submission?.id || !result.submission?.token) {
+    const error = new Error(result.error || "Your drawing could not be saved safely.");
+    const persistenceUnavailable = response.status >= 500 || result.code === "PGRST205" || result.code === "story_database_error";
+    error.code = persistenceUnavailable ? "monster_persistence_unavailable" : result.code;
+    error.status = response.status;
+    throw error;
   }
-  if (!response.ok || !result.submission?.id || !result.submission?.token) throw new Error(result.error || "Your drawing could not be saved safely.");
   monsterSubmission = result.submission;
   try { sessionStorage.setItem("monstersnow_monster_submission", JSON.stringify(monsterSubmission)); } catch {}
   return monsterSubmission;
@@ -1570,6 +1510,11 @@ async function finalizeSavedMonster({ email, personalization, selectedPreviewId:
 }
 
 async function convertMonster(drawing, style, variationNumber, savedSubmission) {
+  if (!savedSubmission?.id || !savedSubmission?.token) {
+    const error = new Error("The drawing was not saved, so a preview cannot be created safely.");
+    error.code = "monster_persistence_unavailable";
+    throw error;
+  }
   const response = await fetch("/api/convert-monster", {
     method: "POST",
     headers: {
@@ -1579,8 +1524,8 @@ async function convertMonster(drawing, style, variationNumber, savedSubmission) 
       drawing,
       style,
       variationNumber,
-      submissionId: savedSubmission?.id || null,
-      submissionToken: savedSubmission?.token || null,
+      submissionId: savedSubmission.id,
+      submissionToken: savedSubmission.token,
     }),
   });
 
@@ -1604,6 +1549,25 @@ async function convertMonster(drawing, style, variationNumber, savedSubmission) 
 
 function showMonsterGenerationError(error) {
   const hasPreview = generatedPreviews.length > 0;
+  const persistenceUnavailable = [
+    "monster_persistence_unavailable",
+    "story_database_error",
+    "PGRST205",
+    "monster_submission_required",
+  ].includes(error?.code);
+
+  if (persistenceUnavailable) {
+    const message = "We couldn't safely save the drawing, so no preview was created. Nothing was charged and no free preview was used. Retry in a moment.";
+    showUploadError(message);
+    if (converterStatus) converterStatus.textContent = "Preview paused before generation.";
+    if (converterNote) converterNote.textContent = hasPreview
+      ? "Your existing preview is still available. Retry when the save service is back."
+      : message;
+    setUploadActionStatus("Save service unavailable. Retry to create the preview; the generator was not called.");
+    setConverterStage(selectedDrawingFile ? "preview" : "upload");
+    scrollToResultPanel({ focus: true, delay: 120 });
+    return;
+  }
 
   if (error?.code === "monster_drawing_not_found") {
     const message = "We couldn't find a clear monster drawing in this photo. Try a closer, brighter picture with the artwork filling most of the frame.";
