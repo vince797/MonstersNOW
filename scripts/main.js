@@ -77,6 +77,9 @@ const previewHistory = document.querySelector("#preview-history");
 const confirmMonsterButton = document.querySelector("#confirm-monster");
 const resultBookOffer = document.querySelector("#result-book-offer");
 const childEditorStart = document.querySelector("#child-editor-start");
+const childEditorKicker = document.querySelector("#child-editor-kicker");
+const bookOfferStatus = document.querySelector("#book-offer-status");
+const childEditorJump = document.querySelector("#jump-to-child-editor");
 const storybookInterestButton = document.querySelector("#storybook-interest");
 const storybookInterestForm = document.querySelector("#storybook-interest-form");
 const interestEmail = document.querySelector("#interest-email");
@@ -243,9 +246,20 @@ if (confirmMonsterButton) {
     confirmMonsterButton.textContent = "Monster Selected ✓";
     resultBookOffer.hidden = false;
     storybookInterestButton.disabled = false;
+    syncBookOfferStatus(true);
     setConverterStage("personalize");
     childEditorStart?.focus({ preventScroll: true });
-    childEditorStart?.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (resultBookOffer) {
+      window.setTimeout(() => {
+        window.scrollTo({ top: window.scrollY + resultBookOffer.getBoundingClientRect().top - 88, behavior: "auto" });
+      }, 0);
+    }
+  });
+}
+
+if (childEditorJump) {
+  childEditorJump.addEventListener("click", () => {
+    window.setTimeout(() => childEditorStart?.focus({ preventScroll: true }), 0);
   });
 }
 
@@ -953,8 +967,10 @@ function syncPreviewControls() {
   }
 
   if (resultBookOffer) {
-    resultBookOffer.hidden = !hasPreview || !monsterConfirmed;
+    resultBookOffer.hidden = false;
   }
+
+  syncBookOfferStatus(hasPreview);
 
   if (downloadColoringButton) {
     downloadColoringButton.hidden = !hasPreview;
@@ -1089,6 +1105,22 @@ function setConverterStage(stage) {
     step.classList.toggle("is-active", stepIndex === activeIndex);
     step.classList.toggle("is-complete", stepIndex < activeIndex);
   });
+}
+
+function syncBookOfferStatus(hasPreview = Boolean(selectedPreviewId)) {
+  if (childEditorKicker) {
+    childEditorKicker.textContent = monsterConfirmed
+      ? "Monster selected · personalize the story"
+      : "Optional studio · explore anytime";
+  }
+  if (!bookOfferStatus) return;
+  if (monsterConfirmed) {
+    bookOfferStatus.textContent = "Your monster is selected. Finish the optional child profile and names, then review all 32 pages before checkout.";
+  } else if (hasPreview) {
+    bookOfferStatus.textContent = "Your child choices are saved. Choose one generated monster above to unlock the 32-page book review.";
+  } else {
+    bookOfferStatus.textContent = "Explore the child creator now. Your choices stay on this device; select a generated monster later to unlock the 32-page book review.";
+  }
 }
 
 function formatBytes(bytes) {

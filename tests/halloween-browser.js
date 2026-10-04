@@ -63,6 +63,33 @@ const server = http.createServer(async (req, res) => {
         ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH }
         : {}),
     });
+    for (const suffix of ["", "?story=halloween-monster-night"]) {
+      const discovery = await browser.newPage({ viewport: { width: 390, height: 844 } });
+      await discovery.goto(`${base}/create.html${suffix}`);
+      assert.equal(await discovery.locator("#child-editor-start").isVisible(), true, `child editor should be visible on ${suffix || "default URL"}`);
+      assert.match(await discovery.locator("#book-offer-status").textContent(), /Explore the child creator now/i);
+      assert.equal(await discovery.locator("#storybook-interest").isHidden(), true, "book review stays locked before monster selection");
+      await discovery.locator("#jump-to-child-editor").click();
+      await discovery.waitForFunction(() => {
+        const top = document.querySelector("#child-editor-start")?.getBoundingClientRect().top;
+        return typeof top === "number" && top >= -2 && top < 220;
+      });
+      const childEntryTop = await discovery.locator("#child-editor-start").evaluate((element) => element.getBoundingClientRect().top);
+      assert.ok(childEntryTop >= -2 && childEntryTop < 220, `child creator link did not reveal editor: ${childEntryTop}`);
+      if (!suffix) {
+        await discovery.screenshot({ path: path.join(output, "child-editor-entry-mobile.png"), fullPage: true });
+        await discovery.locator("#monster-upload").setInputFiles({ name: "not-a-drawing.txt", mimeType: "text/plain", buffer: Buffer.from("not an image") });
+        await discovery.locator("#upload-error").waitFor({ state: "visible" });
+        assert.equal(await discovery.locator("#child-editor-start").isVisible(), true, "failed upload must not hide child editor");
+      }
+      await discovery.close();
+    }
+    const desktopDiscovery = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+    await desktopDiscovery.goto(`${base}/create.html`);
+    assert.equal(await desktopDiscovery.locator("#child-editor-start").isVisible(), true);
+    assert.equal(await desktopDiscovery.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
+    await desktopDiscovery.screenshot({ path: path.join(output, "create-studio-desktop.png"), fullPage: true });
+    await desktopDiscovery.close();
     const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
     const errors = [];
     page.on("pageerror", (error) => errors.push(error.message));
@@ -82,7 +109,7 @@ const server = http.createServer(async (req, res) => {
       return { top: rect.top, bottom: rect.bottom, viewport: innerHeight, horizontal: document.documentElement.scrollWidth > innerWidth };
     });
     assert.equal(editorPosition.horizontal, false);
-    assert.ok(editorPosition.top >= -2 && editorPosition.top < editorPosition.viewport * 0.4, JSON.stringify(editorPosition));
+    assert.ok(editorPosition.top >= -2 && editorPosition.top < editorPosition.viewport, JSON.stringify(editorPosition));
     await page.screenshot({ path: path.join(output, "child-editor-mobile.png"), fullPage: true });
     await page.locator("label").filter({ has: page.locator('input[name="child-character"][value="warm-curly-dark"]') }).click();
     await page.getByText("Ages 5–6 · About average height. Saved with the book profile.").waitFor();
@@ -119,6 +146,7 @@ const server = http.createServer(async (req, res) => {
     assert.equal(await page.locator('input[name="child-character"][value="deep-braids-black"]').isChecked(), true);
     assert.equal(await page.locator('input[name="child-age-band"][value="7-8"]').isChecked(), true);
     assert.equal(await page.locator('input[name="child-relative-height"][value="taller"]').isChecked(), true);
+    await page.screenshot({ path: path.join(output, "child-editor-desktop-wheelchair-editable.png"), fullPage: true });
     await page.goto(`${base}/about.html`);
     await page.goBack();
     assert.equal(await page.locator('input[name="child-character"][value="deep-braids-black"]').isChecked(), true);

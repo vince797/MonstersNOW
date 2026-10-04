@@ -10,8 +10,8 @@
     <link rel="canonical" href="https://www.monstersnow.com/create" />
     <title>Create Your Monster | MonstersNOW</title>
     <link rel="icon" href="assets/brand/monstersnow-icon-32-v1.png" type="image/png" sizes="32x32" />
-    <link rel="stylesheet" href="styles.css?v=20261004-child-handoff" />
-    <link rel="stylesheet" href="child-selector.css?v=20261004-wheelchair-v3" />
+    <link rel="stylesheet" href="styles.css?v=20261004-create-studio-v4" />
+    <link rel="stylesheet" href="child-selector.css?v=20261004-create-studio-v4" />
     <link rel="stylesheet" href="storefront.css?v=20261002-public-storefront" />
     <link rel="apple-touch-icon" href="assets/brand/monstersnow-icon-180-v1.png" />
     <link rel="stylesheet" href="brand.css?v=20261004-selected-logo" />
@@ -44,9 +44,13 @@
             <p class="eyebrow">Create your monster</p>
             <h1 id="converter-title">Upload their drawing.</h1>
             <p>
-              Choose a clear photo, create up to three monster previews, select
-              your favorite, then review the personalized book before checkout.
+              Bring their idea to life, build an optional storybook child, and
+              see every page before anything is ordered.
             </p>
+            <div class="create-jump-actions">
+              <a class="button primary" href="#monster-upload">Start with a drawing</a>
+              <a class="button create-child-jump" id="jump-to-child-editor" href="#child-editor-start">Explore the child creator</a>
+            </div>
             <div class="selected-story-card" id="selected-story" data-story-id="halloween-monster-night" role="group" aria-label="Selected story">
               <img src="assets/storybook/cover-series/minimal-concepts/halloween-monster-night-v2-web.jpg" alt="" width="96" height="96" />
               <span>
@@ -169,18 +173,20 @@
                   View / Download Free Coloring Page
                 </button>
               </div>
-              <section class="result-book-offer" id="result-book-offer" aria-labelledby="result-book-title" hidden>
+            </div>
+          </div>
+              <section class="result-book-offer" id="result-book-offer" aria-labelledby="result-book-title">
                 <div class="book-offer-header">
-                  <span class="result-label">Printed storybook</span>
-                  <h4 id="result-book-title">Personalize Halloween Monster Night.</h4>
-                  <p>Add the names, choose a format, and review all 32 pages before checkout.</p>
+                  <span class="result-label">Step 3 · Optional child creator</span>
+                  <h2 id="result-book-title">Create the co-star of their monster story.</h2>
+                  <p id="book-offer-status">Explore the child creator now. Your choices stay on this device; select a generated monster later to unlock the 32-page book review.</p>
                 </div>
                 <form class="interest-form" id="storybook-interest-form">
                   <fieldset class="storybook-personalization">
                     <legend>Personalize the story</legend>
                     <section class="child-character-picker" id="child-editor-start" aria-labelledby="child-character-title" data-child-selector tabindex="-1">
                       <div class="child-character-heading">
-                        <div><span class="child-editor-kicker">Monster selected · next step</span><strong id="child-character-title">Create your child</strong><small>Optional. Choose a simple illustration profile, or keep the story monster-only. No child photo, birthdate, or exact height needed.</small></div>
+                        <div><span class="child-editor-kicker" id="child-editor-kicker">Optional studio · explore anytime</span><strong id="child-character-title">Create your child</strong><small>Choose an illustrated profile, or keep the story monster-only. No child photo, birthdate, or exact height needed.</small></div>
                         <span id="child-character-selection">Monster only</span>
                       </div>
                       <div class="child-editor-toolbar" role="group" aria-label="Character editor history">
@@ -356,8 +362,6 @@
                   </div>
                 </form>
               </section>
-            </div>
-          </div>
         </div>
       </section>
     </main>
@@ -400,6 +404,6 @@
     </footer>
 
     <script src="scripts/child-selector.js?v=20261004-wheelchair-v3"></script>
-    <script src="scripts/main.js?v=20261004-child-handoff"></script>
+    <script src="scripts/main.js?v=20261004-create-studio-v4"></script>
   </body>
 </html>

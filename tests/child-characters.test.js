@@ -53,10 +53,14 @@ test("proof identity includes the full canonical child profile", () => {
 test("selector UI exposes only supported controls and states the current rendering limit", () => {
   const html = fs.readFileSync(path.join(root, "create.html"), "utf8");
   const script = fs.readFileSync(path.join(root, "scripts/child-selector.js"), "utf8");
+  const mainScript = fs.readFileSync(path.join(root, "scripts/main.js"), "utf8");
   const css = fs.readFileSync(path.join(root, "child-selector.css"), "utf8");
   assert.match(html, /name="child-age-band"/);
   assert.match(html, /name="child-relative-height"/);
   assert.match(html, /name="child-mobility-aid" value="wheelchair" disabled/);
+  assert.match(html, /href="#child-editor-start">Explore the child creator/);
+  assert.match(html, /id="result-book-offer" aria-labelledby="result-book-title">/);
+  assert.match(html, /Explore the child creator now/);
   assert.match(html, /No diagnosis or medical details needed/);
   assert.match(html, /Curly dark or Braids/i);
   assert.match(html, /ages 5–8/i);
@@ -71,6 +75,7 @@ test("selector UI exposes only supported controls and states the current renderi
   assert.match(script, /function reset\(/);
   assert.match(script, /mobility-\$\{profile\.mobilityAid/);
   assert.match(script, /function supportsWheelchair/);
+  assert.match(mainScript, /resultBookOffer\.hidden = false/);
   assert.match(css, /\.child-preview-stage\.mobility-wheelchair/);
   assert.match(css, /\.child-live-preview \{[\s\S]*position: sticky/);
 });
