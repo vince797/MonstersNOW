@@ -56,12 +56,36 @@ const server = http.createServer(async (req, res) => {
   base = `http://127.0.0.1:${server.address().port}`;
   let browser;
   try {
-    browser = await chromium.launch({ headless: true });
+    browser = await chromium.launch({
+      headless: true,
+      ...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH
+        ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH }
+        : {}),
+    });
     const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
     const errors = [];
     page.on("pageerror", (error) => errors.push(error.message));
     await page.goto(`${base}/create.html?test=halloween`);
     await page.locator("#monster-upload").setInputFiles(path.join(root, "assets/step-2-character.jpg"));
+    await page.locator("#confirm-monster").waitFor({ state: "visible" });
+    await page.locator("#confirm-monster").click();
+    await page.locator("#storybook-interest").waitFor({ state: "visible" });
+    await page.locator("label").filter({ has: page.locator('input[name="child-character"][value="deep-coils-black"]') }).click();
+    await page.locator("label").filter({ has: page.locator('input[name="child-age-band"][value="7-8"]') }).click();
+    await page.locator("label").filter({ has: page.locator('input[name="child-relative-height"][value="taller"]') }).click();
+    await page.getByText("Ages 7–8 · Taller than most children this age. Saved with the book profile.").waitFor();
+    const savedProfile = await page.evaluate(() => JSON.parse(localStorage.getItem("monstersnow_child_character_profile_v1")));
+    assert.deepEqual(savedProfile, { id: "deep-coils-black", ageBand: "7-8", relativeHeight: "taller", mobilityAid: "none" });
+    await page.reload();
+    assert.equal(await page.locator('input[name="child-character"][value="deep-coils-black"]').isChecked(), true);
+    assert.equal(await page.locator('input[name="child-age-band"][value="7-8"]').isChecked(), true);
+    assert.equal(await page.locator('input[name="child-relative-height"][value="taller"]').isChecked(), true);
+    await page.goto(`${base}/about.html`);
+    await page.goBack();
+    assert.equal(await page.locator('input[name="child-character"][value="deep-coils-black"]').isChecked(), true);
+    await page.locator("#monster-upload").setInputFiles(path.join(root, "assets/step-2-character.jpg"));
+    await page.locator("#confirm-monster").waitFor({ state: "visible" });
+    await page.locator("#confirm-monster").click();
     await page.locator("#storybook-interest").waitFor({ state: "visible" });
     await page.locator("#download-coloring").click();
     await page.locator("#coloring-page-dialog[open]").waitFor({ state: "visible" });
@@ -74,7 +98,20 @@ const server = http.createServer(async (req, res) => {
     await page.locator("#storybook-interest").click();
     await page.waitForURL("**/halloween-proof.html");
     await page.locator("#proof-checkout").waitFor({ state: "visible" });
+    if (await page.locator("#proof-child-profile").isHidden()) {
+      throw new Error(JSON.stringify({
+        pageErrors: errors,
+        proofStatus: await page.locator("#proof-status").textContent(),
+        saved: JSON.parse(await page.evaluate(() => sessionStorage.getItem("monstersnow_halloween_test_proof"))),
+      }));
+    }
+    assert.match(await page.locator("#proof-child-profile-copy").textContent(), /Ages 7–8.*Taller than most/i);
     assert.equal(await page.locator(".book-proof-page").count(), 32);
+    const savedSubmission = JSON.parse(await page.evaluate(() => sessionStorage.getItem("monstersnow_halloween_test_proof")));
+    assert.equal(savedSubmission.submission.personalization.childCharacter.id, "deep-coils-black");
+    assert.equal(savedSubmission.submission.personalization.childCharacter.ageBand, "7-8");
+    assert.equal(savedSubmission.submission.personalization.childCharacter.relativeHeight, "taller");
+    assert.equal(savedSubmission.submission.personalization.childCharacter.mobilityAid, "none");
     const layout = () => page.evaluate(() => ({ horizontal: document.documentElement.scrollWidth > innerWidth, clipped: [...document.querySelectorAll(".book-proof-page")].filter((p) => p.scrollHeight > p.clientHeight + 2).length }));
     assert.deepEqual(await layout(), { horizontal: false, clipped: 0 });
     await page.screenshot({ path: path.join(output, "desktop.png") });
@@ -100,7 +137,7 @@ const server = http.createServer(async (req, res) => {
     await page.getByRole("heading", { name: "Your test checkout is complete." }).waitFor();
     assert.deepEqual(errors, []);
     assert.ok(external.every((call) => !/lulu|resend/.test(call.url)));
-    console.log("PASS: upload → coloring-page viewer → selected preview → 32-page proof → approval → mocked test checkout → verified success; desktop/mobile fit; no JS errors; no print/email calls.");
+    console.log("PASS: upload → persistent child profile → coloring-page viewer → selected preview → 32-page proof → approval → mocked test checkout → verified success; back/forward/reload and desktop/mobile fit; no JS errors; no print/email calls.");
   } finally {
     if (browser) await browser.close();
     server.close();

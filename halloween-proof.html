@@ -5,7 +5,9 @@
   <meta name="robots" content="noindex,nofollow"><title>Review Your Halloween Book | MonstersNOW</title>
   <link rel="stylesheet" href="styles.css?v=20260917-halloween-test">
   <link rel="stylesheet" href="halloween-proof.css?v=20260917-halloween-test">
-  <script src="scripts/halloween-proof.js?v=20261002-checkout-guards" defer></script>
+  <link rel="stylesheet" href="child-selector.css?v=20261004-profile-v1">
+  <script src="scripts/child-selector.js?v=20261004-profile-v1" defer></script>
+  <script src="scripts/halloween-proof.js?v=20261004-child-profile" defer></script>
 </head>
 <body>
   <header class="proof-toolbar">
@@ -19,6 +21,10 @@
       <h1>Review your book before checkout.</h1>
       <p>All 32 interior pages use the approved story and your selected monster. This is a layout proof, with character vignettes—not the finished scene illustrations or Lulu-ready print files.</p>
       <p id="proof-mode-message">Your proof is saved in this browser tab until checkout; keep a PDF if you want a copy.</p>
+      <section class="proof-child-profile" id="proof-child-profile" aria-labelledby="proof-child-profile-title" hidden>
+        <span class="child-preview-stage" id="proof-child-preview-stage" aria-hidden="true"><span class="child-preview-figure"><span class="child-avatar" id="proof-child-preview-avatar"></span><span class="child-preview-body"></span></span></span>
+        <div><strong id="proof-child-profile-title">Child character profile</strong><p id="proof-child-profile-copy"></p></div>
+      </section>
       <p id="proof-status" role="status"></p>
     </section>
     <div id="proof-pages" class="proof-pages"></div>

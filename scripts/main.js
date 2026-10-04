@@ -459,6 +459,7 @@ function getStorybookPersonalization() {
 }
 
 function getSelectedChildCharacter() {
+  if (window.MonstersNowChildSelector?.getProfile) return window.MonstersNowChildSelector.getProfile();
   const input = childCharacterInputs.find((option) => option.checked);
   const labels = {
     none: "Monster only", "warm-curly-dark": "Curly dark hair", "deep-coils-black": "Black coily hair",
@@ -471,6 +472,10 @@ function getSelectedChildCharacter() {
 }
 
 function syncChildCharacterPicker() {
+  if (window.MonstersNowChildSelector?.sync) {
+    window.MonstersNowChildSelector.sync();
+    return;
+  }
   const selected = getSelectedChildCharacter();
   for (const input of childCharacterInputs) input.closest("label")?.classList.toggle("is-selected", input.checked);
   if (childCharacterSelection) childCharacterSelection.textContent = selected.label;
@@ -885,6 +890,8 @@ function resetPreviewState() {
 
   if (storybookInterestForm) {
     storybookInterestForm.reset();
+    window.MonstersNowChildSelector?.restore();
+    syncChildCharacterPicker();
     syncFeaturePermissionFields();
   }
 

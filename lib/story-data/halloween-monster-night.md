@@ -15,7 +15,9 @@
 - Stage monster actions without assuming hands, feet, wings, facial features, speech, or a particular method of movement.
 - Reserve a flexible clear area for the monster in every scene. Important props, faces, text, and clues must not overlap that area.
 - `{child_name}` wears the same fall outfit throughout the story. The monster—not a costume worn by the child—is the personalized Halloween character.
-- Depict `{child_name}` using the customer's selected boy or girl presentation in every illustration. No pronoun token or alternate story passage is required because the manuscript avoids gender-specific pronouns.
+- Depict `{child_name}` with the selected appearance, age profile, relative height, and any supported mobility aid consistently in every illustration. Do not infer a diagnosis or medical history.
+- If a wheelchair profile is selected, keep the same wheelchair visible with seated proportions on every child page. Use accessible routes and equally active participation; never frame disability as tragedy, pity, a lesson for others, or something to cure.
+- Stage `{child_name}` with movement-neutral actions such as move, join, follow, or lead. Do not force standing, walking, running, jumping, or climbing.
 - Treat all personalized text areas as flexible templates. Test the longest supported child and monster names before print, and reduce type size or rebalance line breaks without changing the wording.
 - Physical spreads follow standard bound-book pagination: even-numbered page on the left, odd-numbered page on the right.
 
@@ -55,13 +57,13 @@ Copyright and publisher information placed in small type at the bottom.
 **Final story text:**  
 The porch lights were on. Pumpkins lined the steps. Down the street, someone was already calling, “Trick or treat!”
 
-`{child_name}` grabbed an empty treat bucket and hurried to the door. `{monster_name}` was waiting outside.
+`{child_name}` took an empty treat bucket and made their way to the door. `{monster_name}` was waiting outside.
 
 “Ready, `{monster_name}`?”
 
 They had treats to collect and a parade to catch. It was `{monster_name}`’s first Halloween, and `{child_name}` wasn’t about to miss a thing.
 
-**Illustration direction:** Cozy home entry opening onto a decorated neighborhood at sunset. `{child_name}` stands near the open door with a treat bucket. Place `{monster_name}` in a flexible clear zone just outside or beside the doorway. The town-square glow should be visible far down the street.
+**Illustration direction:** Cozy home entry opening onto a decorated neighborhood at sunset, with a step-free route through the open doorway. `{child_name}` is near the door with a treat bucket. Place `{monster_name}` in a flexible clear zone just outside or beside the doorway. The town-square glow should be visible far down the street.
 
 **Personalized characters:** `{child_name}`, `{monster_name}`.
 
@@ -248,7 +250,7 @@ But the path looked different in the dark, and for a moment, nobody moved.
 
 **Continuity:** This is the quietest, darkest spread, but the star and porch lights keep it warm. Place `{child_name}` at the threshold and `{monster_name}` slightly nearer the path.
 
-## Pages 24–25 — Spread 11: One kind step
+## Pages 24–25 — Spread 11: One kind act
 
 **Final story text:**  
 Then `{monster_name}` went ahead.
@@ -297,7 +299,7 @@ Everyone waited.
 
 The giant pumpkin lit up. Then the pumpkin beside it. Then the next, and the next, all the way down the street.
 
-The little pumpkin cheered. The little moon jumped. `{child_name}` nearly dropped the treat bucket.
+The little pumpkin cheered. The little moon bounced with excitement. `{child_name}`’s treat bucket wobbled with excitement too.
 
 “Well, `{monster_name}`,” said the parade keeper, “you’ve brought our star back. There’s only one thing left to do.”
 
@@ -365,6 +367,7 @@ Created by `{child_name}`
 10. The parade banner remains repaired after pages 20–21.
 11. Friends A and B appear in every appropriate subsequent group scene and in the parade.
 12. Keep a flexible monster-safe composition zone in every personalized illustration.
+13. When a mobility aid is selected, preserve its exact design, the child's seated proportions, and an accessible path through every child scene.
 
 ## Personalization QA
 

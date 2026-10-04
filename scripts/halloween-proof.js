@@ -10,9 +10,26 @@ try {
     ? "This checkout is in test mode: no real payment, shipping, or print order occurs. Your proof is saved in this browser tab until checkout; keep a PDF if you want a copy."
     : "Continue only when the names and selected monster are correct. Stripe will collect payment and the shipping address securely.";
   document.querySelector("#proof-approval-copy").textContent = testMode
-    ? "I reviewed the names, selected monster, and all 32 pages. I approve this review copy for test checkout."
-    : "I reviewed the names, selected monster, and all 32 pages and want to continue to secure checkout.";
+    ? "I reviewed the names, child profile, selected monster, and all 32 pages. I approve this review copy for test checkout."
+    : "I reviewed the names, child profile, selected monster, and all 32 pages and want to continue to secure checkout.";
   proofCheckout.querySelector("button").textContent = testMode ? "Continue to Stripe test checkout" : "Continue to secure checkout";
+  const childProfile = savedProof.proof.childCharacter;
+  if (childProfile?.included) {
+    const profileSection = document.querySelector("#proof-child-profile");
+    document.querySelector("#proof-child-profile-title").textContent = childProfile.label;
+    document.querySelector("#proof-child-profile-copy").textContent = [
+      childProfile.ageBandLabel,
+      childProfile.relativeHeightLabel,
+      childProfile.mobilityAid !== "none" ? childProfile.mobilityAidLabel : "",
+      "Saved with this proof. Finished child art remains blocked until a matching transparent render asset is approved.",
+    ].filter(Boolean).join(" · ");
+    window.MonstersNowChildSelector?.renderProfile(
+      document.querySelector("#proof-child-preview-stage"),
+      document.querySelector("#proof-child-preview-avatar"),
+      childProfile,
+    );
+    profileSection.hidden = false;
+  }
   for (const page of savedProof.proof.pages) {
     const article = document.createElement("article");
     article.className = "book-proof-page";

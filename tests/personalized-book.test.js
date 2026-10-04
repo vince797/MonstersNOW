@@ -24,10 +24,11 @@ test("master copy becomes a pinned order-specific render manifest", () => {
   const book = buildPersonalizedBook(story, {
     childName: "Riley",
     monsterName: "Fizz",
-    childCharacter: { id: "deep-braids-black", label: "Black braids", included: true },
+    childCharacter: { id: "deep-braids-black", ageBand: "7-8", relativeHeight: "taller" },
     selectedPreviewId: "preview-1",
   }, { selectedPreviewUrl: "https://assets.example/fizz.png", selectedPreviewId: "preview-1" }, {
     childImageUrl: "https://assets.example/children/deep-braids-black.png",
+    childProfileKey: "deep-braids-black:7-8",
     rendererVersion: "personalized-composite-v1",
   });
 
@@ -38,10 +39,16 @@ test("master copy becomes a pinned order-specific render manifest", () => {
   assert.equal(book.pages[2].monster, null);
   assert.equal(book.pages[0].child.preset.id, "deep-braids-black");
   assert.equal(book.pages[0].child.imageUrl, "https://assets.example/children/deep-braids-black.png");
+  assert.equal(book.pages[0].child.assetProfileKey, "deep-braids-black:7-8");
+  assert.equal(book.pages[0].child.scale, 33);
   assert.equal(book.pages[1].child, null);
-  assert.deepEqual(book.childCharacter, { id: "deep-braids-black", label: "Braids", included: true, skinTone: "deep", hairColor: "black", hairStyle: "braids" });
+  assert.deepEqual(book.childCharacter, {
+    id: "deep-braids-black", label: "Braids", included: true, skinTone: "deep", hairColor: "black", hairStyle: "braids",
+    ageBand: "7-8", ageBandLabel: "Ages 7–8", relativeHeight: "taller", relativeHeightLabel: "Taller than most children this age",
+    mobilityAid: "none", mobilityAidLabel: "No mobility aid",
+  });
   assert.ok(book.pages.every((page) => page.artworkRole === "background_plate"));
-  assert.deepEqual(book.readiness, { copyReady: true, artworkReady: true, monsterReady: true, childReady: true, rendererReady: true, productionReady: true, blockers: [] });
+  assert.deepEqual(book.readiness, { copyReady: true, artworkReady: true, monsterReady: true, childReady: true, mobilityAidReady: true, rendererReady: true, productionReady: true, blockers: [] });
   assert.match(book.fingerprint, /^[a-f0-9]{64}$/);
 });
 
@@ -98,4 +105,47 @@ test("production stays blocked while child art or the personalized compositor is
   assert.equal(book.readiness.rendererReady, false);
   assert.match(book.readiness.blockers.join(" "), /transparent render asset/i);
   assert.match(book.readiness.blockers.join(" "), /compositor/i);
+});
+
+test("wheelchair profiles require an exact seated child-and-wheelchair asset on every child page", () => {
+  const story = {
+    id: "story-1",
+    pages: Array.from({ length: 32 }, (_, index) => ({
+      text: "{child_name} and {monster_name} lead the parade.",
+      artworkUrl: `https://assets.example/page-${index + 1}.jpg`,
+      artworkStatus: "final",
+      backgroundPlateConfirmed: true,
+      backgroundPlateVersion: 2,
+      childRequired: true,
+      childPlacement: { x: 60, y: 78, scale: 30, facing: "right", layer: "front" },
+    })),
+  };
+  const order = {
+    childName: "Riley",
+    monsterName: "Fizz",
+    childCharacter: { id: "deep-coils-black", ageBand: "7-8", relativeHeight: "shorter", mobilityAid: "wheelchair" },
+    selectedPreviewId: "preview-1",
+  };
+  const monster = { selectedPreviewUrl: "https://assets.example/fizz.png", selectedPreviewId: "preview-1" };
+  const incomplete = buildPersonalizedBook(story, order, monster, {
+    childImageUrl: "https://assets.example/children/riley.png",
+    childProfileKey: "deep-coils-black:7-8:wheelchair",
+    rendererVersion: "personalized-composite-v1",
+  });
+  assert.equal(incomplete.readiness.productionReady, false);
+  assert.equal(incomplete.readiness.mobilityAidReady, false);
+  assert.match(incomplete.readiness.blockers.join(" "), /seated child-and-wheelchair render asset/i);
+
+  const ready = buildPersonalizedBook(story, order, monster, {
+    childImageUrl: "https://assets.example/children/riley-wheelchair.png",
+    childProfileKey: "deep-coils-black:7-8:wheelchair",
+    childDepiction: "seated-wheelchair",
+    childAssetComposition: "child-and-wheelchair",
+    rendererVersion: "personalized-composite-v1",
+  });
+  assert.equal(ready.readiness.productionReady, true);
+  assert.ok(ready.pages.every((page) => page.child.pose === "seated-wheelchair"));
+  assert.ok(ready.pages.every((page) => page.child.preserveMobilityAid && page.child.seatedProportions));
+  assert.ok(ready.pages.every((page) => page.child.scale === 30 && page.child.bodyScale === 0.9));
+  assert.ok(ready.pages.every((page) => /actively participating.*seated pose/i.test(page.child.actionGuidance)));
 });

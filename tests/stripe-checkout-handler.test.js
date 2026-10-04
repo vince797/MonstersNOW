@@ -27,7 +27,7 @@ test("checkout succeeds and records an order when optional intake email is not c
   const proofInput = {
     submissionId,
     email: "parent@example.com",
-    personalization: { childName: "Sam", monsterName: "Noodle", childCharacter: { id: "light-short-brown", label: "Short brown hair", included: true } },
+    personalization: { childName: "Sam", monsterName: "Noodle", childCharacter: { id: "light-short-brown", ageBand: "2-4", relativeHeight: "shorter" } },
     format: "softcover",
     source: "create-form",
     monsterImage,
@@ -88,7 +88,11 @@ test("checkout succeeds and records an order when optional intake email is not c
     assert.equal(response.body.intakeEmailId, null);
     const orderInsert = calls.find((call) => call.url.includes("/storybook_orders?on_conflict="));
     const storedOrder = JSON.parse(orderInsert.options.body)[0];
-    assert.deepEqual(storedOrder.child_character, { id: "light-short-brown", label: "Short brown hair", included: true });
+    assert.deepEqual(storedOrder.child_character, {
+      id: "light-short-brown", label: "Short brown", included: true, skinTone: "light", hairColor: "brown", hairStyle: "short",
+      ageBand: "2-4", ageBandLabel: "Ages 2–4", relativeHeight: "shorter", relativeHeightLabel: "Shorter than most children this age",
+      mobilityAid: "none", mobilityAidLabel: "No mobility aid",
+    });
     assert.equal(storedOrder.story_id, "halloween-monster-night");
     assert.equal(storedOrder.selected_preview_id, previewId);
     const stripeIndex = calls.findIndex((call) => call.url === "https://api.stripe.com/v1/checkout/sessions");
@@ -99,6 +103,7 @@ test("checkout succeeds and records an order when optional intake email is not c
     const stripeParams = new URLSearchParams(stripeCall.options.body);
     assert.match(stripeParams.get("success_url"), /order_token=mn_order_/);
     assert.equal(stripeParams.get("automatic_tax[enabled]"), "true");
+    assert.equal(stripeParams.get("metadata[child_mobility_aid]"), "none");
     assert.match(response.body.warnings.join(" "), /order is still available in Admin/i);
   } finally { global.fetch = originalFetch; }
 });
