@@ -1,0 +1,55 @@
+{
+  "status": "reference_only",
+  "synthetic": true,
+  "productionSelectionEnabled": false,
+  "profile": {
+    "name": "Maya",
+    "ageBand": "5-6",
+    "relativeHeight": "average",
+    "appearancePresetId": "warm-curly-dark",
+    "appearance": "warm skin tone with dark curly hair",
+    "mobilityAid": "wheelchair",
+    "mobilityAidLabel": "Wheelchair"
+  },
+  "asset": {
+    "path": "assets/storybook/halloween-monster-night/reference/wheelchair-child-pose-sheet-v1.png",
+    "profileKey": "warm-curly-dark:5-6:wheelchair",
+    "depiction": "seated-wheelchair",
+    "composition": "child-and-wheelchair",
+    "transparent": true,
+    "approved": false,
+    "pageVerification": "reference-only"
+  },
+  "pages": [
+    {
+      "id": "doorway",
+      "pose": "top-left",
+      "text": "Maya took an empty treat bucket and made their way to the open door. Noodle was waiting outside.",
+      "guidance": "Preserve the full chair silhouette and step-free route; do not substitute a standing pose."
+    },
+    {
+      "id": "town-square",
+      "pose": "top-right",
+      "text": "Maya and Noodle joined the crowd near the giant pumpkin lantern. Together, they watched the Monster Star glow.",
+      "guidance": "Keep an accessible clear route and the same chair colors, wheels, casters, and footplate."
+    },
+    {
+      "id": "parade",
+      "pose": "bottom-left",
+      "text": "Maya and Noodle led the parade beneath the glowing stars. The treat bucket rode safely beside Maya.",
+      "guidance": "Show equal participation; the bucket is attached without hiding the chair or changing seated proportions."
+    },
+    {
+      "id": "garden",
+      "pose": "bottom-right",
+      "text": "Maya followed Noodle along the wide garden path, then paused beside the warm golden clue.",
+      "guidance": "No stairs or narrow barriers; preserve the same wheelchair and seated child identity."
+    }
+  ],
+  "remainingProductionGate": [
+    "Separate and edge-clean each transparent pose.",
+    "Approve equivalent assets for every offered age and appearance combination.",
+    "Connect the combined child-and-wheelchair asset to the page compositor.",
+    "Verify device continuity, seated proportions, clear paths, crop safety, print resolution, and proof editing on every required page."
+  ]
+}

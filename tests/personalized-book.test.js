@@ -29,6 +29,8 @@ test("master copy becomes a pinned order-specific render manifest", () => {
   }, { selectedPreviewUrl: "https://assets.example/fizz.png", selectedPreviewId: "preview-1" }, {
     childImageUrl: "https://assets.example/children/deep-braids-black.png",
     childProfileKey: "deep-braids-black:7-8",
+    childAssetApproved: true,
+    childPageVerification: "all-required-pages",
     rendererVersion: "personalized-composite-v1",
   });
 
@@ -48,7 +50,7 @@ test("master copy becomes a pinned order-specific render manifest", () => {
     mobilityAid: "none", mobilityAidLabel: "No mobility aid",
   });
   assert.ok(book.pages.every((page) => page.artworkRole === "background_plate"));
-  assert.deepEqual(book.readiness, { copyReady: true, artworkReady: true, monsterReady: true, childReady: true, mobilityAidReady: true, rendererReady: true, productionReady: true, blockers: [] });
+  assert.deepEqual(book.readiness, { copyReady: true, artworkReady: true, monsterReady: true, childReady: true, mobilityAidReady: true, childApprovalReady: true, rendererReady: true, productionReady: true, blockers: [] });
   assert.match(book.fingerprint, /^[a-f0-9]{64}$/);
 });
 
@@ -141,6 +143,8 @@ test("wheelchair profiles require an exact seated child-and-wheelchair asset on 
     childProfileKey: "deep-coils-black:7-8:wheelchair",
     childDepiction: "seated-wheelchair",
     childAssetComposition: "child-and-wheelchair",
+    childAssetApproved: true,
+    childPageVerification: "all-required-pages",
     rendererVersion: "personalized-composite-v1",
   });
   assert.equal(ready.readiness.productionReady, true);
