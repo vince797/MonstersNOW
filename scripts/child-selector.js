@@ -1,6 +1,11 @@
 (() => {
   const storageKey = "monstersnow_child_character_profile_v1";
   const ageLabels = { "2-4": "Ages 2–4", "5-6": "Ages 5–6", "7-8": "Ages 7–8" };
+  const ageDescriptions = {
+    "2-4": "toddler proportions",
+    "5-6": "younger-child proportions",
+    "7-8": "older-child proportions",
+  };
   const heightLabels = {
     shorter: "Shorter than most children this age",
     average: "About average height",
@@ -164,6 +169,7 @@
   function renderProfile(stage, avatar, profile) {
     if (!stage || !avatar) return;
     const characterImage = stage.querySelector(".child-preview-character");
+    const ageProfile = stage.querySelector("#child-age-profile");
     const fallbackFigure = stage.querySelector(".child-preview-figure");
     stage.className = "child-preview-stage";
     avatar.className = "child-avatar";
@@ -177,6 +183,7 @@
         characterImage.hidden = true;
         characterImage.removeAttribute("src");
       }
+      if (ageProfile) ageProfile.hidden = true;
       if (fallbackFigure) fallbackFigure.hidden = false;
       return;
     }
@@ -190,6 +197,11 @@
       characterImage.hidden = false;
       characterImage.classList.remove("is-arriving");
       window.requestAnimationFrame(() => characterImage.classList.add("is-arriving"));
+      if (ageProfile) {
+        ageProfile.hidden = false;
+        const label = ageProfile.querySelector("strong");
+        if (label) label.textContent = ageLabels[profile.ageBand] || ageLabels["5-6"];
+      }
       if (fallbackFigure) fallbackFigure.hidden = true;
       stage.classList.add("has-character-art");
       return;
@@ -199,6 +211,7 @@
     avatar.style.setProperty("--skin", values.skin);
     avatar.style.setProperty("--hair", values.hair);
     if (characterImage) characterImage.hidden = true;
+    if (ageProfile) ageProfile.hidden = true;
     if (fallbackFigure) fallbackFigure.hidden = false;
   }
 
@@ -292,7 +305,7 @@
     if (title) title.textContent = profile.included ? `${genderLabels[profile.gender] || "Their character"} joins the adventure` : "Their monster takes center stage";
     if (copy) {
       copy.textContent = profile.included
-        ? `${[profile.label, ageLabels[profile.ageBand], heightLabels[profile.relativeHeight], mobilityLabels[profile.mobilityAid]].filter(Boolean).join(" · ")}. Previewed beside their chosen monster.`
+        ? `${[profile.label, `${ageLabels[profile.ageBand]} with ${ageDescriptions[profile.ageBand]}`, heightLabels[profile.relativeHeight], mobilityLabels[profile.mobilityAid]].filter(Boolean).join(" · ")}. Previewed beside their chosen monster.`
         : "Choose a boy or girl to add a storybook co-star beside their monster.";
     }
     renderProfile(stage, avatar, profile);

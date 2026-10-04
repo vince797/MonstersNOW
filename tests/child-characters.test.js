@@ -101,11 +101,16 @@ test("selector UI exposes only supported controls and states the current renderi
   assert.match(mainScript, /function showCharacterStep/);
   assert.match(mainScript, /function showMonsterStep/);
   assert.match(css, /\.child-preview-stage\.mobility-wheelchair/);
+  assert.match(css, /Age changes proportions; relative height only fine-tunes/);
+  assert.match(css, /\.child-preview-stage\.age-2-4 \.child-preview-character \{ --age-scale-x: 1\.12; --age-scale-y: \.9; \}/);
+  assert.match(css, /\.child-preview-stage\.age-7-8 \.child-preview-character \{ --age-scale-x: \.94; --age-scale-y: 1\.08; \}/);
+  assert.match(html, /Changes the character's illustrated proportions and stance—not just their size/);
+  assert.match(html, /id="child-age-profile"/);
   assert.match(css, /\.child-live-preview \{[\s\S]*position: sticky/);
   assert.match(css, /\.child-character-option\.is-selected::after/);
   assert.match(css, /\.child-preview-character/);
-  assert.match(html, /child-selector\.css\?v=20261004-scene-blend-v9/);
-  assert.match(html, /scripts\/child-selector\.js\?v=20261004-character-studio-v7/);
+  assert.match(html, /child-selector\.css\?v=20261004-age-profiles-v10/);
+  assert.match(html, /scripts\/child-selector\.js\?v=20261004-age-profiles-v8/);
   assert.match(html, /scripts\/main\.js\?v=20261004-scene-blend-v10/);
 });
 

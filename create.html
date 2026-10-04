@@ -11,7 +11,7 @@
     <title>Create Your Monster | MonstersNOW</title>
     <link rel="icon" href="assets/brand/monstersnow-icon-32-v1.png" type="image/png" sizes="32x32" />
     <link rel="stylesheet" href="styles.css?v=20261004-create-studio-v4" />
-    <link rel="stylesheet" href="child-selector.css?v=20261004-scene-blend-v9" />
+    <link rel="stylesheet" href="child-selector.css?v=20261004-age-profiles-v10" />
     <link rel="stylesheet" href="storefront.css?v=20261002-public-storefront" />
     <link rel="apple-touch-icon" href="assets/brand/monstersnow-icon-180-v1.png" />
     <link rel="stylesheet" href="brand.css?v=20261004-selected-logo" />
@@ -238,16 +238,16 @@
                           <div class="child-editor-section-body child-basics-grid">
                             <fieldset>
                               <legend>Age range</legend>
-                              <p>Used as an illustration profile—not as a birthdate.</p>
-                              <div class="child-segmented-options">
-                                <label><input type="radio" name="child-age-band" value="2-4" /><span>Ages 2–4</span></label>
-                                <label><input type="radio" name="child-age-band" value="5-6" checked /><span>Ages 5–6</span></label>
-                                <label><input type="radio" name="child-age-band" value="7-8" /><span>Ages 7–8</span></label>
+                              <p>Changes the character's illustrated proportions and stance—not just their size.</p>
+                              <div class="child-segmented-options child-age-options">
+                                <label><input type="radio" name="child-age-band" value="2-4" /><span><strong>Ages 2–4</strong><small>Toddler proportions</small></span></label>
+                                <label><input type="radio" name="child-age-band" value="5-6" checked /><span><strong>Ages 5–6</strong><small>Younger-child proportions</small></span></label>
+                                <label><input type="radio" name="child-age-band" value="7-8" /><span><strong>Ages 7–8</strong><small>Older-child proportions</small></span></label>
                               </div>
                             </fieldset>
                             <fieldset>
                               <legend>Relative height</legend>
-                              <p>Compared with children in the selected age range—no measurement needed.</p>
+                              <p>Fine-tunes stature within the selected age range—no measurement needed.</p>
                               <div class="child-segmented-options">
                                 <label><input type="radio" name="child-relative-height" value="shorter" /><span>Shorter</span></label>
                                 <label><input type="radio" name="child-relative-height" value="average" checked /><span>About average</span></label>
@@ -280,6 +280,7 @@
                           </div>
                           <span class="child-preview-stage is-empty" id="child-preview-stage" aria-hidden="true">
                             <span class="child-scene-glow"></span>
+                            <span class="child-age-profile" id="child-age-profile" hidden><small>Age profile</small><strong>Ages 5–6</strong></span>
                             <img class="child-preview-monster" id="child-preview-monster" alt="" hidden />
                             <span class="child-monster-ground-shadow" aria-hidden="true"></span>
                             <img class="child-preview-character" id="child-preview-character" alt="" width="512" height="768" hidden />
@@ -437,7 +438,7 @@
       </div>
     </footer>
 
-    <script src="scripts/child-selector.js?v=20261004-character-studio-v7"></script>
+    <script src="scripts/child-selector.js?v=20261004-age-profiles-v8"></script>
     <script src="scripts/main.js?v=20261004-scene-blend-v10"></script>
   </body>
 </html>

@@ -407,6 +407,35 @@
   filter: blur(8px);
 }
 
+.child-age-profile {
+  position: absolute;
+  z-index: 7;
+  top: 13px;
+  right: 13px;
+  display: grid;
+  gap: 1px;
+  min-width: 96px;
+  padding: 7px 10px;
+  border: 1px solid rgba(255,255,255,.46);
+  border-radius: 10px;
+  background: rgba(24, 14, 62, .82);
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(5, 9, 28, .2);
+  text-align: left;
+  backdrop-filter: blur(8px);
+}
+
+.child-age-profile[hidden] { display: none; }
+.child-age-profile small {
+  color: #7bf0dc;
+  font-size: .52rem;
+  font-weight: 950;
+  letter-spacing: .08em;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+.child-age-profile strong { font-size: .7rem; line-height: 1.2; }
+
 .child-preview-monster {
   position: absolute;
   z-index: 3;
@@ -447,17 +476,21 @@
 }
 
 .child-preview-character {
+  --height-scale: 1;
+  --age-scale-x: 1;
+  --age-scale-y: 1;
   position: absolute;
   z-index: 4;
   right: 5%;
   bottom: -1%;
   width: 41%;
-  height: 89%;
+  height: auto;
   object-fit: contain;
   object-position: center bottom;
-  transform: scale(1);
+  transform: scale(var(--age-scale-x), var(--age-scale-y));
+  scale: var(--height-scale);
   transform-origin: bottom center;
-  transition: height 180ms ease, transform 180ms ease, opacity 140ms ease;
+  transition: transform 220ms ease, scale 180ms ease, opacity 140ms ease;
   filter: drop-shadow(0 18px 14px rgba(3,8,24,.42));
 }
 
@@ -468,13 +501,18 @@
   display: none;
 }
 
-.child-preview-stage.age-2-4 .child-preview-character { height: 72%; }
-.child-preview-stage.age-5-6 .child-preview-character { height: 82%; }
-.child-preview-stage.age-7-8 .child-preview-character { height: 89%; }
-.child-preview-stage.height-shorter .child-preview-character { transform: scale(.91); }
-.child-preview-stage.height-average .child-preview-character { transform: scale(1); }
-.child-preview-stage.height-taller .child-preview-character { transform: scale(1.05); }
-.child-preview-stage.mobility-wheelchair .child-preview-character { right: 1%; width: 49%; height: 90%; }
+/* Age changes proportions; relative height only fine-tunes the completed figure. */
+.child-preview-stage.age-2-4 .child-preview-character { --age-scale-x: 1.12; --age-scale-y: .9; }
+.child-preview-stage.age-5-6 .child-preview-character { --age-scale-x: 1; --age-scale-y: 1; }
+.child-preview-stage.age-7-8 .child-preview-character { --age-scale-x: .94; --age-scale-y: 1.08; }
+.child-preview-stage.height-shorter .child-preview-character { --height-scale: .94; }
+.child-preview-stage.height-average .child-preview-character { --height-scale: 1; }
+.child-preview-stage.height-taller .child-preview-character { --height-scale: 1.04; }
+.child-preview-stage.mobility-wheelchair .child-preview-character {
+  right: 1%;
+  width: 49%;
+  height: auto;
+}
 
 .child-preview-figure {
   --figure-scale: 1;
@@ -652,6 +690,11 @@
   line-height: 1.15;
   text-align: center;
 }
+
+.child-age-options span { gap: 2px; min-height: 52px; }
+.child-age-options strong { font-size: .68rem; }
+.child-age-options small { color: #66717d; font-size: .55rem; font-weight: 700; line-height: 1.2; }
+.child-age-options input:checked + span small { color: #17646b; }
 
 .child-mobility-options { grid-column: 1 / -1; }
 .child-mobility-choices { grid-template-columns: repeat(2, minmax(0, 1fr)); }
