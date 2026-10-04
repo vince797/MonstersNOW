@@ -35,6 +35,7 @@ const server = http.createServer(async (req, res) => {
     return res.end(JSON.stringify({ submission: req.method === "POST" ? { id: mockSubmissionId, token: "mock-submission-token-that-is-long-enough", status: "draft" } : { id: mockSubmissionId, selectedPreviewId: mockPreviewId, status: "ready" } }));
   }
   if (pathname === "/api/convert-monster") {
+    await new Promise((resolve) => setTimeout(resolve, 140));
     req.resume(); res.setHeader("Content-Type", "application/json");
     return res.end(JSON.stringify({ monsterImage: image, style: "storybook", submissionId: mockSubmissionId, previewId: mockPreviewId }));
   }
@@ -66,16 +67,30 @@ const server = http.createServer(async (req, res) => {
     const errors = [];
     page.on("pageerror", (error) => errors.push(error.message));
     await page.goto(`${base}/create.html?test=halloween`);
+    await page.setViewportSize({ width: 390, height: 844 });
     await page.locator("#monster-upload").setInputFiles(path.join(root, "assets/step-2-character.jpg"));
+    await page.waitForFunction(() => document.querySelector("#monster-result")?.getAttribute("aria-busy") === "true");
+    assert.equal(await page.locator("#confirm-monster").isHidden(), true, "monster confirmation stays hidden while generation is pending");
     await page.locator("#confirm-monster").waitFor({ state: "visible" });
     await page.locator("#confirm-monster").click();
-    await page.locator("#storybook-interest").waitFor({ state: "visible" });
+    await page.locator("#child-editor-start").waitFor({ state: "visible" });
+    assert.equal(await page.locator("#child-character-title").textContent(), "Create your child");
+    assert.equal(await page.evaluate(() => document.activeElement?.id), "child-editor-start");
+    await page.waitForTimeout(350);
+    const editorPosition = await page.locator("#child-editor-start").evaluate((element) => {
+      const rect = element.getBoundingClientRect();
+      return { top: rect.top, bottom: rect.bottom, viewport: innerHeight, horizontal: document.documentElement.scrollWidth > innerWidth };
+    });
+    assert.equal(editorPosition.horizontal, false);
+    assert.ok(editorPosition.top >= -2 && editorPosition.top < editorPosition.viewport * 0.4, JSON.stringify(editorPosition));
+    await page.screenshot({ path: path.join(output, "child-editor-mobile.png"), fullPage: true });
     await page.locator("label").filter({ has: page.locator('input[name="child-character"][value="deep-coils-black"]') }).click();
     await page.locator("label").filter({ has: page.locator('input[name="child-age-band"][value="7-8"]') }).click();
     await page.locator("label").filter({ has: page.locator('input[name="child-relative-height"][value="taller"]') }).click();
     await page.getByText("Ages 7–8 · Taller than most children this age. Saved with the book profile.").waitFor();
     const savedProfile = await page.evaluate(() => JSON.parse(localStorage.getItem("monstersnow_child_character_profile_v1")));
     assert.deepEqual(savedProfile, { id: "deep-coils-black", ageBand: "7-8", relativeHeight: "taller", mobilityAid: "none" });
+    await page.setViewportSize({ width: 1280, height: 900 });
     await page.reload();
     assert.equal(await page.locator('input[name="child-character"][value="deep-coils-black"]').isChecked(), true);
     assert.equal(await page.locator('input[name="child-age-band"][value="7-8"]').isChecked(), true);

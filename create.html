@@ -10,7 +10,7 @@
     <link rel="canonical" href="https://www.monstersnow.com/create" />
     <title>Create Your Monster | MonstersNOW</title>
     <link rel="icon" href="assets/brand/monstersnow-icon-32-v1.png" type="image/png" sizes="32x32" />
-    <link rel="stylesheet" href="styles.css?v=20261001-child-character" />
+    <link rel="stylesheet" href="styles.css?v=20261004-child-handoff" />
     <link rel="stylesheet" href="child-selector.css?v=20261004-profile-v1" />
     <link rel="stylesheet" href="storefront.css?v=20261002-public-storefront" />
     <link rel="apple-touch-icon" href="assets/brand/monstersnow-icon-180-v1.png" />
@@ -66,7 +66,7 @@
             <ol class="converter-flow" aria-label="Creation progress">
               <li class="is-active" data-flow-step="upload"><i>1</i>Upload</li>
               <li data-flow-step="preview"><i>2</i>Create</li>
-              <li data-flow-step="personalize"><i>3</i>Personalize</li>
+              <li data-flow-step="personalize"><i>3</i>Child</li>
               <li data-flow-step="review"><i>4</i>Review</li>
             </ol>
           </div>
@@ -178,35 +178,9 @@
                 <form class="interest-form" id="storybook-interest-form">
                   <fieldset class="storybook-personalization">
                     <legend>Personalize the story</legend>
-                    <div class="storybook-name-fields">
-                      <label for="child-name">
-                        Child's first name
-                        <input
-                          id="child-name"
-                          name="child-name"
-                          type="text"
-                          maxlength="40"
-                          placeholder="Maya"
-                          autocomplete="off"
-                          required
-                        />
-                      </label>
-                      <label for="monster-name">
-                        Monster's name
-                        <input
-                          id="monster-name"
-                          name="monster-name"
-                          type="text"
-                          maxlength="40"
-                          placeholder="Bumbles"
-                          autocomplete="off"
-                          required
-                        />
-                      </label>
-                    </div>
-                    <section class="child-character-picker" aria-labelledby="child-character-title" data-child-selector>
+                    <section class="child-character-picker" id="child-editor-start" aria-labelledby="child-character-title" data-child-selector tabindex="-1">
                       <div class="child-character-heading">
-                        <div><strong id="child-character-title">Choose the child character</strong><small>Optional. No child photo, birthdate, or exact height needed.</small></div>
+                        <div><span class="child-editor-kicker">Monster selected · next step</span><strong id="child-character-title">Create your child</strong><small>Optional. Choose a simple illustration profile, or keep the story monster-only. No child photo, birthdate, or exact height needed.</small></div>
                         <span id="child-character-selection">Monster only</span>
                       </div>
                       <div class="child-selector-layout">
@@ -261,6 +235,32 @@
                       </div>
                       <p>These are illustration choices only. MonstersNOW does not ask for or infer race, health, or exact body measurements.</p>
                     </section>
+                    <div class="storybook-name-fields">
+                      <label for="child-name">
+                        Child's first name
+                        <input
+                          id="child-name"
+                          name="child-name"
+                          type="text"
+                          maxlength="40"
+                          placeholder="Maya"
+                          autocomplete="off"
+                          required
+                        />
+                      </label>
+                      <label for="monster-name">
+                        Monster's name
+                        <input
+                          id="monster-name"
+                          name="monster-name"
+                          type="text"
+                          maxlength="40"
+                          placeholder="Bumbles"
+                          autocomplete="off"
+                          required
+                        />
+                      </label>
+                    </div>
                     <div class="checkout-email-field">
                       <label for="interest-email">Email address <span>Required</span></label>
                       <input
@@ -382,6 +382,6 @@
     </footer>
 
     <script src="scripts/child-selector.js?v=20261004-profile-v1"></script>
-    <script src="scripts/main.js?v=20261004-child-profile"></script>
+    <script src="scripts/main.js?v=20261004-child-handoff"></script>
   </body>
 </html>

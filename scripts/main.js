@@ -76,6 +76,7 @@ const styleButtons = [...document.querySelectorAll("[data-monster-style]")];
 const previewHistory = document.querySelector("#preview-history");
 const confirmMonsterButton = document.querySelector("#confirm-monster");
 const resultBookOffer = document.querySelector("#result-book-offer");
+const childEditorStart = document.querySelector("#child-editor-start");
 const storybookInterestButton = document.querySelector("#storybook-interest");
 const storybookInterestForm = document.querySelector("#storybook-interest-form");
 const interestEmail = document.querySelector("#interest-email");
@@ -237,14 +238,14 @@ if (replaceDrawingButton) {
 
 if (confirmMonsterButton) {
   confirmMonsterButton.addEventListener("click", () => {
-    if (!selectedPreviewId) return;
+    if (!selectedPreviewId || isGeneratingPreview) return;
     monsterConfirmed = true;
     confirmMonsterButton.textContent = "Monster Selected ✓";
     resultBookOffer.hidden = false;
     storybookInterestButton.disabled = false;
     setConverterStage("personalize");
-    resultBookOffer.scrollIntoView({ behavior: "smooth", block: "start" });
-    childName?.focus({ preventScroll: true });
+    childEditorStart?.focus({ preventScroll: true });
+    childEditorStart?.scrollIntoView({ behavior: "smooth", block: "start" });
   });
 }
 

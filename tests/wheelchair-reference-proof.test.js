@@ -72,7 +72,7 @@ test("synthetic wheelchair proof runs through the real manifest contract but can
   assert.match(book.readiness.blockers.join(" "), /record successful composition review on every required child page/i);
 });
 
-test("wheelchair reference asset has transparent RGBA pixels and is wired into the review proof", () => {
+test("wheelchair reference assets have transparent RGBA pixels and are wired into the review proof", () => {
   const manifest = JSON.parse(fs.readFileSync(path.join(root, "docs/wheelchair-reference-proof-manifest.json"), "utf8"));
   const asset = path.join(root, manifest.asset.path);
   const png = fs.readFileSync(asset);
@@ -81,7 +81,12 @@ test("wheelchair reference asset has transparent RGBA pixels and is wired into t
   assert.equal(png.readUInt32BE(20), 1199);
   assert.equal(png[25], 6, "PNG color type must be RGBA");
   const html = fs.readFileSync(path.join(root, "docs/wheelchair-reference-proof.html"), "utf8");
-  assert.equal((html.match(/wheelchair-child-pose-sheet-v1\.png/g) || []).length, 4);
+  for (const page of manifest.pages) {
+    const pose = fs.readFileSync(path.join(root, page.poseAsset));
+    assert.equal(pose.subarray(1, 4).toString("ascii"), "PNG");
+    assert.equal(pose[25], 6, `${page.id} PNG color type must be RGBA`);
+    assert.match(html, new RegExp(path.basename(page.poseAsset).replace(".", "\\.")));
+  }
   assert.match(html, /Not production artwork/);
   assert.match(html, /Remaining production gate/);
 });
