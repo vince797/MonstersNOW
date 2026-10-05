@@ -22,6 +22,11 @@ test("admin workspace and homepage collection use the readable system typeface",
 test("admin sign-in does not blame the device for a server credential timestamp error", () => {
   assert.doesNotMatch(adminScript, /Your device clock appears out of sync/);
   assert.match(adminScript, /Your device clock is not the cause/);
+  assert.doesNotMatch(adminScript, /update the Supabase secret key in Vercel/);
+  assert.match(adminScript, /database service had a temporary timestamp problem/);
+  assert.match(adminScript, /method === "GET"/);
+  assert.match(adminScript, /retryCount === 0/);
+  assert.match(adminScript, /result\.code === "PGRST303"/);
   assert.match(adminScript, /error\.code = result\.code/);
   assert.match(adminScript, /error\.status = response\.status/);
 });

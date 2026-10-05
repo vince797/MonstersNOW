@@ -264,7 +264,7 @@ function formatAdminLoginError(error) {
   const message = String(error?.message || "").toLowerCase();
   const code = String(error?.code || "").toLowerCase();
   if (message.includes("issued at future") || message.includes("not yet valid") || message.includes("clock")) {
-    return "The MonstersNOW database credential has a timestamp problem. Your device clock is not the cause. Try again shortly; if it continues, update the Supabase secret key in Vercel.";
+    return "The MonstersNOW database service had a temporary timestamp problem. Your device clock is not the cause. Please try again; if it continues, contact support with the time it happened.";
   }
   if (code === "invalid_admin_password" || message.includes("password")) {
     return "That password wasn’t accepted. Check it and try again.";
@@ -1837,14 +1837,24 @@ function signOut() {
   passwordInput.focus();
 }
 
-async function apiRequest(query = "", options = {}) {
+async function apiRequest(query = "", options = {}, retryCount = 0) {
+  const method = String(options.method || "GET").toUpperCase();
   const response = await fetch(`/api/storybook-interest${query}`, {
-    method: options.method || "GET",
+    method,
     headers: { "Content-Type": "application/json", "x-admin-password": adminPassword },
     body: options.body ? JSON.stringify(options.body) : undefined,
   });
   const result = await response.json().catch(() => ({}));
   if (!response.ok) {
+    const retryableTimestampFailure = method === "GET"
+      && retryCount === 0
+      && response.status === 401
+      && result.code === "PGRST303"
+      && /jwt issued at future/i.test(String(result.error || ""));
+    if (retryableTimestampFailure) {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      return apiRequest(query, options, retryCount + 1);
+    }
     const error = new Error(result.error || "The story library could not be opened.");
     error.code = result.code || "admin_request_failed";
     error.status = response.status;

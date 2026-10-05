@@ -84,10 +84,25 @@ const server = http.createServer((request, response) => {
     for (const viewport of [{ name: "desktop", width: 1440, height: 1000 }, { name: "mobile", width: 390, height: 844 }]) {
       const page = await browser.newPage({ viewport });
       const errors = [];
+      const requestCounts = new Map();
       page.on("pageerror", (error) => errors.push(error.message));
       await page.addInitScript(() => sessionStorage.setItem("monstersnow_admin_password", "local-mock-only"));
       await page.route("**/api/storybook-interest**", async (route) => {
         const resource = new URL(route.request().url()).searchParams.get("resource") || "stories";
+        const requestKey = `${route.request().method()}:${resource}`;
+        requestCounts.set(requestKey, (requestCounts.get(requestKey) || 0) + 1);
+        if (requestKey === "GET:stories" && requestCounts.get(requestKey) === 1) {
+          await route.fulfill({ status: 401, contentType: "application/json", body: JSON.stringify({ code: "PGRST303", error: "JWT issued at future" }) });
+          return;
+        }
+        if (requestKey === "POST:pose-jobs") {
+          await route.fulfill({ status: 401, contentType: "application/json", body: JSON.stringify({ code: "PGRST303", error: "JWT issued at future" }) });
+          return;
+        }
+        if (requestKey === "GET:non-retryable") {
+          await route.fulfill({ status: 401, contentType: "application/json", body: JSON.stringify({ code: "PGRST301", error: "JWT issued at future" }) });
+          return;
+        }
         const body = resource === "orders" ? { orders: [] }
           : resource === "monsters" ? { monsters: [], posePipelineAvailable: false }
             : resource === "book-review-files" ? { files: reviewFiles }
@@ -95,6 +110,31 @@ const server = http.createServer((request, response) => {
         await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(body) });
       });
       await page.goto(`${base}/admin.html`);
+      await page.locator("#admin-app").waitFor({ state: "visible" });
+      assert.equal(requestCounts.get("GET:stories"), 2);
+      assert.equal(requestCounts.get("GET:orders"), 1);
+      assert.equal(requestCounts.get("GET:monsters"), 1);
+      assert.equal(requestCounts.get("GET:book-review-files"), 1);
+      const mutationFailure = await page.evaluate(async () => {
+        try {
+          await apiRequest("?resource=pose-jobs", { method: "POST", body: { submissionId: "fixture" } });
+          return null;
+        } catch (error) {
+          return { code: error.code, status: error.status };
+        }
+      });
+      assert.deepEqual(mutationFailure, { code: "PGRST303", status: 401 });
+      assert.equal(requestCounts.get("POST:pose-jobs"), 1);
+      const nonRetryableFailure = await page.evaluate(async () => {
+        try {
+          await apiRequest("?resource=non-retryable");
+          return null;
+        } catch (error) {
+          return { code: error.code, status: error.status };
+        }
+      });
+      assert.deepEqual(nonRetryableFailure, { code: "PGRST301", status: 401 });
+      assert.equal(requestCounts.get("GET:non-retryable"), 1);
       await page.locator('[data-admin-view="stories"]').click();
       await page.locator(".story-list-item", { hasText: "Halloween Monster Night" }).click();
       await page.locator("#book-workspace-summary").waitFor({ state: "visible" });
@@ -112,7 +152,7 @@ const server = http.createServer((request, response) => {
       await page.screenshot({ path: path.join(output, `admin-books-review-${viewport.name}.png`), fullPage: true });
       await page.close();
     }
-    console.log("PASS: Admin separates page-background review, review-PDF status, and print approval on desktop/mobile; no JS errors or private writes.");
+    console.log("PASS: Admin recovers from one PGRST303 GET failure without retrying mutations or other auth errors, and preserves book-review behavior on desktop/mobile; no JS errors or private writes.");
   } finally {
     await browser?.close();
     await new Promise((resolve) => server.close(resolve));

@@ -15,11 +15,15 @@ test("downstream Supabase authentication failures are returned and safely logged
   process.env.SUPABASE_URL = "https://database.example.com";
   process.env.SUPABASE_SECRET_KEY = "server-secret-never-logged";
   process.env.ADMIN_PASSWORD = "admin-test-password";
-  global.fetch = async () => ({
-    ok: false,
-    status: 401,
-    json: async () => ({ code: "PGRST301", message: "JWT issued at future" }),
-  });
+  let fetchCalls = 0;
+  global.fetch = async () => {
+    fetchCalls += 1;
+    return {
+      ok: false,
+      status: 401,
+      json: async () => ({ code: "PGRST301", message: "JWT issued at future" }),
+    };
+  };
 
   try {
     await assert.rejects(listStories(), (error) => {
@@ -38,6 +42,19 @@ test("downstream Supabase authentication failures are returned and safely logged
     });
 
     assert.equal(shouldLogAdminDataError({ code: "invalid_admin_password" }), false);
+
+    const rejectedResponse = {
+      body: null,
+      statusCode: null,
+      setHeader() {},
+      status(code) { this.statusCode = code; return this; },
+      json(body) { this.body = body; return this; },
+    };
+    const callsBeforeRejectedRequest = fetchCalls;
+    await handler({ method: "GET", query: {}, url: "/api/storybook-interest", headers: { "x-admin-password": "wrong-password" } }, rejectedResponse);
+    assert.equal(rejectedResponse.statusCode, 401);
+    assert.equal(rejectedResponse.body.code, "invalid_admin_password");
+    assert.equal(fetchCalls, callsBeforeRejectedRequest);
 
     const response = {
       body: null,
