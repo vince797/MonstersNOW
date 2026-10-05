@@ -8,6 +8,9 @@ const root = path.resolve(__dirname, "..");
 test("About page centers the founders and their real story", () => {
   const html = fs.readFileSync(path.join(root, "about.html"), "utf8");
   assert.match(html, /Meet the young founders/);
+  assert.equal(html.match(/young founders/gi)?.length, 1);
+  assert.match(html, /Always drawing/);
+  assert.match(html, /<span>brothers<\/span>/);
   assert.match(html, /James and Luke/);
   assert.match(html, /neighborhood duty/i);
   assert.match(html, /assets\/about-james-luke\.jpg/);
