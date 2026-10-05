@@ -15,6 +15,7 @@ test("About page centers the founders and their real story", () => {
   assert.match(html, /<body class="brand-theme about-page">/);
   assert.match(html, /styles\.css\?v=20261004-founder-mobile-v2/);
   assert.doesNotMatch(html, /<source media="\(max-width: 520px\)"/);
+  assert.doesNotMatch(html, /—/);
 });
 
 test("Founder photo is a lightweight local JPEG", () => {
