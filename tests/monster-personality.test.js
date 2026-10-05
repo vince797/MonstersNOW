@@ -10,8 +10,10 @@ const html = fs.readFileSync(path.join(root, "create.html"), "utf8");
 const main = fs.readFileSync(path.join(root, "scripts/main.js"), "utf8");
 
 test("editor presents backend style ids as next-preview personalities under one master art style", () => {
-  assert.match(html, /Personality \+ pose for next preview/);
+  assert.match(html, /<details class="variation-controls preview-options">/);
+  assert.match(html, /<span>Preview personality<\/span>/);
   assert.match(html, /Every option uses the same Soft 3D Storybook art style/);
+  assert.ok(html.indexOf('class="upload-drop"') < html.indexOf('class="variation-controls preview-options"'), "upload should lead and personality options should follow");
   for (const [id, label] of [["storybook", "Classic"], ["cute", "Gentle"], ["silly", "Playful"], ["adventure", "Brave"]]) {
     assert.match(html, new RegExp(`data-monster-style="${id}"[\\s\\S]*?<strong>${label}</strong>`));
   }

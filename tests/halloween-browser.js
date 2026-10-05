@@ -106,6 +106,13 @@ const server = http.createServer(async (req, res) => {
     page.on("pageerror", (error) => errors.push(error.message));
     await page.goto(`${base}/create.html?test=halloween`);
     await page.setViewportSize({ width: 390, height: 844 });
+    const previewOptions = page.locator(".preview-options");
+    assert.equal(await previewOptions.evaluate((element) => element.open), false, "personality choices start progressively disclosed");
+    await previewOptions.locator("summary").click();
+    assert.equal(await previewOptions.evaluate((element) => element.open), true);
+    await previewOptions.locator("summary").click();
+    assert.equal(await previewOptions.evaluate((element) => element.open), false, "repeated disclosure clicks return to the original state");
+    await previewOptions.locator("summary").click();
     await page.locator('[data-monster-style="silly"]').click();
     assert.match(await page.locator("#next-personality-status").textContent(), /Playful is ready for the first preview/);
     await page.locator("#monster-upload").setInputFiles(path.join(root, "assets/step-2-character.jpg"));
@@ -133,10 +140,21 @@ const server = http.createServer(async (req, res) => {
     assert.equal(await page.locator("#selected-preview-personality").textContent(), "Selected preview · Playful");
     await page.locator("#confirm-monster").click();
     await page.locator("#child-editor-start").waitFor({ state: "visible" });
-    await page.waitForTimeout(350);
+    await page.waitForFunction(() => {
+      const rect = document.querySelector("#child-editor-start")?.getBoundingClientRect();
+      return rect && rect.top >= -2 && rect.top < innerHeight;
+    });
     const editorPosition = await page.locator("#child-editor-start").evaluate((element) => {
       const rect = element.getBoundingClientRect();
-      return { top: rect.top, bottom: rect.bottom, viewport: innerHeight, horizontal: document.documentElement.scrollWidth > innerWidth };
+      const offerRect = document.querySelector("#result-book-offer")?.getBoundingClientRect();
+      return {
+        top: rect.top,
+        bottom: rect.bottom,
+        offerTop: offerRect?.top,
+        scrollY,
+        viewport: innerHeight,
+        horizontal: document.documentElement.scrollWidth > innerWidth,
+      };
     });
     assert.equal(editorPosition.horizontal, false);
     assert.ok(editorPosition.top >= -2 && editorPosition.top < editorPosition.viewport, JSON.stringify(editorPosition));
@@ -155,6 +173,10 @@ const server = http.createServer(async (req, res) => {
     await page.locator("label").filter({ has: page.locator('input[name="child-gender"][value="girl"]') }).click();
     await page.locator("label").filter({ has: page.locator('input[name="child-character"][value="deep-braids-black"]') }).click();
     await page.locator("label").filter({ has: page.locator('input[name="child-mobility-aid"][value="wheelchair"]') }).click();
+    const basicsSection = page.locator(".child-character-details > .child-editor-section").first();
+    if (!(await basicsSection.evaluate((element) => element.open))) {
+      await basicsSection.locator("summary").click();
+    }
     await page.locator("label").filter({ has: page.locator('input[name="child-age-band"][value="6-8"]') }).click();
     await page.locator("#child-preview-details", { hasText: /Ages 6–8.*Wheelchair shown in every scene/i }).waitFor();
     const editorTargets = await page.locator("#child-editor-undo, #child-editor-reset, .child-editor-section > summary").evaluateAll((elements) => elements.map((element) => ({

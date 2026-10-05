@@ -70,6 +70,8 @@ test("selector UI exposes only supported controls and states the current renderi
   assert.equal((html.match(/data-monster-step-panel/g) || []).length, 2);
   assert.match(html, /id="result-book-offer" aria-labelledby="result-book-title" hidden/);
   assert.match(html, /id="back-to-monster"/);
+  assert.match(html, /Step 3 · Optional child/);
+  assert.match(html, /<details class="child-editor-section">\s*<summary><span>Basics<\/span>/);
   assert.match(html, /No diagnosis or medical details needed/);
   assert.match(html, /Dark curls or Long braids/i);
   assert.match(html, /Ages 6–8/i);

@@ -10,7 +10,7 @@
     <link rel="canonical" href="https://www.monstersnow.com/create" />
     <title>Create Your Monster | MonstersNOW</title>
     <link rel="icon" href="assets/brand/monstersnow-icon-32-v1.png" type="image/png" sizes="32x32" />
-    <link rel="stylesheet" href="styles.css?v=20261005-personality-studio-v2" />
+    <link rel="stylesheet" href="styles.css?v=20261005-create-flow-v6" />
     <link rel="stylesheet" href="child-selector.css?v=20261005-age-personality-v11" />
     <link rel="stylesheet" href="storefront.css?v=20261002-public-storefront" />
     <link rel="apple-touch-icon" href="assets/brand/monstersnow-icon-180-v1.png" />
@@ -63,41 +63,20 @@
               <a href="books.html#catalog">Change story</a>
             </div>
             <ol class="converter-flow" aria-label="Creation progress">
-              <li class="is-active" data-flow-step="upload"><i>1</i>Upload</li>
-              <li data-flow-step="preview"><i>2</i>Create</li>
+              <li class="is-active" data-flow-step="upload"><i>1</i>Drawing</li>
+              <li data-flow-step="preview"><i>2</i>Monster</li>
               <li data-flow-step="personalize"><i>3</i>Child</li>
-              <li data-flow-step="review"><i>4</i>Review</li>
+              <li data-flow-step="review"><i>4</i>Book</li>
             </ol>
+            <p class="converter-flow-note">Drawing → monster preview → optional child → 32-page book</p>
           </div>
         </div>
 
         <div class="converter-tool" data-converter>
           <form class="upload-panel" data-monster-step-panel novalidate>
-            <div class="variation-controls" role="group" aria-label="Monster preview options">
-              <div class="variation-heading">
-                <span>Personality + pose for next preview</span>
-                <p>Every option uses the same Soft 3D Storybook art style. A new choice takes effect only when the next preview is created.</p>
-                <p class="next-personality-status" id="next-personality-status">Classic is ready for the first preview.</p>
-                <p id="preview-count">Upload once, then try up to three versions.</p>
-              </div>
-              <div class="style-options" role="group" aria-label="Choose the personality and pose for the next monster preview">
-                <button class="style-option is-active" type="button" data-monster-style="storybook" aria-pressed="true">
-                  <strong>Classic</strong>
-                  <small>Balanced + faithful</small>
-                </button>
-                <button class="style-option" type="button" data-monster-style="cute" aria-pressed="false">
-                  <strong>Gentle</strong>
-                  <small>Warm + welcoming</small>
-                </button>
-                <button class="style-option" type="button" data-monster-style="silly" aria-pressed="false">
-                  <strong>Playful</strong>
-                  <small>Goofy + energetic</small>
-                </button>
-                <button class="style-option" type="button" data-monster-style="adventure" aria-pressed="false">
-                  <strong>Brave</strong>
-                  <small>Confident + ready</small>
-                </button>
-              </div>
+            <div class="studio-card-heading">
+              <span aria-hidden="true">1</span>
+              <div><small>Start here</small><h2>Upload the monster drawing</h2><p>The first preview starts automatically.</p></div>
             </div>
             <label class="upload-drop" for="monster-upload">
               <span>Drawing</span>
@@ -109,29 +88,57 @@
               type="file"
               accept="image/png,image/jpeg,image/webp,image/gif,image/heic,image/heif,image/heic-sequence,image/heif-sequence,.heic,.heif"
             />
-            <ul class="upload-tips" aria-label="Upload tips">
-              <li>Bright, straight-on photo</li>
-              <li>Drawing fills most of the frame</li>
-              <li>iPhone HEIC photos convert automatically</li>
-              <li>Artwork only when possible</li>
-            </ul>
-            <p class="privacy-note">For adults: upload the drawing only—no child photo or personal details. Artwork stays private unless you explicitly choose to share it. <a href="privacy.html">How artwork is handled</a></p>
             <p class="converter-error" id="upload-error" role="alert" hidden></p>
-
-            <button class="button primary converter-button" id="convert-button" type="button" disabled hidden>
-              Create Monster
-            </button>
             <p class="upload-action-status" id="upload-action-status" role="status">
               Upload a drawing and the first preview starts automatically.
             </p>
-
-            <div class="converter-preview drawing-preview">
-              <img
-                id="drawing-preview"
-                src="assets/step-1-drawing.jpg"
-                alt="Sample child monster drawing."
-              />
-            </div>
+            <details class="variation-controls preview-options">
+              <summary>
+                <span>Preview personality</span>
+                <strong class="next-personality-status" id="next-personality-status">Classic is ready for the first preview.</strong>
+              </summary>
+              <div class="preview-options-body">
+                <div class="variation-heading">
+                  <p>Every option uses the same Soft 3D Storybook art style. A new choice takes effect only when the next preview is created.</p>
+                  <p id="preview-count">Upload once, then try up to three versions.</p>
+                </div>
+                <div class="style-options" role="group" aria-label="Choose the personality and pose for the next monster preview">
+                  <button class="style-option is-active" type="button" data-monster-style="storybook" aria-pressed="true">
+                    <strong>Classic</strong>
+                    <small>Balanced + faithful</small>
+                  </button>
+                  <button class="style-option" type="button" data-monster-style="cute" aria-pressed="false">
+                    <strong>Gentle</strong>
+                    <small>Warm + welcoming</small>
+                  </button>
+                  <button class="style-option" type="button" data-monster-style="silly" aria-pressed="false">
+                    <strong>Playful</strong>
+                    <small>Goofy + energetic</small>
+                  </button>
+                  <button class="style-option" type="button" data-monster-style="adventure" aria-pressed="false">
+                    <strong>Brave</strong>
+                    <small>Confident + ready</small>
+                  </button>
+                </div>
+              </div>
+            </details>
+            <details class="upload-guidance">
+              <summary><span>Photo tips &amp; privacy</span><small>Formats, framing, and how artwork is handled</small></summary>
+              <div class="upload-guidance-body">
+                <ul class="upload-tips" aria-label="Upload tips">
+                  <li>Bright, straight-on photo</li>
+                  <li>Drawing fills most of the frame</li>
+                  <li>iPhone HEIC photos convert automatically</li>
+                  <li>Artwork only when possible</li>
+                </ul>
+                <p class="privacy-note">For adults: upload the drawing only—no child photo or personal details. Artwork stays private unless you explicitly choose to share it. <a href="privacy.html">How artwork is handled</a></p>
+                <figure class="drawing-preview-example">
+                  <img id="drawing-preview" src="assets/step-1-drawing.jpg" alt="Sample child monster drawing framed clearly for upload." />
+                  <figcaption>Example photo framing</figcaption>
+                </figure>
+              </div>
+            </details>
+            <button class="button primary converter-button" id="convert-button" type="button" disabled hidden>Create Monster</button>
           </form>
 
           <div class="result-panel is-example-preview" id="monster-result" data-monster-step-panel aria-live="polite" tabindex="-1">
@@ -144,7 +151,7 @@
               />
             </div>
             <div class="result-content">
-              <span class="result-label">Monster preview</span>
+              <span class="result-label">Step 2 · Monster preview</span>
               <span class="selected-preview-personality" id="selected-preview-personality" hidden></span>
               <h2 id="converter-status">Upload a drawing to begin.</h2>
               <p id="converter-note">
@@ -177,7 +184,7 @@
                 <div class="book-offer-header">
                   <div class="child-step-nav">
                     <button type="button" id="back-to-monster">← Back to monster</button>
-                    <span class="result-label">Step 2 · Story character</span>
+                    <span class="result-label">Step 3 · Optional child</span>
                   </div>
                   <h2 id="result-book-title">Choose who joins their monster.</h2>
                   <p id="book-offer-status">Your monster is ready. Add an optional illustrated child character, then continue to the 32-page book review.</p>
@@ -232,7 +239,7 @@
                             </div>
                           </details>
                           <div class="child-character-details" id="child-character-details" hidden>
-                        <details class="child-editor-section" open>
+                        <details class="child-editor-section">
                           <summary><span>Basics</span><small>Private, approximate illustration guidance.</small></summary>
                           <div class="child-editor-section-body child-basics-grid">
                             <fieldset>
