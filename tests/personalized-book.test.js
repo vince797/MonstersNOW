@@ -1,6 +1,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const { buildPersonalizedBook } = require("../lib/personalized-book");
+const { buildHalloweenMasterPages } = require("../lib/halloween-master-pages");
 const { approvedPoseSet } = require("./pose-test-fixtures");
 
 test("master copy becomes a pinned order-specific render manifest", () => {
@@ -76,6 +77,65 @@ test("proof fingerprints remain stable when signed asset URLs rotate", () => {
   const first = buildPersonalizedBook(story, order, { selectedPreviewId: "preview-1", selectedPreviewUrl: "https://assets.example/fizz.png?token=one" });
   const second = buildPersonalizedBook(story, order, { selectedPreviewId: "preview-1", selectedPreviewUrl: "https://assets.example/fizz.png?token=two" });
   assert.equal(first.fingerprint, second.fingerprint);
+});
+
+test("Halloween page 32 compares the immutable original with the exact approved monster", () => {
+  const story = {
+    id: "halloween-story",
+    slug: "halloween-monster-night",
+    version: 5,
+    title_template: "Halloween Monster Night",
+    pages: buildHalloweenMasterPages().map((page, index) => ({
+      ...page,
+      artworkUrl: `https://assets.example/halloween/page-${index + 1}.jpg`,
+      artworkStatus: "final",
+      backgroundPlateConfirmed: true,
+    })),
+  };
+  const order = { childName: "Riley", monsterName: "Fizz", selectedPreviewId: "preview-32" };
+  const poseSet = approvedPoseSet(story, { selectedPreviewId: "preview-32" });
+  const monsterAssets = {
+    selectedPreviewId: "preview-32",
+    selectedPreviewUrl: "https://assets.example/fizz.png?token=one",
+    originalUrl: "https://assets.example/original.png?token=one",
+    originalPath: "submissions/original-immutable.png",
+    poseSet,
+  };
+  const book = buildPersonalizedBook(story, order, monsterAssets, { rendererVersion: "personalized-composite-v1" });
+  const comparison = book.pages[31].comparisonArtifact;
+
+  assert.deepEqual(book.pages.slice(0, 3).map((page) => page.openingArtifact?.role), [
+    "title_dedication_copyright_source_credit", "original_monster_drawing", "approved_monster_portrait",
+  ]);
+  assert.equal(book.pages[1].openingArtifact.assetId, "submissions/original-immutable.png");
+  assert.equal(book.pages[2].openingArtifact.sourcePreviewId, "preview-32");
+  assert.equal(comparison.role, "original_and_storybook_monster_comparison");
+  assert.equal(comparison.originalDrawing.assetId, "submissions/original-immutable.png");
+  assert.equal(comparison.originalDrawing.aiRedrawForbidden, true);
+  assert.equal(comparison.approvedMonster.sourcePreviewId, "preview-32");
+  assert.equal(comparison.originalDrawing.imageUrl, monsterAssets.originalUrl);
+  assert.equal(comparison.approvedMonster.imageUrl, monsterAssets.selectedPreviewUrl);
+  assert.equal(book.pages[31].monster, null, "page 32 uses the exact approved portrait, not a generated pose");
+  assert.deepEqual(book.closingComparison, {
+    page: 32,
+    withinExisting32Pages: true,
+    addsPages: false,
+    originalDrawingAvailable: true,
+    originalDrawingAssetId: "submissions/original-immutable.png",
+    approvedPortraitVersion: "preview-32",
+  });
+  assert.equal(book.readiness.closingComparisonReady, true);
+
+  const rotated = buildPersonalizedBook(story, order, {
+    ...monsterAssets,
+    selectedPreviewUrl: "https://assets.example/fizz.png?token=two",
+    originalUrl: "https://assets.example/original.png?token=two",
+  }, { rendererVersion: "personalized-composite-v1" });
+  assert.equal(rotated.fingerprint, book.fingerprint, "signed URL rotation must not change exact-asset approval identity");
+
+  const missingImmutableOriginal = buildPersonalizedBook(story, order, { ...monsterAssets, originalPath: "" }, { rendererVersion: "personalized-composite-v1" });
+  assert.equal(missingImmutableOriginal.readiness.closingComparisonReady, false);
+  assert.match(missingImmutableOriginal.readiness.blockers.join(" "), /page 32 comparison/i);
 });
 
 test("an order cannot silently switch to another saved monster preview", () => {

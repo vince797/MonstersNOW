@@ -19,7 +19,10 @@ test("Halloween manuscript maps to 32 complete editable Admin pages", () => {
   assert.deepEqual(pages.slice(0, 3).map((page) => [page.monsterRequired, page.childRequired]), [[false, false], [false, false], [false, false]]);
   assert.match(pages[0].text, /Copyright © MonstersNOW/);
   assert.match(pages[1].illustrationPrompt, /exact original uploaded drawing/i);
+  assert.equal(pages[1].text, "Every adventure starts with an idea…");
   assert.match(pages[2].illustrationPrompt, /exact customer-approved monster portrait/i);
+  assert.match(pages[31].illustrationPrompt, /unchanged original drawing and exact approved monster portrait/i);
+  assert.match(pages[31].text, /Meet \{monster_name\}/);
   assert.ok(pages.slice(3, 31).every((page) => page.childRequired));
   assert.match(pages[3].illustrationPrompt, /do not include a permanent child or story monster/i);
 });
