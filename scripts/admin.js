@@ -32,6 +32,7 @@ const pagesContainer = document.querySelector("#story-pages");
 let stories = [];
 let orders = [];
 let monsters = [];
+let posePipelineAvailable = false;
 let bookReviewFiles = [];
 let bookReviewFilesError = "";
 let manuscriptFile = null;
@@ -229,6 +230,7 @@ async function openLibrary() {
     stories = storyResult.stories || [];
     orders = orderResult.orders || [];
     monsters = monsterResult.monsters || [];
+    posePipelineAvailable = monsterResult.posePipelineAvailable === true;
     bookReviewFiles = reviewFilesResult.files || [];
     bookReviewFilesError = reviewFilesResult.error || "";
     if (Object.keys(CATALOG_COVERS).some((slug) => !stories.some((story) => story.slug === slug))) {
@@ -794,6 +796,10 @@ function buildMonsterCard(monster) {
 }
 
 function renderMonsterPoseProduction(container, monster) {
+  if (!posePipelineAvailable) {
+    container.innerHTML = '<div><strong>Book pose production</strong><span>Setup pending. Apply the reviewed pose-pipeline database migration before creating production plans.</span></div>';
+    return;
+  }
   const job = monster.poseJobs?.[0];
   if (!job) {
     container.innerHTML = '<div><strong>Book pose production</strong><span>No internal pose plan yet. Creating a plan does not call the image provider.</span></div><button class="button secondary" type="button">Create bounded plan</button>';

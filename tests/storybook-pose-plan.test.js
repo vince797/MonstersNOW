@@ -1,6 +1,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const { buildStorybookPosePlan, evaluatePoseJobReadiness } = require("../lib/storybook-pose-plan");
+const { buildHalloweenMasterPages } = require("../lib/halloween-master-pages");
 const { approvedPoseSet } = require("./pose-test-fixtures");
 
 function story() {
@@ -26,8 +27,8 @@ test("one exact portrait produces only the referenced bounded poses with page co
     scaleContract: { monsterHeightToStandingChildHeight: 0.9, calibrationStatus: "approved", approvedBy: "Art lead" },
   });
   assert.equal(plan.sourcePreviewId, "portrait-v3");
-  assert.ok(plan.baseAssets.filter((asset) => asset.subjectType === "monster").length <= 6);
-  assert.ok(plan.baseAssets.filter((asset) => asset.subjectType === "child").length <= 8);
+  assert.equal(plan.baseAssets.filter((asset) => asset.subjectType === "monster").length, 4);
+  assert.equal(plan.baseAssets.filter((asset) => asset.subjectType === "child").length, 3);
   const referencedKeys = new Set(plan.scenes.flatMap((scene) => [scene.monster?.assetKey, scene.child?.assetKey]).filter(Boolean));
   assert.deepEqual(new Set(plan.baseAssets.map((asset) => asset.key)), referencedKeys);
   assert.equal(plan.limits.maxAttemptsPerAsset, 2);
@@ -35,26 +36,46 @@ test("one exact portrait produces only the referenced bounded poses with page co
   assert.equal(plan.scenes.length, 32);
   assert.ok(plan.scenes.every((scene) => scene.qa.relativeScale === false && scene.qa.cameraDepth === false && scene.qa.boundingBoxes === false));
   assert.ok(plan.scenes.filter((scene) => scene.child).every((scene) => scene.child.scaleBasis === "seated-eye-line-and-wheel-envelope"));
-  assert.ok(plan.scenes.filter((scene) => scene.child).every((scene) => scene.child.mobilityEquivalent.startsWith("seated-") || scene.child.mobilityEquivalent === "wheelchair-moving"));
+  assert.ok(plan.scenes.filter((scene) => scene.child).every((scene) => scene.child.mobilityEquivalent.startsWith("seated-")));
   assert.deepEqual(plan.identityContract.monster.anatomyTraits, ["exactly three visible legs", "one horn", "blue spots"]);
   assert.equal(plan.scaleContract.fixedPixelHeightForbidden, true);
   assert.ok(plan.scenes.slice(0, 3).every((scene) => scene.status === "not_required"));
 });
 
-test("an approved small page map reuses a small base set instead of filling the catalog", () => {
+test("an approved small page map reuses only the referenced families", () => {
   const mapped = story();
   mapped.pages = mapped.pages.map((page, index) => index < 3 ? page : {
     ...page,
-    monsterPoseId: ["lead_walk", "reach_help", "celebrate_wave"][index % 3],
-    childPoseId: ["moving", "reaching", "celebrating"][index % 3],
+    monsterPoseId: ["neutral_travel", "help_interact", "seated_rest"][index % 3],
+    childPoseId: ["travel_observe", "reach_help", "celebrate"][index % 3],
   });
   const plan = buildStorybookPosePlan(mapped, {
     selectedPreviewId: "portrait-v3",
     childCharacter: { id: "deep-braids-black", ageBand: "6-8", mobilityAid: "wheelchair", included: true },
   });
-  assert.deepEqual(plan.baseAssets.filter((asset) => asset.subjectType === "monster").map((asset) => asset.poseId), ["lead_walk", "reach_help", "celebrate_wave"]);
-  assert.deepEqual(plan.baseAssets.filter((asset) => asset.subjectType === "child").map((asset) => asset.poseId), ["moving", "reaching", "celebrating"]);
+  assert.deepEqual(plan.baseAssets.filter((asset) => asset.subjectType === "monster").map((asset) => asset.poseId), ["neutral_travel", "help_interact", "seated_rest"]);
+  assert.deepEqual(plan.baseAssets.filter((asset) => asset.subjectType === "child").map((asset) => asset.poseId), ["travel_observe", "reach_help", "celebrate"]);
   assert.equal(plan.baseAssets.length, 6);
+});
+
+test("Halloween uses the authoritative four-monster and three-child family map", () => {
+  const plan = buildStorybookPosePlan({
+    id: "halloween-story",
+    slug: "halloween-monster-night",
+    version: 4,
+    pages: buildHalloweenMasterPages(),
+  }, {
+    selectedPreviewId: "portrait-v4",
+    childCharacter: { id: "deep-braids-black", ageBand: "6-8", mobilityAid: "wheelchair", included: true },
+  });
+  assert.deepEqual(plan.baseAssets.filter((asset) => asset.subjectType === "monster").map((asset) => asset.poseId), [
+    "neutral_travel", "active_reach_celebrate", "help_interact", "seated_rest",
+  ]);
+  assert.deepEqual(plan.baseAssets.filter((asset) => asset.subjectType === "child").map((asset) => asset.poseId), [
+    "travel_observe", "reach_help", "celebrate",
+  ]);
+  assert.deepEqual(plan.scenes.filter((scene) => scene.status === "not_required").map((scene) => scene.pageNumber), [1, 2, 3, 32]);
+  assert.equal(plan.baseAssets.length, 7);
 });
 
 test("legacy child ages cannot be silently remapped into a new pose plan", () => {
@@ -88,7 +109,7 @@ test("a different approved portrait version invalidates an otherwise complete po
 test("a page adaptation cannot pass readiness until its exact replacement asset is approved", () => {
   const fixture = approvedPoseSet(story(), { selectedPreviewId: "portrait-v3" });
   const scene = fixture.scenes.find((item) => item.status === "approved");
-  scene.monsterAssetKey = `monster:scene:${scene.pageNumber}:lead_walk`;
+  scene.monsterAssetKey = `monster:scene:${scene.pageNumber}:neutral_travel`;
   scene.composition.adaptation = { required: true, monsterAssetKey: scene.monsterAssetKey };
   scene.composition.monster.assetKey = scene.monsterAssetKey;
   const missing = evaluatePoseJobReadiness({ sourcePreviewId: "portrait-v3", plan: fixture.plan, assets: fixture.assets, scenes: fixture.scenes });

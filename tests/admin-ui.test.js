@@ -40,3 +40,9 @@ test("admin book workspace groups status, review files, and the next action", ()
   assert.match(adminBooksStyles, /@media \(max-width: 720px\)/);
   assert.doesNotMatch(adminScript, /Delete review PDF|Replace review PDF/);
 });
+
+test("admin pose production stays dormant until its database migration is available", () => {
+  assert.match(adminScript, /posePipelineAvailable = monsterResult\.posePipelineAvailable === true/);
+  assert.match(adminScript, /Apply the reviewed pose-pipeline database migration/);
+  assert.match(adminScript, /if \(!posePipelineAvailable\)/);
+});

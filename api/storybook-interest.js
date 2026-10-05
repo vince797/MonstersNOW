@@ -206,10 +206,14 @@ async function handleAdminStories(request, response) {
     if (resource === "monsters") {
       if (request.method === "GET") {
         response.setHeader("Cache-Control", "private, no-store");
+        let posePipelineAvailable = true;
         const [monsters, poseJobs] = await Promise.all([
           listAdminMonsters(),
           listPoseJobsForAdmin().catch((error) => {
-            if (["42P01", "PGRST205"].includes(error.code)) return [];
+            if (["42P01", "PGRST205"].includes(error.code)) {
+              posePipelineAvailable = false;
+              return [];
+            }
             throw error;
           }),
         ]);
@@ -218,7 +222,7 @@ async function handleAdminStories(request, response) {
           map.get(job.submissionId).push(job);
           return map;
         }, new Map());
-        return sendJson(response, 200, { monsters: monsters.map((monster) => ({ ...monster, poseJobs: jobsBySubmission.get(monster.id) || [] })) });
+        return sendJson(response, 200, { posePipelineAvailable, monsters: monsters.map((monster) => ({ ...monster, poseJobs: jobsBySubmission.get(monster.id) || [] })) });
       }
       if (request.method === "DELETE") {
         const deleted = await deleteAdminMonster(id);
