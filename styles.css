@@ -1391,7 +1391,7 @@ a {
 .converter-flow li { min-height: 50px; padding: 7px 11px; background: rgba(24, 7, 48, .38); border-color: rgba(255,255,255,.25); }
 .converter-flow i { width: 30px; height: 30px; background: #fff; color: #42166e; }
 .converter-flow li.is-active { border-color: #ffb25f; box-shadow: 0 0 0 2px rgba(255,178,95,.16); }
-.converter-flow li.is-active i { background: #ff7a18; color: #fff; }
+.converter-flow li.is-active i { background: #ff7a18; color: #32145f; }
 
 .create-flow-section .converter-tool {
   max-width: 1280px;
@@ -6119,13 +6119,10 @@ main > section {
 }
 
 /* Keep Create Studio overrides last in the cascade. */
-body .create-flow-section {
+body.brand-theme .create-flow-section {
   gap: clamp(20px, 2.8vw, 34px);
   padding-top: clamp(22px, 3vw, 38px);
-  background:
-    radial-gradient(circle at 82% 5%, rgba(255, 122, 24, .42), transparent 24%),
-    radial-gradient(circle at 7% 38%, rgba(139, 83, 255, .34), transparent 27%),
-    linear-gradient(142deg, #211044 0%, #41156f 48%, #651a74 72%, #b63f47 116%);
+  background: #32145f;
 }
 body .create-flow-header { max-width: 1280px; grid-template-columns: minmax(0,1fr) minmax(390px,.74fr); align-items: start; gap: clamp(24px,4vw,58px); }
 body .create-flow-copy .eyebrow { color: #ffb25f; }
@@ -6159,7 +6156,7 @@ body .selected-preview-personality {
 }
 body .selected-preview-personality[hidden] { display: none; }
 
-/* Create flow v6: keep the purple studio, lead with the drawing and reveal choices as needed. */
+/* Create flow v10: keep the purple studio, lead with the drawing and reveal choices as needed. */
 body .create-flow-header {
   align-items: center;
 }
@@ -6200,7 +6197,7 @@ body .create-flow-section .upload-panel {
   place-items: center;
   border-radius: 50%;
   background: #ff7a18;
-  color: #fff;
+  color: #32145f;
   font-size: 1rem;
   font-weight: 950;
   box-shadow: 0 8px 18px rgba(196,77,0,.2);
@@ -6216,7 +6213,7 @@ body .create-flow-section .upload-drop {
   padding: 20px;
   border-color: #70ccd3;
   border-radius: 16px;
-  background: linear-gradient(145deg,#f8ffff,#f5f0ff);
+  background: #f7fbff;
 }
 
 body .create-flow-section .upload-drop strong {
@@ -6348,6 +6345,7 @@ body .create-flow-section .result-panel {
   grid-template-columns: minmax(0,1.38fr) minmax(240px,.62fr);
   gap: clamp(20px,2.4vw,34px);
   padding: clamp(18px,2.4vw,30px);
+  background: #fff8f1;
 }
 
 body .create-flow-section .monster-preview {
