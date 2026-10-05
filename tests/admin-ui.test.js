@@ -32,11 +32,17 @@ test("admin sign-in does not blame the device for a server credential timestamp 
 });
 
 test("admin book workspace groups status, review files, and the next action", () => {
-  assert.match(adminMarkup, /admin-books\.css\?v=20261005-review-scope-v2/);
-  assert.match(adminMarkup, /scripts\/admin\.js\?v=20261005-review-scope-v2/);
-  assert.match(adminMarkup, /Books &amp; stories/);
-  assert.match(adminMarkup, /Review &amp; print/);
-  assert.match(adminMarkup, /Artwork &amp; monsters/);
+  assert.match(adminMarkup, /admin-books\.css\?v=20261005-admin-simplification-v1/);
+  assert.match(adminMarkup, /scripts\/admin\.js\?v=20261005-admin-simplification-v1/);
+  assert.match(adminMarkup, />Orders/);
+  assert.match(adminMarkup, /Master Books/);
+  assert.match(adminMarkup, /Character Assets/);
+  assert.match(adminMarkup, /Master background review/);
+  assert.match(adminMarkup, /Personalized customer proof/);
+  assert.match(adminMarkup, /Cover preview/);
+  assert.match(adminMarkup, /Print preflight/);
+  assert.match(adminMarkup, /Lulu acceptance/);
+  assert.match(adminMarkup, /Every master page has separate layers/);
   assert.match(adminMarkup, /id="book-workspace-summary"/);
   assert.match(adminMarkup, /id="book-review-files-list"/);
   assert.match(adminMarkup, /id="book-production-blockers-list"/);
@@ -47,6 +53,8 @@ test("admin book workspace groups status, review files, and the next action", ()
   assert.match(adminScript, /review PDFs, not print approvals/);
   assert.match(adminScript, /Individual page background/);
   assert.match(adminScript, /This does not approve a PDF or unlock printing/);
+  assert.match(adminScript, /page\.backgroundPlateConfirmed === true/);
+  assert.match(adminScript, /Number\(page\.backgroundPlateVersion \|\| 0\) >= 2/);
   assert.match(adminScript, /Exact review-PDF approval is not recorded in the current data model/);
   assert.match(adminScript, /No final personalized print PDF has been created and approved/);
   assert.match(adminBooksStyles, /\.background-plate-check/);

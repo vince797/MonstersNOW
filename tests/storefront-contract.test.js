@@ -1,4 +1,5 @@
 const assert = require("node:assert/strict");
+const crypto = require("node:crypto");
 const fs = require("node:fs");
 const path = require("node:path");
 const test = require("node:test");
@@ -35,6 +36,21 @@ test("the create flow displays and forwards the allowlisted story", () => {
   assert.match(script, /storyId: selectedStory\.id/);
   assert.match(script, /storyLabel: selectedStory\.label/);
   assert.match(script, /storyId: storyId \|\| selectedStory\.id/);
+});
+
+test("Halloween uses the approved purple-and-cream cover everywhere public", () => {
+  const expected = "halloween-monster-night-v3-web.jpg";
+  assert.match(read("index.html"), new RegExp(expected));
+  assert.match(read("books.html"), new RegExp(expected));
+  assert.match(read("create.html"), new RegExp(expected));
+  assert.doesNotMatch([read("index.html"), read("books.html"), read("create.html")].join("\n"), /halloween-monster-night-v2-(?:web|640)/);
+  assert.ok(fs.existsSync(path.join(root, "assets/storybook/cover-series/minimal-concepts/halloween-monster-night-v3.png")));
+  assert.ok(fs.existsSync(path.join(root, "assets/storybook/cover-series/minimal-concepts/halloween-monster-night-v3-web.jpg")));
+  assert.ok(fs.existsSync(path.join(root, "assets/storybook/cover-series/minimal-concepts/halloween-monster-night-v3-640.webp")));
+  assert.equal(
+    crypto.createHash("sha256").update(fs.readFileSync(path.join(root, "assets/storybook/cover-series/minimal-concepts/halloween-monster-night-v3.png"))).digest("hex"),
+    "7c46e1c744ac3e156ce8daec97331eaa1db1dd8a0eb1052e2a54c4f9f45f3d13",
+  );
 });
 
 test("public storefront remains isolated from admin and Etsy", () => {

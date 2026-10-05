@@ -138,6 +138,11 @@ const server = http.createServer((request, response) => {
       await page.locator('[data-admin-view="stories"]').click();
       await page.locator(".story-list-item", { hasText: "Halloween Monster Night" }).click();
       await page.locator("#book-workspace-summary").waitFor({ state: "visible" });
+      assert.equal(await page.locator("#book-summary-next-button").textContent(), "Open review files");
+      assert.match(await page.locator("#gate-master-state").textContent(), /31\/32 backgrounds approved for master v4/);
+      assert.match(await page.locator("#gate-proof-state").textContent(), /created and approved per customer order/);
+      assert.match(await page.locator("#gate-cover-state").textContent(), /printer approval not recorded/);
+      assert.match(await page.locator("#gate-lulu-state").textContent(), /No Lulu acceptance recorded/);
       assert.match(await page.locator("#book-review-files-summary").textContent(), /1\/3 stored · review PDFs, not print approvals/);
       assert.match(await page.locator("#book-production-blockers-list").textContent(), /Exact review-PDF approval is not recorded/);
       assert.match(await page.locator("#book-production-blockers-list").textContent(), /No final personalized print PDF/);

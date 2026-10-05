@@ -58,7 +58,7 @@ const commandResults = document.querySelector("#admin-command-results");
 let reviewSpreadIndex = 0;
 let commandSelection = 0;
 const CATALOG_COVERS = {
-  "halloween-monster-night": "assets/storybook/cover-series/minimal-concepts/halloween-monster-night-v2-web.jpg",
+  "halloween-monster-night": "assets/storybook/cover-series/minimal-concepts/halloween-monster-night-v3-web.jpg",
   "big-adventure": "assets/storybook/cover-series/minimal-concepts/big-adventure-v2-web.jpg",
   "bedtime-monster": "assets/storybook/cover-series/minimal-concepts/bedtime-monster-v2-web.jpg",
   "abc-monster-book": "assets/storybook/cover-series/minimal-concepts/abc-monster-book-v2-web.jpg",
@@ -134,7 +134,7 @@ async function loadProductionReadiness() {
     if (!response.ok) throw new Error("Production status is unavailable");
     const report = await response.json();
     productionReport = report;
-    overall.textContent = report.status === "ready" ? "Ready for Lulu" : "Blocked";
+    overall.textContent = report.status === "ready" ? "Preflight passed" : "Blocked";
     overall.className = `production-overall is-${report.status}`;
     document.querySelector("#production-format").textContent = report.format;
     document.querySelector("#production-updated").textContent = `Preflight updated ${report.updated}`;
@@ -285,9 +285,9 @@ function showView(view) {
   const viewCopy = {
     dashboard: ["Overview", "A clear view of the work that needs you."],
     orders: ["Orders", "Move every book from payment to delivery."],
-    stories: ["Books & stories", "Draft and review master books without making them public."],
-    production: ["Review & print", "Prepare review files and clear print-release gates."],
-    monsters: ["Artwork & monsters", "Manage reusable characters, original drawings, and permissions."],
+    stories: ["Master Books", "Review character-free backgrounds and editable story text by revision."],
+    production: ["Print checks", "Keep master review, customer proof, preflight, and printer acceptance separate."],
+    monsters: ["Character Assets", "Review identity, source drawings, pose coverage, and permissions."],
     customers: ["Customers", "See families, books, and order history together."],
   };
   const [title, context] = viewCopy[view] || viewCopy.dashboard;
@@ -327,8 +327,9 @@ function renderAdminCommand() {
   const items = [
     { type: "Go to", title: "Overview", detail: "Workspace summary", keywords: "dashboard home", run: () => showView("dashboard") },
     { type: "Go to", title: "Orders", detail: "Fulfillment queue", keywords: "orders fulfillment", run: () => showView("orders") },
-    { type: "Go to", title: "Books & stories", detail: "Draft and review masters", keywords: "stories books", run: () => showView("stories") },
-    { type: "Go to", title: "Review & print", detail: "Review files and print readiness", keywords: "production print review", run: () => showView("production") },
+    { type: "Go to", title: "Master Books", detail: "Backgrounds and editable story text", keywords: "stories books", run: () => showView("stories") },
+    { type: "Go to", title: "Character Assets", detail: "Identity and pose review", keywords: "monsters artwork character", run: () => showView("monsters") },
+    { type: "Go to", title: "Print checks", detail: "Preflight and printer readiness", keywords: "production print review", run: () => showView("production") },
     ...stories.map((story) => ({
       type: "Book",
       title: story.title_template,
@@ -504,15 +505,21 @@ function renderProductionHub(error = null) {
   const checksContainer = document.querySelector("#production-hub-checks");
   const pages = story?.pages || [];
   const contentReady = pages.filter((page) => page.text?.trim() && page.illustrationPrompt?.trim()).length;
-  const artworkReady = pages.filter((page) => page.artworkUrl && ["approved", "final"].includes(page.artworkStatus)).length;
+  const artworkReady = pages.filter((page) => page.artworkUrl
+    && page.backgroundPlateConfirmed === true
+    && Number(page.backgroundPlateVersion || 0) >= 2
+    && ["approved", "final"].includes(page.artworkStatus)).length;
   const reportChecks = report?.checks || [];
   const check = (label) => reportChecks.find((item) => item.label === label);
   const passed = (label) => check(label)?.status === "pass";
   const coverReady = passed("Softcover package cover") && passed("Hardcover package cover");
   const packageReady = contentReady === 32 && artworkReady === 32 && coverReady && passed("Lulu file validation");
+  const acceptedOrders = orders.filter((order) => order.lulu_print_job_id).length;
+  const customerProofs = orders.filter((order) => order.customer_proof_status === "approved"
+    || (order.proof_fingerprint && order.proof_approved_at)).length;
   const pipeline = [
     { title: "Master copy", detail: `${contentReady}/32 pages complete`, ready: contentReady === 32, action: "Edit book", run: openProductionBook },
-    { title: "Artwork", detail: `${artworkReady}/32 page illustrations approved`, ready: artworkReady === 32 && passed("Illustration dimensions") && passed("Print-art quality review"), action: "Review artwork", run: openProductionBook },
+    { title: "Background art", detail: `${artworkReady}/32 character-free backgrounds approved`, ready: artworkReady === 32 && passed("Illustration dimensions") && passed("Print-art quality review"), action: "Review backgrounds", run: openProductionBook },
     { title: "Print files", detail: coverReady ? "Interior and both covers ready" : "Interior prepared · covers pending", ready: passed("Interior pagination") && passed("Interior size and bleed") && coverReady },
     { title: "Lulu validation", detail: passed("Lulu file validation") ? "Files accepted" : "Waiting on final files", ready: passed("Lulu file validation") },
     { title: "Fulfillment", detail: `${orders.filter((order) => !["completed", "cancelled"].includes(order.status)).length} active orders`, ready: true, action: "View orders", run: () => showView("orders") },
@@ -520,12 +527,20 @@ function renderProductionHub(error = null) {
 
   document.querySelector("#production-book-title").textContent = story?.title_template || "Select a master book";
   document.querySelector("#production-book-summary").textContent = story?.description || "Complete the master story before preparing print files.";
-  document.querySelector("#editorial-proof-state").textContent = story?.id ? "Ready to generate from the latest saved story text." : "Save the master book to generate a review PDF.";
-  document.querySelector("#print-package-state").textContent = packageReady ? "Interior and cover package ready." : `${contentReady}/32 pages complete · ${artworkReady}/32 illustrations approved.`;
-  document.querySelector("#lulu-gate-state").textContent = packageReady ? "Ready for final sandbox validation and proof ordering." : "Locked until real interior and cover files pass preflight.";
+  document.querySelector("#master-art-gate-state").textContent = `${artworkReady}/32 backgrounds approved for master v${story?.version || 1}.`;
+  document.querySelector("#editorial-proof-state").textContent = customerProofs
+    ? `${customerProofs} customer proof${customerProofs === 1 ? "" : "s"} approved for exact order revisions.`
+    : "No customer proof approval recorded; this gate is order-specific.";
+  document.querySelector("#cover-preview-gate-state").textContent = CATALOG_COVERS[story?.slug]
+    ? "Catalog preview available; printer-cover approval remains separate."
+    : "No catalog cover preview assigned.";
+  document.querySelector("#print-package-state").textContent = packageReady ? "Exact interior and cover files passed preflight." : `${contentReady}/32 pages complete · ${artworkReady}/32 backgrounds approved.`;
+  document.querySelector("#lulu-gate-state").textContent = acceptedOrders
+    ? `${acceptedOrders} order${acceptedOrders === 1 ? "" : "s"} accepted by Lulu.`
+    : packageReady ? "Preflight passed; no Lulu acceptance is recorded yet." : "No Lulu acceptance recorded; preflight must pass first.";
   document.querySelector("#production-gate").classList.toggle("is-ready", packageReady);
 
-  status.textContent = error ? "Unavailable" : report?.status === "ready" ? "Ready for Lulu" : "Action needed";
+  status.textContent = error ? "Unavailable" : report?.status === "ready" ? "Preflight passed" : "Action needed";
   status.className = `production-overall ${report?.status === "ready" ? "is-ready" : "is-blocked"}`;
   document.querySelector("#production-hub-updated").textContent = report?.updated ? `Preflight updated ${report.updated}` : "Waiting for preflight data";
   document.querySelector("#production-hub-next").textContent = report?.next_action || error?.message || "Complete the master book and run preflight.";
@@ -1039,6 +1054,14 @@ function renderBookWorkspace(story = currentStory(), cards = [...pagesContainer.
     && ["approved", "final"].includes(card.dataset.artworkStatus)).length;
   const files = bookReviewFiles.filter((file) => file.storySlug === slug);
   const preservedFiles = files.filter((file) => file.uploaded).length;
+  const relatedOrders = orders.filter((order) => order.story_id === story?.id
+    || order.story_id === slug
+    || order.story_label === story?.title_template);
+  const approvedProofs = relatedOrders.filter((order) => order.customer_proof_status === "approved"
+    || (order.proof_fingerprint && order.proof_approved_at)).length;
+  const acceptedByLulu = relatedOrders.filter((order) => order.lulu_print_job_id).length;
+  const reportChecks = slug === "halloween-monster-night" ? productionReport?.checks || [] : [];
+  const passedPreflight = reportChecks.filter((check) => check.status === "pass").length;
   const productionBlockers = [];
   if (cards.length !== 32 || copyReady !== 32) productionBlockers.push(`${copyReady}/32 pages have complete copy and art direction.`);
   if (artReady !== 32) productionBlockers.push(`${artReady}/32 individual page backgrounds are approved.`);
@@ -1065,6 +1088,44 @@ function renderBookWorkspace(story = currentStory(), cards = [...pagesContainer.
   document.querySelector("#book-summary-art").textContent = `${artReady}/32`;
   document.querySelector("#book-summary-next").textContent = nextAction;
   document.querySelector("#book-summary-next-help").textContent = nextHelp;
+  const nextButton = document.querySelector("#book-summary-next-button");
+  const reviewFilesMissing = copyReady === 32 && cards.length === 32 && files.some((file) => !file.uploaded);
+  nextButton.textContent = copyReady < 32 || cards.length !== 32 ? "Open first incomplete page" : reviewFilesMissing ? "Open review files" : artReady < 32 ? "Review next background" : "Open master review";
+  nextButton.onclick = () => {
+    if (copyReady < 32 || cards.length !== 32) {
+      const index = cards.findIndex((card) => ![...card.querySelectorAll("textarea")].every((area) => area.value.trim()));
+      if (index >= 0) selectPage(index, true);
+      else document.querySelector("#add-page").focus();
+      return;
+    }
+    if (reviewFilesMissing) {
+      const reviewFiles = document.querySelector(".book-review-files");
+      reviewFiles.open = true;
+      reviewFiles.scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
+    }
+    if (artReady < 32) {
+      const index = cards.findIndex((card) => !(card.dataset.artworkUrl
+        && card.dataset.backgroundPlateConfirmed === "true"
+        && ["approved", "final"].includes(card.dataset.artworkStatus)));
+      if (index >= 0) selectPage(index, true);
+      return;
+    }
+    openStoryReview();
+  };
+  document.querySelector("#gate-master-state").textContent = `${artReady}/32 backgrounds approved for master v${version}`;
+  document.querySelector("#gate-proof-state").textContent = relatedOrders.length
+    ? `${approvedProofs}/${relatedOrders.length} order proof${relatedOrders.length === 1 ? "" : "s"} approved`
+    : "Not started · created and approved per customer order";
+  document.querySelector("#gate-cover-state").textContent = CATALOG_COVERS[slug]
+    ? "Catalog preview available · printer approval not recorded"
+    : "No cover preview assigned";
+  document.querySelector("#gate-preflight-state").textContent = reportChecks.length
+    ? `${passedPreflight}/${reportChecks.length} exact-file checks passed`
+    : "Not run or unavailable for this master";
+  document.querySelector("#gate-lulu-state").textContent = acceptedByLulu
+    ? `${acceptedByLulu}/${relatedOrders.length} order${acceptedByLulu === 1 ? "" : "s"} accepted by Lulu`
+    : "No Lulu acceptance recorded";
   document.querySelector("#book-production-blockers-count").textContent = `${productionBlockers.length} open`;
   document.querySelector("#book-production-blockers-list").replaceChildren(...productionBlockers.map((message) => {
     const item = document.createElement("li");
