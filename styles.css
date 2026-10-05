@@ -3329,7 +3329,6 @@ main > section {
 }
 
 .founder-spark-list span { color: var(--brand-orange, #ff8a00); font-size: .82rem; }
-}
 
 .about-page-hero-art {
   position: relative;
@@ -5088,6 +5087,56 @@ main > section {
   }
 
   .nav-toggle { width: 42px; }
+
+  .about-page .site-header {
+    gap: 8px;
+    padding: 6px 10px;
+  }
+
+  .about-page .brand,
+  .about-page .brand picture,
+  .about-page .brand img {
+    width: 138px;
+    height: auto;
+  }
+
+  .about-page .about-page-hero {
+    gap: 28px;
+    padding-top: 38px;
+    padding-bottom: 54px;
+  }
+
+  .about-page .about-page-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+    width: 100%;
+  }
+
+  .about-page .about-page-actions .button {
+    width: 100%;
+  }
+
+  .about-page .about-story-link {
+    justify-self: center;
+    padding: 6px 10px;
+  }
+
+  .about-page .founder-spark-list {
+    gap: 7px;
+    margin-top: 18px;
+  }
+
+  .about-page .about-page-hero-art {
+    width: 100%;
+    margin: 4px auto 0;
+    justify-self: center;
+  }
+
+  .about-page .about-page-hero-art figcaption {
+    width: 92%;
+    margin: -18px auto 0;
+  }
 
   .hero,
   .hero-copy-wrap,

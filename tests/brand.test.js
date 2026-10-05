@@ -21,10 +21,11 @@ function contrast(a, b) {
 test('public headers and footers use selected, responsive MonstersNow.com artwork', () => {
   for (const page of publicPages) {
     const html = read(`${page}.html`);
-    assert.match(html, /<body class="brand-theme">/, page);
+    assert.match(html, page === 'about' ? /<body class="brand-theme about-page">/ : /<body class="brand-theme">/, page);
     assert.match(html, /brand\.css\?v=20261004-selected-logo/, page);
     assert.match(html, /aria-label="MonstersNow\.com home"/, page);
-    assert.match(html, /<source media="\(max-width: 520px\)" srcset="assets\/brand\/monstersnow-stacked-v1\.png" width="640" height="331"/, page);
+    if (page === 'about') assert.doesNotMatch(html, /<source media="\(max-width: 520px\)"/, page);
+    else assert.match(html, /<source media="\(max-width: 520px\)" srcset="assets\/brand\/monstersnow-stacked-v1\.png" width="640" height="331"/, page);
     assert.match(html, /monstersnow-primary-v1\.png" alt="" width="960" height="228"/, page);
     assert.doesNotMatch(html, /monstersnow-logo-v2\.svg/, page);
     assert.match(html, /monstersnow-icon-32-v1\.png" type="image\/png" sizes="32x32"/, page);
