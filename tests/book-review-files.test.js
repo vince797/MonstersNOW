@@ -36,6 +36,9 @@ test("review manifest identifies the three exact Halloween PDFs honestly", () =>
   assert.match(BOOK_REVIEW_FILES[1].status, /Not print ready/);
   assert.match(BOOK_REVIEW_FILES[2].status, /Not print ready/);
   assert.match(BOOK_REVIEW_FILES[2].description, /review material only, not verified print masters/);
+  assert.ok(BOOK_REVIEW_FILES.every((file) => file.reviewStatus === "Approval not recorded"));
+  assert.ok(BOOK_REVIEW_FILES.every((file) => file.printStatus === "Not print ready"));
+  assert.ok(BOOK_REVIEW_FILES.every((file) => /only|separate/.test(file.approvalScope)));
 });
 
 test("missing private review files are listed as pending", async () => {

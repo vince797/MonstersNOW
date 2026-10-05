@@ -1039,6 +1039,12 @@ function renderBookWorkspace(story = currentStory(), cards = [...pagesContainer.
     && ["approved", "final"].includes(card.dataset.artworkStatus)).length;
   const files = bookReviewFiles.filter((file) => file.storySlug === slug);
   const preservedFiles = files.filter((file) => file.uploaded).length;
+  const productionBlockers = [];
+  if (cards.length !== 32 || copyReady !== 32) productionBlockers.push(`${copyReady}/32 pages have complete copy and art direction.`);
+  if (artReady !== 32) productionBlockers.push(`${artReady}/32 individual page backgrounds are approved.`);
+  if (files.some((file) => !file.uploaded)) productionBlockers.push(`${files.filter((file) => !file.uploaded).length} assigned review PDF${files.filter((file) => !file.uploaded).length === 1 ? " is" : "s are"} not stored.`);
+  if (files.length) productionBlockers.push("Exact review-PDF approval is not recorded in the current data model.");
+  productionBlockers.push("No final personalized print PDF has been created and approved.");
   let nextAction = "Complete the remaining master copy.";
   let nextHelp = "Drafts stay private until deliberately published.";
   if (copyReady === 32 && cards.length === 32 && files.some((file) => !file.uploaded)) {
@@ -1059,6 +1065,12 @@ function renderBookWorkspace(story = currentStory(), cards = [...pagesContainer.
   document.querySelector("#book-summary-art").textContent = `${artReady}/32`;
   document.querySelector("#book-summary-next").textContent = nextAction;
   document.querySelector("#book-summary-next-help").textContent = nextHelp;
+  document.querySelector("#book-production-blockers-count").textContent = `${productionBlockers.length} open`;
+  document.querySelector("#book-production-blockers-list").replaceChildren(...productionBlockers.map((message) => {
+    const item = document.createElement("li");
+    item.textContent = message;
+    return item;
+  }));
   renderBookReviewFiles(slug);
 }
 
@@ -1081,18 +1093,20 @@ function renderBookReviewFiles(storySlug) {
   }
 
   const preserved = files.filter((file) => file.uploaded).length;
-  summary.textContent = `${preserved}/${files.length} preserved · private review materials`;
+  summary.textContent = `${preserved}/${files.length} stored · review PDFs, not print approvals`;
   list.replaceChildren(...files.map((file) => {
     const article = document.createElement("article");
     article.className = `book-review-file ${file.uploaded ? "is-preserved" : "is-pending"}`;
-    article.innerHTML = '<header><div><small data-category></small><strong data-label></strong></div><span data-state></span></header><p data-description></p><dl><div><dt>Length</dt><dd data-pages></dd></div><div><dt>File size</dt><dd data-size></dd></div><div><dt>Review status</dt><dd data-review-status></dd></div></dl><div class="book-review-file-next"><small>Next action</small><p data-next></p></div><div class="book-review-file-actions"></div>';
+    article.innerHTML = '<header><div><small data-category></small><strong data-label></strong></div><span data-state></span></header><p data-description></p><dl><div><dt>Length</dt><dd data-pages></dd></div><div><dt>File size</dt><dd data-size></dd></div><div><dt>PDF artwork review</dt><dd data-review-status></dd></div><div><dt>Print gate</dt><dd data-print-status></dd></div></dl><div class="book-review-file-scope"><strong>Approval scope</strong><p data-approval-scope></p></div><div class="book-review-file-next"><small>Next action</small><p data-next></p></div><div class="book-review-file-actions"></div>';
     article.querySelector("[data-category]").textContent = file.category;
     article.querySelector("[data-label]").textContent = file.label;
-    article.querySelector("[data-state]").textContent = file.uploaded ? "Preserved" : "Pending upload";
+    article.querySelector("[data-state]").textContent = file.uploaded ? "Stored" : "Not stored";
     article.querySelector("[data-description]").textContent = file.description;
     article.querySelector("[data-pages]").textContent = `${file.pages} pages`;
     article.querySelector("[data-size]").textContent = formatFileSize(file.size);
-    article.querySelector("[data-review-status]").textContent = file.status;
+    article.querySelector("[data-review-status]").textContent = file.reviewStatus || "Approval not recorded";
+    article.querySelector("[data-print-status]").textContent = file.printStatus || "Not print ready";
+    article.querySelector("[data-approval-scope]").textContent = file.approvalScope || "Review material only; no print approval is recorded.";
     article.querySelector("[data-next]").textContent = file.nextAction;
     const actions = article.querySelector(".book-review-file-actions");
     if (file.uploaded && file.downloadUrl) {
@@ -1289,10 +1303,10 @@ function addPage(page = {}) {
   const pageNumber = pagesContainer.children.length + 1;
   const card = document.createElement("section");
   card.className = "story-page-card";
-  card.innerHTML = `<header class="page-card-header"><span><small data-page-role>Story page</small><strong>Page <span data-page-number></span></strong></span><div class="page-card-header-tools"><em data-page-completion>Checking page…</em><div class="page-card-actions"><button type="button" data-page-action="up" aria-label="Move page up" title="Move page up">↑</button><button type="button" data-page-action="down" aria-label="Move page down" title="Move page down">↓</button><button type="button" data-page-action="duplicate">Duplicate</button><button type="button" data-page-action="remove">Remove</button></div></div></header><label class="page-copy-field"><span class="page-field-heading"><b>1</b><span><strong>Story text</strong><small>The words printed in the book</small></span></span><span class="token-toolbar" role="group" aria-label="Insert personalization"><button type="button" data-insert-token="{child_name}">+ Child name</button><button type="button" data-insert-token="{monster_name}">+ Monster name</button></span><textarea rows="8" maxlength="2000" placeholder="Write the words the child will read on this page…"></textarea><small><span data-text-words>0 words</span> · <span data-text-count>0</span>/2,000 characters</small></label><label><span class="page-field-heading"><b>2</b><span><strong>Illustration direction</strong><small>Internal notes for creating or revising the scene</small></span></span><textarea rows="8" maxlength="3000" placeholder="Describe the scene, characters, action, lighting, and composition…"></textarea><small><span data-art-words>0 words</span> · <span data-art-count>0</span>/3,000 characters</small></label><section class="page-artwork-panel"><div class="page-artwork-visual"><img alt="" data-artwork-image hidden /><div data-artwork-empty><span>◇</span><strong>No artwork uploaded</strong><small>JPG, PNG, or WebP · 3 MB maximum</small></div><div class="monster-zone" data-monster-zone role="img" aria-label="Admin-only personalized monster placement"><span>MONSTER</span></div><div class="child-zone" data-child-zone role="img" aria-label="Admin-only personalized child placement"><span>CHILD</span></div></div><div class="page-artwork-controls"><div class="page-artwork-heading"><span class="page-step-number">3</span><span><strong>Page artwork</strong><small data-artwork-name>Upload the background illustration without permanent characters.</small></span></div><label class="button secondary artwork-upload-button"><input type="file" accept="image/jpeg,image/png,image/webp" data-artwork-file /> <span data-artwork-upload-label>Upload artwork</span></label><label class="artwork-status-label">Review status<select data-artwork-review><option value="missing">Missing</option><option value="draft">Draft</option><option value="approved">Approved</option><option value="final">Final</option></select></label><details class="monster-placement-controls"><summary>Monster placement <small>Advanced</small></summary><label>Horizontal <input type="range" min="5" max="95" data-character="monster" data-placement="x" /><output data-character-output="monster-x"></output></label><label>Baseline <input type="range" min="10" max="95" data-character="monster" data-placement="y" /><output data-character-output="monster-y"></output></label><label>Size <input type="range" min="15" max="70" data-character="monster" data-placement="scale" /><output data-character-output="monster-scale"></output></label><div><label>Facing<select data-character="monster" data-placement="facing"><option value="left">Left</option><option value="right">Right</option><option value="neutral">Neutral</option></select></label><label>Layer<select data-character="monster" data-placement="layer"><option value="front">In front</option><option value="behind">Behind foreground</option></select></label></div></details><details class="monster-placement-controls child-placement-controls"><summary>Child placement <small>Advanced</small></summary><label>Horizontal <input type="range" min="5" max="95" data-character="child" data-placement="x" /><output data-character-output="child-x"></output></label><label>Baseline <input type="range" min="10" max="95" data-character="child" data-placement="y" /><output data-character-output="child-y"></output></label><label>Size <input type="range" min="15" max="70" data-character="child" data-placement="scale" /><output data-character-output="child-scale"></output></label><div><label>Facing<select data-character="child" data-placement="facing"><option value="left">Left</option><option value="right">Right</option><option value="neutral">Neutral</option></select></label><label>Layer<select data-character="child" data-placement="layer"><option value="front">In front</option><option value="behind">Behind foreground</option></select></label></div><p>Placement guides are never printed.</p></details><button class="button secondary" type="button" data-remove-artwork hidden>Remove from page</button><p data-artwork-message role="status"></p></div></section>`;
+  card.innerHTML = `<header class="page-card-header"><span><small data-page-role>Story page</small><strong>Page <span data-page-number></span></strong></span><div class="page-card-header-tools"><em data-page-completion>Checking page…</em><div class="page-card-actions"><button type="button" data-page-action="up" aria-label="Move page up" title="Move page up">↑</button><button type="button" data-page-action="down" aria-label="Move page down" title="Move page down">↓</button><button type="button" data-page-action="duplicate">Duplicate</button><button type="button" data-page-action="remove">Remove</button></div></div></header><label class="page-copy-field"><span class="page-field-heading"><b>1</b><span><strong>Story text</strong><small>The words printed in the book</small></span></span><span class="token-toolbar" role="group" aria-label="Insert personalization"><button type="button" data-insert-token="{child_name}">+ Child name</button><button type="button" data-insert-token="{monster_name}">+ Monster name</button></span><textarea rows="8" maxlength="2000" placeholder="Write the words the child will read on this page…"></textarea><small><span data-text-words>0 words</span> · <span data-text-count>0</span>/2,000 characters</small></label><label><span class="page-field-heading"><b>2</b><span><strong>Illustration direction</strong><small>Internal notes for creating or revising the scene</small></span></span><textarea rows="8" maxlength="3000" placeholder="Describe the scene, characters, action, lighting, and composition…"></textarea><small><span data-art-words>0 words</span> · <span data-art-count>0</span>/3,000 characters</small></label><section class="page-artwork-panel"><div class="page-artwork-visual"><img alt="" data-artwork-image hidden /><div data-artwork-empty><span>◇</span><strong>No background uploaded</strong><small>Individual page art · JPG, PNG, or WebP · 3 MB maximum</small></div><div class="monster-zone" data-monster-zone role="img" aria-label="Admin-only personalized monster placement"><span>MONSTER</span></div><div class="child-zone" data-child-zone role="img" aria-label="Admin-only personalized child placement"><span>CHILD</span></div></div><div class="page-artwork-controls"><div class="page-artwork-heading"><span class="page-step-number">3</span><span><strong>Individual page background</strong><small data-artwork-name>Upload this page's background without permanent characters.</small></span></div><label class="button secondary artwork-upload-button"><input type="file" accept="image/jpeg,image/png,image/webp" data-artwork-file /> <span data-artwork-upload-label>Upload page background</span></label><label class="artwork-status-label"><span><strong>Background artwork review</strong><small>Applies only to this individual page, not any PDF.</small></span><select data-artwork-review><option value="missing">Background missing</option><option value="draft">Needs background review</option><option value="approved">Background approved</option><option value="final">Final background art</option></select></label><details class="monster-placement-controls"><summary>Monster placement <small>Advanced</small></summary><label>Horizontal <input type="range" min="5" max="95" data-character="monster" data-placement="x" /><output data-character-output="monster-x"></output></label><label>Baseline <input type="range" min="10" max="95" data-character="monster" data-placement="y" /><output data-character-output="monster-y"></output></label><label>Size <input type="range" min="15" max="70" data-character="monster" data-placement="scale" /><output data-character-output="monster-scale"></output></label><div><label>Facing<select data-character="monster" data-placement="facing"><option value="left">Left</option><option value="right">Right</option><option value="neutral">Neutral</option></select></label><label>Layer<select data-character="monster" data-placement="layer"><option value="front">In front</option><option value="behind">Behind foreground</option></select></label></div></details><details class="monster-placement-controls child-placement-controls"><summary>Child placement <small>Advanced</small></summary><label>Horizontal <input type="range" min="5" max="95" data-character="child" data-placement="x" /><output data-character-output="child-x"></output></label><label>Baseline <input type="range" min="10" max="95" data-character="child" data-placement="y" /><output data-character-output="child-y"></output></label><label>Size <input type="range" min="15" max="70" data-character="child" data-placement="scale" /><output data-character-output="child-scale"></output></label><div><label>Facing<select data-character="child" data-placement="facing"><option value="left">Left</option><option value="right">Right</option><option value="neutral">Neutral</option></select></label><label>Layer<select data-character="child" data-placement="layer"><option value="front">In front</option><option value="behind">Behind foreground</option></select></label></div><p>Placement guides are never printed.</p></details><button class="button secondary" type="button" data-remove-artwork hidden>Remove from page</button><p data-artwork-message role="status"></p></div></section>`;
   const backgroundCheck = document.createElement("label");
   backgroundCheck.className = "background-plate-check";
-  backgroundCheck.innerHTML = '<input type="checkbox" data-background-confirmed /> <span><strong>Clean background confirmed</strong><small>No permanent child or sample monster appears in either reserved zone.</small></span>';
+  backgroundCheck.innerHTML = '<input type="checkbox" data-background-confirmed /> <span><strong>This page background is character-free</strong><small>Confirms only this image: no permanent child or sample monster appears. This does not approve a PDF or unlock printing.</small></span>';
   card.querySelector(".artwork-status-label").after(backgroundCheck);
   card.dataset.artworkUrl = page.artworkUrl || "";
   card.dataset.artworkPath = page.artworkPath || "";
@@ -1582,7 +1596,7 @@ function removePageArtwork(card) {
 }
 
 function artworkStatusLabel(status) {
-  return ({ missing: "Missing", draft: "Draft review", approved: "Approved", final: "Final artwork" })[status] || "Missing";
+  return ({ missing: "Background missing", draft: "Needs background review", approved: "Background approved", final: "Final background art" })[status] || "Background missing";
 }
 
 function openArtworkOverview() {
@@ -1689,7 +1703,7 @@ function renderStoryReview() {
     return button;
   }));
 
-  document.querySelector("#review-readiness-title").textContent = state.ready ? "Ready for approval" : "Review required";
+  document.querySelector("#review-readiness-title").textContent = state.ready ? "Artwork master ready" : "Artwork review required";
   document.querySelector("#review-readiness-count").textContent = state.ready ? "All 32 pages passed" : `${state.issues.length} issue${state.issues.length === 1 ? "" : "s"}`;
   const issues = document.querySelector("#story-review-issues");
   if (!state.issues.length) issues.innerHTML = "<li class=\"is-ready\">✓ Copy, artwork, personalization, and page count passed.</li>";
@@ -1705,7 +1719,7 @@ function renderStoryReview() {
   }));
   const approve = document.querySelector("#approve-master-story");
   approve.disabled = !state.ready || savingStory;
-  approve.textContent = state.ready ? "Approve & publish master" : "Resolve issues to approve";
+  approve.textContent = state.ready ? "Approve artwork master" : "Resolve artwork issues";
 }
 
 function buildReviewPage(card, index, child, monster) {
@@ -1729,13 +1743,13 @@ function buildReviewPage(card, index, child, monster) {
 
 async function approveMasterStory() {
   const state = storyReviewState();
-  if (!state.ready || !window.confirm("Approve and publish this master book? Future personalized orders will use this saved version.")) return;
+  if (!state.ready || !window.confirm("Approve and publish this story and its individual page backgrounds? This does not approve any PDF or release a print file.")) return;
   const status = document.querySelector("#story-review-status");
-  status.textContent = "Saving and approving the master book…";
+  status.textContent = "Saving and approving the artwork master…";
   const saved = await saveStory("published");
   if (saved) {
     storyReviewDialog.close();
-    editorStatus.textContent = `Master book approved and published as version ${saved.version}.`;
+    editorStatus.textContent = `Artwork master approved and published as version ${saved.version}. Review-PDF and print approval remain separate.`;
   } else status.textContent = editorStatus.textContent || "The master book could not be approved.";
 }
 
