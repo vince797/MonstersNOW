@@ -23,28 +23,31 @@ test.afterEach(() => {
   if (originalKey === undefined) delete process.env.SUPABASE_SECRET_KEY; else process.env.SUPABASE_SECRET_KEY = originalKey;
 });
 
-test("review manifest identifies the two exact Halloween PDFs honestly", () => {
-  assert.equal(BOOK_REVIEW_FILES.length, 2);
-  assert.deepEqual(BOOK_REVIEW_FILES.map((file) => file.size), [12933876, 14854554]);
+test("review manifest identifies the three exact Halloween PDFs honestly", () => {
+  assert.equal(BOOK_REVIEW_FILES.length, 3);
+  assert.deepEqual(BOOK_REVIEW_FILES.map((file) => file.size), [12933876, 14854554, 16677582]);
   assert.deepEqual(BOOK_REVIEW_FILES.map((file) => file.sha256), [
     "56b30976ae88ae8bb498158219f19d573733ca81b89db9ea8ccc02dcd397309d",
     "9167c31db4f8cba0c41872ef5c1d06ce3d933658d99fae8d0cac6166556be955",
+    "8e1c8b09db417da4fbd75104dcc3a736388b52e4b4b8665f8cbadba45c4d917d",
   ]);
   assert.ok(BOOK_REVIEW_FILES.every((file) => file.storySlug === "halloween-monster-night"));
   assert.match(BOOK_REVIEW_FILES[0].status, /Review required/);
   assert.match(BOOK_REVIEW_FILES[1].status, /Not print ready/);
+  assert.match(BOOK_REVIEW_FILES[2].status, /Not print ready/);
+  assert.match(BOOK_REVIEW_FILES[2].description, /review material only, not verified print masters/);
 });
 
 test("missing private review files are listed as pending", async () => {
   global.fetch = async () => new Response(JSON.stringify({ message: "not found" }), { status: 404 });
   const files = await listBookReviewFiles("halloween-monster-night");
-  assert.equal(files.length, 2);
+  assert.equal(files.length, 3);
   assert.ok(files.every((file) => file.uploaded === false));
   assert.ok(files.every((file) => !file.downloadUrl));
 });
 
 test("signed upload requires exact file identity and returns the storage URL", async () => {
-  const file = BOOK_REVIEW_FILES[0];
+  const file = BOOK_REVIEW_FILES[2];
   const calls = [];
   global.fetch = async (url, options = {}) => {
     calls.push({ url, options });
