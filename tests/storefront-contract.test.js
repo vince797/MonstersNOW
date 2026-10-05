@@ -67,3 +67,12 @@ test("public page links and image sources resolve locally", () => {
     }
   }
 });
+
+test("storybook step pairs a child with their monster across the spread", () => {
+  const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
+  const image = path.join(root, "assets", "step-3-storybook-v2.jpg");
+  assert.match(html, /assets\/step-3-storybook-v2\.jpg/);
+  assert.match(html, /child and a green monster waving to each other/);
+  assert.equal(fs.existsSync(image), true);
+  assert.ok(fs.statSync(image).size < 200_000);
+});
