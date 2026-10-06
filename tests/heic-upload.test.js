@@ -21,13 +21,22 @@ test("HEIC conversion cannot leave the upload UI waiting forever", () => {
 test("upload progress stays customer-friendly while HEIC handling remains internal", () => {
   assert.match(mainScript, /setUploadActionStatus\("Loading your photo\.\.\."\)/);
   assert.match(mainScript, /setUploadActionStatus\("Still loading your photo\.\.\."\)/);
-  assert.match(mainScript, /setUploadActionStatus\("Photo loaded\. Creating your preview now\."\)/);
+  assert.match(mainScript, /setUploadActionStatus\("Drawing selected\. Continue when it looks right\."\)/);
   assert.doesNotMatch(mainScript, /setUploadActionStatus\([^\n]*HEIC/);
 });
 
 test("create flow cache-busts the corrected upload script", () => {
-  assert.match(createPage, /scripts\/main\.js\?v=20261005-personality-studio-v2/);
+  assert.match(createPage, /scripts\/main\.js\?v=20261005-upload-polish-v1/);
+  assert.match(createPage, /styles\.css\?v=20261005-upload-polish-v1/);
   assert.doesNotMatch(createPage, /scripts\/main\.js\?v=20261004-upload-timeout-v7/);
+});
+
+test("upload step presents one primary action and a review-before-generation state", () => {
+  assert.match(createPage, /<strong>Upload your monster drawing<\/strong>/);
+  assert.match(createPage, /id="selected-drawing"[\s\S]*id="replace-selected-drawing"[\s\S]*Continue to monster preview/);
+  assert.match(createPage, /Best results:[\s\S]*bright, straight-on photo/);
+  assert.match(mainScript, /if \(file\) selectDrawingFile\(file\)/);
+  assert.match(mainScript, /if \(resultPanel\) resultPanel\.hidden = false/);
 });
 
 test("HEIC server conversion logs start, completion, rejection, and failure", () => {

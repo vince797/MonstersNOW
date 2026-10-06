@@ -59,12 +59,12 @@ let reviewSpreadIndex = 0;
 let commandSelection = 0;
 const CATALOG_COVERS = {
   "halloween-monster-night": "assets/storybook/cover-series/minimal-concepts/halloween-monster-night-v3-web.jpg",
-  "big-adventure": "assets/storybook/cover-series/minimal-concepts/big-adventure-v2-web.jpg",
-  "bedtime-monster": "assets/storybook/cover-series/minimal-concepts/bedtime-monster-v2-web.jpg",
-  "abc-monster-book": "assets/storybook/cover-series/minimal-concepts/abc-monster-book-v2-web.jpg",
-  "counting-with-my-monster": "assets/storybook/cover-series/minimal-concepts/counting-with-my-monster-v2-web.jpg",
-  "the-monster-who-lost-their-glow": "assets/storybook/cover-series/minimal-concepts/the-monster-who-lost-their-glow-v3-web.jpg",
-  "birthday-monster-adventure": "assets/storybook/cover-series/minimal-concepts/birthday-monster-adventure-v2-web.jpg",
+  "big-adventure": "assets/storybook/cover-series/minimal-concepts/big-adventure-v3-web.jpg",
+  "bedtime-monster": "assets/storybook/cover-series/minimal-concepts/bedtime-monster-v3-web.jpg",
+  "abc-monster-book": "assets/storybook/cover-series/minimal-concepts/abc-monster-book-v3-web.jpg",
+  "counting-with-my-monster": "assets/storybook/cover-series/minimal-concepts/counting-with-my-monster-v3-web.jpg",
+  "the-monster-who-lost-their-glow": "assets/storybook/cover-series/minimal-concepts/the-monster-who-lost-their-glow-v4-web.jpg",
+  "birthday-monster-adventure": "assets/storybook/cover-series/minimal-concepts/birthday-monster-adventure-v3-web.jpg",
 };
 editor.addEventListener("submit", (event) => event.preventDefault());
 editor.addEventListener("input", (event) => {

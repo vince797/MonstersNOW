@@ -10,7 +10,7 @@
     <link rel="canonical" href="https://www.monstersnow.com/create" />
     <title>Create Your Monster | MonstersNOW</title>
     <link rel="icon" href="assets/brand/monstersnow-icon-32-v1.png" type="image/png" sizes="32x32" />
-    <link rel="stylesheet" href="styles.css?v=20261005-create-flow-v10" />
+    <link rel="stylesheet" href="styles.css?v=20261005-upload-polish-v1" />
     <link rel="stylesheet" href="child-selector.css?v=20261005-age-personality-v11" />
     <link rel="stylesheet" href="storefront.css?v=20261002-public-storefront" />
     <link rel="apple-touch-icon" href="assets/brand/monstersnow-icon-180-v1.png" />
@@ -72,27 +72,41 @@
           </div>
         </div>
 
-        <div class="converter-tool" data-converter>
+        <div class="converter-tool is-upload-only" data-converter>
           <form class="upload-panel" data-monster-step-panel novalidate>
             <div class="studio-card-heading">
               <span aria-hidden="true">1</span>
-              <div><small>Start here</small><h2>Upload the monster drawing</h2><p>The first preview starts automatically.</p></div>
+              <div><small>Start here</small><h2>Upload your monster drawing</h2><p>Take a clear photo or choose one from this device.</p></div>
             </div>
-            <label class="upload-drop" for="monster-upload">
-              <span>Drawing</span>
-              <strong>Upload or take a picture</strong>
-              <small>PNG, JPG, HEIC, WebP, or GIF under 8 MB</small>
+            <label class="upload-drop" for="monster-upload" aria-describedby="upload-quick-tip upload-format-help">
+              <span class="upload-drop-icon" aria-hidden="true">↑</span>
+              <strong>Upload your monster drawing</strong>
+              <small id="upload-format-help">Choose a photo or take one · PNG, JPG, HEIC, WebP, or GIF under 8 MB</small>
             </label>
             <input
               id="monster-upload"
               type="file"
               accept="image/png,image/jpeg,image/webp,image/gif,image/heic,image/heif,image/heic-sequence,image/heif-sequence,.heic,.heif"
             />
+            <p class="upload-quick-tip" id="upload-quick-tip"><strong>Best results:</strong> bright, straight-on photo with only the drawing in frame.</p>
             <p class="converter-error" id="upload-error" role="alert" hidden></p>
+            <section class="selected-drawing-card" id="selected-drawing" aria-labelledby="selected-drawing-title" hidden>
+              <figure><img id="drawing-preview" src="assets/step-1-drawing.jpg" alt="" /></figure>
+              <div class="selected-drawing-copy">
+                <small>Selected drawing</small>
+                <strong id="selected-drawing-title">Drawing ready</strong>
+                <span id="selected-drawing-meta"></span>
+                <p>Make sure the drawing is clear, then continue when it looks right.</p>
+                <div class="selected-drawing-actions">
+                  <button class="button secondary" id="replace-selected-drawing" type="button">Replace</button>
+                  <button class="button primary converter-button" id="convert-button" type="button">Continue to monster preview</button>
+                </div>
+              </div>
+            </section>
             <p class="upload-action-status" id="upload-action-status" role="status">
-              Upload a drawing and the first preview starts automatically.
+              Nothing is created until you choose a drawing and continue.
             </p>
-            <details class="variation-controls preview-options">
+            <details class="variation-controls preview-options" hidden>
               <summary>
                 <span>Preview personality</span>
                 <strong class="next-personality-status" id="next-personality-status">Classic is ready for the first preview.</strong>
@@ -133,15 +147,14 @@
                 </ul>
                 <p class="privacy-note">For adults: upload the drawing only—no child photo or personal details. Artwork stays private unless you explicitly choose to share it. <a href="privacy.html">How artwork is handled</a></p>
                 <figure class="drawing-preview-example">
-                  <img id="drawing-preview" src="assets/step-1-drawing.jpg" alt="Sample child monster drawing framed clearly for upload." />
+                  <img src="assets/step-1-drawing.jpg" alt="Sample child monster drawing framed clearly for upload." />
                   <figcaption>Example photo framing</figcaption>
                 </figure>
               </div>
             </details>
-            <button class="button primary converter-button" id="convert-button" type="button" disabled hidden>Create Monster</button>
           </form>
 
-          <div class="result-panel is-example-preview" id="monster-result" data-monster-step-panel aria-live="polite" tabindex="-1">
+          <div class="result-panel is-example-preview" id="monster-result" data-monster-step-panel aria-live="polite" tabindex="-1" hidden>
             <div class="converter-preview monster-preview">
               <span class="preview-badge" id="monster-preview-badge">Example preview</span>
               <img
@@ -437,6 +450,6 @@
 
     <script src="scripts/child-selector.js?v=20261005-age-personality-v9"></script>
     <script src="scripts/monster-cutout.js?v=20261004-cutout-v1"></script>
-    <script src="scripts/main.js?v=20261005-personality-studio-v2"></script>
+    <script src="scripts/main.js?v=20261005-upload-polish-v1"></script>
   </body>
 </html>

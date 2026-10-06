@@ -83,6 +83,14 @@ const server = http.createServer(async (req, res) => {
     for (const suffix of ["", "?story=halloween-monster-night"]) {
       const discovery = await browser.newPage({ viewport: { width: 390, height: 844 } });
       await discovery.goto(`${base}/create.html${suffix}`);
+      assert.equal(await discovery.getByText("Upload your monster drawing", { exact: true }).count(), 2, "one heading and one primary upload action should lead the step");
+      assert.equal(await discovery.locator("#selected-drawing").isHidden(), true);
+      assert.equal(await discovery.locator("#monster-result").isHidden(), true, "example result should not compete with the initial upload action");
+      assert.equal(await discovery.locator(".preview-options").isHidden(), true, "personality choices appear only after a drawing is selected");
+      const accept = await discovery.locator("#monster-upload").getAttribute("accept");
+      assert.match(accept, /image\/jpeg/);
+      assert.match(accept, /image\/heic/);
+      assert.equal(await discovery.locator("#monster-upload").getAttribute("capture"), null, "browser picker remains free to offer camera or photo library");
       assert.equal(await discovery.locator("#result-book-offer").isHidden(), true, `child editor should stay locked before monster selection on ${suffix || "default URL"}`);
       assert.equal(await discovery.locator("#child-editor-start").count(), 1, "child editor should remain available in the locked next step");
       assert.equal(await discovery.locator("#storybook-interest").isHidden(), true, "book review stays locked before monster selection");
@@ -91,6 +99,9 @@ const server = http.createServer(async (req, res) => {
         await discovery.screenshot({ path: path.join(output, "child-editor-entry-mobile.png"), fullPage: true });
         await discovery.locator("#monster-upload").setInputFiles({ name: "not-a-drawing.txt", mimeType: "text/plain", buffer: Buffer.from("not an image") });
         await discovery.locator("#upload-error").waitFor({ state: "visible" });
+        assert.match(await discovery.locator("#upload-error").textContent(), /PNG, JPG, HEIC, WebP, or GIF/);
+        await discovery.locator("#monster-upload").setInputFiles({ name: "too-large.png", mimeType: "image/png", buffer: Buffer.alloc((8 * 1024 * 1024) + 1) });
+        assert.match(await discovery.locator("#upload-error").textContent(), /under 8(?:\.0)? MB/);
         assert.equal(await discovery.locator("#result-book-offer").isHidden(), true, "failed upload must not skip into the child step");
       }
       await discovery.close();
@@ -107,6 +118,27 @@ const server = http.createServer(async (req, res) => {
     await page.goto(`${base}/create.html?test=halloween`);
     await page.setViewportSize({ width: 390, height: 844 });
     const previewOptions = page.locator(".preview-options");
+    assert.equal(await previewOptions.isHidden(), true, "personality controls stay out of the initial upload decision");
+    const requestsBeforeSelection = monsterPreviewRequests.length;
+    await page.locator("#monster-upload").setInputFiles({ name: "first-monster.jpg", mimeType: "image/jpeg", buffer: fs.readFileSync(path.join(root, "assets/step-2-character.jpg")) });
+    await page.locator("#selected-drawing").waitFor({ state: "visible" });
+    assert.equal(monsterPreviewRequests.length, requestsBeforeSelection, "selecting a drawing must wait for explicit Continue");
+    assert.equal(await page.locator("#monster-result").isHidden(), true);
+    assert.equal(await page.locator("#selected-drawing-title").textContent(), "first-monster.jpg");
+    assert.equal(await page.locator("#drawing-preview").evaluate((image) => image.complete && image.naturalWidth > 0), true);
+    const fileChooserPromise = page.waitForEvent("filechooser");
+    await page.locator("#replace-selected-drawing").click();
+    const fileChooser = await fileChooserPromise;
+    await fileChooser.setFiles([]);
+    assert.equal(await page.locator("#selected-drawing-title").textContent(), "first-monster.jpg", "canceling Replace keeps the selected drawing");
+    await page.locator("#monster-upload").setInputFiles({ name: "replacement-monster.jpg", mimeType: "image/jpeg", buffer: fs.readFileSync(path.join(root, "assets/step-2-character.jpg")) });
+    assert.equal(await page.locator("#selected-drawing-title").textContent(), "replacement-monster.jpg");
+    assert.equal(monsterPreviewRequests.length, requestsBeforeSelection, "replacing a drawing still waits for explicit Continue");
+    await page.screenshot({ path: path.join(output, "selected-drawing-mobile.png"), fullPage: true });
+    await page.locator("#monster-upload").setInputFiles({ name: "oversize-replacement.png", mimeType: "image/png", buffer: Buffer.alloc((8 * 1024 * 1024) + 1) });
+    assert.match(await page.locator("#upload-error").textContent(), /under 8(?:\.0)? MB/);
+    assert.equal(await page.locator("#selected-drawing-title").textContent(), "replacement-monster.jpg", "invalid replacement keeps the current drawing selected");
+    assert.equal(await previewOptions.isVisible(), true);
     assert.equal(await previewOptions.evaluate((element) => element.open), false, "personality choices start progressively disclosed");
     await previewOptions.locator("summary").click();
     assert.equal(await previewOptions.evaluate((element) => element.open), true);
@@ -115,12 +147,13 @@ const server = http.createServer(async (req, res) => {
     await previewOptions.locator("summary").click();
     await page.locator('[data-monster-style="silly"]').click();
     assert.match(await page.locator("#next-personality-status").textContent(), /Playful is ready for the first preview/);
-    await page.locator("#monster-upload").setInputFiles(path.join(root, "assets/step-2-character.jpg"));
+    await page.locator("#convert-button").evaluate((button) => { button.click(); button.click(); });
     await page.waitForFunction(() => document.querySelector("#monster-result")?.getAttribute("aria-busy") === "true");
     await page.locator('[data-monster-style="adventure"]').click();
     assert.match(await page.locator("#upload-action-status").textContent(), /queued for the next preview.*(?:will not|has not) changed?/i);
     assert.equal(await page.locator("#confirm-monster").isHidden(), true, "monster confirmation stays hidden while generation is pending");
     await page.locator("#confirm-monster").waitFor({ state: "visible" });
+    assert.equal(monsterPreviewRequests.length, requestsBeforeSelection + 1, "repeated Continue taps create only one request");
     assert.equal(monsterPreviewRequests[0].style, "silly", "selected personality must reach the generation request");
     assert.equal(monsterPreviewRequests[0].submissionId, mockSubmissionId, "persisted submission must authorize generation");
     assert.equal(await page.locator("#selected-preview-personality").textContent(), "Selected preview · Playful");
@@ -204,6 +237,7 @@ const server = http.createServer(async (req, res) => {
     assert.equal(await page.locator('input[name="child-character"][value="deep-braids-black"]').isChecked(), true);
     assert.equal(await page.locator('input[name="child-mobility-aid"][value="wheelchair"]').isChecked(), true);
     await page.locator("#monster-upload").setInputFiles(path.join(root, "assets/step-2-character.jpg"));
+    await page.locator("#convert-button").click();
     await page.locator("#confirm-monster").waitFor({ state: "visible" });
     await page.locator("#download-coloring").click();
     await page.locator("#coloring-page-dialog[open]").waitFor({ state: "visible" });
@@ -263,6 +297,7 @@ const server = http.createServer(async (req, res) => {
     const convertCountBeforeFailure = monsterPreviewRequests.length;
     failNextMonsterSubmission = true;
     await errorPage.locator("#monster-upload").setInputFiles(path.join(root, "assets/step-2-character.jpg"));
+    await errorPage.locator("#convert-button").click();
     await errorPage.locator("#upload-error").waitFor({ state: "visible" });
     assert.match(await errorPage.locator("#upload-error").textContent(), /couldn't safely save.*no preview was created.*Nothing was charged/i);
     assert.equal(monsterPreviewRequests.length, convertCountBeforeFailure, "generation must not run without a persisted submission");

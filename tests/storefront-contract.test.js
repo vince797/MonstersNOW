@@ -38,19 +38,32 @@ test("the create flow displays and forwards the allowlisted story", () => {
   assert.match(script, /storyId: storyId \|\| selectedStory\.id/);
 });
 
-test("Halloween uses the approved purple-and-cream cover everywhere public", () => {
-  const expected = "halloween-monster-night-v3-web.jpg";
-  assert.match(read("index.html"), new RegExp(expected));
-  assert.match(read("books.html"), new RegExp(expected));
-  assert.match(read("create.html"), new RegExp(expected));
-  assert.doesNotMatch([read("index.html"), read("books.html"), read("create.html")].join("\n"), /halloween-monster-night-v2-(?:web|640)/);
-  assert.ok(fs.existsSync(path.join(root, "assets/storybook/cover-series/minimal-concepts/halloween-monster-night-v3.png")));
-  assert.ok(fs.existsSync(path.join(root, "assets/storybook/cover-series/minimal-concepts/halloween-monster-night-v3-web.jpg")));
-  assert.ok(fs.existsSync(path.join(root, "assets/storybook/cover-series/minimal-concepts/halloween-monster-night-v3-640.webp")));
-  assert.equal(
-    crypto.createHash("sha256").update(fs.readFileSync(path.join(root, "assets/storybook/cover-series/minimal-concepts/halloween-monster-night-v3.png"))).digest("hex"),
-    "7c46e1c744ac3e156ce8daec97331eaa1db1dd8a0eb1052e2a54c4f9f45f3d13",
-  );
+test("the approved seven-cover collection is used without changing story availability", () => {
+  const covers = {
+    "halloween-monster-night-v3": "7c46e1c744ac3e156ce8daec97331eaa1db1dd8a0eb1052e2a54c4f9f45f3d13",
+    "big-adventure-v3": "4d5a64303ddbebec72ac045b5ae0b54966fd73ceff999dcc7ae64aec534f4b27",
+    "bedtime-monster-v3": "b654e6aa5d87c31a11c8449a4443f2d7d66d486354ac6227bdf03f7d2a97dbdd",
+    "abc-monster-book-v3": "6dba3ddd9c51a75b589c5761507b7ec627bbf6bafd664209d1c57e2cfca8f052",
+    "counting-with-my-monster-v3": "0a70ffb1877ea745113ff912a2b9ee65e8c87984f84ed2494e45a074b0ac530c",
+    "the-monster-who-lost-their-glow-v4": "662ac55c635f26631661448582c21c37ae7907ba8bc2970504059b5519db61b4",
+    "birthday-monster-adventure-v3": "18bd305d65b03b32d0c39d883f598fbadd601b248b0a77bcd738f045ebe7dcc1",
+  };
+  const books = read("books.html");
+  const admin = read("scripts/admin.js");
+  Object.entries(covers).forEach(([name, expectedHash]) => {
+    assert.match(books, new RegExp(`${name}-web\\.jpg`));
+    assert.match(admin, new RegExp(`${name}-web\\.jpg`));
+    for (const suffix of [".png", "-web.jpg", "-640.webp"]) {
+      assert.ok(fs.existsSync(path.join(root, `assets/storybook/cover-series/minimal-concepts/${name}${suffix}`)));
+    }
+    assert.equal(
+      crypto.createHash("sha256").update(fs.readFileSync(path.join(root, `assets/storybook/cover-series/minimal-concepts/${name}.png`))).digest("hex"),
+      expectedHash,
+    );
+  });
+  const publicCoverMarkup = [read("index.html"), books, read("create.html")].join("\n");
+  assert.doesNotMatch(publicCoverMarkup, /(?:big-adventure|bedtime-monster|abc-monster-book|counting-with-my-monster|birthday-monster-adventure)-v2-(?:web|640)/);
+  assert.doesNotMatch(publicCoverMarkup, /the-monster-who-lost-their-glow-v3-web/);
 });
 
 test("public storefront remains isolated from admin and Etsy", () => {

@@ -120,7 +120,7 @@ test("selector UI exposes only supported controls and states the current renderi
   assert.match(css, /\.child-preview-character/);
   assert.match(html, /child-selector\.css\?v=20261005-age-personality-v11/);
   assert.match(html, /scripts\/child-selector\.js\?v=20261005-age-personality-v9/);
-  assert.match(html, /scripts\/main\.js\?v=20261005-personality-studio-v2/);
+  assert.match(html, /scripts\/main\.js\?v=20261005-upload-polish-v1/);
 });
 
 test("character studio includes lightweight changing storybook previews", () => {

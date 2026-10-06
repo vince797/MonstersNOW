@@ -70,8 +70,13 @@ const nextPersonalityStatus = document.querySelector("#next-personality-status")
 const uploadActionStatus = document.querySelector("#upload-action-status");
 const uploadError = document.querySelector("#upload-error");
 const uploadDrop = document.querySelector(".upload-drop");
-const uploadTitle = document.querySelector(".upload-drop strong");
-const uploadMeta = document.querySelector(".upload-drop small");
+const uploadQuickTip = document.querySelector("#upload-quick-tip");
+const selectedDrawingCard = document.querySelector("#selected-drawing");
+const selectedDrawingTitle = document.querySelector("#selected-drawing-title");
+const selectedDrawingMeta = document.querySelector("#selected-drawing-meta");
+const replaceSelectedDrawingButton = document.querySelector("#replace-selected-drawing");
+const previewOptions = document.querySelector(".preview-options");
+const converterTool = document.querySelector(".converter-tool");
 const resultActions = document.querySelector(".result-actions");
 const flowSteps = [...document.querySelectorAll(".converter-flow li")];
 const styleButtons = [...document.querySelectorAll("[data-monster-style]")];
@@ -181,8 +186,7 @@ let heicConverterPromise;
 if (monsterUpload && drawingPreview && monsterPreview && convertButton) {
   monsterUpload.addEventListener("change", () => {
     const [file] = monsterUpload.files;
-
-    selectDrawingFile(file);
+    if (file) selectDrawingFile(file);
   });
 
   bindUploadDropZone();
@@ -234,7 +238,7 @@ if (monsterUpload && drawingPreview && monsterPreview && convertButton) {
       } else if (selectedDrawingFile && previewsUsed < maxFreePreviews) {
         setUploadActionStatus(`${getPreviewPersonalityLabel(selectedMonsterStyle)} is queued for the next preview. Your selected preview has not changed.`);
       } else if (!selectedDrawingFile) {
-        setUploadActionStatus(`${getPreviewPersonalityLabel(selectedMonsterStyle)} is ready for the first preview. Upload a drawing to start automatically.`);
+        setUploadActionStatus(`${getPreviewPersonalityLabel(selectedMonsterStyle)} is ready for the first preview. Upload a drawing, then continue when it looks right.`);
       }
       syncPreviewControls();
     });
@@ -251,6 +255,8 @@ if (storybookInterestForm) {
 if (replaceDrawingButton) {
   replaceDrawingButton.addEventListener("click", () => monsterUpload?.click());
 }
+
+replaceSelectedDrawingButton?.addEventListener("click", () => monsterUpload?.click());
 
 if (confirmMonsterButton) {
   confirmMonsterButton.addEventListener("click", () => {
@@ -610,16 +616,20 @@ async function selectDrawingFile(file) {
   const validationError = validateDrawing(file);
 
   if (validationError) {
-    resetUpload();
+    monsterUpload.value = "";
+    if (!selectedDrawingFile) resetUpload();
+    else {
+      setUploadActionStatus("That replacement was not used. Your current drawing is still selected.");
+      syncPreviewControls();
+    }
     showUploadError(validationError);
     return;
   }
 
   const selectionId = ++uploadSelectionId;
   const shouldConvertHeic = isHeicUpload(file);
+  const hadSelectedDrawing = Boolean(selectedDrawingFile);
 
-  selectedDrawingFile = undefined;
-  resetPreviewState();
   showUploadError("");
   if (replaceDrawingButton) replaceDrawingButton.hidden = true;
   setUploadActionStatus("Loading your photo...");
@@ -639,7 +649,11 @@ async function selectDrawingFile(file) {
       return;
     }
 
-    resetUpload();
+    if (hadSelectedDrawing) {
+      monsterUpload.value = "";
+      setUploadActionStatus("That replacement could not be prepared. Your current drawing is still selected.");
+      syncPreviewControls();
+    } else resetUpload();
     showUploadError(
       shouldConvertHeic
         ? "This photo could not be prepared. Please save it as JPG or PNG and upload again."
@@ -661,16 +675,16 @@ async function selectDrawingFile(file) {
   resetPreviewState();
   drawingPreview.src = drawingPreviewUrl;
   drawingPreview.alt = "Uploaded child monster drawing.";
-  setConverterStage("preview");
+  setConverterStage("upload");
   showUploadError("");
 
-  if (uploadTitle) {
-    uploadTitle.textContent = formatUploadName(file.name);
-    uploadTitle.title = file.name;
+  if (selectedDrawingTitle) {
+    selectedDrawingTitle.textContent = formatUploadName(file.name);
+    selectedDrawingTitle.title = file.name;
   }
 
-  if (uploadMeta) {
-    uploadMeta.textContent = shouldConvertHeic
+  if (selectedDrawingMeta) {
+    selectedDrawingMeta.textContent = shouldConvertHeic
       ? `${formatBytes(file.size)} photo ready`
       : `${formatBytes(file.size)} selected`;
   }
@@ -679,17 +693,10 @@ async function selectDrawingFile(file) {
     downloadColoringButton.disabled = true;
   }
 
-  if (converterStatus) {
-    converterStatus.textContent = "Drawing ready. Creating preview...";
-  }
-
-  if (converterNote) {
-    converterNote.textContent = `Creating a ${getPreviewPersonalityLabel(selectedMonsterStyle)} personality preview in the shared Soft 3D Storybook art style.`;
-  }
-
-  setUploadActionStatus("Photo loaded. Creating your preview now.");
+  if (converterStatus) converterStatus.textContent = "Drawing selected.";
+  if (converterNote) converterNote.textContent = "Continue when the drawing looks clear, then we’ll create the first monster preview.";
+  setUploadActionStatus("Drawing selected. Continue when it looks right.");
   syncPreviewControls();
-  requestMonsterPreview();
 }
 
 async function requestMonsterPreview() {
@@ -713,6 +720,9 @@ async function requestMonsterPreview() {
   }
 
   isGeneratingPreview = true;
+  if (resultPanel) resultPanel.hidden = false;
+  converterTool?.classList.remove("is-upload-only");
+  setConverterStage("preview");
   syncPreviewControls();
   setUploadActionStatus(`Creating your ${getPreviewPersonalityLabel(selectedMonsterStyle)} personality preview.`);
 
@@ -946,7 +956,7 @@ function syncPreviewControls() {
   const canGenerate = Boolean(selectedDrawingFile) && remaining > 0 && !isGeneratingPreview;
   const hasPreview = generatedPreviews.length > 0;
   const shouldShowConvertButton = Boolean(selectedDrawingFile) && !hasPreview;
-  const primaryText = previewsUsed === 0 ? "Create Preview" : "Try Another Version";
+  const primaryText = previewsUsed === 0 ? "Continue to monster preview" : "Try Another Version";
   const buttonText = isGeneratingPreview
     ? "Creating..."
     : !selectedDrawingFile
@@ -995,7 +1005,10 @@ function syncPreviewControls() {
   }
 
   updatePreviewPresentation(hasPreview);
-  uploadDrop?.classList.toggle("has-file", Boolean(selectedDrawingFile));
+  if (uploadDrop) uploadDrop.hidden = Boolean(selectedDrawingFile);
+  if (uploadQuickTip) uploadQuickTip.hidden = Boolean(selectedDrawingFile);
+  if (selectedDrawingCard) selectedDrawingCard.hidden = !selectedDrawingFile;
+  if (previewOptions) previewOptions.hidden = !selectedDrawingFile;
   resultPanel?.setAttribute("aria-busy", isGeneratingPreview ? "true" : "false");
 
   if (previewCount) {
@@ -1082,16 +1095,16 @@ function resetUpload() {
     downloadColoringButton.disabled = true;
   }
 
-  if (uploadTitle) {
-    uploadTitle.textContent = "Upload or take a picture";
-    uploadTitle.removeAttribute("title");
+  if (selectedDrawingTitle) {
+    selectedDrawingTitle.textContent = "Drawing ready";
+    selectedDrawingTitle.removeAttribute("title");
   }
 
-  if (uploadMeta) {
-    uploadMeta.textContent = "PNG, JPG, HEIC, WebP, or GIF under 8 MB";
-  }
+  if (selectedDrawingMeta) selectedDrawingMeta.textContent = "";
 
-  setUploadActionStatus("Upload a drawing to create the first preview.");
+  if (resultPanel) resultPanel.hidden = true;
+  converterTool?.classList.add("is-upload-only");
+  setUploadActionStatus("Nothing is created until you choose a drawing and continue.");
   setConverterStage("upload");
   syncPreviewControls();
 }

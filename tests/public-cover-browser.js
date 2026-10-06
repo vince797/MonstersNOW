@@ -1,4 +1,4 @@
-// Local browser check for the approved Halloween cover on every public entry point.
+// Local browser check for the approved seven-cover collection on public catalog surfaces.
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const http = require("node:http");
@@ -8,6 +8,15 @@ const { chromium } = require("playwright");
 const root = path.resolve(__dirname, "..");
 const output = path.join(root, "tmp", "public-cover-check");
 fs.mkdirSync(output, { recursive: true });
+const approvedCoverFiles = [
+  "halloween-monster-night-v3-web.jpg",
+  "big-adventure-v3-web.jpg",
+  "bedtime-monster-v3-web.jpg",
+  "abc-monster-book-v3-web.jpg",
+  "counting-with-my-monster-v3-web.jpg",
+  "the-monster-who-lost-their-glow-v4-web.jpg",
+  "birthday-monster-adventure-v3-web.jpg",
+];
 
 const server = http.createServer((request, response) => {
   const pathname = new URL(request.url, "http://localhost").pathname;
@@ -44,15 +53,20 @@ const server = http.createServer((request, response) => {
       assert.deepEqual(errors, []);
       await cover.locator("xpath=ancestor::article[1]").screenshot({ path: path.join(output, `halloween-cover-${viewport.name}.png`) });
       await page.goto(`${base}/books.html`);
-      const catalogCover = page.locator('img[src*="halloween-monster-night-v3-web.jpg"]').first();
-      await catalogCover.scrollIntoViewIfNeeded();
-      await page.waitForFunction((image) => image.complete && image.naturalWidth > 0, await catalogCover.elementHandle());
-      assert.equal(await catalogCover.evaluate((image) => image.complete && image.naturalWidth > 0), true);
+      const catalogGrid = page.locator(".story-catalog-grid");
+      await catalogGrid.scrollIntoViewIfNeeded();
+      for (const fileName of approvedCoverFiles) {
+        const catalogCover = page.locator(`img[src*="${fileName}"]`).first();
+        await catalogCover.scrollIntoViewIfNeeded();
+        await page.waitForFunction((image) => image.complete && image.naturalWidth > 0, await catalogCover.elementHandle());
+        assert.equal(await catalogCover.evaluate((image) => image.complete && image.naturalWidth > 0), true);
+      }
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
       assert.deepEqual(errors, []);
+      await catalogGrid.screenshot({ path: path.join(output, `cover-collection-${viewport.name}.png`) });
       await page.close();
     }
-    console.log("PASS: approved Halloween cover loads on the homepage and Books page at desktop/mobile sizes with no overflow or browser errors.");
+    console.log("PASS: approved seven-cover collection loads on public catalog surfaces at desktop/mobile sizes with no overflow or browser errors.");
   } finally {
     await browser?.close();
     await new Promise((resolve) => server.close(resolve));
