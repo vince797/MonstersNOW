@@ -194,7 +194,47 @@
 .child-gender-options label.is-selected > span { background: #007f89; color: #fff; box-shadow: 0 0 0 4px rgba(0,127,137,.12); }
 .child-gender-options label:has(input:focus-visible),
 .child-monster-only-option:has(input:focus-visible) { outline: 3px solid #175f9a; outline-offset: 2px; }
+.child-skin-tone-picker[hidden],
 .child-look-picker[hidden] { display: none; }
+
+.child-skin-tone-options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.child-skin-tone-options label[hidden] { display: none; }
+.child-skin-tone-options label { min-width: 0; cursor: pointer; }
+.child-skin-tone-options input { position: absolute; opacity: 0; pointer-events: none; }
+.child-skin-tone-options span {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+  min-height: 48px;
+  padding: 7px 9px;
+  border: 2px solid #dfe8ec;
+  border-radius: 11px;
+  background: #fff;
+  color: var(--navy);
+}
+.child-skin-tone-options i {
+  width: 28px;
+  height: 28px;
+  border: 2px solid rgba(53,18,93,.18);
+  border-radius: 50%;
+  background: var(--tone);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.34);
+}
+.child-skin-tone-options b { min-width: 0; font-size: .66rem; line-height: 1.15; }
+.child-skin-tone-options label:is(:hover, :focus-within) span,
+.child-skin-tone-options input:checked + span {
+  border-color: #007f89;
+  background: #eaf8f7;
+  box-shadow: 0 0 0 2px rgba(0,127,137,.1);
+}
+.child-skin-tone-options input:checked + span i { box-shadow: 0 0 0 3px #fff, 0 0 0 5px #007f89; }
+.child-skin-tone-options input:focus-visible + span { outline: 3px solid #175f9a; outline-offset: 2px; }
 
 .child-character-options {
   display: grid;
@@ -476,9 +516,6 @@
 }
 
 .child-preview-character {
-  --height-scale: 1;
-  --age-scale-x: 1;
-  --age-scale-y: 1;
   position: absolute;
   z-index: 4;
   right: 7%;
@@ -487,10 +524,8 @@
   height: auto;
   object-fit: contain;
   object-position: center bottom;
-  transform: scale(var(--age-scale-x), var(--age-scale-y));
-  scale: var(--height-scale);
   transform-origin: bottom center;
-  transition: transform 220ms ease, scale 180ms ease, opacity 140ms ease;
+  transition: opacity 140ms ease;
   filter: drop-shadow(0 18px 14px rgba(3,8,24,.42));
 }
 
@@ -501,9 +536,8 @@
   display: none;
 }
 
-/* The two launch bands change illustrated proportions; exact height is not collected. */
-.child-preview-stage.age-3-5 .child-preview-character { --age-scale-x: 1.07; --age-scale-y: .94; }
-.child-preview-stage.age-6-8 .child-preview-character { --age-scale-x: .96; --age-scale-y: 1.06; }
+/* Keep approved reference art at its native aspect ratio. Distinct age-band
+   proportions require separate approved pose art; CSS must not squash it. */
 .child-preview-stage.mobility-wheelchair .child-preview-character {
   right: 1%;
   width: 49%;
@@ -758,6 +792,7 @@
 @media (max-width: 430px) {
   .child-gender-options { grid-template-columns: 1fr 1fr; }
   .child-character-options { grid-template-columns: 1fr; }
+  .child-skin-tone-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .child-character-option { grid-template-columns: 52px minmax(0, 1fr); min-height: 74px; padding: 7px 28px 7px 7px; }
   .child-character-thumb { width: 52px; height: 60px; }
   .child-character-option b { font-size: .67rem; }

@@ -6287,8 +6287,8 @@ body .create-flow-section .upload-drop small {
 .selected-drawing-copy > strong { overflow: hidden; color: #35125d; font-size: 1.12rem; text-overflow: ellipsis; white-space: nowrap; }
 .selected-drawing-copy > span { color: #52657a; font-size: .76rem; font-weight: 800; }
 .selected-drawing-copy > p { margin: 4px 0; color: #5f5267; font-size: .78rem; line-height: 1.4; }
-.selected-drawing-actions { display: grid; grid-template-columns: auto minmax(0,1fr); gap: 8px; }
-.selected-drawing-actions .button { min-height: 46px; }
+.selected-drawing-actions { display: grid; grid-template-columns: minmax(96px,.68fr) minmax(0,1.32fr); gap: 8px; }
+.selected-drawing-actions .button { width: 100%; min-width: 0; min-height: 46px; padding-inline: 10px; white-space: normal; }
 
 body .create-flow-section .upload-action-status {
   min-height: 0;

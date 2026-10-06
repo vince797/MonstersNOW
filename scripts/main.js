@@ -720,6 +720,7 @@ async function requestMonsterPreview() {
   }
 
   isGeneratingPreview = true;
+  showUploadError("");
   if (resultPanel) resultPanel.hidden = false;
   converterTool?.classList.remove("is-upload-only");
   setConverterStage("preview");

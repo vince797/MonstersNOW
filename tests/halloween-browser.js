@@ -149,6 +149,9 @@ const server = http.createServer(async (req, res) => {
     assert.match(await page.locator("#next-personality-status").textContent(), /Playful is ready for the first preview/);
     await page.locator("#convert-button").evaluate((button) => { button.click(); button.click(); });
     await page.waitForFunction(() => document.querySelector("#monster-result")?.getAttribute("aria-busy") === "true");
+    assert.equal(await page.locator("#upload-error").isHidden(), true, "continuing with the valid selected drawing clears a stale replacement warning");
+    await page.locator("#selected-drawing").screenshot({ path: path.join(output, "selected-drawing-generating.png") });
+    await page.screenshot({ path: path.join(output, "monster-generating-mobile.png"), fullPage: true });
     await page.locator('[data-monster-style="adventure"]').click();
     assert.match(await page.locator("#upload-action-status").textContent(), /queued for the next preview.*(?:will not|has not) changed?/i);
     assert.equal(await page.locator("#confirm-monster").isHidden(), true, "monster confirmation stays hidden while generation is pending");
@@ -193,25 +196,54 @@ const server = http.createServer(async (req, res) => {
     assert.ok(editorPosition.top >= -2 && editorPosition.top < editorPosition.viewport, JSON.stringify(editorPosition));
     await page.screenshot({ path: path.join(output, "child-editor-mobile.png"), fullPage: true });
     await page.locator("label").filter({ has: page.locator('input[name="child-gender"][value="boy"]') }).click();
-    await page.locator("label").filter({ has: page.locator('input[name="child-character"][value="warm-curly-dark"]') }).click();
-    await page.locator("#child-preview-details", { hasText: /Dark curls.*Ages 6–8.*Previewed beside/i }).waitFor();
+    assert.equal(await page.locator("#child-skin-tone-picker").isVisible(), true, "skin tone should become a visible step after choosing a character type");
+    assert.equal(await page.locator("#child-skin-tone-picker label:visible").count(), 3, "boy art exposes only its three supported skin tones");
+    assert.equal(await page.locator('input[name="child-skin-tone"][value="light"]').isChecked(), true);
+    assert.equal(await page.locator('input[name="child-character"][value="light-short-brown"]').isChecked(), true);
+    await page.locator("label").filter({ has: page.locator('input[name="child-skin-tone"][value="deep"]') }).click();
+    assert.equal(await page.locator('input[name="child-character"][value="deep-coils-black"]').isChecked(), true, "skin tone should choose a matching complete character");
+    await page.locator("#child-preview-details", { hasText: /Short coils.*Deep skin tone/i }).waitFor();
+    await page.locator("label").filter({ has: page.locator('input[name="child-skin-tone"][value="warm-brown"]') }).click();
+    assert.equal(await page.locator('input[name="child-character"][value="warm-curly-dark"]').isChecked(), true);
+    await page.locator("#child-preview-details", { hasText: /Dark curls.*Warm brown skin tone.*Ages 6–8/i }).waitFor();
+    const basicsSection = page.locator(".child-character-details > .child-editor-section").first();
+    await basicsSection.locator("summary").click();
+    const olderArt = await page.locator("#child-preview-character").evaluate((image) => {
+      const rect = image.getBoundingClientRect();
+      return { src: image.currentSrc, transform: getComputedStyle(image).transform, aspect: rect.width / rect.height };
+    });
+    await page.locator("label").filter({ has: page.locator('input[name="child-age-band"][value="3-5"]') }).click();
+    await page.locator("#child-preview-details", { hasText: /Ages 3–5.*younger story profile.*original proportions/i }).waitFor();
+    const youngerArt = await page.locator("#child-preview-character").evaluate((image) => {
+      const rect = image.getBoundingClientRect();
+      return { src: image.currentSrc, transform: getComputedStyle(image).transform, aspect: rect.width / rect.height };
+    });
+    assert.equal(youngerArt.src, olderArt.src, "age bands honestly reuse the single approved reference image");
+    assert.equal(youngerArt.transform, olderArt.transform, "age selection must not squash or stretch the character raster");
+    assert.ok(Math.abs(youngerArt.aspect - olderArt.aspect) < 0.001, JSON.stringify({ youngerArt, olderArt }));
+    assert.equal((await page.evaluate(() => JSON.parse(localStorage.getItem("monstersnow_child_character_profile_v1")))).skinTone, "warm-brown");
+    await page.screenshot({ path: path.join(output, "child-editor-mobile-skin-age.png"), fullPage: true });
+    await page.locator("label").filter({ has: page.locator('input[name="child-age-band"][value="6-8"]') }).click();
     await page.locator(".child-accessibility-section > summary").click();
     assert.equal(await page.locator('input[name="child-mobility-aid"][value="wheelchair"]').isEnabled(), true);
     await page.locator("label").filter({ has: page.locator('input[name="child-mobility-aid"][value="wheelchair"]') }).click();
     await page.locator("#child-preview-details", { hasText: /Wheelchair shown in every scene.*Previewed beside/i }).waitFor();
     assert.equal(await page.locator("#child-preview-stage").evaluate((element) => element.classList.contains("mobility-wheelchair")), true);
     assert.equal(await page.locator('input[name="child-character"][value="deep-coils-black"]').isDisabled(), true);
+    assert.equal(await page.locator('input[name="child-skin-tone"][value="deep"]').isDisabled(), true, "wheelchair mode keeps unsupported tone/character combinations unavailable");
+    assert.equal(await page.locator('input[name="child-skin-tone"][value="warm-brown"]').isChecked(), true);
     assert.equal(await page.locator('input[name="child-age-band"][value="3-5"]').isDisabled(), true);
     assert.equal(await page.locator('input[name="child-relative-height"]').count(), 0, "relative height is not a launch choice");
     await page.locator("label").filter({ has: page.locator('input[name="child-gender"][value="girl"]') }).click();
-    await page.locator("label").filter({ has: page.locator('input[name="child-character"][value="deep-braids-black"]') }).click();
-    await page.locator("label").filter({ has: page.locator('input[name="child-mobility-aid"][value="wheelchair"]') }).click();
-    const basicsSection = page.locator(".child-character-details > .child-editor-section").first();
-    if (!(await basicsSection.evaluate((element) => element.open))) {
-      await basicsSection.locator("summary").click();
-    }
+    assert.equal(await page.locator('input[name="child-character"][value="deep-braids-black"]').isChecked(), true, "switching character type preserves wheelchair by choosing the supported complete art");
+    assert.equal(await page.locator('input[name="child-skin-tone"][value="deep"]').isChecked(), true);
+    assert.equal(await page.locator('input[name="child-mobility-aid"][value="wheelchair"]').isChecked(), true);
     await page.locator("label").filter({ has: page.locator('input[name="child-age-band"][value="6-8"]') }).click();
     await page.locator("#child-preview-details", { hasText: /Ages 6–8.*Wheelchair shown in every scene/i }).waitFor();
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.waitForTimeout(500);
+    await page.screenshot({ path: path.join(output, "child-editor-desktop-skin-wheelchair.png"), fullPage: true });
+    await page.setViewportSize({ width: 390, height: 844 });
     const editorTargets = await page.locator("#child-editor-undo, #child-editor-reset, .child-editor-section > summary").evaluateAll((elements) => elements.map((element) => ({
       width: element.getBoundingClientRect().width,
       height: element.getBoundingClientRect().height,
@@ -226,15 +258,17 @@ const server = http.createServer(async (req, res) => {
     assert.equal(await page.locator('input[name="child-character"][value="deep-braids-black"]').isChecked(), true);
     assert.equal(await page.locator('input[name="child-age-band"][value="6-8"]').isChecked(), true);
     const savedProfile = await page.evaluate(() => JSON.parse(localStorage.getItem("monstersnow_child_character_profile_v1")));
-    assert.deepEqual(savedProfile, { id: "deep-braids-black", ageBand: "6-8", relativeHeight: "standard", profileVersion: "launch-v2", mobilityAid: "wheelchair" });
+    assert.deepEqual(savedProfile, { id: "deep-braids-black", skinTone: "deep", ageBand: "6-8", relativeHeight: "standard", profileVersion: "launch-v2", mobilityAid: "wheelchair" });
     await page.setViewportSize({ width: 1280, height: 900 });
     await page.reload();
     assert.equal(await page.locator('input[name="child-character"][value="deep-braids-black"]').isChecked(), true);
+    assert.equal(await page.locator('input[name="child-skin-tone"][value="deep"]').isChecked(), true);
     assert.equal(await page.locator('input[name="child-age-band"][value="6-8"]').isChecked(), true);
     await page.screenshot({ path: path.join(output, "child-editor-desktop-wheelchair-editable.png"), fullPage: true });
     await page.goto(`${base}/about.html`);
     await page.goBack();
     assert.equal(await page.locator('input[name="child-character"][value="deep-braids-black"]').isChecked(), true);
+    assert.equal(await page.locator('input[name="child-skin-tone"][value="deep"]').isChecked(), true);
     assert.equal(await page.locator('input[name="child-mobility-aid"][value="wheelchair"]').isChecked(), true);
     await page.locator("#monster-upload").setInputFiles(path.join(root, "assets/step-2-character.jpg"));
     await page.locator("#convert-button").click();
@@ -264,6 +298,7 @@ const server = http.createServer(async (req, res) => {
     assert.equal(await page.locator(".book-proof-page").count(), 32);
     const savedSubmission = JSON.parse(await page.evaluate(() => sessionStorage.getItem("monstersnow_halloween_test_proof")));
     assert.equal(savedSubmission.submission.personalization.childCharacter.id, "deep-braids-black");
+    assert.equal(savedSubmission.submission.personalization.childCharacter.skinTone, "deep");
     assert.equal(savedSubmission.submission.personalization.childCharacter.ageBand, "6-8");
     assert.equal(savedSubmission.submission.personalization.childCharacter.relativeHeight, "standard");
     assert.equal(savedSubmission.submission.personalization.childCharacter.mobilityAid, "wheelchair");

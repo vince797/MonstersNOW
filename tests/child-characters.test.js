@@ -79,6 +79,10 @@ test("selector UI exposes only supported controls and states the current renderi
   assert.match(html, />Choose a story character<|>Basics<|>Accessibility/);
   assert.match(html, /name="child-gender" value="boy"/);
   assert.match(html, /name="child-gender" value="girl"/);
+  assert.match(html, /id="child-skin-tone-picker" hidden/);
+  assert.match(html, /name="child-skin-tone" value="light"/);
+  assert.match(html, /name="child-skin-tone" value="deep"/);
+  assert.match(html, /Only tones with complete character art are shown/);
   assert.match(html, /id="child-look-picker" hidden/);
   assert.match(html, /class="child-character-thumb"/);
   assert.match(html, /data-gender="boy"/);
@@ -94,7 +98,9 @@ test("selector UI exposes only supported controls and states the current renderi
   assert.match(script, /function supportsWheelchair/);
   assert.match(script, /const characterArt = \{/);
   assert.match(script, /function chooseFirstAppearanceForGender/);
+  assert.match(script, /function chooseFirstAppearanceForSkinTone/);
   assert.match(script, /function syncAppearanceBuilder/);
+  assert.match(script, /skinTone: profile\.skinTone/);
   assert.match(script, /const wheelchairCharacterArt = \{/);
   assert.match(script, /child-preview-character/);
   assert.match(html, /id="child-preview-monster"/);
@@ -110,17 +116,17 @@ test("selector UI exposes only supported controls and states the current renderi
   assert.match(mainScript, /function showCharacterStep/);
   assert.match(mainScript, /function showMonsterStep/);
   assert.match(css, /\.child-preview-stage\.mobility-wheelchair/);
-  assert.match(css, /The two launch bands change illustrated proportions; exact height is not collected/);
-  assert.match(css, /\.child-preview-stage\.age-3-5 \.child-preview-character \{ --age-scale-x: 1\.07; --age-scale-y: \.94; \}/);
-  assert.match(css, /\.child-preview-stage\.age-6-8 \.child-preview-character \{ --age-scale-x: \.96; --age-scale-y: 1\.06; \}/);
-  assert.match(html, /Choose the closest illustrated age band/);
+  assert.match(css, /CSS must not squash it/);
+  assert.doesNotMatch(css, /age-scale-[xy]|\.age-3-5 \.child-preview-character[^{]*\{[^}]*scale/i);
+  assert.match(html, /Choose the closest story age band/);
+  assert.match(html, /preview keeps the character art at its original proportions/i);
   assert.match(html, /id="child-age-profile"/);
   assert.match(css, /\.child-live-preview \{[\s\S]*position: sticky/);
   assert.match(css, /\.child-character-option\.is-selected::after/);
   assert.match(css, /\.child-preview-character/);
-  assert.match(html, /child-selector\.css\?v=20261005-age-personality-v11/);
-  assert.match(html, /scripts\/child-selector\.js\?v=20261005-age-personality-v9/);
-  assert.match(html, /scripts\/main\.js\?v=20261005-upload-polish-v1/);
+  assert.match(html, /child-selector\.css\?v=20261006-skin-age-v1/);
+  assert.match(html, /scripts\/child-selector\.js\?v=20261006-skin-age-v1/);
+  assert.match(html, /scripts\/main\.js\?v=20261006-editor-v1/);
 });
 
 test("character studio includes lightweight changing storybook previews", () => {

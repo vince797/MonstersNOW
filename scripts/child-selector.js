@@ -2,12 +2,19 @@
   const storageKey = "monstersnow_child_character_profile_v1";
   const ageLabels = { "3-5": "Ages 3–5", "6-8": "Ages 6–8" };
   const ageDescriptions = {
-    "3-5": "younger-child proportions",
-    "6-8": "older-child proportions",
+    "3-5": "younger story profile",
+    "6-8": "older story profile",
   };
   const legacyAgeBands = new Set(["2-4", "5-6", "7-8"]);
   const mobilityLabels = { none: "", wheelchair: "Wheelchair shown in every scene" };
   const genderLabels = { boy: "Boy", girl: "Girl" };
+  const skinToneLabels = {
+    light: "Light skin tone",
+    golden: "Golden skin tone",
+    medium: "Medium skin tone",
+    "warm-brown": "Warm brown skin tone",
+    deep: "Deep skin tone",
+  };
   const wheelchairSupport = {
     appearanceIds: ["warm-curly-dark", "deep-braids-black"],
     ageBands: ["6-8"],
@@ -56,19 +63,34 @@
 
   function syncAppearanceBuilder(profile) {
     const lookPicker = document.querySelector("#child-look-picker");
+    const tonePicker = document.querySelector("#child-skin-tone-picker");
     const monsterOnly = document.querySelector(".child-monster-only-option");
     const selectedInput = selectedAppearance();
     const gender = profile?.included ? genderForAppearance(selectedInput) : "";
+    const tone = profile?.included ? selectedInput?.dataset.skinTone || "" : "";
     const genderInput = [...document.querySelectorAll('input[name="child-gender"]')]
       .find((input) => input.value === gender);
     for (const input of document.querySelectorAll('input[name="child-gender"]')) {
       input.checked = input === genderInput;
       input.closest("label")?.classList.toggle("is-selected", input.checked);
     }
-    for (const option of document.querySelectorAll(".child-character-option[data-gender]")) {
-      option.hidden = !gender || option.dataset.gender !== gender;
+    const availableTones = new Set(
+      [...document.querySelectorAll('input[name="child-character"][data-gender]')]
+        .filter((input) => input.dataset.gender === gender && !input.disabled)
+        .map((input) => input.dataset.skinTone),
+    );
+    for (const input of document.querySelectorAll('input[name="child-skin-tone"]')) {
+      const available = Boolean(gender) && availableTones.has(input.value);
+      input.disabled = !available;
+      input.checked = available && input.value === tone;
+      const label = input.closest("label");
+      if (label) label.hidden = !available;
     }
-    if (lookPicker) lookPicker.hidden = !gender;
+    for (const option of document.querySelectorAll(".child-character-option[data-gender]")) {
+      option.hidden = !gender || !tone || option.dataset.gender !== gender || option.dataset.skinTone !== tone;
+    }
+    if (tonePicker) tonePicker.hidden = !gender;
+    if (lookPicker) lookPicker.hidden = !gender || !tone;
     monsterOnly?.classList.toggle("is-selected", !profile?.included);
   }
 
@@ -76,7 +98,15 @@
     const current = selectedAppearance();
     const currentGender = genderForAppearance(current);
     if (current?.value !== "none" && currentGender === gender) return;
-    const firstMatch = document.querySelector(`.child-character-option[data-gender="${gender}"] input[name="child-character"]`);
+    const firstMatch = [...document.querySelectorAll(`.child-character-option[data-gender="${gender}"] input[name="child-character"]`)]
+      .find((input) => !input.disabled);
+    if (firstMatch) firstMatch.checked = true;
+  }
+
+  function chooseFirstAppearanceForSkinTone(tone) {
+    const gender = selected("child-gender");
+    const firstMatch = [...document.querySelectorAll(`.child-character-option[data-gender="${gender}"][data-skin-tone="${tone}"] input[name="child-character"]`)]
+      .find((input) => !input.disabled);
     if (firstMatch) firstMatch.checked = true;
   }
 
@@ -211,6 +241,7 @@
     try {
       localStorage.setItem(storageKey, JSON.stringify({
         id: profile.id,
+        skinTone: profile.skinTone,
         ageBand: profile.ageBand,
         relativeHeight: "standard",
         profileVersion: "launch-v2",
@@ -295,13 +326,15 @@
     }
     syncAppearanceBuilder(profile);
     if (details) details.hidden = !profile.included;
-    if (selection) selection.textContent = profile.included ? `${genderLabels[profile.gender] || "Character"} · ${profile.label}` : "Monster-only story";
+    if (selection) selection.textContent = profile.included
+      ? `${genderLabels[profile.gender] || "Character"} · ${skinToneLabels[profile.skinTone] || "Selected skin tone"} · ${profile.label}`
+      : "Monster-only story";
     if (title) title.textContent = profile.included ? `${genderLabels[profile.gender] || "Their character"} joins the adventure` : "Their monster takes center stage";
     if (copy) {
       copy.textContent = profile.included
         ? profile.requiresAgeBandReselection
           ? `${profile.label}. Choose a current age band to continue; the older saved range was preserved and not remapped.`
-          : `${[profile.label, `${ageLabels[profile.ageBand]} with ${ageDescriptions[profile.ageBand]}`, mobilityLabels[profile.mobilityAid]].filter(Boolean).join(" · ")}. Previewed beside their chosen monster.`
+          : `${[profile.label, skinToneLabels[profile.skinTone], `${ageLabels[profile.ageBand]} · ${ageDescriptions[profile.ageBand]}`, mobilityLabels[profile.mobilityAid]].filter(Boolean).join(" · ")}. Previewed beside their chosen monster with the character art's original proportions.`
         : "Choose a boy or girl to add a storybook co-star beside their monster.";
     }
     if (ageReselection) ageReselection.hidden = !profile.requiresAgeBandReselection;
@@ -333,6 +366,7 @@
   restore();
   root.addEventListener("change", (event) => {
     if (event.target?.name === "child-gender") chooseFirstAppearanceForGender(event.target.value);
+    if (event.target?.name === "child-skin-tone") chooseFirstAppearanceForSkinTone(event.target.value);
     if (event.target?.name === "child-age-band") legacyAgeRequiresReselection = false;
     sync({ recordHistory: true });
   });
