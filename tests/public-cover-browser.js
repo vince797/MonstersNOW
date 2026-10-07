@@ -9,13 +9,13 @@ const root = path.resolve(__dirname, "..");
 const output = path.join(root, "tmp", "public-cover-check");
 fs.mkdirSync(output, { recursive: true });
 const approvedCoverFiles = [
-  "halloween-monster-night-v3-web.jpg",
-  "big-adventure-v3-web.jpg",
-  "bedtime-monster-v4-web.jpg",
-  "abc-monster-book-v3-web.jpg",
-  "counting-with-my-monster-v3-web.jpg",
-  "the-monster-who-lost-their-glow-v4-web.jpg",
-  "birthday-monster-adventure-v3-web.jpg",
+  "halloween-monster-night-v5-web.jpg",
+  "big-adventure-v4-web.jpg",
+  "bedtime-monster-v5-web.jpg",
+  "abc-monster-book-v4-web.jpg",
+  "counting-with-my-monster-v4-web.jpg",
+  "the-monster-who-lost-their-glow-v5-web.jpg",
+  "birthday-monster-adventure-v4-web.jpg",
 ];
 
 const server = http.createServer((request, response) => {
@@ -44,7 +44,7 @@ const server = http.createServer((request, response) => {
       const errors = [];
       page.on("pageerror", (error) => errors.push(error.message));
       await page.goto(`${base}/index.html`);
-      const cover = page.locator('img[src*="halloween-monster-night-v3-web.jpg"]').first();
+      const cover = page.locator('img[src*="halloween-monster-night-v5-web.jpg"]').first();
       await cover.scrollIntoViewIfNeeded();
       await cover.waitFor({ state: "visible" });
       await page.waitForFunction((image) => image.complete && image.naturalWidth > 0, await cover.elementHandle());

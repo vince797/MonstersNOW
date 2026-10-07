@@ -2,6 +2,7 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 const { buildStorybookPosePlan, evaluatePoseJobReadiness } = require("../lib/storybook-pose-plan");
 const { buildHalloweenMasterPages } = require("../lib/halloween-master-pages");
+const { HALLOWEEN_CHILD_POSES, HALLOWEEN_MONSTER_POSES } = require("../lib/halloween-pose-blueprint");
 const { approvedPoseSet } = require("./pose-test-fixtures");
 
 function story() {
@@ -27,8 +28,8 @@ test("one exact portrait produces only the referenced bounded poses with page co
     scaleContract: { monsterHeightToStandingChildHeight: 0.9, calibrationStatus: "approved", approvedBy: "Art lead" },
   });
   assert.equal(plan.sourcePreviewId, "portrait-v3");
-  assert.equal(plan.baseAssets.filter((asset) => asset.subjectType === "monster").length, 4);
-  assert.equal(plan.baseAssets.filter((asset) => asset.subjectType === "child").length, 3);
+  assert.equal(plan.baseAssets.filter((asset) => asset.subjectType === "monster").length, 15);
+  assert.equal(plan.baseAssets.filter((asset) => asset.subjectType === "child").length, 12);
   assert.equal(plan.identityContract.child.anchorArtwork.publicPath, "assets/child-characters/deep-braids-black-wheelchair-v1.webp");
   assert.equal(plan.identityContract.child.ageBandLabel, "Ages 6–8");
   assert.ok(plan.baseAssets.filter((asset) => asset.subjectType === "child").every((asset) => asset.pageCount === asset.pageNumbers.length && asset.pageCount > 0));
@@ -36,7 +37,9 @@ test("one exact portrait produces only the referenced bounded poses with page co
   const referencedKeys = new Set(plan.scenes.flatMap((scene) => [scene.monster?.assetKey, scene.child?.assetKey]).filter(Boolean));
   assert.deepEqual(new Set(plan.baseAssets.map((asset) => asset.key)), referencedKeys);
   assert.equal(plan.limits.maxAttemptsPerAsset, 2);
-  assert.equal(plan.limits.costCapCents, 50);
+  assert.equal(plan.limits.costCapCents, 100);
+  assert.equal(plan.artBlueprint.environmentPlateCount, 14);
+  assert.equal(plan.artBlueprint.generateMissingCharacterLayersOnly, true);
   assert.equal(plan.scenes.length, 32);
   assert.ok(plan.scenes.every((scene) => scene.qa.relativeScale === false && scene.qa.cameraDepth === false && scene.qa.boundingBoxes === false));
   assert.ok(plan.scenes.filter((scene) => scene.child).every((scene) => scene.child.scaleBasis === "seated-eye-line-and-wheel-envelope"));
@@ -48,6 +51,7 @@ test("one exact portrait produces only the referenced bounded poses with page co
 
 test("an approved small page map reuses only the referenced families", () => {
   const mapped = story();
+  mapped.slug = "generic-story";
   mapped.pages = mapped.pages.map((page, index) => index < 3 ? page : {
     ...page,
     monsterPoseId: ["neutral_travel", "help_interact", "seated_rest"][index % 3],
@@ -62,7 +66,7 @@ test("an approved small page map reuses only the referenced families", () => {
   assert.equal(plan.baseAssets.length, 6);
 });
 
-test("Halloween uses the authoritative four-monster and three-child family map", () => {
+test("Halloween uses the existing twelve-child and fifteen-monster art blueprint", () => {
   const plan = buildStorybookPosePlan({
     id: "halloween-story",
     slug: "halloween-monster-night",
@@ -72,15 +76,15 @@ test("Halloween uses the authoritative four-monster and three-child family map",
     selectedPreviewId: "portrait-v4",
     childCharacter: { id: "deep-braids-black", ageBand: "6-8", mobilityAid: "wheelchair", included: true },
   });
-  assert.deepEqual(plan.baseAssets.filter((asset) => asset.subjectType === "monster").map((asset) => asset.poseId), [
-    "neutral_travel", "active_reach_celebrate", "help_interact", "seated_rest",
-  ]);
-  assert.deepEqual(plan.baseAssets.filter((asset) => asset.subjectType === "child").map((asset) => asset.poseId), [
-    "travel_observe", "reach_help", "celebrate",
-  ]);
-  assert.match(plan.baseAssets.find((asset) => asset.key === "child:base:travel_observe").direction, /Ages 6–8.*exact approved wheelchair/i);
+  assert.deepEqual(plan.baseAssets.filter((asset) => asset.subjectType === "monster").map((asset) => asset.poseId), HALLOWEEN_MONSTER_POSES.map((pose) => pose.id));
+  assert.deepEqual(plan.baseAssets.filter((asset) => asset.subjectType === "child").map((asset) => asset.poseId), HALLOWEEN_CHILD_POSES.map((pose) => pose.id));
+  assert.match(plan.baseAssets.find((asset) => asset.key === "child:base:doorway").direction, /Ages 6–8.*exact approved wheelchair/i);
   assert.deepEqual(plan.scenes.filter((scene) => scene.status === "not_required").map((scene) => scene.pageNumber), [1, 2, 3, 32]);
-  assert.equal(plan.baseAssets.length, 7);
+  assert.equal(plan.baseAssets.length, 27);
+  assert.equal(plan.blueprintVersion, "halloween-existing-art-v1");
+  assert.ok(plan.baseAssets.every((asset) => asset.artReference?.status === "visual_direction_approved"));
+  assert.equal(plan.scenes[3].productionArtwork.environmentPath, "assets/storybook/halloween-monster-night/pages-04-05-environment-v1.png");
+  assert.equal(plan.scenes[30].productionArtwork.masterPath, "assets/storybook/halloween-monster-night/pages-30-31-master-v1.png");
 });
 
 test("legacy child ages cannot be silently remapped into a new pose plan", () => {

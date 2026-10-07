@@ -12,7 +12,7 @@ const adminBooksStyles = fs.readFileSync(path.join(root, "admin-books.css"), "ut
 const poseJobs = fs.readFileSync(path.join(root, "lib/storybook-pose-jobs.js"), "utf8");
 
 test("admin workspace and homepage collection use the readable system typeface", () => {
-  assert.match(adminMarkup, /styles\.css\?v=20261007-pose-workflow-v1/);
+  assert.match(adminMarkup, /styles\.css\?v=20261007-halloween-art-v2/);
   assert.match(styles, /--admin-ui-font: Inter, ui-sans-serif, system-ui/);
   assert.match(styles, /\.admin-page strong \{[\s\S]*font-family: var\(--admin-ui-font\)/);
   assert.doesNotMatch(styles, /Admin Fredoka/);
@@ -34,7 +34,7 @@ test("admin sign-in does not blame the device for a server credential timestamp 
 
 test("admin book workspace groups status, review files, and the next action", () => {
   assert.match(adminMarkup, /admin-books\.css\?v=20261007-master-monsters-v1/);
-  assert.match(adminMarkup, /scripts\/admin\.js\?v=20261007-pose-workflow-v1/);
+  assert.match(adminMarkup, /scripts\/admin\.js\?v=20261007-lulu-cover-series-v1/);
   assert.match(adminMarkup, />Orders/);
   assert.match(adminMarkup, /Master Books/);
   assert.match(adminMarkup, /Character Assets/);
@@ -76,12 +76,20 @@ test("admin pose production stays dormant until its database migration is availa
   assert.match(adminScript, /Build book pose set/);
   assert.match(adminScript, /Locked child identity/);
   assert.match(adminScript, /Automatically attached from the confirmed selection/);
+  assert.match(adminScript, /Existing Halloween art/);
+  assert.match(adminScript, /14 environment spreads/);
+  assert.match(adminScript, /Only missing personalized character layers will be generated/);
+  assert.match(adminScript, /Connect existing Halloween art/);
+  assert.match(adminScript, /job\?\.blueprintOutdated/);
   assert.match(adminScript, /function buildPoseAssetGroup/);
   assert.match(adminScript, /Generate next \$\{nextAsset\.subjectType\} pose/);
   assert.match(styles, /\.monster-pose-stages/);
   assert.match(styles, /\.monster-pose-identity/);
+  assert.match(styles, /\.monster-pose-blueprint/);
   assert.match(poseJobs, /loadChildArtwork/);
   assert.match(poseJobs, /child_anchor_path: childAnchorPath/);
   assert.match(poseJobs, /child_profile_key=eq\.\$\{encodeURIComponent\(childProfileKey\)\}/);
   assert.match(poseJobs, /Story age lock/);
+  assert.match(poseJobs, /posePlansCompatible/);
+  assert.match(poseJobs, /pose_plan_outdated/);
 });

@@ -61,13 +61,13 @@ const commandResults = document.querySelector("#admin-command-results");
 let reviewSpreadIndex = 0;
 let commandSelection = 0;
 const CATALOG_COVERS = {
-  "halloween-monster-night": "assets/storybook/cover-series/minimal-concepts/halloween-monster-night-v3-web.jpg",
-  "big-adventure": "assets/storybook/cover-series/minimal-concepts/big-adventure-v3-web.jpg",
-  "bedtime-monster": "assets/storybook/cover-series/minimal-concepts/bedtime-monster-v4-web.jpg",
-  "abc-monster-book": "assets/storybook/cover-series/minimal-concepts/abc-monster-book-v3-web.jpg",
-  "counting-with-my-monster": "assets/storybook/cover-series/minimal-concepts/counting-with-my-monster-v3-web.jpg",
-  "the-monster-who-lost-their-glow": "assets/storybook/cover-series/minimal-concepts/the-monster-who-lost-their-glow-v4-web.jpg",
-  "birthday-monster-adventure": "assets/storybook/cover-series/minimal-concepts/birthday-monster-adventure-v3-web.jpg",
+  "halloween-monster-night": "assets/storybook/cover-series/minimal-concepts/halloween-monster-night-v5-web.jpg",
+  "big-adventure": "assets/storybook/cover-series/minimal-concepts/big-adventure-v4-web.jpg",
+  "bedtime-monster": "assets/storybook/cover-series/minimal-concepts/bedtime-monster-v5-web.jpg",
+  "abc-monster-book": "assets/storybook/cover-series/minimal-concepts/abc-monster-book-v4-web.jpg",
+  "counting-with-my-monster": "assets/storybook/cover-series/minimal-concepts/counting-with-my-monster-v4-web.jpg",
+  "the-monster-who-lost-their-glow": "assets/storybook/cover-series/minimal-concepts/the-monster-who-lost-their-glow-v5-web.jpg",
+  "birthday-monster-adventure": "assets/storybook/cover-series/minimal-concepts/birthday-monster-adventure-v4-web.jpg",
 };
 editor.addEventListener("submit", (event) => event.preventDefault());
 editor.addEventListener("input", (event) => {
@@ -923,9 +923,18 @@ function renderMonsterPoseProduction(container, monster) {
   }
   const confirmedOrder = monster.orders?.[0];
   const confirmedChild = confirmedOrder?.childCharacter;
+  const confirmedStory = stories.find((story) => story.id === confirmedOrder?.storyId || story.slug === confirmedOrder?.storyId || story.id === monster.storyId || story.slug === monster.storyId);
+  const usesHalloweenArt = ["halloween-monster-night", "halloween-adventure"].includes(confirmedStory?.slug);
   const job = monster.poseJobs?.[0];
+  if (job?.blueprintOutdated) {
+    container.innerHTML = '<div class="monster-pose-empty"><span class="monster-pose-kicker">Halloween art upgrade ready</span><strong>Replace the compact pose plan</strong><span>The earlier 3-child and 4-monster plan does not use the artwork already created for this book. Upgrade it to 12 child scenes, 15 monster actions, and all 14 environment spreads. Existing files remain preserved for audit.</span></div><button class="button secondary" type="button">Connect existing Halloween art</button>';
+    const button = container.querySelector("button");
+    button.disabled = !monster.hasSelectedPreview || !confirmedOrder;
+    button.addEventListener("click", () => createMonsterPosePlan(monster, button));
+    return;
+  }
   if (!job) {
-    container.innerHTML = '<div class="monster-pose-empty"><span class="monster-pose-kicker">Confirmed-book workflow</span><strong>Build the exact pose set this story needs</strong><span data-pose-intro></span><div class="monster-pose-empty-summary"><span data-pose-child></span><span data-pose-story></span><span>3 reusable child poses · 32 mapped pages · human approval required</span></div></div><button class="button secondary" type="button">Build book pose set</button>';
+    container.innerHTML = '<div class="monster-pose-empty"><span class="monster-pose-kicker">Confirmed-book workflow</span><strong>Build the exact pose set this story needs</strong><span data-pose-intro></span><div class="monster-pose-empty-summary"><span data-pose-child></span><span data-pose-story></span><span data-pose-scope></span></div></div><button class="button secondary" type="button">Build book pose set</button>';
     container.querySelector("[data-pose-intro]").textContent = confirmedOrder
       ? "The selected child will be locked automatically as the identity anchor. Planning is free and does not call the image provider."
       : "Connect a confirmed book before creating poses, so experimentation remains free.";
@@ -933,6 +942,9 @@ function renderMonsterPoseProduction(container, monster) {
       ? `Child: ${confirmedChild.label} · ${confirmedChild.ageBandLabel || confirmedChild.ageBand}${confirmedChild.mobilityAid === "wheelchair" ? " · Wheelchair" : ""}`
       : "Child: Monster-only story";
     container.querySelector("[data-pose-story]").textContent = `Story: ${confirmedOrder?.storyLabel || storyLabel(monster.storyId)}`;
+    container.querySelector("[data-pose-scope]").textContent = usesHalloweenArt
+      ? "Existing Halloween art · 14 environment spreads · 12 child scenes · 15 monster actions"
+      : "Reusable story poses · 32 mapped pages · human approval required";
     const button = container.querySelector("button");
     button.disabled = !monster.hasSelectedPreview || !confirmedOrder;
     button.addEventListener("click", () => createMonsterPosePlan(monster, button));
@@ -940,10 +952,19 @@ function renderMonsterPoseProduction(container, monster) {
   }
   const progress = job.progress || {};
   const readiness = job.readiness || { blockers: [] };
-  container.innerHTML = '<details open><summary><span><strong></strong><small></small></span><em></em></summary><div class="monster-pose-body"><div class="monster-pose-stages" aria-label="Pose production stages"><span data-pose-stage="identity"><i>1</i>Identity</span><span data-pose-stage="poses"><i>2</i>Poses</span><span data-pose-stage="pages"><i>3</i>Pages</span><span data-pose-stage="approval"><i>4</i>Approved</span></div><div class="monster-pose-identity" hidden><figure><span>Child</span></figure><div><span class="monster-pose-kicker">Locked child identity</span><strong data-child-identity></strong><small data-child-profile></small><em>Automatically attached from the confirmed selection</em></div></div><p data-source></p><div class="monster-pose-meter"><span></span></div><div class="monster-pose-assets"></div><div class="monster-pose-review-actions"></div><p class="monster-pose-generation-note" hidden></p><ul class="monster-pose-blockers"></ul></div></details>';
+  container.innerHTML = '<details open><summary><span><strong></strong><small></small></span><em></em></summary><div class="monster-pose-body"><div class="monster-pose-stages" aria-label="Pose production stages"><span data-pose-stage="identity"><i>1</i>Identity</span><span data-pose-stage="poses"><i>2</i>Poses</span><span data-pose-stage="pages"><i>3</i>Pages</span><span data-pose-stage="approval"><i>4</i>Approved</span></div><div class="monster-pose-blueprint" hidden><div><span class="monster-pose-kicker">Existing artwork connected</span><strong></strong><small></small></div><a class="button secondary" target="_blank" rel="noopener">View art guide</a></div><div class="monster-pose-identity" hidden><figure><span>Child</span></figure><div><span class="monster-pose-kicker">Locked child identity</span><strong data-child-identity></strong><small data-child-profile></small><em>Automatically attached from the confirmed selection</em></div></div><p data-source></p><div class="monster-pose-meter"><span></span></div><div class="monster-pose-assets"></div><div class="monster-pose-review-actions"></div><p class="monster-pose-generation-note" hidden></p><ul class="monster-pose-blockers"></ul></div></details>';
   container.querySelector("summary strong").textContent = `Pose production · ${String(job.status || "planned").replaceAll("_", " ")}`;
   container.querySelector("summary small").textContent = `${progress.approvedAssets || 0}/${progress.totalAssets || 0} assets · ${progress.approvedScenes || 0}/${progress.totalScenes || 32} pages`;
   container.querySelector("summary em").textContent = `${formatMoney(job.estimatedCostCents || 0)} est. / ${formatMoney(job.costCapCents || 0)} cap`;
+  const artBlueprint = job.plan?.artBlueprint;
+  if (artBlueprint?.status === "existing_art_connected") {
+    const blueprint = container.querySelector(".monster-pose-blueprint");
+    blueprint.hidden = false;
+    blueprint.querySelector("strong").textContent = artBlueprint.label || "Existing Halloween production art";
+    blueprint.querySelector("small").textContent = `${artBlueprint.environmentPlateCount || 0} environment spreads · ${artBlueprint.childPoseCount || 0} child scenes · ${artBlueprint.monsterPoseCount || 0} monster actions. Only missing personalized character layers will be generated.`;
+    const guide = blueprint.querySelector("a");
+    guide.href = `/${String(artBlueprint.referenceStartPath || "").replace(/^\//, "")}`;
+  }
   const childIdentity = job.plan?.identityContract?.child;
   if (childIdentity?.included) {
     const identity = container.querySelector(".monster-pose-identity");
@@ -1003,9 +1024,10 @@ function setPoseStage(container, name, complete, active) {
 function buildPoseAssetGroup(monster, job, subjectType) {
   const assets = job.assets.filter((asset) => asset.subjectType === subjectType);
   if (!assets.length) return null;
-  const section = document.createElement("section");
+  const section = document.createElement("details");
   section.className = `monster-pose-group is-${subjectType}`;
-  const heading = document.createElement("header");
+  section.open = subjectType === "child";
+  const heading = document.createElement("summary");
   const approved = assets.filter((asset) => asset.status === "approved").length;
   heading.innerHTML = `<div><span>${subjectType === "child" ? "Story co-star" : "Customer monster"}</span><strong>${subjectType === "child" ? "Child pose set" : "Monster pose set"}</strong></div><em>${approved}/${assets.length} approved</em>`;
   const list = document.createElement("div");
@@ -1022,9 +1044,10 @@ function buildPoseAssetRow(monster, job, asset) {
     const image = document.createElement("img"); image.src = asset.url; image.alt = "";
     row.querySelector(".monster-pose-thumb").replaceChildren(image);
   } else row.querySelector(".monster-pose-thumb span").textContent = asset.subjectType === "child" ? "Child" : "Monster";
-  row.querySelector("strong").textContent = asset.poseId.replaceAll("_", " ");
+  row.querySelector("strong").textContent = asset.label || asset.poseId.replaceAll("_", " ");
   const pages = asset.pageCount ? ` · ${asset.pageCount} mapped page${asset.pageCount === 1 ? "" : "s"}` : "";
-  row.querySelector("small").textContent = `${asset.kind.replaceAll("_", " ")} · ${asset.status}${pages} · ${asset.attempts}/${asset.maxAttempts} attempts`;
+  const artGuide = asset.artReference?.status === "visual_direction_approved" ? " · existing art guide" : "";
+  row.querySelector("small").textContent = `${asset.kind.replaceAll("_", " ")} · ${asset.status}${pages}${artGuide} · ${asset.attempts}/${asset.maxAttempts} attempts`;
   const actions = row.querySelector(".monster-pose-asset-actions");
   if (["queued", "failed", "blocked", "review"].includes(asset.status) && asset.attempts < asset.maxAttempts) {
     const upload = document.createElement("label");

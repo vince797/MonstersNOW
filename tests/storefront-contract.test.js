@@ -40,13 +40,13 @@ test("the create flow displays and forwards the allowlisted story", () => {
 
 test("the approved seven-cover collection is used without changing story availability", () => {
   const covers = {
-    "halloween-monster-night-v3": "7c46e1c744ac3e156ce8daec97331eaa1db1dd8a0eb1052e2a54c4f9f45f3d13",
-    "big-adventure-v3": "4d5a64303ddbebec72ac045b5ae0b54966fd73ceff999dcc7ae64aec534f4b27",
-    "bedtime-monster-v4": "cbe4d7f1e610c2fd76eade2f14badaa0c336f7738b6dd41a16dfa1704dbe9f8b",
-    "abc-monster-book-v3": "6dba3ddd9c51a75b589c5761507b7ec627bbf6bafd664209d1c57e2cfca8f052",
-    "counting-with-my-monster-v3": "0a70ffb1877ea745113ff912a2b9ee65e8c87984f84ed2494e45a074b0ac530c",
-    "the-monster-who-lost-their-glow-v4": "662ac55c635f26631661448582c21c37ae7907ba8bc2970504059b5519db61b4",
-    "birthday-monster-adventure-v3": "18bd305d65b03b32d0c39d883f598fbadd601b248b0a77bcd738f045ebe7dcc1",
+    "halloween-monster-night-v5": "6d7581e4e07a37885e1e7eb88b3caedd414ba92e3093acacb7578292a8cc6ac3",
+    "big-adventure-v4": "ddd0fd08a6288b2bd2314a09ed1ecb5c722200afd4bd9e14be4a2a50a6ca1fc2",
+    "bedtime-monster-v5": "ed2961b0cba290ffdea224f15999b982e5c7792d05dd659bb3ccfc8a85e63bc6",
+    "abc-monster-book-v4": "abfed526985d0039612af5b7542198414bec3b83b162e00e2fd526328f6b6a4c",
+    "counting-with-my-monster-v4": "61f2e02502febbe4b5133a8e029a39410de62d12bd447c262cccd136eb947a03",
+    "the-monster-who-lost-their-glow-v5": "ff81d2a637716f91b6c9c40e17c2d286b6f967a5b6abd6c638e0cfd4f87598b0",
+    "birthday-monster-adventure-v4": "22348f32575d5b9c5e5b9e16cb8a7aa7a335c5e796a6753700fb909d17c77508",
   };
   const books = read("books.html");
   const admin = read("scripts/admin.js");

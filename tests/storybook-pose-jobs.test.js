@@ -1,6 +1,15 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const { updatePoseJob } = require("../lib/storybook-pose-jobs");
+const { posePlanNeedsUpgrade, posePlansCompatible, updatePoseJob } = require("../lib/storybook-pose-jobs");
+
+test("outdated compact pose jobs cannot be reused for the connected Halloween artwork", () => {
+  const oldPlan = { blueprintVersion: "generic-pose-v1", baseAssets: [{ key: "child:base:travel_observe" }] };
+  const halloweenPlan = { blueprintVersion: "halloween-existing-art-v1", baseAssets: [{ key: "child:base:doorway" }, { key: "monster:base:doorway_companion" }] };
+  assert.equal(posePlansCompatible(oldPlan, halloweenPlan), false);
+  assert.equal(posePlansCompatible(halloweenPlan, structuredClone(halloweenPlan)), true);
+  assert.equal(posePlanNeedsUpgrade({ storySlug: "halloween-monster-night", ...oldPlan }), true);
+  assert.equal(posePlanNeedsUpgrade({ storySlug: "halloween-monster-night", ...halloweenPlan }), false);
+});
 
 function jsonResponse(body, status = 200) {
   return { ok: status >= 200 && status < 300, status, json: async () => body };

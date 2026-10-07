@@ -6,6 +6,13 @@ const http = require("node:http");
 const path = require("node:path");
 const { chromium } = require("playwright");
 const { buildHalloweenMasterPages } = require("../lib/halloween-master-pages");
+const {
+  HALLOWEEN_CHILD_POSES,
+  HALLOWEEN_CHILD_POSE_PAGES,
+  HALLOWEEN_MONSTER_POSES,
+  HALLOWEEN_MONSTER_POSE_PAGES,
+  halloweenArtBlueprint,
+} = require("../lib/halloween-pose-blueprint");
 
 const root = path.resolve(__dirname, "..");
 const output = path.join(root, "tmp", "admin-books-check");
@@ -61,22 +68,22 @@ const reviewFiles = [
 ];
 
 const poseAssets = [
-  ["child", "travel_observe", 22], ["child", "reach_help", 2], ["child", "celebrate", 4],
-  ["monster", "neutral_travel", 13], ["monster", "active_reach_celebrate", 12], ["monster", "help_interact", 2], ["monster", "seated_rest", 1],
-].map(([subjectType, poseId, pageCount], index) => ({
-  id: `asset-${index + 1}`, key: `${subjectType}:base:${poseId}`, subjectType, kind: "base", poseId,
-  status: "queued", attempts: 0, maxAttempts: 2, pageCount, pageNumbers: Array.from({ length: pageCount }, (_, page) => page + 4),
+  ...HALLOWEEN_CHILD_POSES.map((pose) => ["child", pose, HALLOWEEN_CHILD_POSE_PAGES[pose.id]]),
+  ...HALLOWEEN_MONSTER_POSES.map((pose) => ["monster", pose, HALLOWEEN_MONSTER_POSE_PAGES[pose.id]]),
+].map(([subjectType, pose, pageNumbers], index) => ({
+  id: `asset-${index + 1}`, key: `${subjectType}:base:${pose.id}`, subjectType, kind: "base", poseId: pose.id, label: pose.label,
+  status: "queued", attempts: 0, maxAttempts: 2, pageCount: pageNumbers.length, pageNumbers, artReference: { status: "visual_direction_approved" },
 }));
 const poseJob = {
   id: "pose-job-1", sourcePreviewId: "preview-1", storyId: "story-1", storyVersion: 4,
   childProfileKey: "deep-braids-black:6-8:wheelchair", childAnchorAttached: true,
   childAnchorUrl: "/assets/child-characters/deep-braids-black-wheelchair-v1.webp", status: "planned",
-  model: "gpt-image-1.5", quality: "low", costCapCents: 50, estimatedCostCents: 21, actualCostCents: 0,
+  model: "gpt-image-1.5", quality: "low", costCapCents: 100, estimatedCostCents: 81, actualCostCents: 0,
   generationEnabled: false, assets: poseAssets,
   scenes: Array.from({ length: 32 }, (_, index) => ({ pageNumber: index + 1, status: [0, 1, 2, 31].includes(index) ? "not_required" : "review" })),
-  plan: { identityContract: { child: { included: true, appearanceId: "deep-braids-black", profileKey: "deep-braids-black:6-8:wheelchair", ageBand: "6-8", ageBandLabel: "Ages 6–8", mobilityAid: "wheelchair", anchorArtwork: { label: "Long braids" } } }, scaleContract: { calibrationStatus: "pending_review" } },
+  plan: { artBlueprint: halloweenArtBlueprint(), identityContract: { child: { included: true, appearanceId: "deep-braids-black", profileKey: "deep-braids-black:6-8:wheelchair", ageBand: "6-8", ageBandLabel: "Ages 6–8", mobilityAid: "wheelchair", anchorArtwork: { label: "Long braids" } } }, scaleContract: { calibrationStatus: "pending_review" } },
   readiness: { ready: false, blockers: ["Approve every required transparent pose asset after identity and anatomy review.", "Approve character scale and interactions on every required page proof."] },
-  progress: { approvedAssets: 0, totalAssets: 7, approvedScenes: 4, totalScenes: 32 },
+  progress: { approvedAssets: 0, totalAssets: 27, approvedScenes: 4, totalScenes: 32 },
 };
 const monsterFixture = {
   id: "11111111-1111-4111-8111-111111111111", status: "ready", customerEmail: "parent@example.com",
@@ -182,10 +189,11 @@ const server = http.createServer((request, response) => {
       await page.locator('[data-admin-view="monsters"]').click();
       await page.locator(".monster-pose-stages").waitFor({ state: "visible" });
       assert.match(await page.locator(".monster-pose-identity").textContent(), /Locked child identity.*Long braids.*Ages 6–8.*Wheelchair preserved/i);
-      assert.equal(await page.locator(".monster-pose-group.is-child .monster-pose-asset").count(), 3);
-      assert.equal(await page.locator(".monster-pose-group.is-monster .monster-pose-asset").count(), 4);
+      assert.match(await page.locator(".monster-pose-blueprint").textContent(), /Existing Halloween production art.*14 environment spreads.*12 child scenes.*15 monster actions/i);
+      assert.equal(await page.locator(".monster-pose-group.is-child .monster-pose-asset").count(), 12);
+      assert.equal(await page.locator(".monster-pose-group.is-monster .monster-pose-asset").count(), 15);
       assert.match(await page.locator(".monster-pose-generation-note").textContent(), /safely locked/i);
-      assert.match(await page.locator(".monster-pose-group.is-child").textContent(), /22 mapped pages/i);
+      assert.match(await page.locator(".monster-pose-group.is-child").textContent(), /Look to the star.*5 mapped pages/i);
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
       assert.deepEqual(errors, []);
       await page.screenshot({ path: path.join(output, `admin-pose-workflow-${viewport.name}.png`), fullPage: true });
