@@ -127,7 +127,10 @@ test("selector UI is a true layered character editor with a MonstersNOW storyboo
   assert.match(script, /child-preview-character/);
   assert.doesNotMatch(html, /id="child-preview-monster"/);
   assert.doesNotMatch(html, /child-board-label-monster/);
-  assert.match(html, /Feature-animation style/);
+  assert.match(html, /Premium character preview/);
+  assert.match(html, /Book-quality avatar/);
+  assert.match(html, /id="child-premium-default"/);
+  assert.match(html, /default-girl-feature-animation-v1\.webp/);
   assert.match(html, /id="render-child-character"/);
   assert.match(html, /id="child-rendered-preview"/);
   assert.match(mainScript, /fetch\("\/api\/render-child-character"/);
@@ -147,9 +150,9 @@ test("selector UI is a true layered character editor with a MonstersNOW storyboo
   assert.match(css, /\.child-live-preview \{[\s\S]*position: sticky/);
   assert.match(css, /\.child-presence-toggle label\.is-selected::after/);
   assert.match(css, /\.child-preview-character/);
-  assert.match(html, /child-selector\.css\?v=20261007-book-render-v6/);
-  assert.match(html, /scripts\/child-selector\.js\?v=20261007-boy-girl-editor-v5/);
-  assert.match(html, /scripts\/main\.js\?v=20261007-auto-style-v12/);
+  assert.match(html, /child-selector\.css\?v=20261007-premium-avatar-v7/);
+  assert.match(html, /scripts\/child-selector\.js\?v=20261007-premium-avatar-v7/);
+  assert.match(html, /scripts\/main\.js\?v=20261007-premium-avatar-v13/);
   assert.doesNotMatch(mainScript, /syncStorySceneMonster/);
   assert.doesNotMatch(mainScript, /removeConnectedWhiteBackground/);
 });
@@ -167,7 +170,8 @@ test("book render prompt preserves every independent editor choice", () => {
   assert.match(prompt, /purple hoodie/i);
   assert.match(prompt, /child-sized wheelchair/i);
   assert.match(prompt, /transparent background/i);
-  assert.match(prompt, /Do not copy/i);
+  assert.match(prompt, /first supplied image as the character identity/i);
+  assert.match(prompt, /Preserve.*recognizable face/i);
 });
 
 test("mobile result history uses a full-width readable monster choice", () => {
@@ -186,6 +190,15 @@ test("character studio includes lightweight changing storybook previews", () => 
     const asset = path.join(root, "assets", "child-characters", `${id}-v1.webp`);
     assert.equal(fs.existsSync(asset), true, `${id} preview art should exist`);
     assert.ok(fs.statSync(asset).size < 100_000, `${id} preview art should stay under 100KB`);
+  }
+});
+
+test("premium editor defaults include optimized original feature-animation boy and girl artwork", () => {
+  for (const filename of ["default-boy-feature-animation-v1.webp", "default-girl-feature-animation-v1.webp"]) {
+    const asset = path.join(root, "assets", "child-editor", filename);
+    assert.equal(fs.existsSync(asset), true, `${filename} should exist`);
+    assert.ok(fs.statSync(asset).size > 100_000, `${filename} should be a detailed rendered asset`);
+    assert.ok(fs.statSync(asset).size < 500_000, `${filename} should be optimized for the editor`);
   }
 });
 

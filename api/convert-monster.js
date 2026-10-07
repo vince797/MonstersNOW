@@ -192,7 +192,10 @@ async function loadReferenceImage(assetPath) {
 }
 
 function getReferenceMimeType(assetPath) {
-  return path.extname(assetPath).toLowerCase() === ".png" ? "image/png" : "image/jpeg";
+  const extension = path.extname(assetPath).toLowerCase();
+  if (extension === ".png") return "image/png";
+  if (extension === ".webp") return "image/webp";
+  return "image/jpeg";
 }
 
 function getRemainingRequestBudget(startedAt) {

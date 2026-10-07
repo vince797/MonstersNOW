@@ -90,6 +90,7 @@ const childEditorStart = document.querySelector("#child-editor-start");
 const childEditorKickerLabel = document.querySelector("#child-editor-kicker-label");
 const childPreviewStage = document.querySelector("#child-preview-stage");
 const childPreviewCharacter = document.querySelector("#child-preview-character");
+const childPremiumDefault = document.querySelector("#child-premium-default");
 const childRenderedPreview = document.querySelector("#child-rendered-preview");
 const childRenderButton = document.querySelector("#render-child-character");
 const childRenderStatus = document.querySelector("#child-render-status");
@@ -277,6 +278,7 @@ childEditorStart?.addEventListener("childprofilechange", (event) => {
   const nextKey = getChildProfileKey(event.detail);
   if (renderedChildImage && renderedChildProfileKey !== nextKey) clearRenderedChild("Your choices changed. Render the updated book character when you are ready.");
   if (!event.detail?.included) clearRenderedChild("Monster-only stories do not need a child character render.");
+  syncPremiumDefault(event.detail);
 });
 
 async function handleStorybookInterestSubmit(event) {
@@ -520,10 +522,21 @@ function clearRenderedChild(message) {
     childRenderedPreview.alt = "";
   }
   childPreviewStage?.classList.remove("has-book-render");
-  if (childPreviewCharacter) childPreviewCharacter.hidden = false;
+  if (childPreviewCharacter) childPreviewCharacter.hidden = true;
   childRenderButton?.closest(".child-render-actions")?.classList.remove("is-complete");
-  if (childRenderButton) childRenderButton.textContent = "Render My Book Character";
+  if (childRenderButton) childRenderButton.textContent = "Apply My Choices to This Avatar";
   if (childRenderStatus && message) childRenderStatus.textContent = message;
+}
+
+function syncPremiumDefault(profile = getSelectedChildCharacter()) {
+  if (!childPremiumDefault) return;
+  const included = Boolean(profile?.included);
+  childPremiumDefault.hidden = !included;
+  childPremiumDefault.src = profile?.presentation === "boy"
+    ? "assets/child-editor/default-boy-feature-animation-v1.webp"
+    : "assets/child-editor/default-girl-feature-animation-v1.webp";
+  childPreviewStage?.classList.toggle("has-premium-art", included);
+  if (childPreviewCharacter) childPreviewCharacter.hidden = true;
 }
 
 async function renderBookCharacter() {
@@ -540,7 +553,7 @@ async function renderBookCharacter() {
 
   isRenderingChild = true;
   childRenderButton.disabled = true;
-  childRenderButton.textContent = "Rendering…";
+  childRenderButton.textContent = "Applying choices…";
   if (childRenderProgress) childRenderProgress.hidden = false;
   if (childRenderStatus) childRenderStatus.textContent = "Building the dimensional, book-ready character. This usually takes under a minute.";
 
@@ -563,7 +576,7 @@ async function renderBookCharacter() {
     childRenderedPreview.hidden = false;
     childPreviewStage?.classList.add("has-book-render");
     if (childPreviewCharacter) childPreviewCharacter.hidden = true;
-    childRenderButton.textContent = "Render Another Version";
+    childRenderButton.textContent = "Create Another Version";
     childRenderButton.closest(".child-render-actions")?.classList.add("is-complete");
     if (childRenderStatus) childRenderStatus.textContent = "Book character ready. This polished render will carry into the story proof.";
   } catch (error) {

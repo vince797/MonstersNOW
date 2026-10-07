@@ -5,6 +5,10 @@ const { requireSubmission } = require("../lib/monster-submissions");
 const convertMonster = require("./convert-monster");
 
 const STYLE_REFERENCE = "assets/child-editor/feature-animation-character-reference-v1.png";
+const DEFAULT_REFERENCES = {
+  boy: "assets/child-editor/default-boy-feature-animation-v1.webp",
+  girl: "assets/child-editor/default-girl-feature-animation-v1.webp",
+};
 const FUNCTION_TIMEOUT_MS = 54 * 1000;
 
 module.exports = async function handler(request, response) {
@@ -31,11 +35,14 @@ module.exports = async function handler(request, response) {
   try {
     await requireSubmission(payload.submissionId, payload.submissionToken);
     const profile = resolveChildCharacter(payload.profile);
-    const reference = await convertMonster.loadReferenceImage(STYLE_REFERENCE);
+    const [identityReference, styleReference] = await Promise.all([
+      convertMonster.loadReferenceImage(DEFAULT_REFERENCES[profile.presentation] || DEFAULT_REFERENCES.girl),
+      convertMonster.loadReferenceImage(STYLE_REFERENCE),
+    ]);
     const childImage = await convertMonster.createImageEdit({
       prompt: buildChildCharacterRenderPrompt(profile),
       negativePrompt: CHILD_CHARACTER_NEGATIVE_PROMPT,
-      images: [reference],
+      images: [identityReference, styleReference],
       size: "1024x1536",
       quality: process.env.CHILD_CHARACTER_IMAGE_QUALITY || "medium",
       outputFormat: "webp",

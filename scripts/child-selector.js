@@ -146,11 +146,13 @@
   function renderProfile(stage, avatar, profile) {
     if (!stage) return;
     const figure = stage.querySelector(".child-preview-figure");
+    const premiumDefault = stage.querySelector(".child-premium-default");
     const character = ensureCharacterArt(stage);
     stage.className = "child-preview-stage";
     if (!profile?.included) {
       stage.classList.add("is-empty");
       if (character) character.hidden = true;
+      if (premiumDefault) premiumDefault.hidden = true;
       if (figure) figure.hidden = false;
       return;
     }
@@ -168,8 +170,14 @@
       art.style.setProperty("--eye", palettes.eyeColor[profile.eyeColor] || palettes.eyeColor.brown);
       art.style.setProperty("--outfit", outfit[0]); art.style.setProperty("--outfit-light", outfit[1]); art.style.setProperty("--outfit-dark", outfit[2]);
     }
-    stage.classList.add(`age-${profile.ageBand || "5-6"}`, `height-${profile.relativeHeight || "average"}`, `mobility-${profile.mobilityAid || "none"}`, "has-character-art");
-    if (character) { character.hidden = false; character.classList.remove("is-arriving"); window.requestAnimationFrame(() => character.classList.add("is-arriving")); }
+    stage.classList.add(`age-${profile.ageBand || "5-6"}`, `height-${profile.relativeHeight || "average"}`, `mobility-${profile.mobilityAid || "none"}`, "has-character-art", "has-premium-art");
+    if (premiumDefault) {
+      premiumDefault.src = profile.presentation === "boy"
+        ? "assets/child-editor/default-boy-feature-animation-v1.webp"
+        : "assets/child-editor/default-girl-feature-animation-v1.webp";
+      premiumDefault.hidden = false;
+    }
+    if (character) character.hidden = true;
     if (figure) figure.hidden = true;
   }
 
