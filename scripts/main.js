@@ -695,9 +695,9 @@ async function selectDrawingFile(file) {
     downloadColoringButton.disabled = true;
   }
 
-  if (converterStatus) converterStatus.textContent = "Drawing selected.";
-  if (converterNote) converterNote.textContent = "Continue when the drawing looks clear, then we’ll create the first monster preview.";
-  setUploadActionStatus("Drawing selected. Continue when it looks right.");
+  if (converterStatus) converterStatus.textContent = "Drawing ready.";
+  if (converterNote) converterNote.textContent = "Continue when the whole drawing looks clear and in frame.";
+  setUploadActionStatus("Ready to create your first monster preview.");
   syncPreviewControls();
 }
 
@@ -729,14 +729,14 @@ async function requestMonsterPreview() {
   converterTool?.classList.remove("is-upload-only");
   setConverterStage("preview");
   syncPreviewControls();
-  setUploadActionStatus(`Creating your ${getPreviewPersonalityLabel(selectedMonsterStyle)} personality preview.`);
+  setUploadActionStatus("Your drawing is safe. We’re creating the monster preview now.");
 
   if (converterStatus) {
-    converterStatus.textContent = `Creating ${getPreviewPersonalityLabel(selectedMonsterStyle)} preview...`;
+    converterStatus.textContent = "Bringing your monster to life…";
   }
 
   if (converterNote) {
-    converterNote.textContent = "This usually takes a short moment. Try up to three versions before choosing one.";
+    converterNote.textContent = "We’re keeping the drawing’s unique details while turning it into a polished storybook character.";
   }
 
   scrollToResultPanel();
@@ -968,7 +968,7 @@ function syncPreviewControls() {
   const shouldShowConvertButton = Boolean(selectedDrawingFile) && !hasPreview && !previewGenerationFailed;
   const primaryText = previewsUsed === 0 ? "Continue to monster preview" : "Try Another Version";
   const buttonText = isGeneratingPreview
-    ? "Creating..."
+    ? "Creating preview…"
     : !selectedDrawingFile
       ? "Upload Drawing First"
       : remaining > 0
@@ -985,7 +985,7 @@ function syncPreviewControls() {
     regenerateButton.hidden = !hasPreview && !canRetryFailedPreview;
     regenerateButton.disabled = !canGenerate;
     regenerateButton.textContent = isGeneratingPreview
-      ? "Creating..."
+      ? "Creating preview…"
       : canRetryFailedPreview
         ? "Try Preview Again"
         : remaining > 0
@@ -1022,6 +1022,11 @@ function syncPreviewControls() {
   if (selectedDrawingCard) selectedDrawingCard.hidden = !selectedDrawingFile;
   if (previewOptions) previewOptions.hidden = !selectedDrawingFile;
   resultPanel?.setAttribute("aria-busy", isGeneratingPreview ? "true" : "false");
+  converterTool?.classList.toggle("is-generating-preview", isGeneratingPreview);
+  selectedDrawingCard?.classList.toggle("is-generating-preview", isGeneratingPreview);
+  uploadActionStatus?.classList.toggle("is-generating", isGeneratingPreview);
+  uploadActionStatus?.classList.toggle("is-ready", Boolean(selectedDrawingFile) && !isGeneratingPreview && !previewGenerationFailed);
+  uploadActionStatus?.classList.toggle("is-error", previewGenerationFailed);
 
   if (previewCount) {
     previewCount.textContent = selectedDrawingFile

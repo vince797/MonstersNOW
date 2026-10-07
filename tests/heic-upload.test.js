@@ -21,13 +21,13 @@ test("HEIC conversion cannot leave the upload UI waiting forever", () => {
 test("upload progress stays customer-friendly while HEIC handling remains internal", () => {
   assert.match(mainScript, /setUploadActionStatus\("Loading your photo\.\.\."\)/);
   assert.match(mainScript, /setUploadActionStatus\("Still loading your photo\.\.\."\)/);
-  assert.match(mainScript, /setUploadActionStatus\("Drawing selected\. Continue when it looks right\."\)/);
+  assert.match(mainScript, /setUploadActionStatus\("Ready to create your first monster preview\."\)/);
   assert.doesNotMatch(mainScript, /setUploadActionStatus\([^\n]*HEIC/);
 });
 
 test("create flow cache-busts the corrected upload script", () => {
-  assert.match(createPage, /scripts\/main\.js\?v=20261007-preview-reliability-v1/);
-  assert.match(createPage, /styles\.css\?v=20261007-preview-reliability-v1/);
+  assert.match(createPage, /scripts\/main\.js\?v=20261007-upload-polish-v1/);
+  assert.match(createPage, /styles\.css\?v=20261007-clean-preview-v3/);
   assert.doesNotMatch(createPage, /scripts\/main\.js\?v=20261004-upload-timeout-v7/);
 });
 

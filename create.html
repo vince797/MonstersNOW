@@ -10,7 +10,7 @@
     <link rel="canonical" href="https://www.monstersnow.com/create" />
     <title>Create Your Monster | MonstersNOW</title>
     <link rel="icon" href="assets/brand/monstersnow-icon-32-v1.png" type="image/png" sizes="32x32" />
-    <link rel="stylesheet" href="styles.css?v=20261007-preview-reliability-v1" />
+    <link rel="stylesheet" href="styles.css?v=20261007-clean-preview-v3" />
     <link rel="stylesheet" href="child-selector.css?v=20261007-child-editor-v4" />
     <link rel="stylesheet" href="storefront.css?v=20261002-public-storefront" />
     <link rel="apple-touch-icon" href="assets/brand/monstersnow-icon-180-v1.png" />
@@ -91,12 +91,15 @@
             <p class="upload-quick-tip" id="upload-quick-tip"><strong>Best results:</strong> bright, straight-on photo with only the drawing in frame.</p>
             <p class="converter-error" id="upload-error" role="alert" hidden></p>
             <section class="selected-drawing-card" id="selected-drawing" aria-labelledby="selected-drawing-title" hidden>
-              <figure><img id="drawing-preview" src="assets/step-1-drawing.jpg" alt="" /></figure>
+              <figure>
+                <img id="drawing-preview" src="assets/step-1-drawing.jpg" alt="" />
+                <figcaption><span aria-hidden="true">✓</span> Photo ready</figcaption>
+              </figure>
               <div class="selected-drawing-copy">
-                <small>Selected drawing</small>
+                <small>Ready for preview</small>
                 <strong id="selected-drawing-title">Drawing ready</strong>
                 <span id="selected-drawing-meta"></span>
-                <p>Make sure the drawing is clear, then continue when it looks right.</p>
+                <p>Check that the whole drawing is clear and in frame.</p>
                 <div class="selected-drawing-actions">
                   <button class="button secondary" id="replace-selected-drawing" type="button">Replace</button>
                   <button class="button primary converter-button" id="convert-button" type="button">Continue to monster preview</button>
@@ -171,6 +174,11 @@
                 Classic is ready for the first preview. Every personality keeps
                 the same Soft 3D Storybook art style.
               </p>
+              <div class="preview-loading-details" aria-hidden="true">
+                <span class="is-complete"><i>✓</i> Drawing received</span>
+                <span class="is-active"><i></i> Shaping the character</span>
+                <span><i></i> Preparing your preview</span>
+              </div>
               <button class="button secondary replace-drawing-button" id="replace-drawing" type="button" hidden>
                 Choose a Different Photo
               </button>
@@ -496,6 +504,6 @@
 
     <script src="scripts/child-selector.js?v=20261007-child-editor-v4"></script>
     <script src="scripts/monster-cutout.js?v=20261004-cutout-v1"></script>
-    <script src="scripts/main.js?v=20261007-preview-reliability-v1"></script>
+    <script src="scripts/main.js?v=20261007-upload-polish-v1"></script>
   </body>
 </html>

@@ -10,7 +10,7 @@
     <link rel="canonical" href="https://www.monstersnow.com/books" />
     <title>Books | MonstersNOW Story Catalog</title>
     <link rel="icon" href="assets/brand/monstersnow-icon-32-v1.png" type="image/png" sizes="32x32" />
-    <link rel="stylesheet" href="styles.css?v=20260923-no-count-strips" />
+    <link rel="stylesheet" href="styles.css?v=20261007-books-hero-v2" />
     <link rel="stylesheet" href="cover-art.css?v=20260921-mobile-catalog" />
     <link rel="stylesheet" href="storefront.css?v=20261002-public-storefront" />
     <link rel="apple-touch-icon" href="assets/brand/monstersnow-icon-180-v1.png" />
@@ -52,24 +52,36 @@
             <a class="button primary" href="create.html?story=halloween-monster-night">Personalize the Ready Story</a>
             <a class="button secondary" href="#catalog">See Story Options</a>
           </div>
-          <p class="availability-note"><strong>Ready now:</strong> Halloween Monster Night · 32 pages · Ages 3–8</p>
+          <div class="books-availability" aria-label="Halloween Monster Night is ready now">
+            <span class="books-availability-status"><i aria-hidden="true"></i>Ready now</span>
+            <strong>Halloween Monster Night</strong>
+            <span>32 pages <b aria-hidden="true">·</b> Ages 3–8</span>
+          </div>
         </div>
 
         <div class="book-hero-showcase" role="group" aria-label="A personalized MonstersNOW storybook made from a child's drawing">
           <figure class="book-hero-main">
-            <img
-              src="assets/master-references/consistent-monster-adventure-spread-v5-desk.jpg"
-              alt="An open personalized storybook resting on a warm wooden desk, with one purple monster looking along a continuous garden path toward a distant castle."
-            />
-            <figcaption>A story starring their monster</figcaption>
+            <picture>
+              <source
+                type="image/avif"
+                srcset="assets/hero-storybook-720.avif 720w, assets/hero-storybook-1361.avif 1361w"
+                sizes="(max-width: 1320px) 90vw, 48vw"
+              />
+              <img
+                src="assets/hero-storybook-v2.png"
+                alt="A child's monster drawing becoming the same hand-painted character inside an open storybook."
+                width="1361"
+                height="1156"
+              />
+            </picture>
           </figure>
-          <figure class="book-hero-drawing">
-            <img
-              src="assets/master-references/input-drawing-purple-clean-v2.png"
-              alt="The original purple monster drawing used to create the storybook character."
-            />
-            <figcaption>Made from their drawing</figcaption>
-          </figure>
+          <div class="book-hero-steps" aria-label="Draw it, meet it, read it">
+            <span><i>1</i>Draw it</span>
+            <b aria-hidden="true">→</b>
+            <span><i>2</i>Meet it</span>
+            <b aria-hidden="true">→</b>
+            <span><i>3</i>Read it</span>
+          </div>
         </div>
       </section>
 

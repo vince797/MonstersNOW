@@ -15,6 +15,9 @@ test("first preview generation replaces the example monster with a neutral loadi
   assert.match(mainScript, /: "Example preview"/);
   assert.match(styles, /\.is-generating-preview \.monster-preview img\s*\{[^}]*opacity:\s*0/s);
   assert.match(styles, /content:\s*"Creating your monster"/);
+  assert.match(styles, /\.is-generating-preview \.preview-loading-details\s*\{[^}]*display:\s*grid/s);
+  assert.match(styles, /\.is-generating-preview \.result-trust-points\s*\{[^}]*display:\s*none/s);
+  assert.match(mainScript, /converterTool\?\.classList\.toggle\("is-generating-preview", isGeneratingPreview\)/);
   assert.match(styles, /@media \(prefers-reduced-motion: reduce\)/);
 });
 
@@ -37,4 +40,9 @@ test("a failed first preview offers one clear retry action without preview benef
   assert.match(mainScript, /"Preview needs another try\."/);
   assert.match(styles, /\.is-preview-error \.result-trust-points\s*\{[^}]*display:\s*none/s);
   assert.match(styles, /\.is-preview-error #regenerate-monster\s*\{[^}]*background:\s*var\(--orange\)/s);
+});
+
+test("desktop upload and preview cards share a row height without forcing the mobile stack", () => {
+  assert.match(styles, /@media \(min-width: 981px\)[\s\S]*?\.converter-tool:not\(\.is-upload-only\)\s*\{[^}]*align-items:\s*stretch/s);
+  assert.match(styles, /\.converter-tool:not\(\.is-upload-only\) > \.upload-panel,[\s\S]*?height:\s*100%/s);
 });

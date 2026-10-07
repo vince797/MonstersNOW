@@ -106,3 +106,13 @@ test("storybook step pairs a child with their monster across the spread", () => 
   assert.equal(fs.existsSync(image), true);
   assert.ok(fs.statSync(image).size < 200_000);
 });
+
+test("books hero reuses the clearer homepage transformation artwork", () => {
+  const books = read("books.html");
+
+  assert.match(books, /assets\/hero-storybook-720\.avif 720w, assets\/hero-storybook-1361\.avif 1361w/);
+  assert.match(books, /src="assets\/hero-storybook-v2\.png"/);
+  assert.match(books, /class="books-availability"/);
+  assert.match(books, /Draw it[\s\S]*Meet it[\s\S]*Read it/);
+  assert.doesNotMatch(books, /consistent-monster-adventure-spread-v5-desk|book-hero-drawing/);
+});
