@@ -255,7 +255,7 @@
     if (title) title.textContent = profile.included ? "Their storybook character is taking shape." : "Their monster takes center stage.";
     if (copy) copy.textContent = profile.included
       ? `${optionLabels.presentation[profile.presentation]} · ${optionLabels.skinTone[profile.skinTone]} skin · ${optionLabels.hairColor[profile.hairColor]} ${optionLabels.hairStyle[profile.hairStyle].toLowerCase()} · ${optionLabels.eyeColor[profile.eyeColor]} eyes · ${optionLabels.outfitColor[profile.outfitColor]} ${optionLabels.outfitStyle[profile.outfitStyle].toLowerCase()}. ${ageLabels[profile.ageBand]} · ${heightLabels[profile.relativeHeight]}.`
-      : "The child character is turned off. Their monster remains on the drawing board.";
+      : "Your selected monster is shown here and will star in the story.";
     renderProfile(document.querySelector("#child-preview-stage"), document.querySelector("#child-preview-avatar"), profile);
     if (save) persist(profile);
     lastProfile = compactProfile(profile);

@@ -112,6 +112,13 @@ const server = http.createServer(async (req, res) => {
     assert.ok(editorPosition.top >= -2 && editorPosition.top < editorPosition.viewport, JSON.stringify(editorPosition));
     await page.screenshot({ path: path.join(output, "child-editor-mobile.png"), fullPage: true });
     assert.equal(await page.locator('input[name="child-character"][value="custom"]').isChecked(), true);
+    await page.locator("label").filter({ has: page.locator('input[name="child-character"][value="none"]') }).click();
+    assert.equal(await page.locator("#child-monster-only-preview").isVisible(), true);
+    assert.equal(await page.locator("#child-monster-only-preview").getAttribute("src"), image);
+    assert.equal(await page.locator("#render-child-character").isHidden(), true);
+    await page.locator("label").filter({ has: page.locator('input[name="child-character"][value="custom"]') }).click();
+    assert.equal(await page.locator("#child-monster-only-preview").isHidden(), true);
+    assert.equal(await page.locator("#render-child-character").isVisible(), true);
     await page.locator("label").filter({ has: page.locator('input[name="child-skin-tone"][value="deep"]') }).click();
     await page.locator("label").filter({ has: page.locator('input[name="child-hair-style"][value="braids"]') }).click();
     await page.locator("label").filter({ has: page.locator('input[name="child-hair-color"][value="auburn"]') }).click();

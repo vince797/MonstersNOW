@@ -91,6 +91,9 @@ const childEditorKickerLabel = document.querySelector("#child-editor-kicker-labe
 const childPreviewStage = document.querySelector("#child-preview-stage");
 const childPreviewCharacter = document.querySelector("#child-preview-character");
 const childPremiumDefault = document.querySelector("#child-premium-default");
+const childMonsterOnlyPreview = document.querySelector("#child-monster-only-preview");
+const childPreviewLabelText = document.querySelector("#child-preview-label-text");
+const childPreviewModeText = document.querySelector("#child-preview-mode-text");
 const childRenderedPreview = document.querySelector("#child-rendered-preview");
 const childRenderButton = document.querySelector("#render-child-character");
 const childRenderStatus = document.querySelector("#child-render-status");
@@ -531,11 +534,31 @@ function clearRenderedChild(message) {
 function syncPremiumDefault(profile = getSelectedChildCharacter()) {
   if (!childPremiumDefault) return;
   const included = Boolean(profile?.included);
+  const monsterImage = getSelectedPreview()?.image || "";
+  const showMonster = !included && Boolean(monsterImage);
   childPremiumDefault.hidden = !included;
   childPremiumDefault.src = profile?.presentation === "boy"
     ? "assets/child-editor/default-boy-feature-animation-v1.webp"
     : "assets/child-editor/default-girl-feature-animation-v1.webp";
+  if (childMonsterOnlyPreview) {
+    childMonsterOnlyPreview.hidden = !showMonster;
+    if (showMonster) {
+      childMonsterOnlyPreview.src = monsterImage;
+      childMonsterOnlyPreview.alt = "Selected storybook monster.";
+    } else {
+      childMonsterOnlyPreview.removeAttribute("src");
+      childMonsterOnlyPreview.alt = "";
+    }
+  }
   childPreviewStage?.classList.toggle("has-premium-art", included);
+  childPreviewStage?.classList.toggle("has-monster-only", showMonster);
+  const renderActions = childRenderButton?.closest(".child-render-actions");
+  if (renderActions) renderActions.hidden = !included;
+  if (included && childRenderStatus?.textContent.includes("Monster-only")) {
+    childRenderStatus.textContent = "The premium sample updates to the exact selected hair, skin, eyes, and clothes when you apply the choices.";
+  }
+  if (childPreviewLabelText) childPreviewLabelText.textContent = included ? "Premium character preview" : "Your monster preview";
+  if (childPreviewModeText) childPreviewModeText.textContent = included ? "Book-quality avatar" : "Monster-only story";
   if (childPreviewCharacter) childPreviewCharacter.hidden = true;
 }
 

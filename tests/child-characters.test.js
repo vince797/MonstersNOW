@@ -125,7 +125,7 @@ test("selector UI is a true layered character editor with a MonstersNOW storyboo
   assert.match(script, /--eye/);
   assert.match(script, /--outfit/);
   assert.match(script, /child-preview-character/);
-  assert.doesNotMatch(html, /id="child-preview-monster"/);
+  assert.match(html, /id="child-monster-only-preview"/);
   assert.doesNotMatch(html, /child-board-label-monster/);
   assert.match(html, /Premium character preview/);
   assert.match(html, /Book-quality avatar/);
@@ -150,9 +150,12 @@ test("selector UI is a true layered character editor with a MonstersNOW storyboo
   assert.match(css, /\.child-live-preview \{[\s\S]*position: sticky/);
   assert.match(css, /\.child-presence-toggle label\.is-selected::after/);
   assert.match(css, /\.child-preview-character/);
-  assert.match(html, /child-selector\.css\?v=20261007-premium-hair-v8/);
+  assert.match(html, /child-selector\.css\?v=20261007-monster-only-v9/);
   assert.match(html, /scripts\/child-selector\.js\?v=20261007-premium-hair-v8/);
-  assert.match(html, /scripts\/main\.js\?v=20261007-premium-avatar-v13/);
+  assert.match(html, /scripts\/main\.js\?v=20261007-monster-only-v14/);
+  assert.match(mainScript, /childMonsterOnlyPreview\.src = monsterImage/);
+  assert.match(mainScript, /classList\.toggle\("has-monster-only", showMonster\)/);
+  assert.match(css, /\.child-monster-only-preview/);
   assert.doesNotMatch(mainScript, /syncStorySceneMonster/);
   assert.doesNotMatch(mainScript, /removeConnectedWhiteBackground/);
 });

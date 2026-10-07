@@ -464,6 +464,17 @@
 .child-preview-stage.is-empty .child-board-label-character { display: none; }
 .child-preview-stage.is-empty .child-preview-figure { position: absolute; z-index: 4; right: 19%; bottom: 35%; display: grid; transform: scale(1.8); }
 .child-preview-stage:not(.is-empty) .child-preview-figure { display: none; }
+.child-monster-only-preview {
+  position: absolute;
+  z-index: 5;
+  inset: 4% 7% 3%;
+  width: 86%;
+  height: 93%;
+  object-fit: contain;
+  filter: drop-shadow(0 25px 23px rgba(29,15,58,.32));
+}
+.child-monster-only-preview[hidden] { display: none; }
+.child-preview-stage.has-monster-only .child-preview-figure { display: none; }
 
 @keyframes character-arrival { from { opacity: 0; translate: 0 18px; } to { opacity: 1; translate: 0 0; } }
 
@@ -648,7 +659,7 @@
   .child-preview-specs span { padding-inline: 3px; font-size: .5rem; }
 }
 
-/* Child-first feature-animation preview. The monster stays in the story flow, not the avatar editor. */
+/* Feature-animation preview. Monster-only stories display the selected monster in this same stage. */
 .child-preview-stage::before {
   position: absolute;
   z-index: 1;
@@ -806,6 +817,7 @@
   padding: 8px 7px 10px;
   border-bottom: 1px solid #e6dce9;
 }
+.child-render-actions[hidden] { display: none; }
 .child-render-actions .button { width: 100%; min-height: 50px; }
 .child-render-actions p { margin: 0; color: #665c70; font-size: .7rem; line-height: 1.4; text-align: center; }
 .child-render-actions.is-complete .button { border-color: #00888e; background: #eff9f8; color: #006b70; box-shadow: none; }

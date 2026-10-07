@@ -11,7 +11,7 @@
     <title>Create Your Monster | MonstersNOW</title>
     <link rel="icon" href="assets/brand/monstersnow-icon-32-v1.png" type="image/png" sizes="32x32" />
     <link rel="stylesheet" href="styles.css?v=20261004-monster-studio-v5" />
-    <link rel="stylesheet" href="child-selector.css?v=20261007-premium-hair-v8" />
+    <link rel="stylesheet" href="child-selector.css?v=20261007-monster-only-v9" />
     <link rel="stylesheet" href="storefront.css?v=20261002-public-storefront" />
     <link rel="apple-touch-icon" href="assets/brand/monstersnow-icon-180-v1.png" />
     <link rel="stylesheet" href="brand.css?v=20261004-selected-logo" />
@@ -364,8 +364,8 @@
                         </div>
                         <aside class="child-live-preview" aria-labelledby="child-preview-title">
                           <div class="child-preview-topline">
-                            <span class="child-preview-label"><i aria-hidden="true"></i> Premium character preview</span>
-                            <span class="child-preview-updates"><i aria-hidden="true"></i> Book-quality avatar</span>
+                            <span class="child-preview-label"><i aria-hidden="true"></i> <span id="child-preview-label-text">Premium character preview</span></span>
+                            <span class="child-preview-updates"><i aria-hidden="true"></i> <span id="child-preview-mode-text">Book-quality avatar</span></span>
                           </div>
                           <div class="child-render-actions">
                             <button class="button primary" id="render-child-character" type="button">Apply My Choices to This Avatar</button>
@@ -374,6 +374,7 @@
                           <span class="child-preview-stage" id="child-preview-stage" aria-hidden="true">
                             <span class="child-stage-corners"></span>
                             <span class="child-stage-scanline"></span>
+                            <img class="child-monster-only-preview" id="child-monster-only-preview" alt="" hidden />
                             <img class="child-premium-default" id="child-premium-default" src="assets/child-editor/default-girl-feature-animation-v1.webp" alt="" />
                             <span class="child-preview-character" id="child-preview-character" hidden></span>
                             <img class="child-rendered-preview" id="child-rendered-preview" alt="" hidden />
@@ -534,6 +535,6 @@
     </footer>
 
     <script src="scripts/child-selector.js?v=20261007-premium-hair-v8"></script>
-    <script src="scripts/main.js?v=20261007-premium-avatar-v13"></script>
+    <script src="scripts/main.js?v=20261007-monster-only-v14"></script>
   </body>
 </html>
