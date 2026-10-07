@@ -50,55 +50,88 @@ test("proof identity includes the full canonical child profile", () => {
   assert.equal(proof.childCharacter.mobilityAid, "wheelchair");
 });
 
-test("selector UI exposes only supported controls and states the current rendering limit", () => {
+test("custom child profiles preserve independently editable appearance choices", () => {
+  const custom = resolveChildCharacter({
+    id: "custom", skinTone: "deep", hairStyle: "braids", hairColor: "auburn",
+    eyeColor: "green", outfitStyle: "hoodie", outfitColor: "purple",
+    ageBand: "7-8", relativeHeight: "taller", mobilityAid: "wheelchair",
+  });
+  assert.equal(custom.id, "custom");
+  assert.equal(custom.skinTone, "deep");
+  assert.equal(custom.hairStyle, "braids");
+  assert.equal(custom.hairColor, "auburn");
+  assert.equal(custom.eyeColor, "green");
+  assert.equal(custom.outfitStyle, "hoodie");
+  assert.equal(custom.outfitColor, "purple");
+  assert.match(childProfileKey(custom), /custom:deep:braids:auburn:green:hoodie:purple/);
+  const submission = buildStorybookInterestSubmission({
+    email: "parent@example.com", childName: "Sam", monsterName: "Noodle", childCharacter: custom,
+  });
+  assert.equal(submission.personalization.childCharacter.eyeColor, "green");
+  assert.equal(submission.personalization.childCharacter.outfitStyle, "hoodie");
+  assert.throws(() => buildStorybookInterestSubmission({
+    email: "parent@example.com", childName: "Sam", monsterName: "Noodle",
+    childCharacter: { ...custom, eyeColor: "laser-red" },
+  }), /valid child eye color/i);
+});
+
+test("selector UI is a true layered character editor with a game-style loadout preview", () => {
   const html = fs.readFileSync(path.join(root, "create.html"), "utf8");
   const script = fs.readFileSync(path.join(root, "scripts/child-selector.js"), "utf8");
   const mainScript = fs.readFileSync(path.join(root, "scripts/main.js"), "utf8");
   const css = fs.readFileSync(path.join(root, "child-selector.css"), "utf8");
   assert.match(html, /name="child-age-band"/);
   assert.match(html, /name="child-relative-height"/);
-  assert.match(html, /name="child-mobility-aid" value="wheelchair" disabled/);
+  assert.match(html, /name="child-mobility-aid" value="wheelchair"/);
   assert.doesNotMatch(html, /href="#child-editor-start">Explore the child creator/);
   assert.equal((html.match(/data-monster-step-panel/g) || []).length, 2);
   assert.match(html, /id="result-book-offer" aria-labelledby="result-book-title" hidden/);
   assert.match(html, /id="back-to-monster"/);
   assert.match(html, /No diagnosis or medical details needed/);
-  assert.match(html, /Curly dark or Braids/i);
-  assert.match(html, /ages 5–8/i);
+  assert.match(html, /Available for ages 5–8 and average or taller/i);
   assert.doesNotMatch(html, /type="date"|name="child-(?:birthdate|date-of-birth|height-(?:cm|in))"/i);
-  assert.match(html, />Choose a look<|>Basics<|>Accessibility/);
+  assert.match(html, />Face &amp; hair<|>Outfit<|>Age, height &amp; accessibility/);
+  assert.match(html, /name="child-character" value="custom" checked/);
   assert.match(html, /name="child-skin-tone" value="light"/);
-  assert.match(html, /This does not identify race or ethnicity/);
-  assert.match(html, /id="child-hair-picker" hidden/);
+  assert.match(html, /name="child-hair-style" value="braids"/);
+  assert.match(html, /name="child-hair-color" value="auburn"/);
+  assert.match(html, /name="child-eye-color" value="green"/);
+  assert.match(html, /name="child-outfit-style" value="hoodie"/);
+  assert.match(html, /name="child-outfit-color" value="purple"/);
+  assert.match(html, /data-editor-tab="appearance"/);
+  assert.match(html, /data-editor-tab="outfit"/);
+  assert.match(html, /data-editor-tab="build"/);
   assert.match(html, /id="child-editor-undo" disabled/);
   assert.match(html, /id="child-editor-reset"/);
-  assert.match(html, /Walkers, canes, prostheses, glasses, hearing aids, eye details, and outfit colors stay unavailable/i);
-  assert.match(script, /monstersnow_child_character_profile_v1/);
+  assert.match(script, /monstersnow_child_character_profile_v2/);
   assert.match(script, /localStorage\.setItem/);
   assert.match(script, /function undo\(/);
   assert.match(script, /function reset\(/);
-  assert.match(script, /mobility-\$\{profile\.mobilityAid/);
   assert.match(script, /function supportsWheelchair/);
-  assert.match(script, /const characterArt = \{/);
-  assert.match(script, /function chooseFirstAppearanceForSkin/);
-  assert.match(script, /function syncAppearanceBuilder/);
-  assert.match(script, /const wheelchairCharacterArt = \{/);
+  assert.match(script, /const customCharacterSvg/);
+  assert.match(script, /dataset\.hairStyle/);
+  assert.match(script, /dataset\.outfitStyle/);
+  assert.match(script, /--skin/);
+  assert.match(script, /--eye/);
+  assert.match(script, /--outfit/);
   assert.match(script, /child-preview-character/);
   assert.match(html, /id="child-preview-monster"/);
   assert.match(mainScript, /function syncStorySceneMonster/);
   assert.match(mainScript, /function removeConnectedWhiteBackground/);
-  assert.match(css, /storybook-forest-stage-v1\.webp/);
-  assert.match(css, /@keyframes story-character-arrival/);
+  assert.doesNotMatch(css, /storybook-forest-stage-v1\.webp/);
+  assert.match(css, /radial-gradient\(ellipse at 70% 90%/);
+  assert.match(css, /\.child-editor-tabs button\.is-active/);
+  assert.match(css, /\.custom-child-svg\[data-hair-style="curly"\]/);
   assert.match(mainScript, /resultBookOffer\.hidden = false/);
   assert.match(mainScript, /function showCharacterStep/);
   assert.match(mainScript, /function showMonsterStep/);
   assert.match(css, /\.child-preview-stage\.mobility-wheelchair/);
-  assert.match(css, /\.child-live-preview \{[\s\S]*position: relative/);
-  assert.match(css, /\.child-character-option\.is-selected::after/);
+  assert.match(css, /\.child-live-preview \{[\s\S]*position: sticky/);
+  assert.match(css, /\.child-presence-toggle label\.is-selected::after/);
   assert.match(css, /\.child-preview-character/);
-  assert.match(html, /child-selector\.css\?v=20261004-story-scene-v7/);
-  assert.match(html, /scripts\/child-selector\.js\?v=20261004-story-scene-v6/);
-  assert.match(html, /scripts\/main\.js\?v=20261004-story-scene-v6/);
+  assert.match(html, /child-selector\.css\?v=20261007-true-character-editor-v1/);
+  assert.match(html, /scripts\/child-selector\.js\?v=20261007-true-character-editor-v1/);
+  assert.match(html, /scripts\/main\.js\?v=20261007-character-board-v8/);
 });
 
 test("character studio includes lightweight changing storybook previews", () => {

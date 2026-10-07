@@ -17,11 +17,18 @@ try {
   if (childProfile?.included) {
     const profileSection = document.querySelector("#proof-child-profile");
     document.querySelector("#proof-child-profile-title").textContent = childProfile.label;
+    const customDetails = childProfile.id === "custom" ? [
+      childProfile.skinToneLabel,
+      `${childProfile.hairColorLabel} ${childProfile.hairStyleLabel}`,
+      `${childProfile.eyeColorLabel} eyes`,
+      `${childProfile.outfitColorLabel} ${childProfile.outfitStyleLabel}`,
+    ] : [];
     document.querySelector("#proof-child-profile-copy").textContent = [
+      ...customDetails,
       childProfile.ageBandLabel,
       childProfile.relativeHeightLabel,
       childProfile.mobilityAid !== "none" ? childProfile.mobilityAidLabel : "",
-      "Saved with this proof. Finished child art remains blocked until a matching transparent render asset is approved.",
+      "Custom character settings saved with this proof.",
     ].filter(Boolean).join(" · ");
     window.MonstersNowChildSelector?.renderProfile(
       document.querySelector("#proof-child-preview-stage"),

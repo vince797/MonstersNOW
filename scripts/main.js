@@ -1305,7 +1305,7 @@ function removeConnectedWhiteBackground(source) {
           if (pixel < width * (height - 1)) enqueue(pixel + width);
         }
         context.putImageData(pixels, 0, 0);
-        resolve(canvas.toDataURL("image/webp", .92));
+        resolve(canvas.toDataURL("image/png"));
       } catch (error) {
         reject(error);
       }
@@ -1328,16 +1328,16 @@ function showMonsterStep({ scroll = true } = {}) {
 function syncBookOfferStatus(hasPreview = Boolean(selectedPreviewId)) {
   if (childEditorKicker) {
     childEditorKicker.textContent = monsterConfirmed
-      ? "Monster selected · character step"
-      : "Optional story character";
+      ? "Monster locked · character locker"
+      : "Character locker";
   }
   if (!bookOfferStatus) return;
   if (monsterConfirmed) {
-    bookOfferStatus.textContent = "Your monster is ready. Add an optional illustrated child character and names, then review all 32 pages before checkout.";
+    bookOfferStatus.textContent = "Your monster is ready. Build an optional illustrated child character, add the names, then review all 32 pages before checkout.";
   } else if (hasPreview) {
     bookOfferStatus.textContent = "Choose one generated monster to continue to the character step.";
   } else {
-    bookOfferStatus.textContent = "Create and choose a monster first, then continue to the optional child character.";
+    bookOfferStatus.textContent = "Create and lock in a monster first, then open the character locker.";
   }
 }
 
