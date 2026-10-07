@@ -10,6 +10,7 @@ const DEFAULT_REFERENCES = {
   girl: "assets/child-editor/default-girl-feature-animation-v1.webp",
 };
 const FUNCTION_TIMEOUT_MS = 54 * 1000;
+const MAX_PREVIOUS_CHILD_BYTES = 2 * 1024 * 1024;
 
 module.exports = async function handler(request, response) {
   response.setHeader("Cache-Control", "private, no-store");
@@ -20,7 +21,7 @@ module.exports = async function handler(request, response) {
 
   let payload;
   try {
-    payload = await readJsonBody(request, { maxBytes: 128 * 1024 });
+    payload = await readJsonBody(request, { maxBytes: 3 * 1024 * 1024 });
   } catch (error) {
     return response.status(error.status || 400).json({ code: error.code || "invalid_json", error: "Invalid character request." });
   }
@@ -35,8 +36,25 @@ module.exports = async function handler(request, response) {
   try {
     await requireSubmission(payload.submissionId, payload.submissionToken);
     const profile = resolveChildCharacter(payload.profile);
+    let previousReference = null;
+    if (payload.previousChildImage) {
+      try {
+        previousReference = convertMonster.dataUrlToImagePart(payload.previousChildImage, "previous-child.webp");
+      } catch {
+        const error = new Error("The previous character image is invalid.");
+        error.status = 400;
+        error.code = "invalid_previous_child_image";
+        throw error;
+      }
+      if (previousReference.buffer.length > MAX_PREVIOUS_CHILD_BYTES) {
+        const error = new Error("The previous character image is too large.");
+        error.status = 413;
+        error.code = "previous_child_image_too_large";
+        throw error;
+      }
+    }
     const [identityReference, styleReference] = await Promise.all([
-      convertMonster.loadReferenceImage(DEFAULT_REFERENCES[profile.presentation] || DEFAULT_REFERENCES.girl),
+      previousReference || convertMonster.loadReferenceImage(DEFAULT_REFERENCES[profile.presentation] || DEFAULT_REFERENCES.girl),
       convertMonster.loadReferenceImage(STYLE_REFERENCE),
     ]);
     const childImage = await convertMonster.createImageEdit({

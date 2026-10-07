@@ -448,4 +448,5 @@ function formatErrorForLog(error) {
 
 module.exports.createImageEdit = createImageEdit;
 module.exports.loadReferenceImage = loadReferenceImage;
+module.exports.dataUrlToImagePart = dataUrlToImagePart;
 module.exports.formatErrorForLog = formatErrorForLog;

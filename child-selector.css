@@ -788,7 +788,12 @@
 .child-premium-default[hidden] { display: none; }
 .child-preview-stage.has-premium-art .child-preview-character { display: none; }
 .child-preview-stage.has-book-render .child-preview-character { display: none; }
+.child-preview-stage.has-book-render .child-premium-default { display: none; }
+.child-preview-stage.has-monster-only .child-rendered-preview { display: none; }
 .child-preview-stage.has-book-render::before { opacity: .55; }
+.child-preview-stage.has-pending-child-changes .child-rendered-preview {
+  filter: drop-shadow(0 22px 20px rgba(59,29,109,.22)) saturate(.96);
+}
 .child-render-progress {
   position: absolute;
   z-index: 8;

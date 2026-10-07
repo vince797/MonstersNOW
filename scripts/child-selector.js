@@ -149,7 +149,20 @@
     const figure = stage.querySelector(".child-preview-figure");
     const premiumDefault = stage.querySelector(".child-premium-default");
     const character = ensureCharacterArt(stage);
-    stage.className = "child-preview-stage";
+    // Keep render lifecycle classes owned by main.js. Clearing the complete
+    // class list here used to reveal the starter avatar over a finished render
+    // whenever the user changed a choice or returned to another editor tab.
+    for (const className of [...stage.classList]) {
+      if (
+        className === "is-empty" ||
+        className === "has-character-art" ||
+        className === "has-premium-art" ||
+        className.startsWith("age-") ||
+        className.startsWith("height-") ||
+        className.startsWith("mobility-")
+      ) stage.classList.remove(className);
+    }
+    stage.classList.add("child-preview-stage");
     if (!profile?.included) {
       stage.classList.add("is-empty");
       if (character) character.hidden = true;
@@ -176,7 +189,7 @@
       premiumDefault.src = profile.presentation === "boy"
         ? "assets/child-editor/default-boy-feature-animation-v1.webp"
         : "assets/child-editor/default-girl-feature-animation-v1.webp";
-      premiumDefault.hidden = false;
+      premiumDefault.hidden = stage.classList.contains("has-book-render");
     }
     if (character) character.hidden = true;
     if (figure) figure.hidden = true;
