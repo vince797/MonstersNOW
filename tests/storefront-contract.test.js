@@ -42,7 +42,7 @@ test("the approved seven-cover collection is used without changing story availab
   const covers = {
     "halloween-monster-night-v3": "7c46e1c744ac3e156ce8daec97331eaa1db1dd8a0eb1052e2a54c4f9f45f3d13",
     "big-adventure-v3": "4d5a64303ddbebec72ac045b5ae0b54966fd73ceff999dcc7ae64aec534f4b27",
-    "bedtime-monster-v3": "b654e6aa5d87c31a11c8449a4443f2d7d66d486354ac6227bdf03f7d2a97dbdd",
+    "bedtime-monster-v4": "cbe4d7f1e610c2fd76eade2f14badaa0c336f7738b6dd41a16dfa1704dbe9f8b",
     "abc-monster-book-v3": "6dba3ddd9c51a75b589c5761507b7ec627bbf6bafd664209d1c57e2cfca8f052",
     "counting-with-my-monster-v3": "0a70ffb1877ea745113ff912a2b9ee65e8c87984f84ed2494e45a074b0ac530c",
     "the-monster-who-lost-their-glow-v4": "662ac55c635f26631661448582c21c37ae7907ba8bc2970504059b5519db61b4",
@@ -63,6 +63,7 @@ test("the approved seven-cover collection is used without changing story availab
   });
   const publicCoverMarkup = [read("index.html"), books, read("create.html")].join("\n");
   assert.doesNotMatch(publicCoverMarkup, /(?:big-adventure|bedtime-monster|abc-monster-book|counting-with-my-monster|birthday-monster-adventure)-v2-(?:web|640)/);
+  assert.doesNotMatch(publicCoverMarkup, /bedtime-monster-v3-(?:web|640)/);
   assert.doesNotMatch(publicCoverMarkup, /the-monster-who-lost-their-glow-v3-web/);
 });
 

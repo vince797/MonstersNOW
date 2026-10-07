@@ -240,3 +240,135 @@
   .book-review-file dl { grid-template-columns: 1fr; }
   .book-review-file footer { align-items: flex-start; flex-direction: column; }
 }
+
+.master-monsters-admin {
+  display: grid;
+  gap: 18px;
+}
+
+.master-monsters-hero {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 28px;
+  padding: clamp(20px, 3vw, 34px);
+  overflow: hidden;
+  border: 1px solid #d7e2df;
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 88% 18%, rgba(0, 169, 179, .13), transparent 30%),
+    linear-gradient(135deg, #fff 0%, #f7faf8 58%, #fff6ed 100%);
+}
+
+.master-monsters-hero h2 {
+  margin: 4px 0 8px;
+  color: #102d3a;
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  letter-spacing: -.045em;
+}
+
+.master-monsters-hero p { max-width: 760px; margin: 0; color: #526b75; line-height: 1.6; }
+
+.master-monsters-state {
+  display: grid;
+  min-width: 230px;
+  gap: 5px;
+  padding: 16px 18px;
+  border: 1px solid #c9dcd7;
+  border-radius: 16px;
+  background: rgba(255,255,255,.82);
+  box-shadow: 0 12px 30px rgba(16,45,58,.07);
+}
+
+.master-monsters-state span { display: flex; align-items: center; gap: 7px; color: #087456; font-size: .7rem; font-weight: 900; letter-spacing: .07em; text-transform: uppercase; }
+.master-monsters-state i { width: 8px; height: 8px; border-radius: 50%; background: #18a875; box-shadow: 0 0 0 5px rgba(24,168,117,.12); }
+.master-monsters-state strong { color: #102d3a; font-size: 1.05rem; }
+.master-monsters-state small { color: #71828a; }
+
+.master-monsters-definition {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.master-monsters-definition article {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  padding: 16px;
+  border: 1px solid #dbe5e2;
+  border-radius: 15px;
+  background: #fff;
+}
+
+.master-monsters-definition article > span { display: grid; width: 38px; height: 38px; place-items: center; border-radius: 11px; color: #087982; background: #eaf8f7; font-size: 1.1rem; font-weight: 950; }
+.master-monsters-definition strong { color: #102d3a; }
+.master-monsters-definition p { margin: 3px 0 0; color: #60737c; font-size: .82rem; line-height: 1.5; }
+
+.master-monsters-section {
+  padding: clamp(18px, 2.6vw, 28px);
+  border: 1px solid #dbe5e2;
+  border-radius: 20px;
+  background: #fff;
+}
+
+.master-monsters-section .admin-panel-heading { margin-bottom: 16px; }
+.master-monsters-section h3 { margin: 3px 0 0; color: #102d3a; font-size: 1.45rem; }
+
+.master-monsters-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.master-support-grid { display: grid; grid-template-columns: minmax(260px, 420px); }
+
+.master-monster-card {
+  display: grid;
+  overflow: hidden;
+  border: 1px solid #dce5e2;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(16,45,58,.06);
+}
+
+.master-monster-image {
+  display: grid;
+  aspect-ratio: 1;
+  place-items: center;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 45%, rgba(0,169,179,.1), transparent 42%),
+    linear-gradient(145deg, #f6faf9, #fff7ef);
+}
+
+.master-monster-image img { width: 100%; height: 100%; padding: 10px; object-fit: contain; transition: transform .2s ease; }
+.master-monster-image:hover img, .master-monster-image:focus-visible img { transform: scale(1.025); }
+
+.master-monster-card-body { display: grid; gap: 10px; padding: 14px 15px 15px; border-top: 1px solid #e4ebe9; }
+.master-monster-card-body header { display: flex; align-items: start; justify-content: space-between; gap: 10px; }
+.master-monster-card-body header span { color: #71828a; font-size: .65rem; font-weight: 900; letter-spacing: .07em; text-transform: uppercase; }
+.master-monster-card-body h4 { margin: 3px 0 0; color: #102d3a; font-size: 1rem; }
+.master-monster-card-body em { padding: 5px 7px; border-radius: 999px; color: #087456; background: #e4f7ef; font-size: .62rem; font-style: normal; font-weight: 900; text-transform: uppercase; }
+.master-monster-card-body p { margin: 0; color: #5f737c; font-size: .78rem; line-height: 1.45; }
+.master-monster-card-body footer { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding-top: 9px; border-top: 1px solid #edf1ef; }
+.master-monster-card-body code { overflow: hidden; color: #50636c; font-size: .65rem; text-overflow: ellipsis; white-space: nowrap; }
+.master-monster-card-body small { flex: 0 0 auto; color: #849198; font-size: .65rem; }
+.master-monster-card.is-supporting { grid-template-columns: 150px minmax(0, 1fr); }
+.master-monster-card.is-supporting .master-monster-image { aspect-ratio: auto; min-height: 180px; }
+.master-monsters-status { margin: 0; color: #61757d; font-size: .78rem; }
+
+@media (max-width: 1000px) {
+  .master-monsters-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 720px) {
+  .master-monsters-hero { align-items: stretch; flex-direction: column; }
+  .master-monsters-state { min-width: 0; }
+  .master-monsters-definition,
+  .master-monsters-grid { grid-template-columns: 1fr; }
+  .master-monster-card.is-supporting { grid-template-columns: 1fr; }
+  .master-support-grid { grid-template-columns: 1fr; }
+  .master-monster-card-body footer { align-items: flex-start; flex-direction: column; }
+}

@@ -69,6 +69,15 @@
       ]
     },
     {
+      "source": "/create",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "private, no-store"
+        }
+      ]
+    },
+    {
       "source": "/order",
       "headers": [
         {

@@ -11,7 +11,7 @@ fs.mkdirSync(output, { recursive: true });
 const approvedCoverFiles = [
   "halloween-monster-night-v3-web.jpg",
   "big-adventure-v3-web.jpg",
-  "bedtime-monster-v3-web.jpg",
+  "bedtime-monster-v4-web.jpg",
   "abc-monster-book-v3-web.jpg",
   "counting-with-my-monster-v3-web.jpg",
   "the-monster-who-lost-their-glow-v4-web.jpg",

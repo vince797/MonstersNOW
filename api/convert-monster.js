@@ -16,6 +16,7 @@ const {
 } = require("../lib/monster-submissions");
 const { readJsonBody } = require("../lib/http");
 const { validateMonsterDrawing } = require("../lib/drawing-validator");
+const masterMonsterReferences = require("../assets/master-references/master-monsters.json");
 
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 const IMAGE_MODEL = process.env.OPENAI_IMAGE_MODEL || "gpt-image-1.5";
@@ -27,14 +28,8 @@ const MONSTER_OUTPUT_FORMAT = "jpeg";
 const MONSTER_OUTPUT_COMPRESSION = 85;
 const FALLBACK_IMAGE_MODELS = ["gpt-image-1"];
 
-const characterReferenceImages = [
-  "assets/master-references/soft-3d-storybook-monster-01.png",
-  "assets/master-references/soft-3d-storybook-monster-02.png",
-  "assets/master-references/soft-3d-storybook-monster-03.png",
-  "assets/master-references/soft-3d-storybook-monster-04.png",
-  "assets/master-references/soft-3d-storybook-monster-05.png",
-];
-const coloringPageReferenceImage = "assets/master-references/coloring-page-line-art.jpg";
+const characterReferenceImages = masterMonsterReferences.characterReferences.map((reference) => reference.src);
+const coloringPageReferenceImage = masterMonsterReferences.coloringPageReference.src;
 
 module.exports = async function handler(request, response) {
   if (request.method !== "POST") {

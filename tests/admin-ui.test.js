@@ -11,7 +11,7 @@ const adminScript = fs.readFileSync(path.join(root, "scripts/admin.js"), "utf8")
 const adminBooksStyles = fs.readFileSync(path.join(root, "admin-books.css"), "utf8");
 
 test("admin workspace and homepage collection use the readable system typeface", () => {
-  assert.match(adminMarkup, /styles\.css\?v=20261002-admin-system-type/);
+  assert.match(adminMarkup, /styles\.css\?v=20261007-artwork-panel-v2/);
   assert.match(styles, /--admin-ui-font: Inter, ui-sans-serif, system-ui/);
   assert.match(styles, /\.admin-page strong \{[\s\S]*font-family: var\(--admin-ui-font\)/);
   assert.doesNotMatch(styles, /Admin Fredoka/);
@@ -32,8 +32,8 @@ test("admin sign-in does not blame the device for a server credential timestamp 
 });
 
 test("admin book workspace groups status, review files, and the next action", () => {
-  assert.match(adminMarkup, /admin-books\.css\?v=20261005-admin-simplification-v1/);
-  assert.match(adminMarkup, /scripts\/admin\.js\?v=20261005-admin-simplification-v1/);
+  assert.match(adminMarkup, /admin-books\.css\?v=20261007-master-monsters-v1/);
+  assert.match(adminMarkup, /scripts\/admin\.js\?v=20261007-artwork-panel-v2/);
   assert.match(adminMarkup, />Orders/);
   assert.match(adminMarkup, /Master Books/);
   assert.match(adminMarkup, /Character Assets/);
@@ -53,12 +53,18 @@ test("admin book workspace groups status, review files, and the next action", ()
   assert.match(adminScript, /review PDFs, not print approvals/);
   assert.match(adminScript, /Individual page background/);
   assert.match(adminScript, /This does not approve a PDF or unlock printing/);
+  assert.match(adminScript, /Background plate needed/);
+  assert.match(adminScript, /zone\.hidden = !hasVisual/);
+  assert.match(adminScript, /MONSTER AREA/);
+  assert.doesNotMatch(adminScript, /CUSTOM MONSTER/);
   assert.match(adminScript, /page\.backgroundPlateConfirmed === true/);
   assert.match(adminScript, /Number\(page\.backgroundPlateVersion \|\| 0\) >= 2/);
   assert.match(adminScript, /Exact review-PDF approval is not recorded in the current data model/);
   assert.match(adminScript, /No final personalized print PDF has been created and approved/);
   assert.match(adminBooksStyles, /\.background-plate-check/);
   assert.match(adminBooksStyles, /@media \(max-width: 720px\)/);
+  assert.match(styles, /\.page-artwork-visual\.is-empty \.monster-zone/);
+  assert.doesNotMatch(styles, /\.monster-zone::before|\.monster-zone::after/);
   assert.doesNotMatch(adminScript, /Delete review PDF|Replace review PDF/);
 });
 

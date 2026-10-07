@@ -61,6 +61,7 @@ test("selector UI exposes only supported controls and states the current renderi
   const script = fs.readFileSync(path.join(root, "scripts/child-selector.js"), "utf8");
   const mainScript = fs.readFileSync(path.join(root, "scripts/main.js"), "utf8");
   const css = fs.readFileSync(path.join(root, "child-selector.css"), "utf8");
+  const vercel = JSON.parse(fs.readFileSync(path.join(root, "vercel.json"), "utf8"));
   assert.match(html, /name="child-age-band"/);
   assert.doesNotMatch(html, /name="child-relative-height"/);
   assert.match(html, /value="3-5"/);
@@ -124,9 +125,14 @@ test("selector UI exposes only supported controls and states the current renderi
   assert.match(css, /\.child-live-preview \{[\s\S]*position: sticky/);
   assert.match(css, /\.child-character-option\.is-selected::after/);
   assert.match(css, /\.child-preview-character/);
-  assert.match(html, /child-selector\.css\?v=20261006-skin-age-v1/);
-  assert.match(html, /scripts\/child-selector\.js\?v=20261006-skin-age-v1/);
+  assert.match(html, /child-selector\.css\?v=20261007-skin-tone-v2/);
+  assert.match(html, /scripts\/child-selector\.js\?v=20261007-skin-tone-v2/);
+  assert.match(html, /1\. Character[\s\S]*2\. Skin tone[\s\S]*3\. Hairstyle/);
   assert.match(html, /scripts\/main\.js\?v=20261007-preview-reliability-v1/);
+  assert.deepEqual(
+    vercel.headers.find((entry) => entry.source === "/create")?.headers,
+    [{ key: "Cache-Control", value: "private, no-store" }],
+  );
 });
 
 test("character studio includes lightweight changing storybook previews", () => {

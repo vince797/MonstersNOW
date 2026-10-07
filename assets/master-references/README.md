@@ -3,6 +3,10 @@
 These cropped assets are internal AI style references. They are not full-page
 website images.
 
+`master-monsters.json` is the canonical active-set manifest shared by the
+preview generator and the visual Admin library. Update that manifest when a
+master is added, retired, or replaced so both surfaces remain in sync.
+
 - `input-drawing-purple.jpg`: example of a child drawing input.
 - `soft-3d-storybook-monster-01.png`: Soft 3D Storybook Monster character reference.
 - `soft-3d-storybook-monster-02.png`: Soft 3D Storybook Monster character reference.

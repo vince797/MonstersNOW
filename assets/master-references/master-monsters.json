@@ -1,0 +1,51 @@
+{
+  "version": "soft-3d-storybook-v1",
+  "styleId": "storybook",
+  "title": "Soft 3D Storybook Master Set",
+  "status": "active",
+  "description": "Five still character references that define the shared MonstersNOW generation look while each uploaded drawing remains the source of truth.",
+  "characterReferences": [
+    {
+      "id": "master-01",
+      "label": "Master Monster 01",
+      "role": "Character shape and finish reference",
+      "src": "assets/master-references/soft-3d-storybook-monster-01.png",
+      "alt": "Soft 3D Storybook master monster reference 1."
+    },
+    {
+      "id": "master-02",
+      "label": "Master Monster 02",
+      "role": "Character shape and finish reference",
+      "src": "assets/master-references/soft-3d-storybook-monster-02.png",
+      "alt": "Soft 3D Storybook master monster reference 2."
+    },
+    {
+      "id": "master-03",
+      "label": "Master Monster 03",
+      "role": "Character shape and finish reference",
+      "src": "assets/master-references/soft-3d-storybook-monster-03.png",
+      "alt": "Soft 3D Storybook master monster reference 3."
+    },
+    {
+      "id": "master-04",
+      "label": "Master Monster 04",
+      "role": "Character shape and finish reference",
+      "src": "assets/master-references/soft-3d-storybook-monster-04.png",
+      "alt": "Soft 3D Storybook master monster reference 4."
+    },
+    {
+      "id": "master-05",
+      "label": "Master Monster 05",
+      "role": "Character shape and finish reference",
+      "src": "assets/master-references/soft-3d-storybook-monster-05.png",
+      "alt": "Soft 3D Storybook master monster reference 5."
+    }
+  ],
+  "coloringPageReference": {
+    "id": "coloring-page-line-art",
+    "label": "Coloring Page Master",
+    "role": "Second-pass line-art reference only",
+    "src": "assets/master-references/coloring-page-line-art.jpg",
+    "alt": "Black-and-white MonstersNOW coloring page style reference."
+  }
+}

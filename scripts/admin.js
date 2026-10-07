@@ -22,6 +22,7 @@ const productionAdmin = document.querySelector("#production-admin");
 const ordersAdmin = document.querySelector("#orders-admin");
 const customersAdmin = document.querySelector("#customers-admin");
 const monstersAdmin = document.querySelector("#monsters-admin");
+const masterMonstersAdmin = document.querySelector("#master-monsters-admin");
 const newStoryButton = document.querySelector("#new-story");
 const storyList = document.querySelector("#story-list");
 const storyCount = document.querySelector("#story-count");
@@ -32,6 +33,8 @@ const pagesContainer = document.querySelector("#story-pages");
 let stories = [];
 let orders = [];
 let monsters = [];
+let masterMonsterManifest = null;
+let masterMonsterManifestError = "";
 let posePipelineAvailable = false;
 let bookReviewFiles = [];
 let bookReviewFilesError = "";
@@ -60,7 +63,7 @@ let commandSelection = 0;
 const CATALOG_COVERS = {
   "halloween-monster-night": "assets/storybook/cover-series/minimal-concepts/halloween-monster-night-v3-web.jpg",
   "big-adventure": "assets/storybook/cover-series/minimal-concepts/big-adventure-v3-web.jpg",
-  "bedtime-monster": "assets/storybook/cover-series/minimal-concepts/bedtime-monster-v3-web.jpg",
+  "bedtime-monster": "assets/storybook/cover-series/minimal-concepts/bedtime-monster-v4-web.jpg",
   "abc-monster-book": "assets/storybook/cover-series/minimal-concepts/abc-monster-book-v3-web.jpg",
   "counting-with-my-monster": "assets/storybook/cover-series/minimal-concepts/counting-with-my-monster-v3-web.jpg",
   "the-monster-who-lost-their-glow": "assets/storybook/cover-series/minimal-concepts/the-monster-who-lost-their-glow-v4-web.jpg",
@@ -221,11 +224,13 @@ async function openLibrary() {
   try {
     const reviewFilesPromise = apiRequest("?resource=book-review-files")
       .catch((error) => ({ files: [], error: error.message || "Review files are unavailable." }));
-    const [storyResult, orderResult, monsterResult, reviewFilesResult] = await Promise.all([
+    const masterMonsterPromise = loadMasterMonsterManifest();
+    const [storyResult, orderResult, monsterResult, reviewFilesResult, masterMonsterResult] = await Promise.all([
       apiRequest(),
       apiRequest("?resource=orders"),
       apiRequest("?resource=monsters"),
       reviewFilesPromise,
+      masterMonsterPromise,
     ]);
     stories = storyResult.stories || [];
     orders = orderResult.orders || [];
@@ -233,6 +238,8 @@ async function openLibrary() {
     posePipelineAvailable = monsterResult.posePipelineAvailable === true;
     bookReviewFiles = reviewFilesResult.files || [];
     bookReviewFilesError = reviewFilesResult.error || "";
+    masterMonsterManifest = masterMonsterResult.manifest;
+    masterMonsterManifestError = masterMonsterResult.error || "";
     if (Object.keys(CATALOG_COVERS).some((slug) => !stories.some((story) => story.slug === slug))) {
       const catalogResult = await setupCatalog();
       stories = catalogResult?.stories || stories;
@@ -246,6 +253,7 @@ async function openLibrary() {
     renderOrders();
     renderCustomers();
     renderMonsters();
+    renderMasterMonsters();
     renderProductionHub();
     showView("dashboard");
   } catch (error) {
@@ -282,12 +290,14 @@ function showView(view) {
   ordersAdmin.hidden = view !== "orders";
   customersAdmin.hidden = view !== "customers";
   monstersAdmin.hidden = view !== "monsters";
+  masterMonstersAdmin.hidden = view !== "masters";
   const viewCopy = {
     dashboard: ["Overview", "A clear view of the work that needs you."],
     orders: ["Orders", "Move every book from payment to delivery."],
     stories: ["Master Books", "Review character-free backgrounds and editable story text by revision."],
     production: ["Print checks", "Keep master review, customer proof, preflight, and printer acceptance separate."],
     monsters: ["Character Assets", "Review identity, source drawings, pose coverage, and permissions."],
+    masters: ["Master Monsters", "See the exact still references that define the active generation look."],
     customers: ["Customers", "See families, books, and order history together."],
   };
   const [title, context] = viewCopy[view] || viewCopy.dashboard;
@@ -297,6 +307,101 @@ function showView(view) {
   document.querySelectorAll("[data-admin-view]").forEach((button) => button.classList.toggle("is-active", button.dataset.adminView === view));
   if (view === "stories" && editor.hidden && stories[0]) editStory(stories[0]);
   if (view === "production") renderProductionHub();
+  if (view === "masters") renderMasterMonsters();
+}
+
+async function loadMasterMonsterManifest() {
+  try {
+    const response = await fetch("assets/master-references/master-monsters.json", { cache: "no-store" });
+    if (!response.ok) throw new Error(`Master reference request failed: ${response.status}`);
+    return { manifest: await response.json(), error: "" };
+  } catch (error) {
+    console.error("Master monster references could not be loaded", error);
+    return { manifest: null, error: "The master reference set could not be loaded." };
+  }
+}
+
+function renderMasterMonsters() {
+  const grid = document.querySelector("#master-monsters-grid");
+  const supportGrid = document.querySelector("#master-support-grid");
+  const status = document.querySelector("#master-monsters-status");
+  if (!grid || !supportGrid || !status) return;
+
+  grid.replaceChildren();
+  supportGrid.replaceChildren();
+
+  if (!masterMonsterManifest) {
+    status.textContent = masterMonsterManifestError || "The master reference set is unavailable.";
+    grid.innerHTML = '<div class="admin-inline-empty"><strong>Master references unavailable</strong><span>Refresh Admin to try loading the active set again.</span></div>';
+    return;
+  }
+
+  const references = Array.isArray(masterMonsterManifest.characterReferences)
+    ? masterMonsterManifest.characterReferences
+    : [];
+  document.querySelector("#nav-master-count").textContent = String(references.length);
+  document.querySelector("#master-monster-count").textContent = `${references.length} character master${references.length === 1 ? "" : "s"}`;
+  document.querySelector("#master-monster-version").textContent = masterMonsterManifest.version || "Unversioned set";
+  document.querySelector("#master-character-summary").textContent = `All ${references.length} are sent with every monster preview.`;
+
+  references.forEach((reference, index) => {
+    grid.append(createMasterMonsterCard(reference, index));
+  });
+
+  if (masterMonsterManifest.coloringPageReference) {
+    supportGrid.append(createMasterMonsterCard(masterMonsterManifest.coloringPageReference, 0, { supporting: true }));
+  }
+
+  status.textContent = `${masterMonsterManifest.title || "Master monster set"} is active. The Admin library and preview generator share this manifest.`;
+}
+
+function createMasterMonsterCard(reference, index, { supporting = false } = {}) {
+  const article = document.createElement("article");
+  article.className = supporting ? "master-monster-card is-supporting" : "master-monster-card";
+
+  const imageLink = document.createElement("a");
+  imageLink.className = "master-monster-image";
+  imageLink.href = reference.src;
+  imageLink.target = "_blank";
+  imageLink.rel = "noopener";
+  imageLink.setAttribute("aria-label", `Open ${reference.label || `master reference ${index + 1}`} full size`);
+
+  const image = document.createElement("img");
+  image.src = reference.src;
+  image.alt = reference.alt || "";
+  image.loading = "lazy";
+  image.addEventListener("load", () => {
+    const dimensions = article.querySelector("[data-dimensions]");
+    if (dimensions) dimensions.textContent = `${image.naturalWidth} × ${image.naturalHeight}`;
+  });
+  imageLink.append(image);
+
+  const body = document.createElement("div");
+  body.className = "master-monster-card-body";
+  const heading = document.createElement("header");
+  const titleWrap = document.createElement("div");
+  const sequence = document.createElement("span");
+  sequence.textContent = supporting ? "Supporting reference" : `Reference ${String(index + 1).padStart(2, "0")}`;
+  const title = document.createElement("h4");
+  title.textContent = reference.label || `Master Monster ${index + 1}`;
+  titleWrap.append(sequence, title);
+  const active = document.createElement("em");
+  active.textContent = "Active";
+  heading.append(titleWrap, active);
+
+  const role = document.createElement("p");
+  role.textContent = reference.role || "Generation style reference";
+  const meta = document.createElement("footer");
+  const filename = document.createElement("code");
+  filename.textContent = String(reference.src || "").split("/").pop() || "Reference file";
+  const dimensions = document.createElement("small");
+  dimensions.dataset.dimensions = "";
+  dimensions.textContent = "Loading size…";
+  meta.append(filename, dimensions);
+
+  body.append(heading, role, meta);
+  article.append(imageLink, body);
+  return article;
 }
 
 function openAdminCommand() {
@@ -328,6 +433,7 @@ function renderAdminCommand() {
     { type: "Go to", title: "Overview", detail: "Workspace summary", keywords: "dashboard home", run: () => showView("dashboard") },
     { type: "Go to", title: "Orders", detail: "Fulfillment queue", keywords: "orders fulfillment", run: () => showView("orders") },
     { type: "Go to", title: "Master Books", detail: "Backgrounds and editable story text", keywords: "stories books", run: () => showView("stories") },
+    { type: "Go to", title: "Master Monsters", detail: "Active generation references", keywords: "master monsters animation style references", run: () => showView("masters") },
     { type: "Go to", title: "Character Assets", detail: "Identity and pose review", keywords: "monsters artwork character", run: () => showView("monsters") },
     { type: "Go to", title: "Print checks", detail: "Preflight and printer readiness", keywords: "production print review", run: () => showView("production") },
     ...stories.map((story) => ({
@@ -1364,7 +1470,7 @@ function addPage(page = {}) {
   const pageNumber = pagesContainer.children.length + 1;
   const card = document.createElement("section");
   card.className = "story-page-card";
-  card.innerHTML = `<header class="page-card-header"><span><small data-page-role>Story page</small><strong>Page <span data-page-number></span></strong></span><div class="page-card-header-tools"><em data-page-completion>Checking page…</em><div class="page-card-actions"><button type="button" data-page-action="up" aria-label="Move page up" title="Move page up">↑</button><button type="button" data-page-action="down" aria-label="Move page down" title="Move page down">↓</button><button type="button" data-page-action="duplicate">Duplicate</button><button type="button" data-page-action="remove">Remove</button></div></div></header><label class="page-copy-field"><span class="page-field-heading"><b>1</b><span><strong>Story text</strong><small>The words printed in the book</small></span></span><span class="token-toolbar" role="group" aria-label="Insert personalization"><button type="button" data-insert-token="{child_name}">+ Child name</button><button type="button" data-insert-token="{monster_name}">+ Monster name</button></span><textarea rows="8" maxlength="2000" placeholder="Write the words the child will read on this page…"></textarea><small><span data-text-words>0 words</span> · <span data-text-count>0</span>/2,000 characters</small></label><label><span class="page-field-heading"><b>2</b><span><strong>Illustration direction</strong><small>Internal notes for creating or revising the scene</small></span></span><textarea rows="8" maxlength="3000" placeholder="Describe the scene, characters, action, lighting, and composition…"></textarea><small><span data-art-words>0 words</span> · <span data-art-count>0</span>/3,000 characters</small></label><section class="page-artwork-panel"><div class="page-artwork-visual"><img alt="" data-artwork-image hidden /><div data-artwork-empty><span>◇</span><strong>No background uploaded</strong><small>Individual page art · JPG, PNG, or WebP · 3 MB maximum</small></div><div class="monster-zone" data-monster-zone role="img" aria-label="Admin-only personalized monster placement"><span>MONSTER</span></div><div class="child-zone" data-child-zone role="img" aria-label="Admin-only personalized child placement"><span>CHILD</span></div></div><div class="page-artwork-controls"><div class="page-artwork-heading"><span class="page-step-number">3</span><span><strong>Individual page background</strong><small data-artwork-name>Upload this page's background without permanent characters.</small></span></div><label class="button secondary artwork-upload-button"><input type="file" accept="image/jpeg,image/png,image/webp" data-artwork-file /> <span data-artwork-upload-label>Upload page background</span></label><label class="artwork-status-label"><span><strong>Background artwork review</strong><small>Applies only to this individual page, not any PDF.</small></span><select data-artwork-review><option value="missing">Background missing</option><option value="draft">Needs background review</option><option value="approved">Background approved</option><option value="final">Final background art</option></select></label><details class="monster-placement-controls"><summary>Monster placement <small>Advanced</small></summary><label>Horizontal <input type="range" min="5" max="95" data-character="monster" data-placement="x" /><output data-character-output="monster-x"></output></label><label>Baseline <input type="range" min="10" max="95" data-character="monster" data-placement="y" /><output data-character-output="monster-y"></output></label><label>Size <input type="range" min="15" max="70" data-character="monster" data-placement="scale" /><output data-character-output="monster-scale"></output></label><div><label>Facing<select data-character="monster" data-placement="facing"><option value="left">Left</option><option value="right">Right</option><option value="neutral">Neutral</option></select></label><label>Layer<select data-character="monster" data-placement="layer"><option value="front">In front</option><option value="behind">Behind foreground</option></select></label></div></details><details class="monster-placement-controls child-placement-controls"><summary>Child placement <small>Advanced</small></summary><label>Horizontal <input type="range" min="5" max="95" data-character="child" data-placement="x" /><output data-character-output="child-x"></output></label><label>Baseline <input type="range" min="10" max="95" data-character="child" data-placement="y" /><output data-character-output="child-y"></output></label><label>Size <input type="range" min="15" max="70" data-character="child" data-placement="scale" /><output data-character-output="child-scale"></output></label><div><label>Facing<select data-character="child" data-placement="facing"><option value="left">Left</option><option value="right">Right</option><option value="neutral">Neutral</option></select></label><label>Layer<select data-character="child" data-placement="layer"><option value="front">In front</option><option value="behind">Behind foreground</option></select></label></div><p>Placement guides are never printed.</p></details><button class="button secondary" type="button" data-remove-artwork hidden>Remove from page</button><p data-artwork-message role="status"></p></div></section>`;
+  card.innerHTML = `<header class="page-card-header"><span><small data-page-role>Story page</small><strong>Page <span data-page-number></span></strong></span><div class="page-card-header-tools"><em data-page-completion>Checking page…</em><div class="page-card-actions"><button type="button" data-page-action="up" aria-label="Move page up" title="Move page up">↑</button><button type="button" data-page-action="down" aria-label="Move page down" title="Move page down">↓</button><button type="button" data-page-action="duplicate">Duplicate</button><button type="button" data-page-action="remove">Remove</button></div></div></header><label class="page-copy-field"><span class="page-field-heading"><b>1</b><span><strong>Story text</strong><small>The words printed in the book</small></span></span><span class="token-toolbar" role="group" aria-label="Insert personalization"><button type="button" data-insert-token="{child_name}">+ Child name</button><button type="button" data-insert-token="{monster_name}">+ Monster name</button></span><textarea rows="8" maxlength="2000" placeholder="Write the words the child will read on this page…"></textarea><small><span data-text-words>0 words</span> · <span data-text-count>0</span>/2,000 characters</small></label><label><span class="page-field-heading"><b>2</b><span><strong>Illustration direction</strong><small>Internal notes for creating or revising the scene</small></span></span><textarea rows="8" maxlength="3000" placeholder="Describe the scene, characters, action, lighting, and composition…"></textarea><small><span data-art-words>0 words</span> · <span data-art-count>0</span>/3,000 characters</small></label><section class="page-artwork-panel"><div class="page-artwork-visual is-empty"><img alt="" data-artwork-image hidden /><div data-artwork-empty><span class="artwork-empty-icon" aria-hidden="true"><i></i></span><strong>Background plate needed</strong><small>Upload the clean scene before positioning the personalized characters.</small><em>JPG, PNG, or WebP · 3 MB maximum</em></div><div class="monster-zone" data-monster-zone role="img" aria-label="Admin-only personalized monster placement"><span>MONSTER AREA</span></div><div class="child-zone" data-child-zone role="img" aria-label="Admin-only personalized child placement"><span>CHILD AREA</span></div></div><div class="page-artwork-controls"><div class="page-artwork-heading"><span class="page-step-number">3</span><span><strong>Individual page background</strong><small data-artwork-name>Upload this page's background without permanent characters.</small></span></div><label class="button secondary artwork-upload-button"><input type="file" accept="image/jpeg,image/png,image/webp" data-artwork-file /> <span data-artwork-upload-label>Upload page background</span></label><label class="artwork-status-label"><span><strong>Background artwork review</strong><small>Applies only to this individual page, not any PDF.</small></span><select data-artwork-review><option value="missing">Background missing</option><option value="draft">Needs background review</option><option value="approved">Background approved</option><option value="final">Final background art</option></select></label><details class="monster-placement-controls"><summary>Monster placement <small>Advanced</small></summary><label>Horizontal <input type="range" min="5" max="95" data-character="monster" data-placement="x" /><output data-character-output="monster-x"></output></label><label>Baseline <input type="range" min="10" max="95" data-character="monster" data-placement="y" /><output data-character-output="monster-y"></output></label><label>Size <input type="range" min="15" max="70" data-character="monster" data-placement="scale" /><output data-character-output="monster-scale"></output></label><div><label>Facing<select data-character="monster" data-placement="facing"><option value="left">Left</option><option value="right">Right</option><option value="neutral">Neutral</option></select></label><label>Layer<select data-character="monster" data-placement="layer"><option value="front">In front</option><option value="behind">Behind foreground</option></select></label></div></details><details class="monster-placement-controls child-placement-controls"><summary>Child placement <small>Advanced</small></summary><label>Horizontal <input type="range" min="5" max="95" data-character="child" data-placement="x" /><output data-character-output="child-x"></output></label><label>Baseline <input type="range" min="10" max="95" data-character="child" data-placement="y" /><output data-character-output="child-y"></output></label><label>Size <input type="range" min="15" max="70" data-character="child" data-placement="scale" /><output data-character-output="child-scale"></output></label><div><label>Facing<select data-character="child" data-placement="facing"><option value="left">Left</option><option value="right">Right</option><option value="neutral">Neutral</option></select></label><label>Layer<select data-character="child" data-placement="layer"><option value="front">In front</option><option value="behind">Behind foreground</option></select></label></div><p>Placement guides are never printed.</p></details><button class="button secondary" type="button" data-remove-artwork hidden>Remove from page</button><p data-artwork-message role="status"></p></div></section>`;
   const backgroundCheck = document.createElement("label");
   backgroundCheck.className = "background-plate-check";
   backgroundCheck.innerHTML = '<input type="checkbox" data-background-confirmed /> <span><strong>This page background is character-free</strong><small>Confirms only this image: no permanent child or sample monster appears. This does not approve a PDF or unlock printing.</small></span>';
@@ -1533,6 +1639,7 @@ function updateCharacterPlacement(card, control) {
 }
 
 function renderCharacterPlacements(card) {
+  const hasVisual = Boolean(card.dataset.artworkUrl || card.dataset.referenceArtworkUrl);
   for (const character of ["monster", "child"]) {
     const prefix = character.charAt(0).toUpperCase() + character.slice(1);
     const values = {
@@ -1551,9 +1658,9 @@ function renderCharacterPlacements(card) {
     zone.style.transform = `translate(-50%, -100%) scaleX(${values.facing === "right" ? -1 : 1})`;
     zone.dataset.layer = values.layer;
     zone.dataset.facing = values.facing;
-    zone.hidden = card.dataset[`${character}Required`] !== "true";
+    zone.hidden = !hasVisual || card.dataset[`${character}Required`] !== "true";
     const details = card.querySelector(`.${character}-placement-controls`);
-    if (details) details.hidden = card.dataset[`${character}Required`] !== "true";
+    if (details) details.hidden = !hasVisual || card.dataset[`${character}Required`] !== "true";
   }
 }
 
@@ -1568,6 +1675,8 @@ function renderArtwork(card) {
   const hasReference = !hasArtwork && Boolean(card.dataset.referenceArtworkUrl);
   const visibleArtworkUrl = hasArtwork ? card.dataset.artworkUrl : card.dataset.referenceArtworkUrl;
   const visual = card.querySelector(".page-artwork-visual");
+  visual.classList.toggle("is-empty", !visibleArtworkUrl);
+  visual.classList.toggle("has-artwork", Boolean(visibleArtworkUrl));
   if (hasReference) visual.dataset.referenceLabel = `${card.dataset.referenceArtworkLabel} · character-free environment reference`;
   else delete visual.dataset.referenceLabel;
   image.hidden = !visibleArtworkUrl;
@@ -1590,7 +1699,7 @@ function renderArtwork(card) {
   for (const character of ["monster", "child"]) {
     const zone = card.querySelector(`[data-${character}-zone]`);
     zone.dataset.referenceRemoval = "false";
-    zone.querySelector("span").textContent = `CUSTOM ${character.toUpperCase()}`;
+    zone.querySelector("span").textContent = `${character.toUpperCase()} AREA`;
   }
   renderCharacterPlacements(card);
 }
@@ -1601,7 +1710,9 @@ function appendPreviewCharacterZones(art, card) {
     const zone = document.createElement("span");
     zone.className = `${character}-zone ${character}-zone-preview`;
     zone.dataset.referenceRemoval = "false";
-    zone.textContent = `CUSTOM ${character.toUpperCase()}`;
+    const label = document.createElement("span");
+    label.textContent = `${character.toUpperCase()} AREA`;
+    zone.append(label);
     zone.style.left = `${card.dataset[`${character}X`] || (character === "monster" ? 68 : 30)}%`;
     zone.style.top = `${card.dataset[`${character}Y`] || (character === "monster" ? 72 : 82)}%`;
     zone.style.width = `${card.dataset[`${character}Scale`] || (character === "monster" ? 36 : 30)}%`;
