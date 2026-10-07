@@ -87,7 +87,7 @@ test("the empty monster preview uses the branded studio state instead of stock c
   const styles = read("monster-uploader.css");
 
   assert.match(create, /id="monster-preview-placeholder"/);
-  assert.match(create, /Their monster will/);
+  assert.match(create, /Their monster appears here/);
   assert.match(create, /id="monster-preview"[\s\S]*?hidden/);
   assert.doesNotMatch(create, /step-2-character\.jpg/);
   assert.doesNotMatch(script, /demoMonsterImage/);
