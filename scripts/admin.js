@@ -1,17 +1,6 @@
 const login = document.querySelector("#admin-login");
 const loginForm = document.querySelector("#admin-login-form");
 const passwordInput = document.querySelector("#admin-password");
-const luluShippingFields = document.querySelector("#lulu-shipping-fields");
-if (luluShippingFields && !document.querySelector("#lulu-email")) {
-  const emailLabel = document.createElement("label");
-  emailLabel.textContent = "Email";
-  const emailInput = document.createElement("input");
-  emailInput.id = "lulu-email";
-  emailInput.type = "email";
-  emailInput.autocomplete = "email";
-  emailLabel.append(emailInput);
-  luluShippingFields.querySelector("label")?.after(emailLabel);
-}
 const paymentNotice = document.querySelector(".order-payment-notice");
 if (paymentNotice) paymentNotice.textContent = "Payment status is controlled by verified Stripe events. Unpaid orders cannot advance to production.";
 const loginStatus = document.querySelector("#admin-login-status");
@@ -94,6 +83,12 @@ document.querySelector("#revoke-order-proof").addEventListener("click", revokeSe
 document.querySelector("#send-order-lulu").addEventListener("click", sendSelectedOrderToLulu);
 document.querySelector("#publish-customer-proof").addEventListener("click", publishSelectedCustomerProof);
 document.querySelector("#copy-customer-proof-link").addEventListener("click", copySelectedCustomerProofLink);
+document.querySelector("#open-customer-proof-link").addEventListener("click", openSelectedCustomerProofLink);
+document.querySelector("#open-production-interior").addEventListener("click", () => openSelectedProductionFile("interior"));
+document.querySelector("#open-production-cover").addEventListener("click", () => openSelectedProductionFile("cover"));
+document.querySelector("#proof-review-confirm").addEventListener("change", () => {
+  if (selectedOrder) renderProofApproval(selectedOrder);
+});
 document.querySelector("#open-artwork-overview").addEventListener("click", openArtworkOverview);
 document.querySelector("#open-story-review").addEventListener("click", openStoryReview);
 document.querySelector("#close-artwork-overview").addEventListener("click", () => artworkDialog.close());
@@ -1152,7 +1147,6 @@ function renderBookWorkspace(story = currentStory(), cards = [...pagesContainer.
     nextHelp = "Publishing and print release remain separate deliberate steps.";
   }
 
-  document.querySelector("#book-workspace-state").textContent = status === "published" ? "Published" : "Private draft";
   document.querySelector("#book-summary-status").textContent = status === "published" ? "Published" : "Draft";
   document.querySelector("#book-summary-version").textContent = `Version ${version}`;
   document.querySelector("#book-summary-copy").textContent = `${copyReady}/32`;
@@ -1179,7 +1173,10 @@ function renderBookWorkspace(story = currentStory(), cards = [...pagesContainer.
       const index = cards.findIndex((card) => !(card.dataset.artworkUrl
         && card.dataset.backgroundPlateConfirmed === "true"
         && ["approved", "final"].includes(card.dataset.artworkStatus)));
-      if (index >= 0) selectPage(index, true);
+      if (index >= 0) {
+        selectPage(index, true);
+        cards[index].querySelector(".page-artwork-panel")?.setAttribute("open", "");
+      }
       return;
     }
     openStoryReview();
@@ -1435,7 +1432,15 @@ function addPage(page = {}) {
   const pageNumber = pagesContainer.children.length + 1;
   const card = document.createElement("section");
   card.className = "story-page-card";
-  card.innerHTML = `<header class="page-card-header"><span><small data-page-role>Story page</small><strong>Page <span data-page-number></span></strong></span><div class="page-card-header-tools"><em data-page-completion>Checking page…</em><div class="page-card-actions"><button type="button" data-page-action="up" aria-label="Move page up" title="Move page up">↑</button><button type="button" data-page-action="down" aria-label="Move page down" title="Move page down">↓</button><button type="button" data-page-action="duplicate">Duplicate</button><button type="button" data-page-action="remove">Remove</button></div></div></header><label class="page-copy-field"><span class="page-field-heading"><b>1</b><span><strong>Story text</strong><small>The words printed in the book</small></span></span><span class="token-toolbar" role="group" aria-label="Insert personalization"><button type="button" data-insert-token="{child_name}">+ Child name</button><button type="button" data-insert-token="{monster_name}">+ Monster name</button></span><textarea rows="8" maxlength="2000" placeholder="Write the words the child will read on this page…"></textarea><small><span data-text-words>0 words</span> · <span data-text-count>0</span>/2,000 characters</small></label><label><span class="page-field-heading"><b>2</b><span><strong>Illustration direction</strong><small>Internal notes for creating or revising the scene</small></span></span><textarea rows="8" maxlength="3000" placeholder="Describe the scene, characters, action, lighting, and composition…"></textarea><small><span data-art-words>0 words</span> · <span data-art-count>0</span>/3,000 characters</small></label><section class="page-artwork-panel"><div class="page-artwork-visual is-empty"><img alt="" data-artwork-image hidden /><div data-artwork-empty><span class="artwork-empty-icon" aria-hidden="true"><i></i></span><strong>Background plate needed</strong><small>Upload the clean scene before positioning the personalized characters.</small><em>JPG, PNG, or WebP · 3 MB maximum</em></div><div class="monster-zone" data-monster-zone role="img" aria-label="Admin-only personalized monster placement"><span>MONSTER AREA</span></div><div class="child-zone" data-child-zone role="img" aria-label="Admin-only personalized child placement"><span>CHILD AREA</span></div></div><div class="page-artwork-controls"><div class="page-artwork-heading"><span class="page-step-number">3</span><span><strong>Individual page background</strong><small data-artwork-name>Upload this page's background without permanent characters.</small></span></div><label class="button secondary artwork-upload-button"><input type="file" accept="image/jpeg,image/png,image/webp" data-artwork-file /> <span data-artwork-upload-label>Upload page background</span></label><label class="artwork-status-label"><span><strong>Background artwork review</strong><small>Applies only to this individual page, not any PDF.</small></span><select data-artwork-review><option value="missing">Background missing</option><option value="draft">Needs background review</option><option value="approved">Background approved</option><option value="final">Final background art</option></select></label><details class="monster-placement-controls"><summary>Monster placement <small>Advanced</small></summary><label>Horizontal <input type="range" min="5" max="95" data-character="monster" data-placement="x" /><output data-character-output="monster-x"></output></label><label>Baseline <input type="range" min="10" max="95" data-character="monster" data-placement="y" /><output data-character-output="monster-y"></output></label><label>Size <input type="range" min="15" max="70" data-character="monster" data-placement="scale" /><output data-character-output="monster-scale"></output></label><div><label>Facing<select data-character="monster" data-placement="facing"><option value="left">Left</option><option value="right">Right</option><option value="neutral">Neutral</option></select></label><label>Layer<select data-character="monster" data-placement="layer"><option value="front">In front</option><option value="behind">Behind foreground</option></select></label></div></details><details class="monster-placement-controls child-placement-controls"><summary>Child placement <small>Advanced</small></summary><label>Horizontal <input type="range" min="5" max="95" data-character="child" data-placement="x" /><output data-character-output="child-x"></output></label><label>Baseline <input type="range" min="10" max="95" data-character="child" data-placement="y" /><output data-character-output="child-y"></output></label><label>Size <input type="range" min="15" max="70" data-character="child" data-placement="scale" /><output data-character-output="child-scale"></output></label><div><label>Facing<select data-character="child" data-placement="facing"><option value="left">Left</option><option value="right">Right</option><option value="neutral">Neutral</option></select></label><label>Layer<select data-character="child" data-placement="layer"><option value="front">In front</option><option value="behind">Behind foreground</option></select></label></div><p>Placement guides are never printed.</p></details><button class="button secondary" type="button" data-remove-artwork hidden>Remove from page</button><p data-artwork-message role="status"></p></div></section>`;
+  card.innerHTML = `<header class="page-card-header"><span><small>Page content</small><strong>Words &amp; illustration</strong></span><div class="page-card-header-tools"><em data-page-completion>Checking page…</em><div class="page-card-actions"><button type="button" data-page-action="up" aria-label="Move page up" title="Move page up">↑</button><button type="button" data-page-action="down" aria-label="Move page down" title="Move page down">↓</button><button type="button" data-page-action="duplicate">Duplicate</button><button type="button" data-page-action="remove">Remove</button></div></div></header><label class="page-copy-field"><span class="page-field-heading"><b>1</b><span><strong>Story text</strong><small>The words printed in the book</small></span></span><span class="token-toolbar" role="group" aria-label="Insert personalization"><button type="button" data-insert-token="{child_name}">+ Child name</button><button type="button" data-insert-token="{monster_name}">+ Monster name</button></span><textarea rows="8" maxlength="2000" placeholder="Write the words the child will read on this page…"></textarea><small><span data-text-words>0 words</span> · <span data-text-count>0</span>/2,000 characters</small></label><label><span class="page-field-heading"><b>2</b><span><strong>Illustration direction</strong><small>Internal notes for creating or revising the scene</small></span></span><textarea rows="8" maxlength="3000" placeholder="Describe the scene, characters, action, lighting, and composition…"></textarea><small><span data-art-words>0 words</span> · <span data-art-count>0</span>/3,000 characters</small></label><section class="page-artwork-panel"><div class="page-artwork-visual is-empty"><img alt="" data-artwork-image hidden /><div data-artwork-empty><span class="artwork-empty-icon" aria-hidden="true"><i></i></span><strong>Background plate needed</strong><small>Upload the clean scene before positioning the personalized characters.</small><em>JPG, PNG, or WebP · 3 MB maximum</em></div><div class="monster-zone" data-monster-zone role="img" aria-label="Admin-only personalized monster placement"><span>MONSTER AREA</span></div><div class="child-zone" data-child-zone role="img" aria-label="Admin-only personalized child placement"><span>CHILD AREA</span></div></div><div class="page-artwork-controls"><div class="page-artwork-heading"><span class="page-step-number">3</span><span><strong>Individual page background</strong><small data-artwork-name>Upload this page's background without permanent characters.</small></span></div><label class="button secondary artwork-upload-button"><input type="file" accept="image/jpeg,image/png,image/webp" data-artwork-file /> <span data-artwork-upload-label>Upload page background</span></label><label class="artwork-status-label"><span><strong>Background artwork review</strong><small>Applies only to this individual page, not any PDF.</small></span><select data-artwork-review><option value="missing">Background missing</option><option value="draft">Needs background review</option><option value="approved">Background approved</option><option value="final">Final background art</option></select></label><details class="monster-placement-controls"><summary>Monster placement <small>Advanced</small></summary><label>Horizontal <input type="range" min="5" max="95" data-character="monster" data-placement="x" /><output data-character-output="monster-x"></output></label><label>Baseline <input type="range" min="10" max="95" data-character="monster" data-placement="y" /><output data-character-output="monster-y"></output></label><label>Size <input type="range" min="15" max="70" data-character="monster" data-placement="scale" /><output data-character-output="monster-scale"></output></label><div><label>Facing<select data-character="monster" data-placement="facing"><option value="left">Left</option><option value="right">Right</option><option value="neutral">Neutral</option></select></label><label>Layer<select data-character="monster" data-placement="layer"><option value="front">In front</option><option value="behind">Behind foreground</option></select></label></div></details><details class="monster-placement-controls child-placement-controls"><summary>Child placement <small>Advanced</small></summary><label>Horizontal <input type="range" min="5" max="95" data-character="child" data-placement="x" /><output data-character-output="child-x"></output></label><label>Baseline <input type="range" min="10" max="95" data-character="child" data-placement="y" /><output data-character-output="child-y"></output></label><label>Size <input type="range" min="15" max="70" data-character="child" data-placement="scale" /><output data-character-output="child-scale"></output></label><div><label>Facing<select data-character="child" data-placement="facing"><option value="left">Left</option><option value="right">Right</option><option value="neutral">Neutral</option></select></label><label>Layer<select data-character="child" data-placement="layer"><option value="front">In front</option><option value="behind">Behind foreground</option></select></label></div><p>Placement guides are never printed.</p></details><button class="button secondary" type="button" data-remove-artwork hidden>Remove from page</button><p data-artwork-message role="status"></p></div></section>`;
+  const artworkBody = card.querySelector(".page-artwork-panel");
+  const artworkDetails = document.createElement("details");
+  const artworkSummary = document.createElement("summary");
+  artworkDetails.className = "page-artwork-panel";
+  artworkSummary.innerHTML = '<span><b>3</b><span><strong>Page artwork &amp; placement</strong><small>Background, review status, and character positions</small></span></span><em data-artwork-summary>Background missing</em>';
+  artworkBody.className = "page-artwork-body";
+  artworkBody.replaceWith(artworkDetails);
+  artworkDetails.append(artworkSummary, artworkBody);
   const backgroundCheck = document.createElement("label");
   backgroundCheck.className = "background-plate-check";
   backgroundCheck.innerHTML = '<input type="checkbox" data-background-confirmed /> <span><strong>This page background is character-free</strong><small>Confirms only this image: no permanent child or sample monster appears. This does not approve a PDF or unlock printing.</small></span>';
@@ -1501,12 +1506,14 @@ function addPage(page = {}) {
 function renumberPages() {
   const cards = [...pagesContainer.children];
   cards.forEach((card, index) => {
-    card.querySelector("[data-page-number]").textContent = String(index + 1);
-    card.querySelector("[data-page-role]").textContent = pageRole(index, cards.length);
-    card.querySelector('[data-page-action="up"]').disabled = index === 0;
-    card.querySelector('[data-page-action="down"]').disabled = index === cards.length - 1;
-    card.querySelector('[data-page-action="duplicate"]').disabled = cards.length >= 32;
-    card.querySelector('[data-page-action="remove"]').disabled = cards.length === 1;
+    const moveUp = card.querySelector('[data-page-action="up"]');
+    const moveDown = card.querySelector('[data-page-action="down"]');
+    const duplicate = card.querySelector('[data-page-action="duplicate"]');
+    const remove = card.querySelector('[data-page-action="remove"]');
+    moveUp.hidden = index === 0;
+    moveDown.hidden = index === cards.length - 1;
+    duplicate.hidden = cards.length >= 32;
+    remove.hidden = cards.length === 1;
   });
 }
 
@@ -1636,6 +1643,7 @@ function renderArtwork(card) {
   const status = card.querySelector("[data-artwork-review]");
   const name = card.querySelector("[data-artwork-name]");
   const uploadLabel = card.querySelector("[data-artwork-upload-label]");
+  const summary = card.querySelector("[data-artwork-summary]");
   const hasArtwork = Boolean(card.dataset.artworkUrl);
   const hasReference = !hasArtwork && Boolean(card.dataset.referenceArtworkUrl);
   const visibleArtworkUrl = hasArtwork ? card.dataset.artworkUrl : card.dataset.referenceArtworkUrl;
@@ -1651,6 +1659,8 @@ function renderArtwork(card) {
   remove.hidden = !hasArtwork;
   status.disabled = !hasArtwork;
   status.value = hasArtwork ? card.dataset.artworkStatus || "draft" : "missing";
+  summary.textContent = hasArtwork ? artworkStatusLabel(status.value) : hasReference ? "Reference art available" : "Background missing";
+  summary.className = hasArtwork && ["approved", "final"].includes(status.value) ? "is-ready" : "";
   const backgroundConfirmed = card.querySelector("[data-background-confirmed]");
   backgroundConfirmed.checked = card.dataset.backgroundPlateConfirmed === "true";
   backgroundConfirmed.disabled = !hasArtwork;
@@ -1775,7 +1785,11 @@ function renderArtworkOverview() {
     button.querySelector("strong").textContent = card.dataset.artworkUrl ? artworkStatusLabel(status) : card.dataset.referenceArtworkUrl ? `${card.dataset.referenceArtworkLabel} reference` : artworkStatusLabel(status);
     button.querySelector("em").textContent = copyReady ? "Copy ready" : "Copy needs work";
     button.setAttribute("aria-label", `Edit page ${index + 1}, artwork ${artworkStatusLabel(status)}`);
-    button.addEventListener("click", () => { artworkDialog.close(); selectPage(index, true); });
+    button.addEventListener("click", () => {
+      artworkDialog.close();
+      selectPage(index, true);
+      card.querySelector(".page-artwork-panel")?.setAttribute("open", "");
+    });
     return button;
   }));
   if (!visible.length) grid.innerHTML = '<div class="artwork-overview-empty"><strong>No pages in this group</strong><span>Choose another artwork status.</span></div>';
@@ -2075,7 +2089,7 @@ function refreshPageTools() {
   const referenceCount = new Set(cards.map((card) => card.dataset.referenceArtworkUrl).filter(Boolean)).size;
   renderBookWorkspace(currentStory(), cards);
   document.querySelector("#page-progress").textContent = `${ready}/32 copy · ${artworkReady}/32 final art${referenceCount ? ` · ${referenceCount} existing spread references` : ""}`;
-  document.querySelector("#add-page").disabled = cards.length >= 32;
+  document.querySelector("#add-page").hidden = cards.length >= 32;
   document.querySelector("#page-nav").replaceChildren(...cards.map((card, index) => {
     card.id = `book-page-${index + 1}`;
     const button = document.createElement("button");
@@ -2093,31 +2107,6 @@ function refreshPageTools() {
     return button;
   }));
   renumberPages();
-  const settings = {
-    title: document.querySelector("#story-title").value.trim(),
-    slug: document.querySelector("#story-slug").value.trim(),
-    seasonal: document.querySelector("#story-seasonal").checked,
-    from: document.querySelector("#story-from").value,
-    until: document.querySelector("#story-until").value,
-  };
-  const allText = cards.map((card) => [...card.querySelectorAll("textarea")].map((area) => area.value).join(" ")).join(" ");
-  const unresolved = [...new Set(allText.match(/\{[^}]+\}/g) || [])].filter((token) => !["{child_name}", "{monster_name}"].includes(token));
-  const checks = [
-    { ok: Boolean(settings.title && settings.slug), label: "Title and slug are complete" },
-    { ok: cards.length === 32, label: `${cards.length}/32 pages added` },
-    { ok: ready === cards.length && cards.length > 0, label: "Every page has story text and art direction" },
-    { ok: artworkReady === cards.length && cards.length === 32, label: `${artworkReady}/32 clean background plates confirmed and approved` },
-    { ok: !unresolved.length, label: unresolved.length ? `Unknown tokens: ${unresolved.join(", ")}` : "No unknown personalization tokens" },
-    { ok: !settings.seasonal || Boolean(settings.from && settings.until), label: settings.seasonal ? "Seasonal availability dates are set" : "Evergreen availability" },
-    { ok: !cards.some((card) => card.querySelector("textarea").value.length > 1200), label: "Page text is within review length" },
-  ];
-  const passedChecks = checks.filter((check) => check.ok).length;
-  const checksPanel = document.querySelector(".book-checks-panel");
-  checksPanel.classList.toggle("is-ready", passedChecks === checks.length);
-  document.querySelector("#book-checks-summary").textContent = `${passedChecks}/${checks.length} checks passed`;
-  document.querySelector("#story-readiness-list").replaceChildren(...checks.map((check) => {
-    const item = document.createElement("li"); item.className = check.ok ? "is-ready" : "needs-work"; item.textContent = `${check.ok ? "✓" : "!"} ${check.label}`; return item;
-  }));
   const stage = storyStage({ status: stories.find((story) => story.id === document.querySelector("#story-id").value)?.status, pages: [] }, ready);
   document.querySelector("#story-stage").textContent = stage;
   document.querySelector("#story-stage").className = `is-${stage.toLowerCase().replaceAll(" ", "-")}`;
@@ -2127,6 +2116,7 @@ function refreshPageTools() {
 
 function openOrderDetail(order) {
   selectedOrder = order;
+  document.querySelector("#order-detail-title").textContent = `${order.child_name || "Customer"}'s personalized book`;
   document.querySelector("#order-detail-id").textContent = `Order ${order.id}`;
   document.querySelector("#order-detail-age").textContent = `${orderNeedsAttention(order) ? "Needs follow-up · " : "Updated "}${relativeAge(order.updated_at || order.created_at)}`;
   const childProfile = order.child_character || {};
@@ -2149,6 +2139,7 @@ function openOrderDetail(order) {
   document.querySelector("#lulu-postcode").value = savedAddress.postal_code || "";
   document.querySelector("#lulu-country").value = savedAddress.country || "US";
   document.querySelector("#lulu-shipping-level").value = "MAIL";
+  document.querySelector("#proof-review-confirm").checked = false;
   renderProofApproval(order);
   syncOrderStatusOptions(order);
   document.querySelector("#order-detail-notes").value = order.notes || "";
@@ -2170,15 +2161,25 @@ function syncOrderStatusOptions(order) {
 }
 
 function renderOrderNextAction(order) {
+  const customerStatus = order.customer_proof_status || "not_ready";
+  const proofingAction = !order.customer_proof_path
+    ? ["Upload the complete personalized book", "Lock the customer proof plus the exact Lulu interior and wrap-cover PDFs."]
+    : customerStatus === "changes_requested"
+      ? ["Revise and republish the customer proof", order.customer_proof_revision_notes || "The customer requested changes to this version."]
+      : customerStatus === "ready"
+        ? ["Waiting for customer approval", "The private proof is published. Copy the link if the customer needs it again."]
+        : customerStatus === "approved" && !order.proof_fingerprint
+          ? ["Review and approve the complete book", "Open the full proof, review all pages, then lock this exact version for print."]
+          : ["Finish the personalized proof", "Complete the next open production gate below."];
   const actions = {
-    checkout_started: ["Verify payment in Stripe", "Confirm payment before beginning proof production."],
-    paid: ["Begin personalized proof", "Advance the order to proofing when production work starts."],
-    proofing: ["Review and approve the proof", "Approval fingerprints the exact master, names, and selected monster."],
-    approved: ["Enter shipping and send to Lulu Sandbox", "Lulu validates both PDFs before creating the print job."],
+    checkout_started: ["Verify payment in Stripe", "Confirm payment before beginning book production."],
+    paid: ["Start the personalized book", "Move the paid order into proofing to begin production."],
+    proofing: proofingAction,
+    approved: ["Add shipping and send to Lulu Sandbox", "Lulu will validate the locked cover and interior before creating the test print job."],
     printing: ["Monitor the Lulu print job", order.lulu_print_job_id ? `Print job ${order.lulu_print_job_id} is in production.` : "Confirm the printer accepted the order."],
-    shipped: ["Add delivery follow-up", "Confirm delivery, then complete the order."],
-    completed: ["No action required", "This order is complete."],
-    cancelled: ["No action required", "This order was cancelled."],
+    shipped: ["Confirm delivery", "Complete the order after the book reaches the customer."],
+    completed: ["Production complete", "The book was approved, submitted, and fulfilled."],
+    cancelled: ["Order cancelled", "No production action is available."],
   };
   const [title, help] = order.payment_issue
     ? ["Resolve the Stripe payment issue", `Fulfillment is blocked: ${order.payment_issue.replaceAll("_", " ")}. Review the payment in Stripe.`]
@@ -2198,6 +2199,14 @@ function renderProofApproval(order) {
   const send = document.querySelector("#send-order-lulu");
   const help = document.querySelector("#proof-approval-help");
   const blocked = Boolean(order.payment_issue);
+  const productionReady = hasOrderProductionFiles(order);
+  const reviewConfirmation = document.querySelector("#proof-review-confirm");
+  const reviewConfirmationWrap = document.querySelector("#full-proof-confirmation");
+  const customerStageStatus = document.querySelector("#customer-proof-stage-status");
+  const studioStageStatus = document.querySelector("#studio-approval-stage-status");
+  const luluStageStatus = document.querySelector("#lulu-stage-status");
+  const fulfillmentStageStatus = document.querySelector("#fulfillment-stage-status");
+  const job = document.querySelector("#order-lulu-job");
   if (submitted) {
     state.textContent = `Sent to Lulu · job ${order.lulu_print_job_id}`;
     help.textContent = order.lulu_submitted_at ? `Submitted ${new Date(order.lulu_submitted_at).toLocaleString()}.` : "The print job has been submitted.";
@@ -2206,7 +2215,7 @@ function renderProofApproval(order) {
     help.textContent = `Master v${order.master_story_version || "?"} · fingerprint ${order.proof_fingerprint.slice(0, 12)}… Final PDFs must pass Lulu validation before sending.`;
   } else if (customerStatus === "approved") {
     state.textContent = `Customer approved PDF ${order.customer_proof_fingerprint?.slice(0, 12) || ""}…`;
-    help.textContent = "Complete the final production check, then lock this exact proof for print handoff.";
+    help.textContent = productionReady ? "Open the customer proof and both locked print files, then approve this exact package." : "The customer proof is approved, but the exact Lulu interior and cover files are missing.";
   } else if (customerStatus === "changes_requested") {
     state.textContent = "Customer requested proof changes.";
     help.textContent = order.customer_proof_revision_notes || "Prepare and publish a revised PDF for review.";
@@ -2217,45 +2226,146 @@ function renderProofApproval(order) {
     state.textContent = "No customer proof has been published.";
     help.textContent = "Upload the exact cover-and-interior PDF. Customer approval is required before final production approval.";
   }
+  customerStageStatus.textContent = customerStatus === "approved" ? "Customer approved" : customerStatus === "changes_requested" ? "Changes requested" : customerStatus === "ready" ? "Awaiting customer" : "Not published";
+  studioStageStatus.textContent = approved ? "Locked" : customerStatus === "approved" ? "Ready for review" : "Waiting";
+  luluStageStatus.textContent = submitted ? "Accepted" : approved ? "Ready to send" : "Sandbox";
+  fulfillmentStageStatus.textContent = order.status === "completed" ? "Complete" : order.status === "shipped" ? "Shipped" : order.status === "printing" ? "Printing" : "Waiting";
+  reviewConfirmationWrap.hidden = approved || submitted;
+  reviewConfirmation.disabled = customerStatus !== "approved" || blocked;
+  if (customerStatus !== "approved" || approved || submitted) reviewConfirmation.checked = false;
   approve.hidden = approved || submitted;
-  approve.disabled = blocked || customerStatus !== "approved" || !["proofing", "approved"].includes(order.status);
+  approve.disabled = blocked || customerStatus !== "approved" || !productionReady || !reviewConfirmation.checked || !["proofing", "approved"].includes(order.status);
+  approve.title = customerStatus !== "approved"
+    ? "The customer must approve the current proof first."
+    : !productionReady
+      ? "Upload the exact Lulu interior and wrap-cover PDFs first."
+    : !reviewConfirmation.checked
+      ? "Open and review the complete proof, then confirm the review checklist."
+      : "Lock this exact customer-approved PDF for print.";
   revoke.hidden = !approved || submitted;
   document.querySelector("#customer-proof-upload").hidden = approved || submitted || order.status !== "proofing";
   document.querySelector("#publish-customer-proof").disabled = blocked || order.status !== "proofing";
-  document.querySelector("#copy-customer-proof-link").hidden = !order.customer_proof_path;
+  document.querySelector("#customer-proof-link-actions").hidden = !order.customer_proof_path;
+  document.querySelector("#open-production-interior").hidden = !productionReady;
+  document.querySelector("#open-production-cover").hidden = !productionReady;
   document.querySelector("#lulu-shipping-fields").hidden = !approved || submitted;
+  send.hidden = submitted;
   send.disabled = blocked || !approved || submitted;
   send.title = blocked ? "Resolve the Stripe payment issue first." : approved ? "Validate the production PDFs and create the Lulu Sandbox print job." : "Approve the proof first.";
+  job.hidden = !submitted;
+  if (submitted) job.innerHTML = `<span>Lulu Sandbox print job</span><strong>${escapeHtml(order.lulu_print_job_id)}</strong><small>${order.lulu_submitted_at ? `Submitted ${escapeHtml(new Date(order.lulu_submitted_at).toLocaleString())}` : "Submission recorded"}</small>`;
+  renderOrderBookChecklist(order);
+  renderWorkflowStageStates(order);
+}
+
+function renderOrderBookChecklist(order) {
+  const child = order.child_character || {};
+  const monsterOnly = child.included === false || child.id === "none";
+  const statusIndex = orderStatuses.indexOf(order.status);
+  const checks = [
+    { label: "Payment verified", detail: order.stripe_paid_at ? new Date(order.stripe_paid_at).toLocaleDateString() : "Waiting for verified Stripe payment", ready: Boolean(order.stripe_paid_at) || statusIndex >= orderStatuses.indexOf("paid") },
+    { label: "Story and format locked", detail: order.story_label && order.format_id ? `${order.story_label} · ${order.format_id}` : "Story or print format missing", ready: Boolean(order.story_id && order.format_id) },
+    { label: "Monster locked", detail: order.selected_preview_id ? "Exact selected preview saved" : "Select the customer's approved monster", ready: Boolean(order.monster_submission_id && order.selected_preview_id && order.monster_assets?.selectedPreviewUrl) },
+    { label: monsterOnly ? "Monster-only story" : "Child character locked", detail: monsterOnly ? "No child character requested" : child.label || "Character selection missing", ready: monsterOnly || Boolean(child.id || child.label) },
+    { label: "Complete customer proof", detail: order.customer_proof_path ? "Exact review file stored privately" : "Cover and 32-page review PDF still needed", ready: Boolean(order.customer_proof_path) },
+    { label: "Exact Lulu print files", detail: hasOrderProductionFiles(order) ? "Interior and wrap cover locked privately" : "Final interior and wrap-cover PDFs still needed", ready: hasOrderProductionFiles(order) },
+  ];
+  const readyCount = checks.filter((check) => check.ready).length;
+  document.querySelector("#order-book-stage-status").textContent = order.customer_proof_path && hasOrderProductionFiles(order) ? "Files locked" : `${readyCount}/${checks.length} ready`;
+  document.querySelector("#order-book-checklist").replaceChildren(...checks.map((check) => {
+    const item = document.createElement("div");
+    item.className = check.ready ? "is-ready" : "is-pending";
+    item.innerHTML = `<span aria-hidden="true">${check.ready ? "✓" : "•"}</span><div><strong>${escapeHtml(check.label)}</strong><small>${escapeHtml(check.detail)}</small></div>`;
+    return item;
+  }));
+}
+
+function renderWorkflowStageStates(order) {
+  const approved = Boolean(order.proof_fingerprint && order.proof_approved_at);
+  const submitted = Boolean(order.lulu_print_job_id);
+  const customerApproved = order.customer_proof_status === "approved";
+  const stages = [
+    ["order-book-stage", Boolean(order.customer_proof_path) && hasOrderProductionFiles(order)],
+    ["order-customer-proof-stage", customerApproved],
+    ["order-studio-approval-stage", approved],
+    ["order-lulu-stage", submitted],
+    ["order-fulfillment-stage", order.status === "completed"],
+  ];
+  const current = stages.findIndex(([, complete]) => !complete);
+  stages.forEach(([id, complete], index) => {
+    const stage = document.querySelector(`#${id}`);
+    stage.classList.toggle("is-complete", complete);
+    stage.classList.toggle("is-current", !complete && index === current);
+    stage.classList.toggle("is-blocked", Boolean(order.payment_issue));
+  });
+}
+
+function hasOrderProductionFiles(order) {
+  return Boolean(order?.production_interior_path && order?.production_interior_fingerprint && order?.production_cover_path && order?.production_cover_fingerprint);
 }
 
 async function publishSelectedCustomerProof() {
   if (!selectedOrder) return;
   const fileInput = document.querySelector("#customer-proof-file");
+  const interiorInput = document.querySelector("#production-interior-file");
+  const coverInput = document.querySelector("#production-cover-file");
   const file = fileInput.files?.[0];
+  const interiorFile = interiorInput.files?.[0];
+  const coverFile = coverInput.files?.[0];
   const message = document.querySelector("#order-detail-message");
-  if (!file || file.type !== "application/pdf") { message.textContent = "Choose the exact customer-review PDF first."; return; }
-  if (file.size > 20 * 1024 * 1024) { message.textContent = "Choose a PDF smaller than 20 MB."; return; }
-  if (!window.confirm("Publish this exact PDF for the customer? Publishing a revision invalidates the previous customer response.")) return;
+  const files = [file, interiorFile, coverFile];
+  if (files.some((item) => !item || item.type !== "application/pdf")) { message.textContent = "Choose the customer proof, Lulu interior, and Lulu wrap-cover PDFs."; return; }
+  if (files.some((item) => item.size > 250 * 1024 * 1024)) { message.textContent = "Each PDF must be smaller than 250 MB."; return; }
+  if (!window.confirm("Publish this customer proof and lock these exact Lulu print files? Publishing a revision invalidates the previous customer response.")) return;
   const button = document.querySelector("#publish-customer-proof");
   button.disabled = true;
-  message.textContent = "Fingerprinting and publishing the private proof…";
+  message.textContent = "Fingerprinting the customer proof and exact print files…";
   try {
-    const proofData = await readFileAsDataUrl(file);
+    const roles = ["proof", "interior", "cover"];
+    const metadata = await Promise.all(files.map((selectedFile, index) => pdfUploadMetadata(selectedFile, roles[index])));
+    const prepared = await apiRequest(`?resource=orders&id=${encodeURIComponent(selectedOrder.id)}`, {
+      method: "PATCH",
+      body: { action: "prepare_customer_proof_upload", files: metadata },
+    });
+    message.textContent = "Uploading three private PDFs…";
+    await Promise.all(prepared.order.files.map((upload) => uploadSignedPdf(upload, files[roles.indexOf(upload.role)])));
+    message.textContent = "Confirming the locked production package…";
     const result = await apiRequest(`?resource=orders&id=${encodeURIComponent(selectedOrder.id)}`, {
       method: "PATCH",
-      body: { action: "publish_customer_proof", proofData },
+      body: { action: "publish_customer_proof", files: metadata },
     });
     Object.assign(selectedOrder, result.order);
     fileInput.value = "";
+    interiorInput.value = "";
+    coverInput.value = "";
     renderProofApproval(selectedOrder);
+    renderOrderProgress(selectedOrder);
     renderOrderNextAction(selectedOrder);
     renderOrders(); renderDashboard();
     const copied = result.order.customer_proof_link ? await copyText(result.order.customer_proof_link) : false;
     message.textContent = copied
-      ? "Customer proof published and its private link copied."
-      : "Customer proof published. Use Copy private proof link to send it through your approved customer communication channel.";
+      ? "Customer proof and exact print files locked. The private customer link was copied."
+      : "Customer proof and exact print files locked. Use Copy private customer link to send it through your approved communication channel.";
   } catch (error) { message.textContent = error.message; }
   finally { renderProofApproval(selectedOrder); }
+}
+
+async function pdfUploadMetadata(file, role) {
+  const digest = await crypto.subtle.digest("SHA-256", await file.arrayBuffer());
+  const sha256 = [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
+  return { role, name: file.name, type: file.type, size: file.size, sha256 };
+}
+
+async function uploadSignedPdf(prepared, file) {
+  if (!prepared?.signedUrl || !file) throw new Error("A private PDF upload could not be prepared.");
+  const formData = new FormData();
+  formData.append("cacheControl", "0");
+  formData.append("", file);
+  const response = await fetch(prepared.signedUrl, { method: "PUT", headers: { "x-upsert": "true" }, body: formData });
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.message || body.error || `The ${prepared.role} PDF could not be stored.`);
+  }
 }
 
 async function copySelectedCustomerProofLink() {
@@ -2267,6 +2377,49 @@ async function copySelectedCustomerProofLink() {
     const copied = await copyText(result.order.customer_proof_link);
     message.textContent = copied ? "Private customer proof link copied." : "Private customer proof link is ready in the copy dialog.";
   } catch (error) { message.textContent = error.message; }
+}
+
+async function openSelectedCustomerProofLink() {
+  if (!selectedOrder) return;
+  const message = document.querySelector("#order-detail-message");
+  const proofWindow = window.open("about:blank", "_blank");
+  if (proofWindow) proofWindow.opener = null;
+  message.textContent = "Opening the private full-book proof…";
+  try {
+    const result = await apiRequest(`?resource=orders&id=${encodeURIComponent(selectedOrder.id)}`, { method: "PATCH", body: { action: "get_customer_proof_link" } });
+    if (proofWindow) {
+      proofWindow.location.replace(result.order.customer_proof_link);
+      message.textContent = "Full-book proof opened in a new tab.";
+    } else {
+      const copied = await copyText(result.order.customer_proof_link);
+      message.textContent = copied ? "Pop-ups were blocked, so the private proof link was copied." : "Allow pop-ups to open the proof in a new tab.";
+    }
+  } catch (error) {
+    proofWindow?.close();
+    message.textContent = error.message;
+  }
+}
+
+async function openSelectedProductionFile(type) {
+  if (!selectedOrder || !["interior", "cover"].includes(type)) return;
+  const message = document.querySelector("#order-detail-message");
+  const fileWindow = window.open("about:blank", "_blank");
+  if (fileWindow) fileWindow.opener = null;
+  message.textContent = `Opening the locked print ${type}…`;
+  try {
+    const result = await apiRequest(`?resource=orders&id=${encodeURIComponent(selectedOrder.id)}`, { method: "PATCH", body: { action: "get_production_file_links" } });
+    const url = type === "interior" ? result.order.production_interior_url : result.order.production_cover_url;
+    if (fileWindow) {
+      fileWindow.location.replace(url);
+      message.textContent = `Locked print ${type} opened in a new tab.`;
+    } else {
+      const copied = await copyText(url);
+      message.textContent = copied ? `Pop-ups were blocked, so the print ${type} link was copied.` : `Allow pop-ups to open the print ${type}.`;
+    }
+  } catch (error) {
+    fileWindow?.close();
+    message.textContent = error.message;
+  }
 }
 
 async function copyText(value) {
@@ -2293,7 +2446,7 @@ async function approveSelectedOrderProof() {
     renderOrders(); renderDashboard();
     message.textContent = "Proof approved and locked. Lulu submission remains a separate action.";
   } catch (error) { message.textContent = error.message; }
-  finally { button.disabled = false; }
+  finally { renderProofApproval(selectedOrder); }
 }
 
 async function sendSelectedOrderToLulu() {
@@ -2332,7 +2485,7 @@ async function sendSelectedOrderToLulu() {
     renderOrders(); renderDashboard();
     message.textContent = `Sent to Lulu Sandbox. Print job ${selectedOrder.lulu_print_job_id} is now tracked on this order.`;
   } catch (error) { message.textContent = error.message; }
-  finally { button.textContent = "Send to Lulu Sandbox"; renderProofApproval(selectedOrder); }
+  finally { button.textContent = "Validate and send to Lulu Sandbox"; renderProofApproval(selectedOrder); }
 }
 
 async function revokeSelectedOrderProof() {
@@ -2374,29 +2527,39 @@ function renderOrderArtwork(assets) {
 }
 
 function renderOrderProgress(order) {
-  const flow = ["checkout_started", "paid", "proofing", "approved", "printing", "shipped", "completed"];
-  const current = flow.indexOf(order.status);
-  document.querySelector("#order-progress").replaceChildren(...flow.map((status, index) => {
+  const approved = Boolean(order.proof_fingerprint && order.proof_approved_at);
+  const steps = [
+    { label: "Payment", complete: order.status !== "checkout_started" },
+    { label: "Book files", complete: Boolean(order.customer_proof_path) && hasOrderProductionFiles(order) },
+    { label: "Customer", complete: order.customer_proof_status === "approved" },
+    { label: "Studio", complete: approved },
+    { label: "Lulu", complete: Boolean(order.lulu_print_job_id) },
+    { label: "Delivered", complete: order.status === "completed" },
+  ];
+  const current = steps.findIndex((step) => !step.complete);
+  document.querySelector("#order-progress").replaceChildren(...steps.map((step, index) => {
     const item = document.createElement("li");
-    item.className = order.status === "cancelled" ? "is-cancelled" : index < current ? "is-complete" : index === current ? "is-current" : "";
-    item.innerHTML = `<span>${index < current ? "✓" : index + 1}</span><small></small>`;
-    item.querySelector("small").textContent = status === "checkout_started" ? "Checkout" : status.charAt(0).toUpperCase() + status.slice(1);
+    item.className = order.status === "cancelled" ? "is-cancelled" : step.complete ? "is-complete" : index === current ? "is-current" : "";
+    item.innerHTML = `<span>${step.complete ? "✓" : index + 1}</span><small></small>`;
+    item.querySelector("small").textContent = step.label;
     return item;
   }));
+  const flow = ["checkout_started", "paid", "proofing", "approved", "printing", "shipped", "completed"];
+  const lifecycleIndex = flow.indexOf(order.status);
   const advance = document.querySelector("#advance-order");
-  const next = flow[current + 1];
+  const next = flow[lifecycleIndex + 1];
   advance.hidden = !next || order.status === "cancelled";
   advance.textContent = next ? `Advance to ${next.replaceAll("_", " ")} →` : "Order complete";
   if (order.status === "checkout_started") {
-    advance.hidden = false;
+    advance.hidden = true;
     advance.disabled = true;
     advance.textContent = "Verify Stripe payment first";
   } else if (order.status === "proofing") {
-    advance.hidden = false;
+    advance.hidden = true;
     advance.disabled = true;
     advance.textContent = "Approve proof to continue";
   } else if (order.status === "approved") {
-    advance.hidden = false;
+    advance.hidden = true;
     advance.disabled = true;
     advance.textContent = "Send to Lulu to continue";
   } else advance.disabled = false;

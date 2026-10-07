@@ -27,6 +27,21 @@ test("revoking approval removes only the audit marker", () => {
   assert.equal(encodeApprovalNotes(stored, null), "Keep this note.");
 });
 
+test("production package metadata is never truncated by long operator notes", () => {
+  const metadata = {
+    proofFingerprint: "d".repeat(64),
+    productionInteriorPath: `order/${"i".repeat(64)}-lulu-interior.pdf`,
+    productionInteriorFingerprint: "i".repeat(64).replaceAll("i", "1"),
+    productionCoverPath: `order/${"c".repeat(64)}-lulu-cover.pdf`,
+    productionCoverFingerprint: "c".repeat(64),
+  };
+  const stored = encodeApprovalNotes("n".repeat(2000), metadata);
+  const parsed = parseApprovalNotes(stored);
+  assert.equal(stored.length, 2000);
+  assert.deepEqual(parsed.approval, metadata);
+  assert.ok(parsed.notes.length < 2000);
+});
+
 test("production statuses cannot bypass approval and Lulu submission", () => {
   assert.throws(() => assertAllowedStatusChange({ status: "checkout_started" }, "paid"), /next required step/i);
   assert.doesNotThrow(() => assertAllowedStatusChange({ status: "paid" }, "proofing"));

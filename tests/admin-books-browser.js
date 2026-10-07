@@ -93,6 +93,21 @@ const monsterFixture = {
   orders: [{ id: "order-1", storyId: "story-1", storyLabel: "Halloween Monster Night", childName: "Maya", childCharacter: { id: "deep-braids-black", label: "Long braids", included: true, ageBand: "6-8", ageBandLabel: "Ages 6–8", mobilityAid: "wheelchair" }, status: "paid" }],
   poseJobs: [poseJob],
 };
+const orderFixture = {
+  id: "order-1", submission_id: "submission-1", status: "proofing",
+  customer_email: "parent@example.com", child_name: "Maya", monster_name: "Bumbles",
+  story_id: "story-1", story_label: "Halloween Monster Night", format_id: "hardcover",
+  monster_style: "Classic", amount_cents: 3499, currency: "USD",
+  created_at: new Date().toISOString(), updated_at: new Date().toISOString(), stripe_paid_at: new Date().toISOString(),
+  stripe_checkout_session_id: "cs_test_fixture", stripe_payment_intent_id: "pi_test_fixture",
+  monster_submission_id: monsterFixture.id, selected_preview_id: "preview-1",
+  child_character: { id: "deep-braids-black", label: "Long braids", included: true, ageBand: "6-8", mobilityAid: "wheelchair" },
+  customer_proof_path: "private/order-1-proof.pdf", customer_proof_status: "approved",
+  customer_proof_fingerprint: "a".repeat(64), customer_proof_master_version: 4,
+  production_interior_path: "private/order-1-interior.pdf", production_interior_fingerprint: "b".repeat(64),
+  production_cover_path: "private/order-1-cover.pdf", production_cover_fingerprint: "c".repeat(64),
+  monster_assets: { originalUrl: monsterFixture.originalUrl, selectedPreviewUrl: monsterFixture.selectedPreviewUrl, selectedPreviewId: "preview-1" },
+};
 
 const server = http.createServer((request, response) => {
   const pathname = new URL(request.url, "http://localhost").pathname;
@@ -137,7 +152,7 @@ const server = http.createServer((request, response) => {
           await route.fulfill({ status: 401, contentType: "application/json", body: JSON.stringify({ code: "PGRST301", error: "JWT issued at future" }) });
           return;
         }
-        const body = resource === "orders" ? { orders: [] }
+        const body = resource === "orders" ? { orders: [orderFixture] }
           : resource === "monsters" ? { monsters: [monsterFixture], posePipelineAvailable: true }
             : resource === "book-review-files" ? { files: reviewFiles }
               : { stories };
@@ -149,6 +164,18 @@ const server = http.createServer((request, response) => {
       assert.equal(requestCounts.get("GET:orders"), 1);
       assert.equal(requestCounts.get("GET:monsters"), 1);
       assert.equal(requestCounts.get("GET:book-review-files"), 1);
+      await page.locator('[data-admin-view="orders"]').click();
+      await page.locator(".order-board-card", { hasText: "Maya + Bumbles" }).click();
+      await page.locator("#order-detail").waitFor({ state: "visible" });
+      assert.equal(await page.locator(".order-workflow-stage").count(), 5);
+      assert.equal(await page.locator("#order-progress li").count(), 6);
+      assert.match(await page.locator("#order-book-checklist").textContent(), /Complete customer proof.*Exact review file stored privately.*Exact Lulu print files.*Interior and wrap cover locked privately/s);
+      assert.equal(await page.locator("#approve-order-proof").isDisabled(), true);
+      await page.locator("#proof-review-confirm").check();
+      assert.equal(await page.locator("#approve-order-proof").isDisabled(), false);
+      assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
+      await page.screenshot({ path: path.join(output, `admin-order-workflow-${viewport.name}.png`), fullPage: false });
+      await page.locator("#close-order-detail").click();
       const mutationFailure = await page.evaluate(async () => {
         try {
           await apiRequest("?resource=pose-jobs", { method: "POST", body: { submissionId: "fixture" } });
@@ -172,6 +199,10 @@ const server = http.createServer((request, response) => {
       await page.locator('[data-admin-view="stories"]').click();
       await page.locator(".story-list-item", { hasText: "Halloween Monster Night" }).click();
       await page.locator("#book-workspace-summary").waitFor({ state: "visible" });
+      assert.equal(await page.locator("#book-workspace-summary").getAttribute("open"), null);
+      assert.equal(await page.locator(".selected-spread-preview").getAttribute("open"), null);
+      assert.equal(await page.locator(".page-artwork-panel").first().getAttribute("open"), null);
+      await page.locator("#book-workspace-summary > summary").click();
       assert.equal(await page.locator("#book-summary-next-button").textContent(), "Open review files");
       assert.match(await page.locator("#gate-master-state").textContent(), /31\/32 backgrounds approved for master v4/);
       assert.match(await page.locator("#gate-proof-state").textContent(), /created and approved per customer order/);
@@ -183,9 +214,11 @@ const server = http.createServer((request, response) => {
       assert.equal(await page.getByText("Individual page background", { exact: true }).count(), 32);
       assert.equal(await page.getByText("This page background is character-free", { exact: true }).count(), 32);
       assert.equal(await page.getByText("Applies only to this individual page, not any PDF.", { exact: true }).count(), 32);
+      await page.locator(".page-artwork-panel > summary").first().click();
       assert.equal(await page.getByText("Individual page background", { exact: true }).first().isVisible(), true);
       assert.equal(await page.locator(".book-review-file", { hasText: "Approval not recorded" }).count(), 3);
       assert.equal(await page.locator(".book-review-file", { hasText: "Not print ready" }).count(), 3);
+      await page.screenshot({ path: path.join(output, `admin-story-editor-${viewport.name}.png`), fullPage: true });
       await page.locator('[data-admin-view="monsters"]').click();
       await page.locator(".monster-pose-stages").waitFor({ state: "visible" });
       assert.match(await page.locator(".monster-pose-identity").textContent(), /Locked child identity.*Long braids.*Ages 6–8.*Wheelchair preserved/i);

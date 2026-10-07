@@ -1,6 +1,8 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const {
+  confirmCustomerProofPackage,
+  createCustomerProofPackageUploads,
   deriveOrderAccess,
   getCustomerOrderView,
   publishCustomerProof,
@@ -90,7 +92,7 @@ test("customer approval is bound to the published proof fingerprint", async () =
   } finally { global.fetch = originalFetch; }
 });
 
-test("publishing a proof fingerprints the PDF and resets customer review state", async () => {
+test("publishing a proof locks the exact customer, interior, and cover PDFs", async () => {
   process.env.ORDER_ACCESS_SECRET = secret;
   process.env.SUPABASE_URL = "https://db.example.com";
   process.env.SUPABASE_SECRET_KEY = "service-secret";
@@ -103,11 +105,56 @@ test("publishing a proof fingerprints the PDF and resets customer review state",
     return { ok: true, json: async () => [baseOrder({ ...body, customer_proof_path: body.customer_proof_path })] };
   };
   try {
-    const proofData = `data:application/pdf;base64,${Buffer.from("%PDF-1.7\nproof\n%%EOF").toString("base64")}`;
-    const published = await publishCustomerProof(baseOrder({ customer_proof_status: "changes_requested" }), { proofData, masterStoryVersion: 7 });
+    const pdfData = (label) => `data:application/pdf;base64,${Buffer.from(`%PDF-1.7\n${label}\n%%EOF`).toString("base64")}`;
+    let packageMetadata;
+    const published = await publishCustomerProof(baseOrder({ customer_proof_status: "changes_requested" }), {
+      proofData: pdfData("proof"), interiorData: pdfData("interior"), coverData: pdfData("cover"), masterStoryVersion: 7,
+      buildNotes: (metadata) => { packageMetadata = metadata; return JSON.stringify(metadata); },
+    });
     assert.equal(published.customer_proof_status, "ready");
     assert.match(published.customer_proof_fingerprint, /^[a-f0-9]{64}$/);
     assert.equal(published.customer_proof_master_version, 7);
-    assert.equal(JSON.parse(calls[1].options.body).customer_proof_revision_notes, null);
+    assert.equal(calls.filter((call) => call.url.includes("/storage/v1/object/customer-proofs/")).length, 3);
+    assert.match(packageMetadata.productionInteriorFingerprint, /^[a-f0-9]{64}$/);
+    assert.match(packageMetadata.productionCoverFingerprint, /^[a-f0-9]{64}$/);
+    const patchCall = calls.find((call) => call.url.includes("/rest/v1/storybook_orders"));
+    assert.equal(JSON.parse(patchCall.options.body).customer_proof_revision_notes, null);
+    assert.match(JSON.parse(patchCall.options.body).notes, /productionInteriorPath/);
+  } finally { global.fetch = originalFetch; }
+});
+
+test("large production PDFs use signed private uploads before the order is updated", async () => {
+  process.env.ORDER_ACCESS_SECRET = secret;
+  process.env.SUPABASE_URL = "https://db.example.com";
+  process.env.SUPABASE_SECRET_KEY = "service-secret";
+  const files = ["proof", "interior", "cover"].map((role, index) => ({
+    role, name: `${role}.pdf`, type: "application/pdf", size: 30 * 1024 * 1024 + index, sha256: String(index + 1).repeat(64),
+  }));
+  const calls = [];
+  const originalFetch = global.fetch;
+  global.fetch = async (url, options = {}) => {
+    calls.push({ url, options });
+    if (url.includes("/object/upload/sign/")) return { ok: true, json: async () => ({ url: `/object/upload/sign/customer-proofs/file-${calls.length}` }) };
+    if (url.includes("/object/info/")) {
+      const role = url.includes("-customer-proof.pdf") ? "proof" : url.includes("-lulu-interior.pdf") ? "interior" : "cover";
+      const file = files.find((item) => item.role === role);
+      return { ok: true, json: async () => ({ metadata: { size: file.size, mimetype: "application/pdf" } }) };
+    }
+    const body = JSON.parse(options.body);
+    return { ok: true, json: async () => [baseOrder(body)] };
+  };
+  try {
+    const prepared = await createCustomerProofPackageUploads(baseOrder(), { files });
+    assert.equal(prepared.files.length, 3);
+    assert.equal(prepared.files.every((file) => file.signedUrl.startsWith("https://db.example.com/storage/v1/")), true);
+    let productionFiles;
+    const confirmed = await confirmCustomerProofPackage(baseOrder(), {
+      files, masterStoryVersion: 9,
+      buildNotes: (metadata) => { productionFiles = metadata; return "locked-package"; },
+    });
+    assert.equal(confirmed.customer_proof_master_version, 9);
+    assert.match(productionFiles.productionInteriorPath, /-lulu-interior\.pdf$/);
+    assert.match(productionFiles.productionCoverPath, /-lulu-cover\.pdf$/);
+    assert.equal(calls.filter((call) => call.url.includes("/object/info/")).length, 3);
   } finally { global.fetch = originalFetch; }
 });
