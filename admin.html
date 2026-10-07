@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex, nofollow" />
     <title>Dashboard | MonstersNOW Admin</title>
-    <link rel="stylesheet" href="styles.css?v=20261007-halloween-art-v2" />
+    <link rel="stylesheet" href="styles.css?v=20261007-gallery-pairs-v1" />
     <link rel="stylesheet" href="admin-books.css?v=20261007-master-monsters-v1" />
     <link rel="icon" href="assets/brand/monstersnow-icon-32-v1.png" type="image/png" sizes="32x32" />
     <link rel="apple-touch-icon" href="assets/brand/monstersnow-icon-180-v1.png" />
@@ -57,10 +57,9 @@
             <button type="button" data-admin-view="orders"><span aria-hidden="true">↗</span>Orders <em id="nav-order-count">0</em></button>
             <button type="button" data-admin-view="stories"><span aria-hidden="true">▤</span>Master Books <em id="nav-story-count">0</em></button>
             <button type="button" data-admin-view="masters"><span aria-hidden="true">✦</span>Master Monsters <em id="nav-master-count">5</em></button>
-            <button type="button" data-admin-view="monsters"><span aria-hidden="true">●</span>Character Assets <em id="nav-monster-count">0</em></button>
+            <button type="button" data-admin-view="monsters"><span aria-hidden="true">●</span>Gallery Collection <em id="nav-monster-count">0</em></button>
             <span class="admin-nav-label">Supporting views</span>
             <button class="is-active" type="button" data-admin-view="dashboard"><span aria-hidden="true">⌂</span>Overview</button>
-            <button type="button" data-admin-view="production"><span aria-hidden="true">◇</span>Print checks <em id="nav-production-count">0</em></button>
             <button type="button" data-admin-view="customers"><span aria-hidden="true">♙</span>Customers <em id="nav-customer-count">0</em></button>
           </nav>
           <div class="admin-rail-footer">
@@ -160,7 +159,6 @@
                 <div class="story-editor-actions">
                   <button class="button secondary" id="show-manuscript-import" type="button">Import manuscript</button>
                   <button class="button secondary" id="download-story-proof" type="button">Download review PDF</button>
-                  <button class="button secondary" id="open-story-production" type="button">Print checks</button>
                   <button class="button secondary" id="save-draft" type="button">Save draft</button>
                   <button class="button primary" id="publish-story" type="button">Publish</button>
                 </div>
@@ -270,62 +268,6 @@
         </div>
           </section>
 
-          <section class="production-admin" id="production-admin" hidden>
-            <div class="production-hero">
-              <div>
-                <p class="eyebrow">Print checks</p>
-                <h2 id="production-book-title">Halloween Monster Night</h2>
-                <p id="production-book-summary">One place to move the book from master copy through artwork, print files, validation, and customer fulfillment.</p>
-              </div>
-              <span class="production-overall" id="production-hub-status">Checking…</span>
-            </div>
-
-            <div class="production-hub-actions">
-              <button class="button primary" type="button" id="production-open-book">Edit master book</button>
-              <button class="button secondary" type="button" id="production-download-proof">Download review PDF</button>
-              <button class="button secondary" type="button" id="production-open-orders">Manage orders</button>
-              <a class="button secondary" href="create.html?test=halloween" target="_blank" rel="noopener">Run test order ↗</a>
-            </div>
-
-            <section class="production-gate" id="production-gate">
-              <div><strong>Master background review</strong><span id="master-art-gate-state">Checks character-free art for one saved master revision.</span></div>
-              <div><strong>Personalized customer proof</strong><span id="editorial-proof-state">Created and approved separately for each order.</span></div>
-              <div><strong>Cover preview</strong><span id="cover-preview-gate-state">A catalog preview is not a printer-approved cover file.</span></div>
-              <div><strong>Print preflight</strong><span id="print-package-state">Locked until the exact interior and cover files pass.</span></div>
-              <div><strong>Lulu acceptance</strong><span id="lulu-gate-state">Recorded only after Lulu accepts the submitted files.</span></div>
-            </section>
-
-            <section class="production-section">
-              <div class="admin-panel-heading"><div><p class="eyebrow">Release pipeline</p><h2>What is ready—and what is next</h2></div><small id="production-hub-updated"></small></div>
-              <div class="release-pipeline" id="release-pipeline"></div>
-            </section>
-
-            <div class="production-hub-grid">
-              <section class="production-section">
-                <div class="admin-panel-heading"><div><p class="eyebrow">Products</p><h2>Book formats</h2></div></div>
-                <div class="format-operations">
-                  <article><span>Softcover</span><strong>$24.99</strong><small>8.5 × 8.5 in · Full color · 32 pages</small><em id="softcover-status">Cover pending</em></article>
-                  <article><span>Hardcover</span><strong>$39.99</strong><small>8.5 × 8.5 in · Full color · 32 pages</small><em id="hardcover-status">Cover pending</em></article>
-                </div>
-              </section>
-              <section class="production-section">
-                <div class="admin-panel-heading"><div><p class="eyebrow">Fulfillment</p><h2>Active workload</h2></div><button type="button" id="production-view-orders">View board</button></div>
-                <div class="production-workload">
-                  <article><strong id="workload-paid">0</strong><span>Paid</span><small>Awaiting proofing</small></article>
-                  <article><strong id="workload-proofing">0</strong><span>Proofing</span><small>Needs approval</small></article>
-                  <article><strong id="workload-printing">0</strong><span>Printing</span><small>With printer</small></article>
-                  <article><strong id="workload-shipped">0</strong><span>Shipped</span><small>In transit</small></article>
-                </div>
-              </section>
-            </div>
-
-            <section class="production-section">
-              <div class="admin-panel-heading"><div><p class="eyebrow">Preflight detail</p><h2>Print checks</h2></div><span id="production-hub-progress">0/0 complete</span></div>
-              <div class="production-checks" id="production-hub-checks"></div>
-              <div class="production-next"><strong>Next action</strong><p id="production-hub-next">Loading…</p></div>
-            </section>
-          </section>
-
           <section class="orders-admin" id="orders-admin" hidden>
             <div class="orders-toolbar">
               <div>
@@ -412,22 +354,22 @@
 
           <section class="monsters-admin" id="monsters-admin" hidden>
             <div class="monster-library-heading">
-              <div><p class="eyebrow">Private character assets</p><h2>Character identity &amp; poses</h2><p>Compare each source drawing with its selected character, then review pose coverage for the book. Missing assets stay visibly incomplete.</p></div>
+              <div><p class="eyebrow">Private gallery collection</p><h2>Uploaded drawing → storybook monster</h2><p>Review the real before-and-after pair from each upload. Nothing appears in the public gallery without the recorded family permission.</p></div>
               <div class="monster-library-controls">
-                <label class="admin-search">Find a monster<input id="monster-search" type="search" placeholder="Monster, child, customer, or story" /></label>
-                <label>Status<select id="monster-filter"><option value="all">All assets</option><option value="ready">Approved identity</option><option value="ordered">Used in an order</option><option value="draft">Needs review</option><option value="expired">Expired</option></select></label>
-                <label>Sort<select id="monster-sort"><option value="newest">Newest first</option><option value="oldest">Oldest first</option><option value="name">Monster name</option><option value="books">Most books</option></select></label>
+                <label class="admin-search">Find a transformation<input id="monster-search" type="search" placeholder="Drawing, monster, child, or customer" /></label>
+                <label>Show<select id="monster-filter"><option value="all">All transformations</option><option value="complete">Complete pairs</option><option value="approved">Gallery approved</option><option value="incomplete">Missing artwork</option></select></label>
+                <label>Sort<select id="monster-sort"><option value="newest">Newest first</option><option value="oldest">Oldest first</option><option value="name">Monster name</option></select></label>
               </div>
             </div>
             <div class="monster-library-summary" aria-label="Monster library summary">
-              <article><span>Saved monsters</span><strong id="monster-metric-total">0</strong></article>
-              <article><span>Ready to reuse</span><strong id="monster-metric-ready">0</strong></article>
-              <article><span>Connected books</span><strong id="monster-metric-books">0</strong></article>
+              <article><span>Saved pairs</span><strong id="monster-metric-total">0</strong></article>
+              <article><span>Complete pairs</span><strong id="monster-metric-ready">0</strong></article>
+              <article><span>Needs artwork</span><strong id="monster-metric-books">0</strong></article>
               <article><span>Gallery approved</span><strong id="monster-metric-gallery">0</strong></article>
             </div>
-            <div class="monster-library-note"><strong>Private by default</strong><span>Saving a monster here does not publish it. Gallery permission is tracked separately.</span></div>
+            <div class="monster-library-note"><strong>Permission-aware collection</strong><span>Every saved pair stays private by default. The permission note on each card shows whether the finished monster, original drawing, or neither may be featured.</span></div>
             <div id="monster-library" class="monster-library"></div>
-            <div class="orders-empty" id="monsters-empty"><strong>No saved monsters yet</strong><p>Uploaded drawings will appear here after they are saved.</p></div>
+            <div class="orders-empty" id="monsters-empty"><strong>No transformations yet</strong><p>An uploaded drawing appears here beside its generated monster after the upload is saved.</p></div>
             <p id="monsters-status" role="status"></p>
           </section>
         </div>
@@ -437,6 +379,6 @@
     <dialog id="artwork-overview" class="artwork-overview"><div class="artwork-overview-shell"><header><div><p class="eyebrow">Visual production</p><h2>Artwork overview</h2><p id="artwork-overview-summary">Review all 32 pages at a glance.</p></div><button class="button secondary" id="close-artwork-overview" type="button">Close</button></header><nav class="artwork-filters" aria-label="Filter artwork"><button class="is-active" type="button" data-artwork-filter="all">All</button><button type="button" data-artwork-filter="missing">Missing</button><button type="button" data-artwork-filter="draft">Draft</button><button type="button" data-artwork-filter="approved">Approved</button><button type="button" data-artwork-filter="final">Final</button></nav><div id="artwork-overview-grid" class="artwork-overview-grid"></div></div></dialog>
     <dialog id="story-review" class="story-review"><div class="story-review-shell"><header><div><p class="eyebrow">Artwork master review</p><h2 id="story-review-title">Review book</h2><p id="story-review-summary">Check every spread before approving the story and individual backgrounds.</p></div><button class="button secondary" id="close-story-review" type="button">Return to editor</button></header><div class="story-review-toolbar"><div class="sample-fields"><label>Child<input id="review-child" value="Alex" maxlength="40" /></label><label>Monster<input id="review-monster" value="Milo" maxlength="40" /></label></div><nav id="story-review-spread-nav" aria-label="Book spreads"></nav></div><div class="story-review-body"><main><div class="story-review-progress"><button class="button secondary" id="review-previous" type="button">← Previous</button><strong id="review-spread-label">Spread 1</strong><button class="button secondary" id="review-next" type="button">Next →</button></div><article id="story-review-spread" class="review-spread"></article></main><aside><div class="review-readiness"><strong id="review-readiness-title">Checking book…</strong><span id="review-readiness-count"></span></div><p class="story-review-scope">This approves the saved story and page backgrounds only. It does not approve a review PDF or a personalized print file.</p><ul id="story-review-issues"></ul><button class="button primary" id="approve-master-story" type="button">Approve artwork master</button><p id="story-review-status" role="status"></p></aside></div></div></dialog>
     <dialog id="order-detail" class="order-detail"><form id="order-detail-form"><div class="admin-panel-heading"><div><p class="eyebrow">Fulfillment record</p><h2>Order details</h2></div><button type="button" id="close-order-detail" class="button secondary">Close</button></div><div class="order-detail-summary"><p id="order-detail-id"></p><span id="order-detail-age"></span></div><section class="order-next-action" aria-live="polite"><span>Next required action</span><strong id="order-next-action">Review this order</strong><small id="order-next-help"></small></section><ol class="order-progress" id="order-progress" aria-label="Order progress"></ol><dl id="order-detail-fields"></dl><section class="order-artwork-panel" id="order-artwork-panel" hidden><div><p class="eyebrow">Customer artwork</p><h3>Saved monster files</h3></div><div class="order-artwork-grid" id="order-artwork-grid"></div></section><section class="proof-approval-panel"><div><p class="eyebrow">Required production gate</p><h3>Customer proof and print handoff</h3><p id="proof-approval-state">This order has not been approved for printing.</p></div><div class="customer-proof-upload" id="customer-proof-upload"><label>Exact customer proof PDF<input id="customer-proof-file" type="file" accept="application/pdf,.pdf" /></label><button class="button secondary" id="publish-customer-proof" type="button">Publish proof for customer</button><button class="button secondary" id="copy-customer-proof-link" type="button" hidden>Copy private proof link</button></div><div class="lulu-shipping-fields" id="lulu-shipping-fields" hidden><label>Recipient name<input id="lulu-recipient-name" autocomplete="name" /></label><label>Phone<input id="lulu-phone" autocomplete="tel" /></label><label class="wide">Street address<input id="lulu-street" autocomplete="street-address" /></label><label>City<input id="lulu-city" autocomplete="address-level2" /></label><label>State / region<input id="lulu-state" autocomplete="address-level1" /></label><label>Postal code<input id="lulu-postcode" autocomplete="postal-code" /></label><label>Country code<input id="lulu-country" value="US" maxlength="2" autocomplete="country" /></label><label>Shipping level<select id="lulu-shipping-level"><option value="MAIL">Mail</option><option value="PRIORITY_MAIL">Priority mail</option><option value="GROUND">Ground</option><option value="EXPEDITED">Expedited</option><option value="EXPRESS">Express</option></select></label></div><div class="proof-approval-actions"><button class="button secondary" id="approve-order-proof" type="button">Approve proof</button><button class="button secondary" id="revoke-order-proof" type="button" hidden>Revoke approval</button><button class="button primary" id="send-order-lulu" type="button" disabled>Send to Lulu Sandbox</button></div><small id="proof-approval-help">Approval locks the exact master version, names, monster, and print-package fingerprint.</small></section><p class="order-payment-notice">A checkout record is not proof of payment. Verify payment in Stripe before advancing the order.</p><label>Operational status<select id="order-detail-status"></select></label><label>Production notes<textarea id="order-detail-notes" rows="6" maxlength="2000" placeholder="Proof review, approval details, printer updates, tracking follow-up…"></textarea></label><div class="order-detail-actions"><button class="button secondary" id="advance-order" type="button">Advance order</button><button class="button primary" id="save-order-detail" type="submit">Save changes</button></div><p id="order-detail-message" role="status"></p></form></dialog>
-    <script src="scripts/admin.js?v=20261007-lulu-cover-series-v1"></script>
+    <script src="scripts/admin.js?v=20261007-gallery-pairs-v2"></script>
   </body>
 </html>

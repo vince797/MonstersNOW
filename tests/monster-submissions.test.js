@@ -7,6 +7,7 @@ const {
   createMonsterSubmission,
   deleteAdminMonster,
   finalizeMonsterSubmission,
+  listAdminMonsters,
   startMonsterPreview,
 } = require("../lib/monster-submissions");
 
@@ -19,6 +20,55 @@ function jsonResponse(body, status = 200) {
     json: async () => body,
   };
 }
+
+test("admin gallery returns the saved upload beside its generated monster", async () => {
+  const originalFetch = global.fetch;
+  const originalUrl = process.env.SUPABASE_URL;
+  const originalKey = process.env.SUPABASE_SECRET_KEY;
+  process.env.SUPABASE_URL = "https://project.supabase.co";
+  process.env.SUPABASE_SECRET_KEY = "server-secret";
+  const submissionId = "11111111-1111-4111-8111-111111111111";
+  const previewId = "22222222-2222-4222-8222-222222222222";
+  const calls = [];
+
+  global.fetch = async (url) => {
+    calls.push(url);
+    if (url.includes("/monster_submissions?")) return jsonResponse([{
+      id: submissionId,
+      status: "ready",
+      source_filename: "rainbow-monster.webp",
+      original_path: `${submissionId}/original.webp`,
+      selected_preview_id: previewId,
+      feature_permission: { canFeatureMonster: true, canFeatureDrawing: true },
+      created_at: "2026-10-07T12:00:00.000Z",
+      updated_at: "2026-10-07T12:05:00.000Z",
+    }]);
+    if (url.includes("/monster_previews?")) return jsonResponse([{
+      id: previewId,
+      submission_id: submissionId,
+      variation_number: 1,
+      style_id: "storybook",
+      status: "complete",
+      preview_path: `${submissionId}/previews/${previewId}.webp`,
+    }]);
+    if (url.includes("/storybook_orders?")) return jsonResponse([]);
+    if (url.includes("/storage/v1/object/sign/")) return jsonResponse({ signedURL: `/object/sign/${decodeURIComponent(url.split("/sign/")[1])}?token=test` });
+    throw new Error(`Unexpected request: ${url}`);
+  };
+
+  try {
+    const gallery = await listAdminMonsters();
+    assert.equal(gallery.length, 1);
+    assert.match(gallery[0].originalUrl, /original\.webp/);
+    assert.match(gallery[0].selectedPreviewUrl, new RegExp(`${previewId}\\.webp`));
+    assert.equal(gallery[0].sourceFilename, "rainbow-monster.webp");
+    assert.ok(calls.find((url) => url.includes("/monster_submissions?")).includes("original_path"));
+  } finally {
+    global.fetch = originalFetch;
+    process.env.SUPABASE_URL = originalUrl;
+    process.env.SUPABASE_SECRET_KEY = originalKey;
+  }
+});
 
 test("monster submission is recorded before its private original is uploaded", async () => {
   const originalFetch = global.fetch;

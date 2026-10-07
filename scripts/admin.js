@@ -18,7 +18,6 @@ const loginStatus = document.querySelector("#admin-login-status");
 const adminApp = document.querySelector("#admin-app");
 const dashboard = document.querySelector("#admin-dashboard");
 const admin = document.querySelector("#story-admin");
-const productionAdmin = document.querySelector("#production-admin");
 const ordersAdmin = document.querySelector("#orders-admin");
 const customersAdmin = document.querySelector("#customers-admin");
 const monstersAdmin = document.querySelector("#monsters-admin");
@@ -50,7 +49,6 @@ let orderQuickFilter = "all";
 let selectedPageIndex = 0;
 let artworkFilter = "all";
 let productionReport = null;
-let productionStoryId = null;
 const orderStatuses = ["checkout_started", "paid", "proofing", "approved", "printing", "shipped", "completed", "cancelled"];
 const orderDialog = document.querySelector("#order-detail");
 const artworkDialog = document.querySelector("#artwork-overview");
@@ -122,12 +120,7 @@ document.querySelector("#setup-catalog").addEventListener("click", () => setupCa
 document.querySelector("#dashboard-new-story").addEventListener("click", () => { showView("stories"); editStory(); });
 document.querySelector("#rail-new-story").addEventListener("click", () => { showView("stories"); editStory(); });
 document.querySelector("#halloween-story").addEventListener("click", () => { showView("stories"); editStory({ title_template: "{child_name} and {monster_name}'s Halloween Adventure", slug: "halloween-adventure", description: "A playful Halloween quest filled with costumes, pumpkins, and friendly surprises.", is_seasonal: true, available_from: "2026-09-15", available_until: "2026-10-31", pages: [] }); });
-document.querySelector("#production-open-book").addEventListener("click", openProductionBook);
-document.querySelector("#production-open-orders").addEventListener("click", () => showView("orders"));
-document.querySelector("#production-view-orders").addEventListener("click", () => showView("orders"));
 document.querySelector("#download-story-proof").addEventListener("click", downloadCurrentStoryProof);
-document.querySelector("#production-download-proof").addEventListener("click", downloadProductionStoryProof);
-document.querySelector("#open-story-production").addEventListener("click", openCurrentStoryProduction);
 
 async function loadProductionReadiness() {
   const overall = document.querySelector("#production-overall");
@@ -148,12 +141,10 @@ async function loadProductionReadiness() {
       item.innerHTML = `<span aria-hidden="true">${check.status === "pass" ? "✓" : "!"}</span><div><strong>${escapeHtml(check.label)}</strong><small>${escapeHtml(check.detail)}</small></div>`;
       return item;
     }));
-    renderProductionHub();
   } catch (error) {
     overall.textContent = "Unavailable";
     overall.className = "production-overall is-blocked";
     checks.innerHTML = `<p class="admin-inline-empty">${escapeHtml(error.message)}</p>`;
-    renderProductionHub(error);
   }
 }
 
@@ -254,7 +245,6 @@ async function openLibrary() {
     renderCustomers();
     renderMonsters();
     renderMasterMonsters();
-    renderProductionHub();
     showView("dashboard");
   } catch (error) {
     sessionStorage.removeItem("monstersnow_admin_password");
@@ -286,7 +276,6 @@ function formatAdminLoginError(error) {
 function showView(view) {
   dashboard.hidden = view !== "dashboard";
   admin.hidden = view !== "stories";
-  productionAdmin.hidden = view !== "production";
   ordersAdmin.hidden = view !== "orders";
   customersAdmin.hidden = view !== "customers";
   monstersAdmin.hidden = view !== "monsters";
@@ -295,8 +284,7 @@ function showView(view) {
     dashboard: ["Overview", "A clear view of the work that needs you."],
     orders: ["Orders", "Move every book from payment to delivery."],
     stories: ["Master Books", "Review character-free backgrounds and editable story text by revision."],
-    production: ["Print checks", "Keep master review, customer proof, preflight, and printer acceptance separate."],
-    monsters: ["Character Assets", "Review identity, source drawings, pose coverage, and permissions."],
+    monsters: ["Gallery Collection", "Review each uploaded drawing beside its storybook transformation and gallery permission."],
     masters: ["Master Monsters", "See the exact still references that define the active generation look."],
     customers: ["Customers", "See families, books, and order history together."],
   };
@@ -306,7 +294,6 @@ function showView(view) {
   document.title = `${title} | MonstersNOW Admin`;
   document.querySelectorAll("[data-admin-view]").forEach((button) => button.classList.toggle("is-active", button.dataset.adminView === view));
   if (view === "stories" && editor.hidden && stories[0]) editStory(stories[0]);
-  if (view === "production") renderProductionHub();
   if (view === "masters") renderMasterMonsters();
 }
 
@@ -434,8 +421,7 @@ function renderAdminCommand() {
     { type: "Go to", title: "Orders", detail: "Fulfillment queue", keywords: "orders fulfillment", run: () => showView("orders") },
     { type: "Go to", title: "Master Books", detail: "Backgrounds and editable story text", keywords: "stories books", run: () => showView("stories") },
     { type: "Go to", title: "Master Monsters", detail: "Active generation references", keywords: "master monsters animation style references", run: () => showView("masters") },
-    { type: "Go to", title: "Character Assets", detail: "Identity and pose review", keywords: "monsters artwork character", run: () => showView("monsters") },
-    { type: "Go to", title: "Print checks", detail: "Preflight and printer readiness", keywords: "production print review", run: () => showView("production") },
+    { type: "Go to", title: "Gallery Collection", detail: "Uploaded drawing and monster pairs", keywords: "gallery monsters before after drawing artwork character", run: () => showView("monsters") },
     ...stories.map((story) => ({
       type: "Book",
       title: story.title_template,
@@ -519,7 +505,6 @@ function renderDashboard() {
   document.querySelector("#nav-order-count").textContent = orders.length;
   document.querySelector("#nav-monster-count").textContent = monsters.length;
   document.querySelector("#nav-customer-count").textContent = new Set(orders.map((order) => order.customer_email?.toLowerCase()).filter(Boolean)).size;
-  document.querySelector("#nav-production-count").textContent = productionReport?.checks?.filter((check) => check.status !== "pass").length || 0;
   const recent = document.querySelector("#recent-stories");
   if (!stories.length) {
     recent.innerHTML = '<div class="admin-inline-empty"><strong>No stories yet</strong><span>Create the Halloween story to get started.</span></div>';
@@ -540,27 +525,6 @@ function renderDashboard() {
   renderAttentionList();
 }
 
-function openProductionBook() {
-  const story = stories.find((item) => item.id === productionStoryId) || stories.find((item) => item.is_seasonal) || stories[0];
-  if (story) editStory(story);
-  else editStory({ title_template: "{child_name} and {monster_name}'s Halloween Monster Night", slug: "halloween-monster-night", description: "A friendly Halloween adventure.", is_seasonal: true, available_from: "2026-09-15", available_until: "2026-10-31", pages: [] });
-  showView("stories");
-}
-
-function openCurrentStoryProduction() {
-  const story = currentStory();
-  if (!story) {
-    editorStatus.textContent = "Save this master book before opening Production.";
-    return;
-  }
-  if (storyDirty) {
-    editorStatus.textContent = "Save your changes before opening Production so the proof matches the editor.";
-    return;
-  }
-  productionStoryId = story.id;
-  showView("production");
-}
-
 function currentStory() {
   const id = document.querySelector("#story-id").value;
   return stories.find((story) => story.id === id) || null;
@@ -573,15 +537,10 @@ async function downloadCurrentStoryProof() {
   await downloadStoryProof(story, editorStatus);
 }
 
-async function downloadProductionStoryProof() {
-  const story = stories.find((item) => item.id === productionStoryId) || stories.find((item) => item.is_seasonal) || stories[0];
-  if (story) await downloadStoryProof(story, document.querySelector("#production-hub-next"));
-}
-
 async function downloadStoryProof(story, status) {
   const childName = document.querySelector("#sample-child")?.value || "Alex";
   const monsterName = document.querySelector("#sample-monster")?.value || "Milo";
-  const button = document.querySelector("#story-id").value === story.id ? document.querySelector("#download-story-proof") : document.querySelector("#production-download-proof");
+  const button = document.querySelector("#download-story-proof");
   button.disabled = true;
   status.textContent = "Building the 32-page editorial proof…";
   try {
@@ -601,84 +560,6 @@ async function downloadStoryProof(story, status) {
   } finally {
     button.disabled = false;
   }
-}
-
-function renderProductionHub(error = null) {
-  const story = stories.find((item) => item.id === productionStoryId) || stories.find((item) => item.is_seasonal) || stories[0];
-  if (story && !productionStoryId) productionStoryId = story.id;
-  const report = story?.slug === "halloween-monster-night" ? productionReport : null;
-  const status = document.querySelector("#production-hub-status");
-  const checksContainer = document.querySelector("#production-hub-checks");
-  const pages = story?.pages || [];
-  const contentReady = pages.filter((page) => page.text?.trim() && page.illustrationPrompt?.trim()).length;
-  const artworkReady = pages.filter((page) => page.artworkUrl
-    && page.backgroundPlateConfirmed === true
-    && Number(page.backgroundPlateVersion || 0) >= 2
-    && ["approved", "final"].includes(page.artworkStatus)).length;
-  const reportChecks = report?.checks || [];
-  const check = (label) => reportChecks.find((item) => item.label === label);
-  const passed = (label) => check(label)?.status === "pass";
-  const coverReady = passed("Softcover package cover") && passed("Hardcover package cover");
-  const packageReady = contentReady === 32 && artworkReady === 32 && coverReady && passed("Lulu file validation");
-  const acceptedOrders = orders.filter((order) => order.lulu_print_job_id).length;
-  const customerProofs = orders.filter((order) => order.customer_proof_status === "approved"
-    || (order.proof_fingerprint && order.proof_approved_at)).length;
-  const pipeline = [
-    { title: "Master copy", detail: `${contentReady}/32 pages complete`, ready: contentReady === 32, action: "Edit book", run: openProductionBook },
-    { title: "Background art", detail: `${artworkReady}/32 character-free backgrounds approved`, ready: artworkReady === 32 && passed("Illustration dimensions") && passed("Print-art quality review"), action: "Review backgrounds", run: openProductionBook },
-    { title: "Print files", detail: coverReady ? "Interior and both covers ready" : "Interior prepared · covers pending", ready: passed("Interior pagination") && passed("Interior size and bleed") && coverReady },
-    { title: "Lulu validation", detail: passed("Lulu file validation") ? "Files accepted" : "Waiting on final files", ready: passed("Lulu file validation") },
-    { title: "Fulfillment", detail: `${orders.filter((order) => !["completed", "cancelled"].includes(order.status)).length} active orders`, ready: true, action: "View orders", run: () => showView("orders") },
-  ];
-
-  document.querySelector("#production-book-title").textContent = story?.title_template || "Select a master book";
-  document.querySelector("#production-book-summary").textContent = story?.description || "Complete the master story before preparing print files.";
-  document.querySelector("#master-art-gate-state").textContent = `${artworkReady}/32 backgrounds approved for master v${story?.version || 1}.`;
-  document.querySelector("#editorial-proof-state").textContent = customerProofs
-    ? `${customerProofs} customer proof${customerProofs === 1 ? "" : "s"} approved for exact order revisions.`
-    : "No customer proof approval recorded; this gate is order-specific.";
-  document.querySelector("#cover-preview-gate-state").textContent = CATALOG_COVERS[story?.slug]
-    ? "Catalog preview available; printer-cover approval remains separate."
-    : "No catalog cover preview assigned.";
-  document.querySelector("#print-package-state").textContent = packageReady ? "Exact interior and cover files passed preflight." : `${contentReady}/32 pages complete · ${artworkReady}/32 backgrounds approved.`;
-  document.querySelector("#lulu-gate-state").textContent = acceptedOrders
-    ? `${acceptedOrders} order${acceptedOrders === 1 ? "" : "s"} accepted by Lulu.`
-    : packageReady ? "Preflight passed; no Lulu acceptance is recorded yet." : "No Lulu acceptance recorded; preflight must pass first.";
-  document.querySelector("#production-gate").classList.toggle("is-ready", packageReady);
-
-  status.textContent = error ? "Unavailable" : report?.status === "ready" ? "Preflight passed" : "Action needed";
-  status.className = `production-overall ${report?.status === "ready" ? "is-ready" : "is-blocked"}`;
-  document.querySelector("#production-hub-updated").textContent = report?.updated ? `Preflight updated ${report.updated}` : "Waiting for preflight data";
-  document.querySelector("#production-hub-next").textContent = report?.next_action || error?.message || "Complete the master book and run preflight.";
-  document.querySelector("#production-hub-progress").textContent = `${reportChecks.filter((item) => item.status === "pass").length}/${reportChecks.length} complete`;
-  document.querySelector("#nav-production-count").textContent = reportChecks.filter((item) => item.status !== "pass").length;
-  document.querySelector("#softcover-status").textContent = passed("Softcover package cover") ? "Cover ready" : "Cover pending";
-  document.querySelector("#hardcover-status").textContent = passed("Hardcover package cover") ? "Cover ready" : "Cover pending";
-
-  document.querySelector("#release-pipeline").replaceChildren(...pipeline.map((stage, index) => {
-    const article = document.createElement("article");
-    article.className = stage.ready ? "is-ready" : "needs-work";
-    article.innerHTML = `<span>${stage.ready ? "✓" : index + 1}</span><div><strong></strong><small></small></div>`;
-    article.querySelector("strong").textContent = stage.title;
-    article.querySelector("small").textContent = stage.detail;
-    if (stage.action) {
-      const button = document.createElement("button");
-      button.type = "button"; button.textContent = `${stage.action} →`; button.addEventListener("click", stage.run); article.append(button);
-    }
-    return article;
-  }));
-  checksContainer.replaceChildren(...reportChecks.map((item) => {
-    const article = document.createElement("article");
-    article.className = `production-check is-${item.status}`;
-    article.innerHTML = `<span aria-hidden="true">${item.status === "pass" ? "✓" : "!"}</span><div><strong></strong><small></small></div>`;
-    article.querySelector("strong").textContent = item.label;
-    article.querySelector("small").textContent = item.detail;
-    return article;
-  }));
-  if (!reportChecks.length) checksContainer.innerHTML = '<div class="admin-inline-empty"><strong>Preflight data unavailable</strong><span>Run the production preflight to refresh this section.</span></div>';
-  ["paid", "proofing", "printing", "shipped"].forEach((orderStatus) => {
-    document.querySelector(`#workload-${orderStatus}`).textContent = orders.filter((order) => order.status === orderStatus).length;
-  });
 }
 
 function renderAttentionList() {
@@ -844,7 +725,12 @@ function renderMonsters() {
   const filter = document.querySelector("#monster-filter").value;
   const sort = document.querySelector("#monster-sort").value;
   const visible = monsters.filter((monster) => {
-    const matchesStatus = filter === "all" || monster.status === filter;
+    const hasPair = Boolean(monster.originalUrl && monster.selectedPreviewUrl);
+    const galleryApproved = Boolean(monster.featurePermission?.canFeatureMonster);
+    const matchesStatus = filter === "all"
+      || (filter === "complete" && hasPair)
+      || (filter === "approved" && hasPair && galleryApproved)
+      || (filter === "incomplete" && !hasPair);
     const searchable = [monster.monsterName, monster.childName, monster.customerEmail, monster.storyId, monster.sourceFilename]
       .filter(Boolean).join(" ").toLowerCase();
     return matchesStatus && searchable.includes(query);
@@ -852,22 +738,21 @@ function renderMonsters() {
   const library = document.querySelector("#monster-library");
   const emptyState = document.querySelector("#monsters-empty");
   emptyState.hidden = visible.length > 0;
-  emptyState.querySelector("strong").textContent = monsters.length ? "No monsters match these filters" : "No saved monsters yet";
-  emptyState.querySelector("p").textContent = monsters.length ? "Try another search term or choose All monsters." : "Uploaded drawings will appear here after they are saved.";
+  emptyState.querySelector("strong").textContent = monsters.length ? "No transformations match these filters" : "No transformations yet";
+  emptyState.querySelector("p").textContent = monsters.length ? "Try another search term or show all transformations." : "An uploaded drawing appears here beside its generated monster after the upload is saved.";
   document.querySelector("#monsters-status").textContent = visible.length
-    ? `Showing ${visible.length} of ${monsters.length} saved monster${monsters.length === 1 ? "" : "s"}.`
+    ? `Showing ${visible.length} of ${monsters.length} saved transformation${monsters.length === 1 ? "" : "s"}.`
     : "";
   document.querySelector("#monster-metric-total").textContent = monsters.length;
-  document.querySelector("#monster-metric-ready").textContent = monsters.filter((monster) => monster.selectedPreviewUrl).length;
-  document.querySelector("#monster-metric-books").textContent = monsters.reduce((total, monster) => total + (monster.orders?.length || 0), 0);
-  document.querySelector("#monster-metric-gallery").textContent = monsters.filter((monster) => monster.featurePermission?.canFeatureMonster).length;
+  document.querySelector("#monster-metric-ready").textContent = monsters.filter((monster) => monster.originalUrl && monster.selectedPreviewUrl).length;
+  document.querySelector("#monster-metric-books").textContent = monsters.filter((monster) => !monster.originalUrl || !monster.selectedPreviewUrl).length;
+  document.querySelector("#monster-metric-gallery").textContent = monsters.filter((monster) => monster.originalUrl && monster.selectedPreviewUrl && monster.featurePermission?.canFeatureMonster).length;
   library.replaceChildren(...visible.map(buildMonsterCard));
 }
 
 function monsterSort(left, right, sort) {
   if (sort === "oldest") return new Date(left.createdAt) - new Date(right.createdAt);
   if (sort === "name") return (left.monsterName || "Unnamed monster").localeCompare(right.monsterName || "Unnamed monster");
-  if (sort === "books") return (right.orders?.length || 0) - (left.orders?.length || 0) || new Date(right.updatedAt) - new Date(left.updatedAt);
   return new Date(right.updatedAt || right.createdAt) - new Date(left.updatedAt || left.createdAt);
 }
 
@@ -875,18 +760,20 @@ function buildMonsterCard(monster) {
   const article = document.createElement("article");
   const canFeature = Boolean(monster.featurePermission?.canFeatureMonster);
   const canFeatureDrawing = Boolean(monster.featurePermission?.canFeatureDrawing);
+  const hasOriginal = Boolean(monster.originalUrl);
+  const hasPreview = Boolean(monster.selectedPreviewUrl);
+  const hasPair = hasOriginal && hasPreview;
   const latestOrder = monster.orders?.[0];
   article.className = "monster-library-card";
-  article.innerHTML = '<div class="monster-library-images"><figure data-original><div class="monster-image-empty">No drawing</div><figcaption>Original drawing</figcaption></figure><span class="monster-transform-arrow" aria-hidden="true">→<small>transformed</small></span><figure data-preview><div class="monster-image-empty">No generated preview</div><figcaption>Storybook monster</figcaption></figure></div><div class="monster-library-info"><header><div><p class="eyebrow">Saved character</p><h3></h3></div><span data-status></span></header><dl><div><dt>Child</dt><dd data-child></dd></div><div><dt>Customer</dt><dd data-customer></dd></div><div><dt>Story</dt><dd data-story></dd></div><div><dt>Books</dt><dd data-orders></dd></div></dl><div class="monster-permission"></div><div class="monster-pose-production"></div><div class="monster-library-actions"></div><small data-updated></small></div>';
+  article.innerHTML = '<div class="monster-library-images"><figure data-original><div class="monster-image-empty">Original drawing unavailable</div><figcaption>Before · Uploaded drawing</figcaption></figure><span class="monster-transform-arrow" aria-hidden="true">→<small>becomes</small></span><figure data-preview><div class="monster-image-empty">Generated monster unavailable</div><figcaption>After · Storybook monster</figcaption></figure></div><div class="monster-library-info"><header><div><p class="eyebrow">Gallery transformation</p><h3></h3></div><span data-status></span></header><dl><div><dt>Uploaded file</dt><dd data-source></dd></div><div><dt>Child</dt><dd data-child></dd></div><div><dt>Customer</dt><dd data-customer></dd></div><div><dt>Story</dt><dd data-story></dd></div></dl><div class="monster-permission"></div><details class="monster-production-details"><summary><span>Book production assets</span><small>Poses and page coverage</small></summary><div class="monster-pose-production"></div></details><div class="monster-library-actions"></div><small data-updated></small></div>';
   article.querySelector("h3").textContent = monster.monsterName || "Unnamed monster";
-  article.querySelector("[data-status]").textContent = monsterStatusLabel(monster.status);
-  article.querySelector("[data-status]").className = `monster-library-status is-${monster.status || "draft"}`;
+  article.querySelector("[data-status]").textContent = hasPair ? "Complete pair" : hasOriginal ? "Preview missing" : hasPreview ? "Drawing missing" : "Artwork missing";
+  article.querySelector("[data-status]").className = `monster-library-status is-${hasPair ? "ready" : "draft"}`;
+  article.querySelector("[data-source]").textContent = monster.sourceFilename || "Not recorded";
   article.querySelector("[data-child]").textContent = monster.childName || "Not provided";
   article.querySelector("[data-customer]").textContent = monster.customerEmail || "Not provided";
   article.querySelector("[data-story]").textContent = storyLabel(monster.storyId);
-  article.querySelector("[data-orders]").textContent = `${monster.orders?.length || 0} connected`;
-  article.querySelector("[data-preview] figcaption").textContent = monster.hasSelectedPreview ? "Selected monster" : "Latest generated preview";
-  article.querySelector("[data-updated]").textContent = `Saved ${relativeAge(monster.updatedAt || monster.createdAt)} · ${monster.previewCount || 0} generated version${monster.previewCount === 1 ? "" : "s"}`;
+  article.querySelector("[data-updated]").textContent = `Saved ${relativeAge(monster.updatedAt || monster.createdAt)} · ${monster.previewCount || 0} generated version${monster.previewCount === 1 ? "" : "s"} · ${monster.orders?.length || 0} connected book${monster.orders?.length === 1 ? "" : "s"}`;
   setMonsterImage(article.querySelector("[data-original]"), monster.originalUrl, `${monster.monsterName || "Monster"} original drawing`);
   setMonsterImage(article.querySelector("[data-preview]"), monster.selectedPreviewUrl, `${monster.monsterName || "Monster"} approved storybook character`);
   const permission = article.querySelector(".monster-permission");
@@ -2403,7 +2290,7 @@ async function approveSelectedOrderProof() {
     renderProofApproval(selectedOrder);
     renderOrderProgress(selectedOrder);
     renderOrderNextAction(selectedOrder);
-    renderOrders(); renderDashboard(); renderProductionHub();
+    renderOrders(); renderDashboard();
     message.textContent = "Proof approved and locked. Lulu submission remains a separate action.";
   } catch (error) { message.textContent = error.message; }
   finally { button.disabled = false; }
@@ -2442,7 +2329,7 @@ async function sendSelectedOrderToLulu() {
     renderProofApproval(selectedOrder);
     renderOrderProgress(selectedOrder);
     renderOrderNextAction(selectedOrder);
-    renderOrders(); renderDashboard(); renderProductionHub();
+    renderOrders(); renderDashboard();
     message.textContent = `Sent to Lulu Sandbox. Print job ${selectedOrder.lulu_print_job_id} is now tracked on this order.`;
   } catch (error) { message.textContent = error.message; }
   finally { button.textContent = "Send to Lulu Sandbox"; renderProofApproval(selectedOrder); }
@@ -2459,7 +2346,7 @@ async function revokeSelectedOrderProof() {
     renderProofApproval(selectedOrder);
     renderOrderProgress(selectedOrder);
     renderOrderNextAction(selectedOrder);
-    renderOrders(); renderDashboard(); renderProductionHub();
+    renderOrders(); renderDashboard();
     message.textContent = "Approval revoked. Review and approve a new proof before printing.";
   } catch (error) { message.textContent = error.message; }
 }
@@ -2533,7 +2420,7 @@ async function advanceSelectedOrder() {
     renderOrderProgress(selectedOrder);
     renderProofApproval(selectedOrder);
     renderOrderNextAction(selectedOrder);
-    renderOrders(); renderDashboard(); renderProductionHub();
+    renderOrders(); renderDashboard();
     message.textContent = `Order advanced to ${next.replaceAll("_", " ")}.`;
   } catch (error) { message.textContent = error.message; }
   finally { button.disabled = false; }
@@ -2565,7 +2452,6 @@ async function saveOrderDetail(event) {
     renderOrders();
     renderDashboard();
     renderCustomers();
-    renderProductionHub();
     renderOrderProgress(order);
     renderProofApproval(order);
     renderOrderNextAction(order);

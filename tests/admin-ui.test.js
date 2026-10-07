@@ -12,7 +12,7 @@ const adminBooksStyles = fs.readFileSync(path.join(root, "admin-books.css"), "ut
 const poseJobs = fs.readFileSync(path.join(root, "lib/storybook-pose-jobs.js"), "utf8");
 
 test("admin workspace and homepage collection use the readable system typeface", () => {
-  assert.match(adminMarkup, /styles\.css\?v=20261007-halloween-art-v2/);
+  assert.match(adminMarkup, /styles\.css\?v=20261007-gallery-pairs-v1/);
   assert.match(styles, /--admin-ui-font: Inter, ui-sans-serif, system-ui/);
   assert.match(styles, /\.admin-page strong \{[\s\S]*font-family: var\(--admin-ui-font\)/);
   assert.doesNotMatch(styles, /Admin Fredoka/);
@@ -34,10 +34,10 @@ test("admin sign-in does not blame the device for a server credential timestamp 
 
 test("admin book workspace groups status, review files, and the next action", () => {
   assert.match(adminMarkup, /admin-books\.css\?v=20261007-master-monsters-v1/);
-  assert.match(adminMarkup, /scripts\/admin\.js\?v=20261007-lulu-cover-series-v1/);
+  assert.match(adminMarkup, /scripts\/admin\.js\?v=20261007-gallery-pairs-v2/);
   assert.match(adminMarkup, />Orders/);
   assert.match(adminMarkup, /Master Books/);
-  assert.match(adminMarkup, /Character Assets/);
+  assert.match(adminMarkup, /Gallery Collection/);
   assert.match(adminMarkup, /Master background review/);
   assert.match(adminMarkup, /Personalized customer proof/);
   assert.match(adminMarkup, /Cover preview/);
@@ -67,6 +67,17 @@ test("admin book workspace groups status, review files, and the next action", ()
   assert.match(styles, /\.page-artwork-visual\.is-empty \.monster-zone/);
   assert.doesNotMatch(styles, /\.monster-zone::before|\.monster-zone::after/);
   assert.doesNotMatch(adminScript, /Delete review PDF|Replace review PDF/);
+});
+
+test("admin no longer exposes the unrelated Print Checks workspace", () => {
+  assert.doesNotMatch(adminMarkup, /data-admin-view="production"/);
+  assert.doesNotMatch(adminMarkup, /id="production-admin"/);
+  assert.doesNotMatch(adminMarkup, /id="open-story-production"/);
+  assert.doesNotMatch(adminScript, /showView\("production"\)/);
+  assert.doesNotMatch(adminScript, /title: "Print checks"/);
+  assert.match(adminMarkup, /id="download-story-proof"/);
+  assert.match(adminMarkup, /id="approve-order-proof"/);
+  assert.match(adminMarkup, /id="send-order-lulu"/);
 });
 
 test("admin pose production stays dormant until its database migration is available", () => {
