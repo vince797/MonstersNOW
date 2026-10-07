@@ -5257,15 +5257,42 @@ main > section {
 .monster-pose-production { display: grid; gap: 9px; padding: 12px; border: 1px solid #dbe7eb; border-radius: 10px; background: #f8fbfc; }
 .monster-pose-production > div { display: grid; gap: 3px; }
 .monster-pose-production > div span, .monster-pose-production summary small, .monster-pose-production [data-source] { color: #65758b; font-size: .72rem; line-height: 1.4; }
+.monster-pose-kicker { color: #00727a !important; font-size: .58rem !important; font-weight: 950; letter-spacing: .07em; text-transform: uppercase; }
+.monster-pose-empty { gap: 7px !important; }
+.monster-pose-empty > strong { color: var(--navy); font-size: .88rem; }
+.monster-pose-empty-summary { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 3px; }
+.monster-pose-empty-summary span { padding: 5px 7px; border: 1px solid #dce8eb; border-radius: 999px; background: #fff; font-size: .61rem !important; font-weight: 750; }
 .monster-pose-production details { min-width: 0; }
 .monster-pose-production summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer; list-style: none; }
 .monster-pose-production summary::-webkit-details-marker { display: none; }
 .monster-pose-production summary span { display: grid; gap: 2px; }
 .monster-pose-production summary em { color: #08727a; font-size: .68rem; font-style: normal; font-weight: 850; text-align: right; }
 .monster-pose-body { display: grid; gap: 10px; padding-top: 12px; }
+.monster-pose-stages { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 5px; }
+.monster-pose-stages span { display: flex; gap: 5px; align-items: center; min-width: 0; padding: 6px; border: 1px solid #dbe6e9; border-radius: 8px; color: #667783; background: #fff; font-size: .58rem; font-weight: 850; }
+.monster-pose-stages i { display: grid; flex: 0 0 auto; width: 18px; height: 18px; place-items: center; border-radius: 50%; color: #61737e; background: #e7eef0; font-size: .55rem; font-style: normal; }
+.monster-pose-stages span.is-active { border-color: #f1b276; color: #7d4314; background: #fff7ee; }
+.monster-pose-stages span.is-active i { color: #fff; background: #f58220; }
+.monster-pose-stages span.is-complete { border-color: #9dd4ca; color: #086a56; background: #ebf8f4; }
+.monster-pose-stages span.is-complete i { color: #fff; background: #008875; }
+.monster-pose-identity { display: grid; grid-template-columns: 62px minmax(0,1fr); gap: 10px; align-items: center; padding: 9px; border: 1px solid #c9e5e2; border-radius: 11px; background: linear-gradient(135deg,#effaf7,#f8fcfc); }
+.monster-pose-identity[hidden] { display: none; }
+.monster-pose-identity figure { display: grid; width: 62px; height: 68px; margin: 0; place-items: center; overflow: hidden; border: 1px solid #d3e4e7; border-radius: 9px; color: #627581; background: #fff; font-size: .59rem; font-weight: 850; }
+.monster-pose-identity figure img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 8%; }
+.monster-pose-identity > div { display: grid; gap: 2px; min-width: 0; }
+.monster-pose-identity strong { color: var(--navy); font-size: .8rem; }
+.monster-pose-identity small { color: #576a76; font-size: .64rem; }
+.monster-pose-identity em { color: #08725f; font-size: .59rem; font-style: normal; font-weight: 800; }
 .monster-pose-meter { height: 6px; overflow: hidden; border-radius: 999px; background: #dce8eb; }
 .monster-pose-meter span { display: block; height: 100%; border-radius: inherit; background: var(--teal); }
-.monster-pose-assets { display: grid; max-height: 310px; overflow: auto; border-block: 1px solid #dce6ed; }
+.monster-pose-assets { display: grid; gap: 8px; }
+.monster-pose-group { overflow: hidden; border: 1px solid #dce6ed; border-radius: 10px; background: #fff; }
+.monster-pose-group > header { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 7px 9px; border-bottom: 1px solid #e3ebee; background: #f5f9fa; }
+.monster-pose-group > header div { display: grid; gap: 1px; }
+.monster-pose-group > header span { color: #00727a; font-size: .5rem; font-weight: 950; letter-spacing: .07em; text-transform: uppercase; }
+.monster-pose-group > header strong { color: var(--navy); font-size: .7rem; }
+.monster-pose-group > header em { padding: 4px 6px; border-radius: 999px; color: #526773; background: #fff; font-size: .54rem; font-style: normal; font-weight: 850; }
+.monster-pose-group > div { padding-inline: 9px; }
 .monster-pose-asset { display: grid; grid-template-columns: 42px minmax(0, 1fr) auto; align-items: center; gap: 9px; padding: 8px 0; border-bottom: 1px solid #e5ecef; }
 .monster-pose-asset:last-child { border-bottom: 0; }
 .monster-pose-thumb { display: grid; width: 42px; height: 42px; place-items: center; overflow: hidden; border-radius: 8px; color: #607386; background: #e8eff2; font-size: .58rem; font-weight: 850; }
@@ -5275,6 +5302,7 @@ main > section {
 .monster-pose-asset > div:nth-child(2) small { overflow: hidden; color: #65758b; font-size: .63rem; text-overflow: ellipsis; white-space: nowrap; }
 .monster-pose-asset-actions, .monster-pose-review-actions { display: flex; flex-wrap: wrap; gap: 6px; }
 .monster-pose-asset-actions .button, .monster-pose-review-actions .button { padding: 7px 8px; font-size: .66rem; }
+.monster-pose-generation-note { margin: 0; padding: 8px 10px; border: 1px solid #f3d1ae; border-radius: 9px; color: #7a481c; background: #fff8f0; font-size: .65rem; line-height: 1.4; }
 .monster-pose-blockers { display: grid; gap: 4px; margin: 0; padding-left: 18px; color: #8c4a16; font-size: .68rem; line-height: 1.35; }
 .monster-library-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .monster-library-actions .button { padding: 9px 11px; font-size: .75rem; }
@@ -5307,7 +5335,7 @@ main > section {
 @media (max-width: 1100px) { .monster-library { grid-template-columns: 1fr; } }
 @media (max-width: 900px) { .monster-library-heading, .monster-library-controls { align-items: stretch; flex-direction: column; } .monster-library-controls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); } .monster-library-controls .admin-search { grid-column: 1 / -1; width: 100%; max-width: none; } .monster-library-controls select { width: 100%; } .monster-library-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 760px) { .monster-library-note { align-items: stretch; flex-direction: column; } }
-@media (max-width: 520px) { .monster-library-summary { grid-template-columns: 1fr 1fr; } .monster-library-summary article { align-items: flex-start; flex-direction: column; } .monster-library-images { grid-template-columns: minmax(0, 1fr) 20px minmax(0, 1fr); padding: 9px; } .monster-library-images > span { font-size: 1rem; } .monster-transform-arrow small { display: none; } .monster-library-images figcaption { padding: 6px 4px; font-size: .56rem; } .monster-library-info dl { grid-template-columns: 1fr; } .monster-library-actions .button { min-height: 42px; } .monster-library-actions .monster-delete-button { margin-left: 0; } .monster-library-controls input, .monster-library-controls select { min-height: 42px; } .monster-pose-asset { grid-template-columns: 38px minmax(0, 1fr); } .monster-pose-asset-actions { grid-column: 1 / -1; } }
+@media (max-width: 520px) { .monster-library-summary { grid-template-columns: 1fr 1fr; } .monster-library-summary article { align-items: flex-start; flex-direction: column; } .monster-library-images { grid-template-columns: minmax(0, 1fr) 20px minmax(0, 1fr); padding: 9px; } .monster-library-images > span { font-size: 1rem; } .monster-transform-arrow small { display: none; } .monster-library-images figcaption { padding: 6px 4px; font-size: .56rem; } .monster-library-info dl { grid-template-columns: 1fr; } .monster-library-actions .button { min-height: 42px; } .monster-library-actions .monster-delete-button { margin-left: 0; } .monster-library-controls input, .monster-library-controls select { min-height: 42px; } .monster-pose-stages { grid-template-columns: 1fr 1fr; } .monster-pose-asset { grid-template-columns: 38px minmax(0, 1fr); } .monster-pose-asset-actions { grid-column: 1 / -1; } }
 @media (max-width: 680px) { .orders-board { grid-template-columns: repeat(5, 250px); } .story-readiness ul { grid-template-columns: 1fr; } .story-spread-preview section { min-height: 140px; padding: 12px; } .customer-card header, .customer-card footer { align-items: flex-start; flex-direction: column; } }
 
 /* Visual master-book workspace */

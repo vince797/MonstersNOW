@@ -11,7 +11,7 @@
     <title>Create Your Monster | MonstersNOW</title>
     <link rel="icon" href="assets/brand/monstersnow-icon-32-v1.png" type="image/png" sizes="32x32" />
     <link rel="stylesheet" href="styles.css?v=20261007-preview-reliability-v1" />
-    <link rel="stylesheet" href="child-selector.css?v=20261007-skin-tone-v2" />
+    <link rel="stylesheet" href="child-selector.css?v=20261007-child-editor-v4" />
     <link rel="stylesheet" href="storefront.css?v=20261002-public-storefront" />
     <link rel="apple-touch-icon" href="assets/brand/monstersnow-icon-180-v1.png" />
     <link rel="stylesheet" href="brand.css?v=20261004-selected-logo" />
@@ -220,7 +220,7 @@
                       <div class="child-selector-layout">
                         <div class="child-editor-controls">
                           <details class="child-editor-section child-appearance-section" open>
-                            <summary><span>Choose a story character</span><small>1. Character &nbsp; 2. Skin tone &nbsp; 3. Hairstyle</small></summary>
+                            <summary><span>Choose a story character</span><small>1. Character &nbsp; 2. Find a complete illustrated look</small></summary>
                             <div class="child-appearance-builder">
                               <label class="child-monster-only-option is-selected">
                                 <input type="radio" name="child-character" value="none" data-label="Monster only" checked />
@@ -235,34 +235,68 @@
                                   <label><input type="radio" name="child-gender" value="girl" /><span aria-hidden="true">G</span><b>Girl</b><small>Show girl characters</small></label>
                                 </div>
                               </fieldset>
-                              <fieldset class="child-skin-tone-picker" id="child-skin-tone-picker" hidden>
-                                <legend>Skin tone</legend>
-                                <p>Choose the closest illustrated tone. Only tones with complete character art are shown.</p>
-                                <div class="child-skin-tone-options" role="radiogroup" aria-label="Choose the illustrated character's skin tone">
-                                  <label data-skin-tone="light"><input type="radio" name="child-skin-tone" value="light" /><span><i style="--tone:#f2c8a8" aria-hidden="true"></i><b>Light</b></span></label>
-                                  <label data-skin-tone="golden"><input type="radio" name="child-skin-tone" value="golden" /><span><i style="--tone:#d4a071" aria-hidden="true"></i><b>Golden</b></span></label>
-                                  <label data-skin-tone="medium"><input type="radio" name="child-skin-tone" value="medium" /><span><i style="--tone:#bd7b54" aria-hidden="true"></i><b>Medium</b></span></label>
-                                  <label data-skin-tone="warm-brown"><input type="radio" name="child-skin-tone" value="warm-brown" /><span><i style="--tone:#8f5538" aria-hidden="true"></i><b>Warm brown</b></span></label>
-                                  <label data-skin-tone="deep"><input type="radio" name="child-skin-tone" value="deep" /><span><i style="--tone:#5c3426" aria-hidden="true"></i><b>Deep</b></span></label>
+                              <section class="child-look-picker" id="child-look-picker" hidden aria-labelledby="child-look-picker-title">
+                                <div class="child-look-picker-heading">
+                                  <div><h4 id="child-look-picker-title">Find the closest illustrated look</h4><p>Skin tone and hair filters work independently. They narrow the complete characters below; they do not change or limit one another.</p></div>
+                                  <button type="button" id="child-look-filters-reset" hidden>Clear filters</button>
                                 </div>
-                              </fieldset>
-                              <fieldset class="child-look-picker" id="child-look-picker" hidden>
-                                <legend>Hairstyle</legend>
-                                <p>Choose a hairstyle from the complete illustrated characters available for this selection.</p>
+                                <div class="child-look-filters">
+                                  <fieldset>
+                                    <legend>Skin tone</legend>
+                                    <div class="child-filter-options child-tone-filters" aria-label="Filter by skin tone">
+                                      <button type="button" class="is-active" data-child-filter="skinTone" data-filter-value="all" aria-pressed="true">All tones</button>
+                                      <button type="button" data-child-filter="skinTone" data-filter-value="light"><i style="--tone:#f2c8a8" aria-hidden="true"></i>Light</button>
+                                      <button type="button" data-child-filter="skinTone" data-filter-value="golden"><i style="--tone:#d4a071" aria-hidden="true"></i>Golden</button>
+                                      <button type="button" data-child-filter="skinTone" data-filter-value="medium"><i style="--tone:#bd7b54" aria-hidden="true"></i>Medium</button>
+                                      <button type="button" data-child-filter="skinTone" data-filter-value="warm-brown"><i style="--tone:#8f5538" aria-hidden="true"></i>Warm brown</button>
+                                      <button type="button" data-child-filter="skinTone" data-filter-value="deep"><i style="--tone:#5c3426" aria-hidden="true"></i>Deep</button>
+                                    </div>
+                                  </fieldset>
+                                  <fieldset>
+                                    <legend>Hair color</legend>
+                                    <div class="child-filter-options" aria-label="Filter by hair color">
+                                      <button type="button" class="is-active" data-child-filter="hairColor" data-filter-value="all" aria-pressed="true">All colors</button>
+                                      <button type="button" data-child-filter="hairColor" data-filter-value="blonde">Blonde</button>
+                                      <button type="button" data-child-filter="hairColor" data-filter-value="brown">Brown</button>
+                                      <button type="button" data-child-filter="hairColor" data-filter-value="dark-brown">Dark brown</button>
+                                      <button type="button" data-child-filter="hairColor" data-filter-value="auburn">Auburn</button>
+                                      <button type="button" data-child-filter="hairColor" data-filter-value="black">Black</button>
+                                    </div>
+                                  </fieldset>
+                                  <fieldset>
+                                    <legend>Hair style</legend>
+                                    <div class="child-filter-options" aria-label="Filter by hair style">
+                                      <button type="button" class="is-active" data-child-filter="hairStyle" data-filter-value="all" aria-pressed="true">All styles</button>
+                                      <button type="button" data-child-filter="hairStyle" data-filter-value="short">Short</button>
+                                      <button type="button" data-child-filter="hairStyle" data-filter-value="straight">Straight</button>
+                                      <button type="button" data-child-filter="hairStyle" data-filter-value="wavy">Wavy</button>
+                                      <button type="button" data-child-filter="hairStyle" data-filter-value="curly">Curly</button>
+                                      <button type="button" data-child-filter="hairStyle" data-filter-value="coils">Coils</button>
+                                      <button type="button" data-child-filter="hairStyle" data-filter-value="braids">Braids</button>
+                                    </div>
+                                  </fieldset>
+                                </div>
+                                <p class="child-look-filter-status" id="child-look-filter-status" role="status" aria-live="polite"></p>
                                 <div class="child-character-options" role="radiogroup" aria-label="Illustrated child character">
-                                  <label class="child-character-option" data-gender="boy" data-skin-tone="light"><input type="radio" name="child-character" value="light-short-brown" data-label="Tousled brown" data-gender="boy" data-skin-tone="light" data-hair-color="brown" data-hair-style="short" data-skin="#f0c3a0" data-hair="#6a3d24" data-avatar-class="avatar-short" /><span class="child-character-thumb" aria-hidden="true"><img src="assets/child-characters/light-short-brown-v1.webp" alt="" /></span><span class="child-character-option-copy"><b>Tousled brown</b><small>Short brown hair</small></span></label>
-                                  <label class="child-character-option" data-gender="boy" data-skin-tone="warm-brown"><input type="radio" name="child-character" value="warm-curly-dark" data-label="Dark curls" data-gender="boy" data-skin-tone="warm-brown" data-hair-color="dark-brown" data-hair-style="curly" data-skin="#8f5538" data-hair="#24150f" data-avatar-class="avatar-curly" /><span class="child-character-thumb" aria-hidden="true"><img src="assets/child-characters/warm-curly-dark-v1.webp" alt="" /></span><span class="child-character-option-copy"><b>Dark curls</b><small>Dark brown curls</small></span></label>
-                                  <label class="child-character-option" data-gender="boy" data-skin-tone="deep"><input type="radio" name="child-character" value="deep-coils-black" data-label="Short coils" data-gender="boy" data-skin-tone="deep" data-hair-color="black" data-hair-style="coils" data-skin="#5c3426" data-hair="#17100e" data-avatar-class="avatar-coils" /><span class="child-character-thumb" aria-hidden="true"><img src="assets/child-characters/deep-coils-black-v1.webp" alt="" /></span><span class="child-character-option-copy"><b>Short coils</b><small>Black coiled hair</small></span></label>
-                                  <label class="child-character-option" data-gender="girl" data-skin-tone="light"><input type="radio" name="child-character" value="light-wavy-blonde" data-label="Long blonde waves" data-gender="girl" data-skin-tone="light" data-hair-color="blonde" data-hair-style="wavy" data-skin="#f5ceb0" data-hair="#d9a83e" data-avatar-class="avatar-wave" /><span class="child-character-thumb" aria-hidden="true"><img src="assets/child-characters/light-wavy-blonde-v1.webp" alt="" /></span><span class="child-character-option-copy"><b>Long blonde waves</b><small>Long wavy hair</small></span></label>
-                                  <label class="child-character-option" data-gender="girl" data-skin-tone="golden"><input type="radio" name="child-character" value="golden-straight-black" data-label="Straight black bob" data-gender="girl" data-skin-tone="golden" data-hair-color="black" data-hair-style="straight" data-skin="#d4a071" data-hair="#171717" data-avatar-class="avatar-straight" /><span class="child-character-thumb" aria-hidden="true"><img src="assets/child-characters/golden-straight-black-v1.webp" alt="" /></span><span class="child-character-option-copy"><b>Straight black bob</b><small>Straight black hair</small></span></label>
-                                  <label class="child-character-option" data-gender="girl" data-skin-tone="medium"><input type="radio" name="child-character" value="medium-wavy-brown" data-label="Brown waves" data-gender="girl" data-skin-tone="medium" data-hair-color="brown" data-hair-style="wavy" data-skin="#bd7b54" data-hair="#4a2818" data-avatar-class="avatar-wave" /><span class="child-character-thumb" aria-hidden="true"><img src="assets/child-characters/medium-wavy-brown-v1.webp" alt="" /></span><span class="child-character-option-copy"><b>Brown waves</b><small>Wavy brown hair</small></span></label>
-                                  <label class="child-character-option" data-gender="girl" data-skin-tone="medium"><input type="radio" name="child-character" value="medium-curly-auburn" data-label="Auburn curls" data-gender="girl" data-skin-tone="medium" data-hair-color="auburn" data-hair-style="curly" data-skin="#c88962" data-hair="#8c3d25" data-avatar-class="avatar-coils" /><span class="child-character-thumb" aria-hidden="true"><img src="assets/child-characters/medium-curly-auburn-v1.webp" alt="" /></span><span class="child-character-option-copy"><b>Auburn curls</b><small>Curly auburn hair</small></span></label>
-                                  <label class="child-character-option" data-gender="girl" data-skin-tone="deep"><input type="radio" name="child-character" value="deep-braids-black" data-label="Long braids" data-gender="girl" data-skin-tone="deep" data-hair-color="black" data-hair-style="braids" data-skin="#70422f" data-hair="#16110f" data-avatar-class="avatar-braids" /><span class="child-character-thumb" aria-hidden="true"><img src="assets/child-characters/deep-braids-black-v1.webp" alt="" /></span><span class="child-character-option-copy"><b>Long braids</b><small>Long black braids</small></span></label>
+                                  <label class="child-character-option" data-gender="boy" data-skin-tone="light"><input type="radio" name="child-character" value="light-short-brown" data-label="Tousled brown" data-gender="boy" data-skin-tone="light" data-hair-color="brown" data-hair-style="short" data-skin="#f0c3a0" data-hair="#6a3d24" data-avatar-class="avatar-short" /><span class="child-character-thumb" aria-hidden="true"><img src="assets/child-characters/light-short-brown-v1.webp" alt="" /></span><span class="child-character-option-copy"><b>Tousled brown</b><small>Light skin tone · Short brown hair</small></span></label>
+                                  <label class="child-character-option" data-gender="boy" data-skin-tone="warm-brown"><input type="radio" name="child-character" value="warm-curly-dark" data-label="Dark curls" data-gender="boy" data-skin-tone="warm-brown" data-hair-color="dark-brown" data-hair-style="curly" data-skin="#8f5538" data-hair="#24150f" data-avatar-class="avatar-curly" /><span class="child-character-thumb" aria-hidden="true"><img src="assets/child-characters/warm-curly-dark-v1.webp" alt="" /></span><span class="child-character-option-copy"><b>Dark curls</b><small>Warm brown skin tone · Dark brown curls</small></span></label>
+                                  <label class="child-character-option" data-gender="boy" data-skin-tone="deep"><input type="radio" name="child-character" value="deep-coils-black" data-label="Short coils" data-gender="boy" data-skin-tone="deep" data-hair-color="black" data-hair-style="coils" data-skin="#5c3426" data-hair="#17100e" data-avatar-class="avatar-coils" /><span class="child-character-thumb" aria-hidden="true"><img src="assets/child-characters/deep-coils-black-v1.webp" alt="" /></span><span class="child-character-option-copy"><b>Short coils</b><small>Deep skin tone · Black coiled hair</small></span></label>
+                                  <label class="child-character-option" data-gender="girl" data-skin-tone="light"><input type="radio" name="child-character" value="light-wavy-blonde" data-label="Long blonde waves" data-gender="girl" data-skin-tone="light" data-hair-color="blonde" data-hair-style="wavy" data-skin="#f5ceb0" data-hair="#d9a83e" data-avatar-class="avatar-wave" /><span class="child-character-thumb" aria-hidden="true"><img src="assets/child-characters/light-wavy-blonde-v1.webp" alt="" /></span><span class="child-character-option-copy"><b>Long blonde waves</b><small>Light skin tone · Long blonde waves</small></span></label>
+                                  <label class="child-character-option" data-gender="girl" data-skin-tone="golden"><input type="radio" name="child-character" value="golden-straight-black" data-label="Straight black bob" data-gender="girl" data-skin-tone="golden" data-hair-color="black" data-hair-style="straight" data-skin="#d4a071" data-hair="#171717" data-avatar-class="avatar-straight" /><span class="child-character-thumb" aria-hidden="true"><img src="assets/child-characters/golden-straight-black-v1.webp" alt="" /></span><span class="child-character-option-copy"><b>Straight black bob</b><small>Golden skin tone · Straight black hair</small></span></label>
+                                  <label class="child-character-option" data-gender="girl" data-skin-tone="medium"><input type="radio" name="child-character" value="medium-wavy-brown" data-label="Brown waves" data-gender="girl" data-skin-tone="medium" data-hair-color="brown" data-hair-style="wavy" data-skin="#bd7b54" data-hair="#4a2818" data-avatar-class="avatar-wave" /><span class="child-character-thumb" aria-hidden="true"><img src="assets/child-characters/medium-wavy-brown-v1.webp" alt="" /></span><span class="child-character-option-copy"><b>Brown waves</b><small>Medium skin tone · Wavy brown hair</small></span></label>
+                                  <label class="child-character-option" data-gender="girl" data-skin-tone="medium"><input type="radio" name="child-character" value="medium-curly-auburn" data-label="Auburn curls" data-gender="girl" data-skin-tone="medium" data-hair-color="auburn" data-hair-style="curly" data-skin="#c88962" data-hair="#8c3d25" data-avatar-class="avatar-coils" /><span class="child-character-thumb" aria-hidden="true"><img src="assets/child-characters/medium-curly-auburn-v1.webp" alt="" /></span><span class="child-character-option-copy"><b>Auburn curls</b><small>Medium skin tone · Curly auburn hair</small></span></label>
+                                  <label class="child-character-option" data-gender="girl" data-skin-tone="deep"><input type="radio" name="child-character" value="deep-braids-black" data-label="Long braids" data-gender="girl" data-skin-tone="deep" data-hair-color="black" data-hair-style="braids" data-skin="#70422f" data-hair="#16110f" data-avatar-class="avatar-braids" /><span class="child-character-thumb" aria-hidden="true"><img src="assets/child-characters/deep-braids-black-v1.webp" alt="" /></span><span class="child-character-option-copy"><b>Long braids</b><small>Deep skin tone · Long black braids</small></span></label>
                                 </div>
-                              </fieldset>
+                                <p class="child-eye-color-note"><strong>Eye color</strong><span>Eyes stay as illustrated in the selected look. A separate eye-color choice will be added only when it can remain consistent across every page.</span></p>
+                              </section>
                             </div>
                           </details>
                           <div class="child-character-details" id="child-character-details" hidden>
+                        <section class="child-current-choice" id="child-current-choice" aria-label="Current illustrated child selection">
+                          <figure><img id="child-current-choice-image" alt="" width="96" height="112" /></figure>
+                          <div><small>Your illustrated child</small><strong id="child-current-choice-title">Selected character</strong><span id="child-current-choice-details"></span></div>
+                          <em id="child-current-choice-mobility">No mobility aid</em>
+                        </section>
                         <details class="child-editor-section">
                           <summary><span>Basics</span><small>Private, approximate illustration guidance.</small></summary>
                           <div class="child-editor-section-body child-basics-grid">
@@ -279,17 +313,17 @@
                           </div>
                         </details>
                         <details class="child-editor-section child-accessibility-section">
-                          <summary><span>Accessibility <em>Optional</em></span><small>Only choices with complete, consistent book artwork are selectable.</small></summary>
+                          <summary><span>Mobility &amp; accessibility <em>Optional</em></span><small>Choose only what should appear in the illustrations.</small></summary>
                           <div class="child-editor-section-body">
                             <fieldset class="child-mobility-options" aria-describedby="child-mobility-help child-mobility-blocker">
                               <legend>Mobility and positioning</legend>
-                              <p id="child-mobility-help">No diagnosis or medical details needed.</p>
+                              <p id="child-mobility-help">No diagnosis or medical details needed. This choice only guides the artwork.</p>
                               <div class="child-segmented-options child-mobility-choices">
-                                <label><input type="radio" name="child-mobility-aid" value="none" checked /><span>No mobility aid</span></label>
-                                <label class="is-unavailable" aria-disabled="true"><input type="radio" name="child-mobility-aid" value="wheelchair" disabled /><span><strong>Wheelchair</strong><small id="child-wheelchair-option-copy">Choose Dark curls or Long braids and Ages 6–8.</small></span></label>
+                                <label data-mobility-option="none"><input type="radio" name="child-mobility-aid" value="none" checked /><span><i aria-hidden="true">✓</i><strong>No mobility aid</strong><small>Use the standard standing character artwork.</small><em>Available</em></span></label>
+                                <label class="is-unavailable" data-mobility-option="wheelchair" aria-disabled="true"><input type="radio" name="child-mobility-aid" value="wheelchair" disabled /><span><i aria-hidden="true">♿</i><strong>Wheelchair</strong><small id="child-wheelchair-option-copy">Available with Dark curls or Long braids, Ages 6–8.</small><em id="child-wheelchair-option-state">Choose a supported look</em></span></label>
                               </div>
                             </fieldset>
-                            <p class="child-render-limit" id="child-mobility-blocker" role="note"><strong>Wheelchair preview:</strong> Dark curls and Long braids currently support Ages 6–8. The child preview and composed pages keep the same approved wheelchair and seated proportions. Print ordering remains off until the final compositions and physical proof are approved. Other mobility aids and appearance details stay unavailable until each has consistent approved art.</p>
+                            <p class="child-render-limit child-mobility-note" id="child-mobility-blocker" role="note"><strong id="child-mobility-note-title">Wheelchair artwork availability</strong><span id="child-mobility-note-copy">Currently available for Dark curls or Long braids in Ages 6–8. Other mobility options will appear only after their complete book artwork is approved.</span></p>
                           </div>
                         </details>
                           </div>
@@ -460,7 +494,7 @@
       </div>
     </footer>
 
-    <script src="scripts/child-selector.js?v=20261007-skin-tone-v2"></script>
+    <script src="scripts/child-selector.js?v=20261007-child-editor-v4"></script>
     <script src="scripts/monster-cutout.js?v=20261004-cutout-v1"></script>
     <script src="scripts/main.js?v=20261007-preview-reliability-v1"></script>
   </body>

@@ -921,37 +921,70 @@ function renderMonsterPoseProduction(container, monster) {
     container.innerHTML = '<div><strong>Book pose production</strong><span>Setup pending. Apply the reviewed pose-pipeline database migration before creating production plans.</span></div>';
     return;
   }
+  const confirmedOrder = monster.orders?.[0];
+  const confirmedChild = confirmedOrder?.childCharacter;
   const job = monster.poseJobs?.[0];
   if (!job) {
-    container.innerHTML = '<div><strong>Book pose production</strong><span>No internal pose plan yet. Creating a plan does not call the image provider.</span></div><button class="button secondary" type="button">Create bounded plan</button>';
+    container.innerHTML = '<div class="monster-pose-empty"><span class="monster-pose-kicker">Confirmed-book workflow</span><strong>Build the exact pose set this story needs</strong><span data-pose-intro></span><div class="monster-pose-empty-summary"><span data-pose-child></span><span data-pose-story></span><span>3 reusable child poses · 32 mapped pages · human approval required</span></div></div><button class="button secondary" type="button">Build book pose set</button>';
+    container.querySelector("[data-pose-intro]").textContent = confirmedOrder
+      ? "The selected child will be locked automatically as the identity anchor. Planning is free and does not call the image provider."
+      : "Connect a confirmed book before creating poses, so experimentation remains free.";
+    container.querySelector("[data-pose-child]").textContent = confirmedChild?.included
+      ? `Child: ${confirmedChild.label} · ${confirmedChild.ageBandLabel || confirmedChild.ageBand}${confirmedChild.mobilityAid === "wheelchair" ? " · Wheelchair" : ""}`
+      : "Child: Monster-only story";
+    container.querySelector("[data-pose-story]").textContent = `Story: ${confirmedOrder?.storyLabel || storyLabel(monster.storyId)}`;
     const button = container.querySelector("button");
-    button.disabled = !monster.hasSelectedPreview || !monster.storyId;
+    button.disabled = !monster.hasSelectedPreview || !confirmedOrder;
     button.addEventListener("click", () => createMonsterPosePlan(monster, button));
     return;
   }
   const progress = job.progress || {};
   const readiness = job.readiness || { blockers: [] };
-  container.innerHTML = '<details><summary><span><strong></strong><small></small></span><em></em></summary><div class="monster-pose-body"><p data-source></p><div class="monster-pose-meter"><span></span></div><div class="monster-pose-assets"></div><div class="monster-pose-review-actions"></div><ul class="monster-pose-blockers"></ul></div></details>';
+  container.innerHTML = '<details open><summary><span><strong></strong><small></small></span><em></em></summary><div class="monster-pose-body"><div class="monster-pose-stages" aria-label="Pose production stages"><span data-pose-stage="identity"><i>1</i>Identity</span><span data-pose-stage="poses"><i>2</i>Poses</span><span data-pose-stage="pages"><i>3</i>Pages</span><span data-pose-stage="approval"><i>4</i>Approved</span></div><div class="monster-pose-identity" hidden><figure><span>Child</span></figure><div><span class="monster-pose-kicker">Locked child identity</span><strong data-child-identity></strong><small data-child-profile></small><em>Automatically attached from the confirmed selection</em></div></div><p data-source></p><div class="monster-pose-meter"><span></span></div><div class="monster-pose-assets"></div><div class="monster-pose-review-actions"></div><p class="monster-pose-generation-note" hidden></p><ul class="monster-pose-blockers"></ul></div></details>';
   container.querySelector("summary strong").textContent = `Pose production · ${String(job.status || "planned").replaceAll("_", " ")}`;
   container.querySelector("summary small").textContent = `${progress.approvedAssets || 0}/${progress.totalAssets || 0} assets · ${progress.approvedScenes || 0}/${progress.totalScenes || 32} pages`;
   container.querySelector("summary em").textContent = `${formatMoney(job.estimatedCostCents || 0)} est. / ${formatMoney(job.costCapCents || 0)} cap`;
-  container.querySelector("[data-source]").textContent = `Pinned portrait ${shortId(job.sourcePreviewId)} · story v${job.storyVersion}. Generation is one asset per approved action and remains disabled until provider spend is authorized.`;
+  const childIdentity = job.plan?.identityContract?.child;
+  if (childIdentity?.included) {
+    const identity = container.querySelector(".monster-pose-identity");
+    identity.hidden = false;
+    if (job.childAnchorUrl) {
+      const image = document.createElement("img"); image.src = job.childAnchorUrl; image.alt = `${childIdentity.anchorArtwork?.label || "Selected child"} identity anchor`;
+      identity.querySelector("figure").replaceChildren(image);
+    }
+    identity.querySelector("[data-child-identity]").textContent = childIdentity.anchorArtwork?.label || childIdentity.appearanceId;
+    identity.querySelector("[data-child-profile]").textContent = `${childIdentity.ageBandLabel || childIdentity.ageBand}${childIdentity.mobilityAid === "wheelchair" ? " · Wheelchair preserved in every pose" : " · Standard mobility artwork"}`;
+  }
+  const approvedAssets = Number(progress.approvedAssets || 0);
+  const totalAssets = Number(progress.totalAssets || 0);
+  const approvedScenes = Number(progress.approvedScenes || 0);
+  const totalScenes = Number(progress.totalScenes || 32);
+  setPoseStage(container, "identity", !childIdentity?.included || job.childAnchorAttached, true);
+  setPoseStage(container, "poses", totalAssets > 0 && approvedAssets === totalAssets, approvedAssets > 0 || job.status === "generating" || job.status === "review");
+  setPoseStage(container, "pages", totalScenes > 0 && approvedScenes === totalScenes, totalAssets > 0 && approvedAssets === totalAssets && approvedScenes < totalScenes);
+  setPoseStage(container, "approval", job.status === "approved", readiness.ready);
+  container.querySelector("[data-source]").textContent = `Pinned monster ${shortId(job.sourcePreviewId)} · ${childIdentity?.included ? `child ${childIdentity.profileKey}` : "monster-only"} · story v${job.storyVersion}. Each pose is reused only on its mapped pages.`;
   const percent = progress.totalAssets ? Math.round(((progress.approvedAssets || 0) / progress.totalAssets) * 100) : 0;
   container.querySelector(".monster-pose-meter span").style.width = `${percent}%`;
   const assetList = container.querySelector(".monster-pose-assets");
-  assetList.replaceChildren(...job.assets.map((asset) => buildPoseAssetRow(monster, job, asset)));
+  assetList.replaceChildren(...["child", "monster"].map((subjectType) => buildPoseAssetGroup(monster, job, subjectType)).filter(Boolean));
   const reviewActions = container.querySelector(".monster-pose-review-actions");
   if (job.plan?.identityContract?.child?.included && !job.childAnchorAttached) {
-    const upload = document.createElement("label"); upload.className = "button secondary"; upload.textContent = "Attach approved child";
+    const upload = document.createElement("label"); upload.className = "button secondary"; upload.textContent = "Attach replacement child anchor";
     const input = document.createElement("input"); input.type = "file"; input.accept = "image/png,image/jpeg,image/webp"; input.hidden = true;
     input.addEventListener("change", async () => { const file = input.files?.[0]; if (!file) return; await updateMonsterPoseJob(monster, job, { action: "record_child_anchor", image: await fileToDataUrl(file) }); });
     upload.append(input); reviewActions.append(upload);
   }
-  if (job.generationEnabled && job.assets.some((asset) => asset.status === "queued" && asset.attempts < asset.maxAttempts)) {
-    reviewActions.append(poseActionButton("Generate next pose", async () => {
+  const nextAsset = job.assets.find((asset) => asset.status === "queued" && asset.attempts < asset.maxAttempts);
+  if (job.generationEnabled && nextAsset) {
+    reviewActions.append(poseActionButton(`Generate next ${nextAsset.subjectType} pose`, async () => {
       if (!window.confirm("Generate exactly one queued pose now? The job reserves up to $0.03 for this provider edit and will not batch additional images.")) return;
       await updateMonsterPoseJob(monster, job, { action: "generate_next", spendApproved: true });
     }));
+  } else if (nextAsset && !job.generationEnabled) {
+    const note = container.querySelector(".monster-pose-generation-note");
+    note.hidden = false;
+    note.textContent = "Pose plan ready. Automated generation is safely locked until the production image provider and spending switch are enabled.";
   }
   if (job.plan?.scaleContract?.calibrationStatus !== "approved") reviewActions.append(poseActionButton("Approve physical scale", () => approvePoseScale(monster, job)));
   const nextScene = job.scenes?.find((scene) => scene.status === "review");
@@ -959,6 +992,26 @@ function renderMonsterPoseProduction(container, monster) {
   if (readiness.ready && job.status !== "approved") reviewActions.append(poseActionButton("Approve pose set", () => approveMonsterPoseJob(monster, job), "primary"));
   const blockers = container.querySelector(".monster-pose-blockers");
   blockers.replaceChildren(...(readiness.blockers || []).map((message) => { const item = document.createElement("li"); item.textContent = message; return item; }));
+}
+
+function setPoseStage(container, name, complete, active) {
+  const stage = container.querySelector(`[data-pose-stage="${name}"]`);
+  stage?.classList.toggle("is-complete", Boolean(complete));
+  stage?.classList.toggle("is-active", !complete && Boolean(active));
+}
+
+function buildPoseAssetGroup(monster, job, subjectType) {
+  const assets = job.assets.filter((asset) => asset.subjectType === subjectType);
+  if (!assets.length) return null;
+  const section = document.createElement("section");
+  section.className = `monster-pose-group is-${subjectType}`;
+  const heading = document.createElement("header");
+  const approved = assets.filter((asset) => asset.status === "approved").length;
+  heading.innerHTML = `<div><span>${subjectType === "child" ? "Story co-star" : "Customer monster"}</span><strong>${subjectType === "child" ? "Child pose set" : "Monster pose set"}</strong></div><em>${approved}/${assets.length} approved</em>`;
+  const list = document.createElement("div");
+  list.replaceChildren(...assets.map((asset) => buildPoseAssetRow(monster, job, asset)));
+  section.append(heading, list);
+  return section;
 }
 
 function buildPoseAssetRow(monster, job, asset) {
@@ -970,7 +1023,8 @@ function buildPoseAssetRow(monster, job, asset) {
     row.querySelector(".monster-pose-thumb").replaceChildren(image);
   } else row.querySelector(".monster-pose-thumb span").textContent = asset.subjectType === "child" ? "Child" : "Monster";
   row.querySelector("strong").textContent = asset.poseId.replaceAll("_", " ");
-  row.querySelector("small").textContent = `${asset.subjectType} · ${asset.kind.replaceAll("_", " ")} · ${asset.status} · ${asset.attempts}/${asset.maxAttempts} attempts`;
+  const pages = asset.pageCount ? ` · ${asset.pageCount} mapped page${asset.pageCount === 1 ? "" : "s"}` : "";
+  row.querySelector("small").textContent = `${asset.kind.replaceAll("_", " ")} · ${asset.status}${pages} · ${asset.attempts}/${asset.maxAttempts} attempts`;
   const actions = row.querySelector(".monster-pose-asset-actions");
   if (["queued", "failed", "blocked", "review"].includes(asset.status) && asset.attempts < asset.maxAttempts) {
     const upload = document.createElement("label");
@@ -991,8 +1045,9 @@ function poseActionButton(label, run, type = "secondary") {
 async function createMonsterPosePlan(monster, button) {
   button.disabled = true; document.querySelector("#monsters-status").textContent = "Creating a bounded internal plan…";
   try {
-    const result = await apiRequest("?resource=pose-jobs", { method: "POST", body: { submissionId: monster.id, selectedPreviewId: monster.selectedPreviewId, storyId: monster.storyId } });
-    monster.poseJobs = [result.poseJob]; renderMonsters(); document.querySelector("#monsters-status").textContent = "Pose plan created. No paid generation was run.";
+    const confirmedOrder = monster.orders?.[0];
+    const result = await apiRequest("?resource=pose-jobs", { method: "POST", body: { submissionId: monster.id, selectedPreviewId: monster.selectedPreviewId, storyId: confirmedOrder?.storyId || monster.storyId, childCharacter: confirmedOrder?.childCharacter } });
+    monster.poseJobs = [result.poseJob]; renderMonsters(); document.querySelector("#monsters-status").textContent = "Book pose set planned and the confirmed child identity was attached. No paid generation was run.";
   } catch (error) { document.querySelector("#monsters-status").textContent = error.message; button.disabled = false; }
 }
 

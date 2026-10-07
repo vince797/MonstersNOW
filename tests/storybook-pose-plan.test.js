@@ -29,6 +29,10 @@ test("one exact portrait produces only the referenced bounded poses with page co
   assert.equal(plan.sourcePreviewId, "portrait-v3");
   assert.equal(plan.baseAssets.filter((asset) => asset.subjectType === "monster").length, 4);
   assert.equal(plan.baseAssets.filter((asset) => asset.subjectType === "child").length, 3);
+  assert.equal(plan.identityContract.child.anchorArtwork.publicPath, "assets/child-characters/deep-braids-black-wheelchair-v1.webp");
+  assert.equal(plan.identityContract.child.ageBandLabel, "Ages 6–8");
+  assert.ok(plan.baseAssets.filter((asset) => asset.subjectType === "child").every((asset) => asset.pageCount === asset.pageNumbers.length && asset.pageCount > 0));
+  assert.equal(plan.baseAssets.filter((asset) => asset.subjectType === "child").reduce((total, asset) => total + asset.pageCount, 0), plan.scenes.filter((scene) => scene.child).length);
   const referencedKeys = new Set(plan.scenes.flatMap((scene) => [scene.monster?.assetKey, scene.child?.assetKey]).filter(Boolean));
   assert.deepEqual(new Set(plan.baseAssets.map((asset) => asset.key)), referencedKeys);
   assert.equal(plan.limits.maxAttemptsPerAsset, 2);
@@ -74,6 +78,7 @@ test("Halloween uses the authoritative four-monster and three-child family map",
   assert.deepEqual(plan.baseAssets.filter((asset) => asset.subjectType === "child").map((asset) => asset.poseId), [
     "travel_observe", "reach_help", "celebrate",
   ]);
+  assert.match(plan.baseAssets.find((asset) => asset.key === "child:base:travel_observe").direction, /Ages 6–8.*exact approved wheelchair/i);
   assert.deepEqual(plan.scenes.filter((scene) => scene.status === "not_required").map((scene) => scene.pageNumber), [1, 2, 3, 32]);
   assert.equal(plan.baseAssets.length, 7);
 });

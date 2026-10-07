@@ -80,17 +80,23 @@ test("selector UI exposes only supported controls and states the current renderi
   assert.match(html, />Choose a story character<|>Basics<|>Accessibility/);
   assert.match(html, /name="child-gender" value="boy"/);
   assert.match(html, /name="child-gender" value="girl"/);
-  assert.match(html, /id="child-skin-tone-picker" hidden/);
-  assert.match(html, /name="child-skin-tone" value="light"/);
-  assert.match(html, /name="child-skin-tone" value="deep"/);
-  assert.match(html, /Only tones with complete character art are shown/);
+  assert.doesNotMatch(html, /name="child-skin-tone"/);
+  assert.match(html, /data-child-filter="skinTone" data-filter-value="light"/);
+  assert.match(html, /data-child-filter="skinTone" data-filter-value="deep"/);
+  assert.match(html, /data-child-filter="hairColor"/);
+  assert.match(html, /data-child-filter="hairStyle"/);
+  assert.match(html, /Skin tone and hair filters work independently/);
+  assert.match(html, /Eyes stay as illustrated in the selected look/);
   assert.match(html, /id="child-look-picker" hidden/);
   assert.match(html, /class="child-character-thumb"/);
   assert.match(html, /data-gender="boy"/);
   assert.match(html, /data-gender="girl"/);
   assert.match(html, /id="child-editor-undo" disabled/);
   assert.match(html, /id="child-editor-reset"/);
-  assert.match(html, /Other mobility aids and appearance details stay unavailable/i);
+  assert.match(html, /Other mobility options will appear only after their complete book artwork is approved/i);
+  assert.match(html, /id="child-current-choice"/);
+  assert.match(html, /Mobility &amp; accessibility/);
+  assert.match(html, /This choice only guides the artwork/);
   assert.match(script, /monstersnow_child_character_profile_v1/);
   assert.match(script, /localStorage\.setItem/);
   assert.match(script, /function undo\(/);
@@ -99,7 +105,8 @@ test("selector UI exposes only supported controls and states the current renderi
   assert.match(script, /function supportsWheelchair/);
   assert.match(script, /const characterArt = \{/);
   assert.match(script, /function chooseFirstAppearanceForGender/);
-  assert.match(script, /function chooseFirstAppearanceForSkinTone/);
+  assert.match(script, /function matchesLookFilters/);
+  assert.match(script, /const lookFilters = \{ skinTone: "all", hairColor: "all", hairStyle: "all" \}/);
   assert.match(script, /function syncAppearanceBuilder/);
   assert.match(script, /skinTone: profile\.skinTone/);
   assert.match(script, /const wheelchairCharacterArt = \{/);
@@ -125,9 +132,9 @@ test("selector UI exposes only supported controls and states the current renderi
   assert.match(css, /\.child-live-preview \{[\s\S]*position: sticky/);
   assert.match(css, /\.child-character-option\.is-selected::after/);
   assert.match(css, /\.child-preview-character/);
-  assert.match(html, /child-selector\.css\?v=20261007-skin-tone-v2/);
-  assert.match(html, /scripts\/child-selector\.js\?v=20261007-skin-tone-v2/);
-  assert.match(html, /1\. Character[\s\S]*2\. Skin tone[\s\S]*3\. Hairstyle/);
+  assert.match(html, /child-selector\.css\?v=20261007-child-editor-v4/);
+  assert.match(html, /scripts\/child-selector\.js\?v=20261007-child-editor-v4/);
+  assert.match(html, /1\. Character[\s\S]*2\. Find a complete illustrated look/);
   assert.match(html, /scripts\/main\.js\?v=20261007-preview-reliability-v1/);
   assert.deepEqual(
     vercel.headers.find((entry) => entry.source === "/create")?.headers,

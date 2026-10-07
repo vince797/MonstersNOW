@@ -16,7 +16,7 @@
   ],
   "functions": {
     "api/storybook-interest.js": {
-      "includeFiles": "lib/**"
+      "includeFiles": "{lib/**,assets/child-characters/**}"
     },
     "api/convert-monster.js": {
       "maxDuration": 180,

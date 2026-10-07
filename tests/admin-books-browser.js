@@ -60,6 +60,33 @@ const reviewFiles = [
   },
 ];
 
+const poseAssets = [
+  ["child", "travel_observe", 22], ["child", "reach_help", 2], ["child", "celebrate", 4],
+  ["monster", "neutral_travel", 13], ["monster", "active_reach_celebrate", 12], ["monster", "help_interact", 2], ["monster", "seated_rest", 1],
+].map(([subjectType, poseId, pageCount], index) => ({
+  id: `asset-${index + 1}`, key: `${subjectType}:base:${poseId}`, subjectType, kind: "base", poseId,
+  status: "queued", attempts: 0, maxAttempts: 2, pageCount, pageNumbers: Array.from({ length: pageCount }, (_, page) => page + 4),
+}));
+const poseJob = {
+  id: "pose-job-1", sourcePreviewId: "preview-1", storyId: "story-1", storyVersion: 4,
+  childProfileKey: "deep-braids-black:6-8:wheelchair", childAnchorAttached: true,
+  childAnchorUrl: "/assets/child-characters/deep-braids-black-wheelchair-v1.webp", status: "planned",
+  model: "gpt-image-1.5", quality: "low", costCapCents: 50, estimatedCostCents: 21, actualCostCents: 0,
+  generationEnabled: false, assets: poseAssets,
+  scenes: Array.from({ length: 32 }, (_, index) => ({ pageNumber: index + 1, status: [0, 1, 2, 31].includes(index) ? "not_required" : "review" })),
+  plan: { identityContract: { child: { included: true, appearanceId: "deep-braids-black", profileKey: "deep-braids-black:6-8:wheelchair", ageBand: "6-8", ageBandLabel: "Ages 6–8", mobilityAid: "wheelchair", anchorArtwork: { label: "Long braids" } } }, scaleContract: { calibrationStatus: "pending_review" } },
+  readiness: { ready: false, blockers: ["Approve every required transparent pose asset after identity and anatomy review.", "Approve character scale and interactions on every required page proof."] },
+  progress: { approvedAssets: 0, totalAssets: 7, approvedScenes: 4, totalScenes: 32 },
+};
+const monsterFixture = {
+  id: "11111111-1111-4111-8111-111111111111", status: "ready", customerEmail: "parent@example.com",
+  childName: "Maya", monsterName: "Bumbles", storyId: "halloween-monster-night", updatedAt: new Date().toISOString(),
+  originalUrl: "/assets/step-2-character.jpg", selectedPreviewUrl: "/assets/master-references/soft-3d-storybook-monster-01.png",
+  selectedPreviewId: "preview-1", hasSelectedPreview: true, previewCount: 1, featurePermission: {},
+  orders: [{ id: "order-1", storyId: "story-1", storyLabel: "Halloween Monster Night", childName: "Maya", childCharacter: { id: "deep-braids-black", label: "Long braids", included: true, ageBand: "6-8", ageBandLabel: "Ages 6–8", mobilityAid: "wheelchair" }, status: "paid" }],
+  poseJobs: [poseJob],
+};
+
 const server = http.createServer((request, response) => {
   const pathname = new URL(request.url, "http://localhost").pathname;
   const file = path.resolve(root, `.${pathname === "/" ? "/admin.html" : pathname}`);
@@ -104,7 +131,7 @@ const server = http.createServer((request, response) => {
           return;
         }
         const body = resource === "orders" ? { orders: [] }
-          : resource === "monsters" ? { monsters: [], posePipelineAvailable: false }
+          : resource === "monsters" ? { monsters: [monsterFixture], posePipelineAvailable: true }
             : resource === "book-review-files" ? { files: reviewFiles }
               : { stories };
         await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(body) });
@@ -152,8 +179,16 @@ const server = http.createServer((request, response) => {
       assert.equal(await page.getByText("Individual page background", { exact: true }).first().isVisible(), true);
       assert.equal(await page.locator(".book-review-file", { hasText: "Approval not recorded" }).count(), 3);
       assert.equal(await page.locator(".book-review-file", { hasText: "Not print ready" }).count(), 3);
+      await page.locator('[data-admin-view="monsters"]').click();
+      await page.locator(".monster-pose-stages").waitFor({ state: "visible" });
+      assert.match(await page.locator(".monster-pose-identity").textContent(), /Locked child identity.*Long braids.*Ages 6–8.*Wheelchair preserved/i);
+      assert.equal(await page.locator(".monster-pose-group.is-child .monster-pose-asset").count(), 3);
+      assert.equal(await page.locator(".monster-pose-group.is-monster .monster-pose-asset").count(), 4);
+      assert.match(await page.locator(".monster-pose-generation-note").textContent(), /safely locked/i);
+      assert.match(await page.locator(".monster-pose-group.is-child").textContent(), /22 mapped pages/i);
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
       assert.deepEqual(errors, []);
+      await page.screenshot({ path: path.join(output, `admin-pose-workflow-${viewport.name}.png`), fullPage: true });
       await page.screenshot({ path: path.join(output, `admin-books-review-${viewport.name}.png`), fullPage: true });
       await page.close();
     }

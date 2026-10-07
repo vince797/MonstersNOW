@@ -70,6 +70,12 @@ test("admin deletion removes private files before the monster record", async () 
     if (url.includes(`/monster_previews?submission_id=eq.${submissionId}`)) {
       return jsonResponse([{ preview_path: `${submissionId}/previews/one.png`, coloring_page_path: `${submissionId}/coloring/one.png` }]);
     }
+    if (url.includes(`/storybook_pose_jobs?submission_id=eq.${submissionId}`)) {
+      return jsonResponse([{ id: "pose-job-1", child_anchor_path: `${submissionId}/poses/pose-job-1/child-anchor.webp` }]);
+    }
+    if (url.includes("/storybook_pose_assets?job_id=in.(pose-job-1)")) {
+      return jsonResponse([{ asset_path: `${submissionId}/poses/pose-job-1/child-travel.png` }]);
+    }
     if (url.endsWith("/storage/v1/object/monster-submissions") && options.method === "DELETE") return jsonResponse([]);
     if (url.includes(`/monster_submissions?id=eq.${submissionId}`) && options.method === "DELETE") return jsonResponse([]);
     throw new Error(`Unexpected request: ${url}`);
@@ -82,6 +88,8 @@ test("admin deletion removes private files before the monster record", async () 
       `${submissionId}/original.png`,
       `${submissionId}/previews/one.png`,
       `${submissionId}/coloring/one.png`,
+      `${submissionId}/poses/pose-job-1/child-anchor.webp`,
+      `${submissionId}/poses/pose-job-1/child-travel.png`,
     ]);
     const storageIndex = calls.indexOf(storageDelete);
     const rowIndex = calls.findIndex((call) => call.url.includes("/monster_submissions?id=eq.") && call.options.method === "DELETE");
