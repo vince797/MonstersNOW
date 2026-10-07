@@ -26,6 +26,7 @@ test('public headers and footers use selected, responsive MonstersNow.com artwor
     assert.match(html, /aria-label="MonstersNow\.com home"/, page);
     assert.match(html, /<source media="\(max-width: 520px\)" srcset="assets\/brand\/monstersnow-stacked-v1\.png" width="640" height="331"/, page);
     assert.match(html, /monstersnow-primary-v1\.png" alt="" width="960" height="228"/, page);
+    assert.match(html, /class="footer-brand"[\s\S]*?monstersnow-stacked-footer-v1\.png" alt="" width="700" height="361"/, page);
     assert.doesNotMatch(html, /monstersnow-logo-v2\.svg/, page);
     assert.match(html, /monstersnow-icon-32-v1\.png" type="image\/png" sizes="32x32"/, page);
     assert.match(html, /rel="apple-touch-icon" href="assets\/brand\/monstersnow-icon-180-v1\.png"/, page);
@@ -42,6 +43,12 @@ test('brand raster dimensions and alpha match the production markup', () => {
     assert.equal(png[25], 6, 'RGBA is retained for transparent marks');
     assert.ok(png.length < 200000, 'header assets remain web-sized');
   }
+
+  const footer = fs.readFileSync(path.join(root, 'assets/brand/monstersnow-stacked-footer-v1.png'));
+  assert.equal(footer.toString('hex', 0, 8), '89504e470d0a1a0a');
+  assert.equal(footer.readUInt32BE(16), 700);
+  assert.equal(footer.readUInt32BE(20), 361);
+  assert.equal(footer[25], 6, 'footer mark retains transparency for colored backgrounds');
 });
 
 test('palette uses accessible foregrounds for buttons, links, and dark panels', () => {
@@ -54,11 +61,11 @@ test('palette uses accessible foregrounds for buttons, links, and dark panels', 
   assert.doesNotMatch(css, /(?:^|\n):root\s*\{/);
 });
 
-test('private workspace receives logo-only styling without public palette inheritance', () => {
+test('private workspace uses its illustrated admin mark without public palette inheritance', () => {
   const admin = read('admin.html');
   assert.match(admin, /<body class="admin-page">/);
   assert.doesNotMatch(admin, /brand-theme|storefront\.css/);
-  assert.match(admin, /monstersnow-primary-v1\.png" alt="MonstersNow\.com"/);
+  assert.match(admin, /monstersnow-logo-v2\.svg\?v=20261007-admin" alt="MonstersNOW"/);
   assert.match(admin, /monstersnow-stacked-v1\.png" alt="MonstersNow\.com"/);
   assert.match(admin, /id="admin-login-form"/);
 });

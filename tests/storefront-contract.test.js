@@ -26,6 +26,34 @@ test("the public catalog only routes the ready story into personalization", () =
   assert.equal((books.match(/<span class="story-status soon">In development<\/span>/g) || []).length, 6);
 });
 
+test("the homepage and catalog use the approved v4/v5 cover collection", () => {
+  const home = read("index.html");
+  const books = read("books.html");
+
+  for (const cover of [
+    "halloween-monster-night-v5",
+    "big-adventure-v4",
+    "bedtime-monster-v5",
+    "abc-monster-book-v4",
+  ]) {
+    assert.match(home, new RegExp(`${cover}-web\\.jpg`));
+    assert.match(home, new RegExp(`${cover}-640\\.webp`));
+    assert.match(books, new RegExp(`${cover}-web\\.jpg`));
+  }
+
+  for (const cover of [
+    "counting-with-my-monster-v4",
+    "the-monster-who-lost-their-glow-v5",
+    "birthday-monster-adventure-v4",
+  ]) {
+    assert.match(books, new RegExp(`${cover}-web\\.jpg`));
+  }
+
+  assert.doesNotMatch(`${home}\n${books}`, /(?:halloween-monster-night|big-adventure|bedtime-monster|abc-monster-book)-v2-/);
+  assert.match(books, /styles\.css\?v=20261007-books-hero-v2/);
+  assert.match(books, /class="book-hero-steps"/);
+});
+
 test("the create flow displays and forwards the allowlisted story", () => {
   const create = read("create.html");
   const script = read("scripts/main.js");

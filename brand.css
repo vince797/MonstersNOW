@@ -27,8 +27,14 @@
 .brand-theme .brand,
 .brand-theme .brand picture { width: 300px; min-width: 0; }
 .brand-theme .brand img { width: 100%; height: auto; }
-.brand-theme .footer-brand { padding: 12px; background: var(--brand-paper); }
-.brand-theme .footer-brand img { width: 200px; height: auto; }
+.brand-theme .footer-brand {
+  padding: 0;
+  background: transparent;
+}
+.brand-theme .footer-brand img {
+  width: 210px;
+  height: auto;
+}
 .brand-theme .footer-brand picture { width: auto; }
 
 .brand-theme .seasonal-banner {
@@ -92,7 +98,10 @@
   outline-color: var(--brand-teal);
 }
 .brand-theme .site-footer {
-  background: #2d1752;
+  background:
+    radial-gradient(circle at 10% 18%, rgba(255, 138, 0, .08), transparent 25%),
+    radial-gradient(circle at 88% 14%, rgba(33, 199, 198, .12), transparent 30%),
+    linear-gradient(135deg, #291448, #351b5f);
   border-top-color: var(--brand-teal);
 }
 .brand-theme .site-footer nav a:hover,
@@ -128,6 +137,69 @@
   .brand-theme .header-button::after { color: #291448; }
 }
 
-/* Only the marks change inside the private workspace. */
-.admin-page .admin-login-brand img { width: 270px; height: auto; }
+/* Keep the private workspace visually connected to the storefront without
+   changing the more utilitarian dashboard controls. */
+.admin-page .admin-login-brand img { width: min(320px, 100%); height: auto; }
 .admin-page .admin-rail-brand img { width: 160px; height: auto; padding: 8px; }
+
+.admin-page .admin-login-brand {
+  background:
+    radial-gradient(circle at 82% 16%, rgba(33, 199, 198, .26), transparent 30%),
+    radial-gradient(circle at 12% 90%, rgba(255, 138, 0, .24), transparent 30%),
+    linear-gradient(145deg, #291448 0%, #3b1d6d 62%, #4a287e 100%);
+}
+
+.admin-page .admin-login-brand::after {
+  border-color: rgba(255, 255, 255, .15);
+  box-shadow: 0 0 90px rgba(33, 199, 198, .12);
+}
+
+.admin-page .admin-login-brand .eyebrow { color: #70e2df; }
+.admin-page .admin-login-brand > div > p:not(.eyebrow) { color: rgba(255, 255, 255, .8); }
+.admin-page .admin-login-note { color: rgba(255, 255, 255, .66); }
+
+.admin-page .admin-login-panel {
+  background:
+    radial-gradient(circle at 88% 12%, rgba(33, 199, 198, .14), transparent 29%),
+    radial-gradient(circle at 6% 92%, rgba(255, 138, 0, .11), transparent 28%),
+    linear-gradient(145deg, #faf9f6 0%, #f5eff9 100%);
+}
+
+.admin-page .admin-login-card {
+  border-color: rgba(59, 29, 109, .15);
+  border-top: 4px solid #ff8a00;
+  background: rgba(255, 255, 255, .94);
+  box-shadow: 0 26px 70px rgba(59, 29, 109, .14);
+}
+
+.admin-page .admin-login-security {
+  color: #00575b;
+  background: #dff7f6;
+}
+
+.admin-page .admin-login-security i,
+.admin-page .admin-login-card .eyebrow { color: #006b70; }
+.admin-page .admin-login-card h2 { color: #3b1d6d; }
+
+.admin-page .admin-password-field:focus-within {
+  border-color: #21c7c6;
+  box-shadow: 0 0 0 4px rgba(33, 199, 198, .18);
+}
+
+.admin-page .admin-password-field button { color: #006b70; }
+
+.admin-page .admin-login-card form .button.primary {
+  color: #291448;
+  background: #ff8a00;
+  box-shadow: 0 10px 24px rgba(59, 29, 109, .16);
+}
+
+.admin-page .admin-login-card form .button.primary:hover,
+.admin-page .admin-login-card form .button.primary:focus-visible {
+  color: #291448;
+  background: #ffac47;
+}
+
+.admin-page .admin-return-link { color: #3b1d6d; }
+.admin-page .admin-return-link:hover,
+.admin-page .admin-return-link:focus-visible { color: #006b70; }

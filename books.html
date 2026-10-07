@@ -10,7 +10,7 @@
     <link rel="canonical" href="https://www.monstersnow.com/books" />
     <title>Books | MonstersNOW Story Catalog</title>
     <link rel="icon" href="assets/brand/monstersnow-icon-32-v1.png" type="image/png" sizes="32x32" />
-    <link rel="stylesheet" href="styles.css?v=20260923-no-count-strips" />
+    <link rel="stylesheet" href="styles.css?v=20261007-books-hero-v2" />
     <link rel="stylesheet" href="cover-art.css?v=20260921-mobile-catalog" />
     <link rel="stylesheet" href="storefront.css?v=20261002-public-storefront" />
     <link rel="apple-touch-icon" href="assets/brand/monstersnow-icon-180-v1.png" />
@@ -52,24 +52,36 @@
             <a class="button primary" href="create.html?story=halloween-monster-night">Personalize the Ready Story</a>
             <a class="button secondary" href="#catalog">See Story Options</a>
           </div>
-          <p class="availability-note"><strong>Ready now:</strong> Halloween Monster Night · 32 pages · Ages 2–8</p>
+          <div class="books-availability" aria-label="Halloween Monster Night is ready now">
+            <span class="books-availability-status"><i aria-hidden="true"></i>Ready now</span>
+            <strong>Halloween Monster Night</strong>
+            <span>32 pages <b aria-hidden="true">·</b> Ages 3–8</span>
+          </div>
         </div>
 
         <div class="book-hero-showcase" role="group" aria-label="A personalized MonstersNOW storybook made from a child's drawing">
           <figure class="book-hero-main">
-            <img
-              src="assets/master-references/consistent-monster-adventure-spread-v5-desk.jpg"
-              alt="An open personalized storybook resting on a warm wooden desk, with one purple monster looking along a continuous garden path toward a distant castle."
-            />
-            <figcaption>A story starring their monster</figcaption>
+            <picture>
+              <source
+                type="image/avif"
+                srcset="assets/hero-storybook-720.avif 720w, assets/hero-storybook-1361.avif 1361w"
+                sizes="(max-width: 1320px) 90vw, 48vw"
+              />
+              <img
+                src="assets/hero-storybook-v2.png"
+                alt="A child's monster drawing becoming the same hand-painted character inside an open storybook."
+                width="1361"
+                height="1156"
+              />
+            </picture>
           </figure>
-          <figure class="book-hero-drawing">
-            <img
-              src="assets/master-references/input-drawing-purple-clean-v2.png"
-              alt="The original purple monster drawing used to create the storybook character."
-            />
-            <figcaption>Made from their drawing</figcaption>
-          </figure>
+          <div class="book-hero-steps" aria-label="Draw it, meet it, read it">
+            <span><i>1</i>Draw it</span>
+            <b aria-hidden="true">→</b>
+            <span><i>2</i>Meet it</span>
+            <b aria-hidden="true">→</b>
+            <span><i>3</i>Read it</span>
+          </div>
         </div>
       </section>
 
@@ -91,13 +103,13 @@
         <div class="story-catalog-grid">
           <article class="story-card featured-story-card" id="halloween">
             <figure class="personalized-cover cover-halloween">
-              <img class="series-cover-image" src="assets/storybook/cover-series/minimal-concepts/halloween-monster-night-v2-web.jpg" alt="Halloween Monster Night sample cover" />
+              <img class="series-cover-image" src="assets/storybook/cover-series/minimal-concepts/halloween-monster-night-v5-web.jpg" alt="Halloween Monster Night cinematic neighborhood cover" />
             </figure>
             <span class="story-status available">Ready to personalize</span>
             <h3>Halloween Monster Night</h3>
             <p>A cozy trick-or-treat story with costumes, porch lights, pumpkins, and a friendly monster finding courage.</p>
             <div class="story-meta">
-              <span>Ages 2-8</span>
+              <span>Ages 3–8</span>
               <span>32 pages</span>
             </div>
             <a class="story-card-action" href="create.html?story=halloween-monster-night">Choose this story <span aria-hidden="true">→</span></a>
@@ -105,13 +117,13 @@
 
           <article class="story-card">
             <figure class="personalized-cover cover-adventure">
-              <img class="series-cover-image" src="assets/storybook/cover-series/minimal-concepts/big-adventure-v2-web.jpg" alt="Big Adventure sample cover" loading="lazy" />
+              <img class="series-cover-image" src="assets/storybook/cover-series/minimal-concepts/big-adventure-v4-web.jpg" alt="Big Adventure illustrated cover" loading="lazy" />
             </figure>
             <span class="story-status soon">In development</span>
             <h3>Big Adventure</h3>
             <p>A classic journey where the child's monster explores a magical world and finds courage.</p>
             <div class="story-meta">
-              <span>Ages 2-8</span>
+              <span>Ages 3–8</span>
               <span>Giftable</span>
             </div>
             <span class="story-card-note">Preview title—not yet available to order</span>
@@ -119,7 +131,7 @@
 
           <article class="story-card">
             <figure class="personalized-cover cover-bedtime">
-              <img class="series-cover-image" src="assets/storybook/cover-series/minimal-concepts/bedtime-monster-v2-web.jpg" alt="Bedtime Monster sample cover" loading="lazy" />
+              <img class="series-cover-image" src="assets/storybook/cover-series/minimal-concepts/bedtime-monster-v5-web.jpg" alt="Bedtime Monster illustrated cover" loading="lazy" />
             </figure>
             <span class="story-status soon">In development</span>
             <h3>Bedtime Monster</h3>
@@ -133,13 +145,13 @@
 
           <article class="story-card">
             <figure class="personalized-cover cover-abc">
-              <img class="series-cover-image" src="assets/storybook/cover-series/minimal-concepts/abc-monster-book-v2-web.jpg" alt="ABC Monster Book sample cover" loading="lazy" />
+              <img class="series-cover-image" src="assets/storybook/cover-series/minimal-concepts/abc-monster-book-v4-web.jpg" alt="ABC Monster Book illustrated cover" loading="lazy" />
             </figure>
             <span class="story-status soon">In development</span>
             <h3>ABC Monster Book</h3>
             <p>Letters and playful scenes built around the child's monster for early learning.</p>
             <div class="story-meta">
-              <span>Ages 2-6</span>
+              <span>Ages 3–8</span>
               <span>Learning</span>
             </div>
             <span class="story-card-note">Preview title—not yet available to order</span>
@@ -147,13 +159,13 @@
 
           <article class="story-card">
             <figure class="personalized-cover cover-counting">
-              <img class="series-cover-image" src="assets/storybook/cover-series/minimal-concepts/counting-with-my-monster-v2-web.jpg" alt="Counting with My Monster sample cover" loading="lazy" />
+              <img class="series-cover-image" src="assets/storybook/cover-series/minimal-concepts/counting-with-my-monster-v4-web.jpg" alt="Counting with My Monster illustrated cover" loading="lazy" />
             </figure>
             <span class="story-status soon">In development</span>
             <h3>Counting with My Monster</h3>
             <p>A number book that turns counting practice into a silly monster hunt.</p>
             <div class="story-meta">
-              <span>Ages 2-6</span>
+              <span>Ages 3–8</span>
               <span>Numbers</span>
             </div>
             <span class="story-card-note">Preview title—not yet available to order</span>
@@ -161,13 +173,13 @@
 
           <article class="story-card">
             <figure class="personalized-cover cover-kindness">
-              <img class="series-cover-image" src="assets/storybook/cover-series/minimal-concepts/the-monster-who-lost-their-glow-v3-web.jpg" alt="The Monster Who Lost Their Glow sample cover" loading="lazy" />
+              <img class="series-cover-image" src="assets/storybook/cover-series/minimal-concepts/the-monster-who-lost-their-glow-v5-web.jpg" alt="The Monster Who Lost Their Glow illustrated cover" loading="lazy" />
             </figure>
             <span class="story-status soon">In development</span>
             <h3>The Monster Who Lost Their Glow</h3>
             <p>A heartfelt story about a monster whose light returns through friendship, courage, and small acts of kindness.</p>
             <div class="story-meta">
-              <span>Ages 2-8</span>
+              <span>Ages 3–8</span>
               <span>Values</span>
             </div>
             <span class="story-card-note">Preview title—not yet available to order</span>
@@ -175,13 +187,13 @@
 
           <article class="story-card">
             <figure class="personalized-cover cover-birthday">
-              <img class="series-cover-image" src="assets/storybook/cover-series/minimal-concepts/birthday-monster-adventure-v2-web.jpg" alt="Birthday Monster Adventure sample cover" loading="lazy" />
+              <img class="series-cover-image" src="assets/storybook/cover-series/minimal-concepts/birthday-monster-adventure-v4-web.jpg" alt="Birthday Monster Adventure illustrated cover" loading="lazy" />
             </figure>
             <span class="story-status soon">In development</span>
             <h3>Birthday Monster Adventure</h3>
             <p>A personalized celebration story that turns their monster into the party guest of honor.</p>
             <div class="story-meta">
-              <span>Ages 2-8</span>
+              <span>Ages 3–8</span>
               <span>Birthday</span>
             </div>
             <span class="story-card-note">Preview title—not yet available to order</span>
@@ -254,7 +266,7 @@
 
     <footer class="site-footer">
       <div class="footer-intro">
-        <a class="footer-brand" href="index.html" aria-label="MonstersNow.com home"><img src="assets/brand/monstersnow-stacked-v1.png" alt="" width="640" height="331" loading="lazy" /></a>
+        <a class="footer-brand" href="index.html" aria-label="MonstersNow.com home"><img src="assets/brand/monstersnow-stacked-footer-v1.png" alt="" width="700" height="361" loading="lazy" /></a>
         <p>Big stories from little imaginations.</p>
       </div>
       <nav aria-label="Footer navigation">
