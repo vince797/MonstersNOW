@@ -2217,6 +2217,30 @@ main > section {
   opacity: 0.78;
 }
 
+.is-preview-error .monster-preview {
+  min-height: clamp(220px, 38vw, 320px);
+  padding: 52px 18px 18px;
+  background:
+    linear-gradient(145deg, rgba(247, 239, 253, 0.9), rgba(255, 248, 238, 0.96)),
+    #fff;
+}
+
+.is-preview-error .monster-preview img {
+  width: min(420px, 94%);
+  max-height: 250px;
+  border: 6px solid #fff;
+  border-radius: 14px;
+  box-shadow: 0 12px 28px rgba(35, 20, 65, 0.14);
+  mix-blend-mode: normal;
+  object-fit: contain;
+}
+
+.is-preview-error .preview-badge {
+  color: var(--navy);
+  border-color: #e1d4ef;
+  background: rgba(255, 255, 255, 0.94);
+}
+
 .is-generating-preview .monster-preview {
   background:
     radial-gradient(circle at 50% 44%, rgba(127, 75, 185, 0.14), transparent 34%),
@@ -6419,6 +6443,30 @@ body .create-flow-section .result-panel {
 
 body .create-flow-section .monster-preview {
   min-height: clamp(500px,42vw,610px);
+}
+
+body .create-flow-section .is-preview-error .monster-preview {
+  min-height: clamp(240px,32vw,330px);
+}
+
+body .create-flow-section .is-preview-error .result-trust-points {
+  display: none;
+}
+
+body .create-flow-section .is-preview-error #regenerate-monster {
+  min-height: 52px;
+  background: var(--orange);
+  border-color: var(--orange);
+  color: var(--navy);
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+body .create-flow-section .is-preview-error #regenerate-monster:hover,
+body .create-flow-section .is-preview-error #regenerate-monster:focus-visible {
+  background: var(--orange-dark);
+  border-color: var(--orange-dark);
+  color: #fff;
 }
 
 body .create-flow-section .result-content {

@@ -126,7 +126,7 @@ test("selector UI exposes only supported controls and states the current renderi
   assert.match(css, /\.child-preview-character/);
   assert.match(html, /child-selector\.css\?v=20261006-skin-age-v1/);
   assert.match(html, /scripts\/child-selector\.js\?v=20261006-skin-age-v1/);
-  assert.match(html, /scripts\/main\.js\?v=20261006-editor-v1/);
+  assert.match(html, /scripts\/main\.js\?v=20261007-preview-reliability-v1/);
 });
 
 test("character studio includes lightweight changing storybook previews", () => {

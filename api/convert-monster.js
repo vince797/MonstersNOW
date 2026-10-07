@@ -20,9 +20,11 @@ const { validateMonsterDrawing } = require("../lib/drawing-validator");
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 const IMAGE_MODEL = process.env.OPENAI_IMAGE_MODEL || "gpt-image-1.5";
 const IMAGE_QUALITY = process.env.OPENAI_IMAGE_QUALITY || "low";
-const FUNCTION_TIME_BUDGET_MS = 60 * 1000;
-const FUNCTION_TIMEOUT_BUFFER_MS = 6 * 1000;
-const COLORING_PAGE_MIN_BUDGET_MS = 18 * 1000;
+const FUNCTION_TIME_BUDGET_MS = 180 * 1000;
+const FUNCTION_TIMEOUT_BUFFER_MS = 15 * 1000;
+const COLORING_PAGE_MIN_BUDGET_MS = 35 * 1000;
+const MONSTER_OUTPUT_FORMAT = "jpeg";
+const MONSTER_OUTPUT_COMPRESSION = 85;
 const FALLBACK_IMAGE_MODELS = ["gpt-image-1"];
 
 const characterReferenceImages = [
@@ -76,13 +78,17 @@ module.exports = async function handler(request, response) {
     });
   }
 
+  const startedAt = Date.now();
   let previewRecord;
+  let stage = "submission";
+
   try {
     await requireSubmission(submissionId, submissionToken);
-    const startedAt = Date.now();
+    stage = "drawing-validation";
     await validateMonsterDrawing(drawing, {
       timeoutMs: Math.min(12 * 1000, getRemainingRequestBudget(startedAt)),
     });
+    stage = "preview-record";
     previewRecord = await startMonsterPreview({
       submissionId,
       token: submissionToken,
@@ -90,7 +96,9 @@ module.exports = async function handler(request, response) {
       styleId: style,
       model: IMAGE_MODEL,
     });
+    stage = "reference-images";
     const references = await loadReferenceImages();
+    stage = "monster-generation";
     const monsterImage = await createMonsterImage(
       drawing,
       references,
@@ -98,18 +106,29 @@ module.exports = async function handler(request, response) {
       variationNumber,
       getRemainingRequestBudget(startedAt),
     );
+    stage = "coloring-page";
     const { coloringPage, warnings } = await createOptionalColoringPage(
       monsterImage,
       references,
       getRemainingRequestBudget(startedAt),
     );
 
+    stage = "persistence";
     const persistedPreview = await completeMonsterPreview({
       submissionId,
       token: submissionToken,
       previewId: previewRecord.id,
       monsterImage,
       coloringPage,
+    });
+
+    console.info("Monster preview generation completed", {
+      elapsedMs: Date.now() - startedAt,
+      generatedColoringPage: Boolean(coloringPage),
+      monsterOutputFormat: MONSTER_OUTPUT_FORMAT,
+      stage: "complete",
+      style,
+      variationNumber,
     });
 
     return response.status(200).json({
@@ -127,10 +146,21 @@ module.exports = async function handler(request, response) {
         : "Monster preview created. Coloring page will be prepared in the browser.",
     });
   } catch (error) {
-    await failMonsterPreview({ submissionId, previewId: previewRecord?.id, code: error?.code });
-    console.error("Monster preview generation failed", formatErrorForLog(error));
+    try {
+      await failMonsterPreview({ submissionId, previewId: previewRecord?.id, code: error?.code });
+    } catch (persistenceError) {
+      console.warn("Could not record failed monster preview", formatErrorForLog(persistenceError));
+    }
 
-    return response.status(error.status >= 400 && error.status < 500 ? error.status : 502).json({
+    console.error("Monster preview generation failed", {
+      ...formatErrorForLog(error),
+      elapsedMs: Date.now() - startedAt,
+      stage,
+    });
+
+    const responseStatus = error.status >= 400 && error.status < 600 ? error.status : 502;
+
+    return response.status(responseStatus).json({
       code: error.code || "monster_generator_unavailable",
       error: error.status >= 400 && error.status < 500 ? error.message : "The monster generator is temporarily unavailable.",
     });
@@ -206,6 +236,8 @@ async function createMonsterImage(drawing, references, style, variationNumber, t
     images: [dataUrlToImagePart(drawing, "drawing.jpg"), ...references.characterStyle],
     size: "1024x1024",
     timeoutMs,
+    outputFormat: MONSTER_OUTPUT_FORMAT,
+    outputCompression: MONSTER_OUTPUT_COMPRESSION,
   });
 }
 
@@ -252,13 +284,14 @@ async function createColoringPage(monsterImage, references, timeoutMs) {
       "White background. No text. No logo. Kid-friendly.",
     ].join(" "),
     negativePrompt: MONSTERSNOW_COLORING_PAGE_NEGATIVE_PROMPT,
-    images: [dataUrlToImagePart(monsterImage, "monster-preview.png"), references.coloringPage],
+    images: [dataUrlToImagePart(monsterImage, "monster-preview.jpg"), references.coloringPage],
     size: "1024x1024",
     timeoutMs,
+    outputFormat: "png",
   });
 }
 
-async function createImageEdit({ prompt, negativePrompt, images, size, timeoutMs }) {
+async function createImageEdit({ prompt, negativePrompt, images, size, timeoutMs, outputFormat = "png", outputCompression }) {
   const models = getImageModels();
   let lastError;
 
@@ -272,6 +305,8 @@ async function createImageEdit({ prompt, negativePrompt, images, size, timeoutMs
         images,
         size,
         timeoutMs,
+        outputFormat,
+        outputCompression,
       });
     } catch (error) {
       lastError = error;
@@ -320,7 +355,7 @@ function shouldRetryWithFallbackModel(error, index, models) {
   );
 }
 
-async function requestImageEdit({ model, prompt, images, size, timeoutMs }) {
+async function requestImageEdit({ model, prompt, images, size, timeoutMs, outputFormat = "png", outputCompression }) {
   const formData = new FormData();
   const controller = new AbortController();
   const requestTimeoutMs = Number.isFinite(timeoutMs)
@@ -333,7 +368,11 @@ async function requestImageEdit({ model, prompt, images, size, timeoutMs }) {
   formData.append("n", "1");
   formData.append("size", size);
   formData.append("quality", IMAGE_QUALITY);
-  formData.append("output_format", "png");
+  formData.append("output_format", outputFormat);
+
+  if (Number.isFinite(outputCompression) && outputFormat !== "png") {
+    formData.append("output_compression", String(outputCompression));
+  }
 
   images.forEach((image, index) => {
     formData.append(
@@ -385,7 +424,19 @@ async function requestImageEdit({ model, prompt, images, size, timeoutMs }) {
     throw new Error("OpenAI did not return image data.");
   }
 
-  return `data:image/png;base64,${base64}`;
+  return `data:${getOutputMimeType(outputFormat)};base64,${base64}`;
+}
+
+function getOutputMimeType(outputFormat) {
+  if (outputFormat === "jpeg" || outputFormat === "jpg") {
+    return "image/jpeg";
+  }
+
+  if (outputFormat === "webp") {
+    return "image/webp";
+  }
+
+  return "image/png";
 }
 
 function dataUrlToImagePart(dataUrl, filename) {

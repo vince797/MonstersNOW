@@ -178,6 +178,8 @@ let isCharacterStepVisible = false;
 let monsterSubmission;
 let checkoutSubmissionId;
 let isGeneratingPreview = false;
+let previewGenerationFailed = false;
+let previewRetryAvailable = false;
 let storySceneMonsterVersion = 0;
 let uploadDragDepth = 0;
 let uploadSelectionId = 0;
@@ -720,6 +722,8 @@ async function requestMonsterPreview() {
   }
 
   isGeneratingPreview = true;
+  previewGenerationFailed = false;
+  previewRetryAvailable = false;
   showUploadError("");
   if (resultPanel) resultPanel.hidden = false;
   converterTool?.classList.remove("is-upload-only");
@@ -752,6 +756,8 @@ async function requestMonsterPreview() {
 }
 
 function applyMonsterResult(result) {
+  previewGenerationFailed = false;
+  previewRetryAvailable = false;
   const style = normalizePreviewStyle(result.style);
   const preview = addGeneratedPreview({
     id: result.previewId,
@@ -896,6 +902,8 @@ function resetPreviewState() {
   checkoutSubmissionId = undefined;
   try { sessionStorage.removeItem("monstersnow_monster_submission"); } catch {}
   isGeneratingPreview = false;
+  previewGenerationFailed = false;
+  previewRetryAvailable = false;
 
   if (monsterPreview) {
     monsterPreview.src = demoMonsterImage;
@@ -956,7 +964,8 @@ function syncPreviewControls() {
   const remaining = Math.max(0, maxFreePreviews - previewsUsed);
   const canGenerate = Boolean(selectedDrawingFile) && remaining > 0 && !isGeneratingPreview;
   const hasPreview = generatedPreviews.length > 0;
-  const shouldShowConvertButton = Boolean(selectedDrawingFile) && !hasPreview;
+  const canRetryFailedPreview = previewGenerationFailed && previewRetryAvailable && Boolean(selectedDrawingFile) && !hasPreview;
+  const shouldShowConvertButton = Boolean(selectedDrawingFile) && !hasPreview && !previewGenerationFailed;
   const primaryText = previewsUsed === 0 ? "Continue to monster preview" : "Try Another Version";
   const buttonText = isGeneratingPreview
     ? "Creating..."
@@ -973,17 +982,19 @@ function syncPreviewControls() {
   }
 
   if (regenerateButton) {
-    regenerateButton.hidden = !hasPreview;
-    regenerateButton.disabled = !canGenerate || !hasPreview;
+    regenerateButton.hidden = !hasPreview && !canRetryFailedPreview;
+    regenerateButton.disabled = !canGenerate;
     regenerateButton.textContent = isGeneratingPreview
       ? "Creating..."
-      : remaining > 0
-        ? "Try Another Version"
-        : "Preview Limit Reached";
+      : canRetryFailedPreview
+        ? "Try Preview Again"
+        : remaining > 0
+          ? "Try Another Version"
+          : "Preview Limit Reached";
   }
 
   if (resultActions) {
-    resultActions.hidden = !hasPreview;
+    resultActions.hidden = !hasPreview && !canRetryFailedPreview;
   }
 
   if (confirmMonsterButton) {
@@ -1030,17 +1041,26 @@ function syncPreviewControls() {
 
 function updatePreviewPresentation(hasPreview) {
   const isCreatingFirstPreview = isGeneratingPreview && !hasPreview;
+  const isFailedFirstPreview = previewGenerationFailed && !hasPreview && !isCreatingFirstPreview;
 
   resultPanel?.classList.toggle("has-generated-preview", hasPreview);
-  resultPanel?.classList.toggle("is-example-preview", !hasPreview && !isCreatingFirstPreview);
+  resultPanel?.classList.toggle("is-example-preview", !hasPreview && !isCreatingFirstPreview && !isFailedFirstPreview);
   resultPanel?.classList.toggle("is-generating-preview", isCreatingFirstPreview);
+  resultPanel?.classList.toggle("is-preview-error", isFailedFirstPreview);
+
+  if (isFailedFirstPreview && monsterPreview && drawingPreviewUrl) {
+    monsterPreview.src = drawingPreviewUrl;
+    monsterPreview.alt = "The selected monster drawing, ready to try again.";
+  }
 
   if (monsterPreviewBadge) {
     monsterPreviewBadge.textContent = hasPreview
       ? "Your preview"
       : isCreatingFirstPreview
         ? "Creating preview"
-        : "Example preview";
+        : isFailedFirstPreview
+          ? "Drawing still selected"
+          : "Example preview";
   }
 }
 
@@ -1563,6 +1583,8 @@ async function convertMonster(drawing, style, variationNumber, savedSubmission) 
 
 function showMonsterGenerationError(error) {
   const hasPreview = generatedPreviews.length > 0;
+  previewGenerationFailed = !hasPreview;
+  previewRetryAvailable = !hasPreview;
   const persistenceUnavailable = [
     "monster_persistence_unavailable",
     "story_database_error",
@@ -1571,19 +1593,21 @@ function showMonsterGenerationError(error) {
   ].includes(error?.code);
 
   if (persistenceUnavailable) {
-    const message = "We couldn't safely save the drawing, so no preview was created. Nothing was charged and no free preview was used. Retry in a moment.";
+    const message = "We couldn't save this preview attempt. Your drawing is still selected, and no free preview was used. Please try again.";
     showUploadError(message);
-    if (converterStatus) converterStatus.textContent = "Preview paused before generation.";
+    if (converterStatus) converterStatus.textContent = hasPreview ? "New version needs another try." : "Preview needs another try.";
     if (converterNote) converterNote.textContent = hasPreview
       ? "Your existing preview is still available. Retry when the save service is back."
       : message;
-    setUploadActionStatus("Save service unavailable. Retry to create the preview; the generator was not called.");
+    syncPreviewControls();
+    setUploadActionStatus("Your drawing is still selected. The generator was not called. Try the preview again.");
     setConverterStage(selectedDrawingFile ? "preview" : "upload");
     scrollToResultPanel({ focus: true, delay: 120 });
     return;
   }
 
   if (error?.code === "monster_drawing_not_found") {
+    previewRetryAvailable = false;
     const message = "We couldn't find a clear monster drawing in this photo. Try a closer, brighter picture with the artwork filling most of the frame.";
     showUploadError(message);
     if (converterStatus) converterStatus.textContent = "This photo needs a different picture.";
@@ -1595,18 +1619,32 @@ function showMonsterGenerationError(error) {
     return;
   }
 
+  if (error?.code === "openai_image_timeout" || error?.status === 504) {
+    const message = "This preview took longer than expected. Your drawing is still selected, and no free preview was used. Please try again.";
+    showUploadError(message);
+    if (converterStatus) converterStatus.textContent = hasPreview ? "New version needs another try." : "Preview needs another try.";
+    if (converterNote) converterNote.textContent = hasPreview
+      ? "Your existing preview is still available. Try another version again."
+      : message;
+    syncPreviewControls();
+    setUploadActionStatus("Your drawing is still selected. Try the preview again.");
+    setConverterStage(selectedDrawingFile ? "preview" : "upload");
+    scrollToResultPanel({ focus: true, delay: 120 });
+    return;
+  }
+
   if (converterStatus) {
-    converterStatus.textContent = hasPreview ? "New version could not be created." : "Preview was not created.";
+    converterStatus.textContent = hasPreview ? "New version needs another try." : "Preview needs another try.";
   }
 
   if (converterNote) {
     converterNote.textContent = hasPreview
       ? "Your existing preview is still available. Try another version again in a moment."
-      : "The generator could not finish. Your drawing is still selected, and this did not use one of your free previews.";
+      : "Your drawing is still selected, and no free preview was used. Please try again.";
   }
 
   syncPreviewControls();
-  setUploadActionStatus("The generator could not finish. Try again in a moment.");
+  setUploadActionStatus("Your drawing is still selected. Try the preview again.");
   setConverterStage(selectedDrawingFile ? "preview" : "upload");
   scrollToResultPanel({ focus: true, delay: 120 });
 }

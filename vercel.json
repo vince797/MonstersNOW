@@ -19,7 +19,7 @@
       "includeFiles": "lib/**"
     },
     "api/convert-monster.js": {
-      "maxDuration": 60,
+      "maxDuration": 180,
       "includeFiles": "assets/master-references/**"
     },
     "api/convert-heic.js": {
