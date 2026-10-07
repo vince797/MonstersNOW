@@ -98,6 +98,8 @@ const childRenderedPreview = document.querySelector("#child-rendered-preview");
 const childRenderButton = document.querySelector("#render-child-character");
 const childRenderStatus = document.querySelector("#child-render-status");
 const childRenderProgress = document.querySelector("#child-render-progress");
+const childRenderElapsed = document.querySelector("#child-render-elapsed");
+const childRenderProgressSteps = [...document.querySelectorAll("[data-child-render-step]")];
 const bookOfferStatus = document.querySelector("#book-offer-status");
 const storybookInterestButton = document.querySelector("#storybook-interest");
 const storybookInterestForm = document.querySelector("#storybook-interest-form");
@@ -186,6 +188,8 @@ let heicConverterPromise;
 let isPreparingUpload = false;
 let monsterProgressTimer;
 let monsterProgressStartedAt = 0;
+let childRenderProgressTimer;
+let childRenderProgressStartedAt = 0;
 
 if (monsterUpload && drawingPreview && monsterPreview && convertButton) {
   monsterUpload.addEventListener("change", () => {
@@ -549,6 +553,37 @@ function markRenderedChildStale() {
   if (childPreviewModeText) childPreviewModeText.textContent = "Changes ready";
 }
 
+function showChildRenderProgress() {
+  if (!childRenderProgress) return;
+  childRenderProgress.hidden = false;
+  childRenderProgressStartedAt = Date.now();
+  updateChildRenderProgress();
+  childRenderProgressTimer = window.setInterval(updateChildRenderProgress, 1000);
+}
+
+function updateChildRenderProgress() {
+  if (!childRenderProgressStartedAt) return;
+  const elapsed = Math.max(0, Math.floor((Date.now() - childRenderProgressStartedAt) / 1000));
+  const activeStep = elapsed >= 35 ? 3 : 2;
+  childRenderProgressSteps.forEach((item) => {
+    const step = Number(item.dataset.childRenderStep);
+    item.classList.toggle("is-complete", step < activeStep);
+    item.classList.toggle("is-active", step === activeStep);
+  });
+  if (childRenderElapsed) {
+    childRenderElapsed.textContent = elapsed < 3
+      ? "Just started"
+      : `${elapsed} seconds elapsed · Still working`;
+  }
+}
+
+function hideChildRenderProgress() {
+  if (childRenderProgress) childRenderProgress.hidden = true;
+  if (childRenderProgressTimer) window.clearInterval(childRenderProgressTimer);
+  childRenderProgressTimer = undefined;
+  childRenderProgressStartedAt = 0;
+}
+
 function syncPremiumDefault(profile = getSelectedChildCharacter()) {
   if (!childPremiumDefault) return;
   const included = Boolean(profile?.included);
@@ -598,7 +633,7 @@ async function renderBookCharacter() {
   childRenderButton.disabled = true;
   childRenderButton.textContent = "Applying choices…";
   if (childPreviewModeText) childPreviewModeText.textContent = renderedChildImage ? "Updating avatar" : "Creating avatar";
-  if (childRenderProgress) childRenderProgress.hidden = false;
+  showChildRenderProgress();
   if (childRenderStatus) childRenderStatus.textContent = "Building the dimensional, book-ready character. This usually takes under a minute.";
 
   try {
@@ -644,7 +679,7 @@ async function renderBookCharacter() {
   } finally {
     isRenderingChild = false;
     childRenderButton.disabled = false;
-    if (childRenderProgress) childRenderProgress.hidden = true;
+    hideChildRenderProgress();
   }
 }
 

@@ -797,30 +797,63 @@
 .child-render-progress {
   position: absolute;
   z-index: 8;
-  inset: 0;
+  inset: 18px;
   display: grid;
-  place-content: center;
+  align-content: center;
   justify-items: center;
-  gap: 10px;
-  padding: 34px;
-  background: rgba(255,251,246,.9);
+  padding: clamp(20px, 4vw, 38px);
+  background: rgba(255,255,255,.91);
+  border: 1px solid rgba(81,31,120,.1);
+  border-radius: 18px;
   color: #3b1d6d;
+  box-shadow: 0 20px 50px rgba(68,25,99,.12);
   text-align: center;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(12px);
 }
 .child-render-progress[hidden] { display: none; }
-.child-render-progress i {
-  width: 54px;
-  height: 54px;
-  border: 6px solid #e8dcef;
-  border-top-color: #ff8a00;
-  border-right-color: #21c7c6;
+.child-render-progress-spinner {
+  position: relative;
+  display: grid;
+  width: 66px;
+  height: 66px;
+  place-items: center;
+  margin-bottom: 16px;
+  background: linear-gradient(145deg, #6ee5e2, #8b55e7 60%, #ff7a18);
   border-radius: 50%;
-  animation: child-render-spin .9s linear infinite;
+  box-shadow: 0 15px 32px rgba(81,31,120,.2);
+  animation: child-render-spin 1.6s linear infinite;
 }
-.child-render-progress strong { font-size: 1.12rem; }
-.child-render-progress small { max-width: 32ch; color: #665c70; font-size: .72rem; line-height: 1.45; }
+.child-render-progress-spinner::before {
+  position: absolute;
+  inset: 6px;
+  background: #fff;
+  border-radius: 50%;
+  content: "";
+}
+.child-render-progress-spinner i {
+  position: relative;
+  z-index: 1;
+  width: 24px;
+  height: 24px;
+  background: #ff7a18;
+  border: 7px solid #42166e;
+  border-radius: 46% 54% 48% 52%;
+}
+.child-render-progress > small { color: #00727a; font-size: .67rem; font-weight: 950; letter-spacing: .13em; text-transform: uppercase; }
+.child-render-progress > strong { max-width: 18ch; margin-top: 7px; font-size: clamp(1.45rem, 3vw, 2.15rem); line-height: 1.02; letter-spacing: -.035em; }
+.child-render-progress > p { max-width: 42ch; margin: 10px 0 0; color: #675d70; font-size: .78rem; line-height: 1.45; }
+.child-render-progress-track { position: relative; width: min(340px, 86%); height: 8px; margin-top: 18px; overflow: hidden; background: #ece5f2; border-radius: 999px; }
+.child-render-progress-track i { position: absolute; inset-block: 0; left: -35%; width: 35%; background: linear-gradient(90deg, #39c5c7, #8b55e7, #ff7a18); border-radius: inherit; animation: child-render-slide 1.5s ease-in-out infinite; }
+.child-render-progress-steps { display: grid; width: min(360px, 92%); grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 16px 0 0; padding: 0; list-style: none; }
+.child-render-progress-steps li { display: grid; justify-items: center; gap: 5px; color: #91879a; font-size: .66rem; font-weight: 850; }
+.child-render-progress-steps li > i { display: grid; width: 27px; height: 27px; place-items: center; background: #eee8f2; border-radius: 50%; color: #706779; font-size: .65rem; font-style: normal; }
+.child-render-progress-steps li.is-active { color: #35115f; }
+.child-render-progress-steps li.is-active > i { background: #ff7a18; box-shadow: 0 0 0 5px rgba(255,122,24,.13); color: #fff; }
+.child-render-progress-steps li.is-complete { color: #00727a; }
+.child-render-progress-steps li.is-complete > i { background: #39c5c7; color: #fff; }
+.child-render-progress > em { margin-top: 13px; color: #776d80; font-size: .67rem; font-style: normal; font-weight: 800; }
 @keyframes child-render-spin { to { transform: rotate(360deg); } }
+@keyframes child-render-slide { 0% { left: -35%; } 60%, 100% { left: 100%; } }
 
 .child-render-actions {
   display: grid;
@@ -911,15 +944,26 @@
   .child-render-actions p { font-size: .63rem; }
   .child-editor-controls { padding: 10px; border-radius: 17px; }
   .child-presentation-options span { min-height: 46px; padding: 6px 8px; }
+  .child-render-progress { inset: 8px; padding: 13px 10px; border-radius: 14px; }
+  .child-render-progress-spinner { width: 48px; height: 48px; margin-bottom: 9px; }
+  .child-render-progress-spinner::before { inset: 5px; }
+  .child-render-progress-spinner i { width: 18px; height: 18px; border-width: 5px; }
+  .child-render-progress > small { font-size: .56rem; }
+  .child-render-progress > strong { margin-top: 5px; font-size: 1.2rem; }
+  .child-render-progress > p { margin-top: 6px; font-size: .65rem; line-height: 1.35; }
+  .child-render-progress-track { height: 6px; margin-top: 10px; }
+  .child-render-progress-steps { margin-top: 10px; }
+  .child-render-progress-steps li { gap: 3px; font-size: .57rem; }
+  .child-render-progress-steps li > i { width: 23px; height: 23px; font-size: .56rem; }
+  .child-render-progress > em { margin-top: 8px; font-size: .58rem; }
 }
 
 @media (max-width: 430px) {
   .child-preview-stage { height: 300px; min-height: 300px; }
   .child-preview-character { width: 74%; height: 97%; }
-  .child-render-progress { padding: 24px; }
-  .child-render-progress i { width: 46px; height: 46px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .child-render-progress i { animation: none; }
+  .child-render-progress-spinner,
+  .child-render-progress-track i { animation: none; }
 }

@@ -150,9 +150,9 @@ test("selector UI is a true layered character editor with a MonstersNOW storyboo
   assert.match(css, /\.child-live-preview \{[\s\S]*position: sticky/);
   assert.match(css, /\.child-presence-toggle label\.is-selected::after/);
   assert.match(css, /\.child-preview-character/);
-  assert.match(html, /child-selector\.css\?v=20261007-mobile-containment-v12/);
+  assert.match(html, /child-selector\.css\?v=20261007-character-loader-v13/);
   assert.match(html, /scripts\/child-selector\.js\?v=20261007-avatar-continuity-v9/);
-  assert.match(html, /scripts\/main\.js\?v=20261007-avatar-continuity-v15/);
+  assert.match(html, /scripts\/main\.js\?v=20261007-character-loader-v16/);
   assert.match(mainScript, /childMonsterOnlyPreview\.src = monsterImage/);
   assert.match(mainScript, /classList\.toggle\("has-monster-only", showMonster\)/);
   assert.match(css, /\.child-monster-only-preview/);
@@ -166,6 +166,11 @@ test("selector UI is a true layered character editor with a MonstersNOW storyboo
   assert.match(mainScript, /previousChildImage/);
   assert.match(script, /Keep render lifecycle classes owned by main\.js/);
   assert.match(mainScript, /childRenderIsCurrent/);
+  assert.match(html, /id="child-render-elapsed"/);
+  assert.match(html, /data-child-render-step="3"/);
+  assert.match(mainScript, /function showChildRenderProgress/);
+  assert.match(mainScript, /elapsed >= 35 \? 3 : 2/);
+  assert.match(css, /\.child-render-progress-track/);
   assert.doesNotMatch(mainScript, /syncStorySceneMonster/);
   assert.doesNotMatch(mainScript, /removeConnectedWhiteBackground/);
 });
@@ -185,6 +190,20 @@ test("book render prompt preserves every independent editor choice", () => {
   assert.match(prompt, /transparent background/i);
   assert.match(prompt, /first supplied image as the character identity/i);
   assert.match(prompt, /Preserve.*recognizable face/i);
+  assert.match(prompt, /short individual box braids/i);
+  assert.match(prompt, /No bun, top knot, crown braid, braided updo/i);
+});
+
+test("girl braid renders require the two-braid thumbnail silhouette", () => {
+  const prompt = buildChildCharacterRenderPrompt({
+    id: "custom", presentation: "girl", skinTone: "light", hairStyle: "braids", hairColor: "blonde",
+    eyeColor: "brown", outfitStyle: "dress", outfitColor: "rose",
+    ageBand: "5-6", relativeHeight: "average", mobilityAid: "none",
+  });
+  assert.match(prompt, /two clearly separated, symmetrical shoulder-length three-strand braids/i);
+  assert.match(prompt, /one woven braid hanging on each side of the face/i);
+  assert.match(prompt, /selected hair color from root to tip/i);
+  assert.match(prompt, /selected hair.*authoritative.*override/i);
 });
 
 test("mobile result history uses a full-width readable monster choice", () => {
