@@ -150,8 +150,8 @@ test("selector UI is a true layered character editor with a MonstersNOW storyboo
   assert.match(css, /\.child-live-preview \{[\s\S]*position: sticky/);
   assert.match(css, /\.child-presence-toggle label\.is-selected::after/);
   assert.match(css, /\.child-preview-character/);
-  assert.match(html, /child-selector\.css\?v=20261007-premium-avatar-v7/);
-  assert.match(html, /scripts\/child-selector\.js\?v=20261007-premium-avatar-v7/);
+  assert.match(html, /child-selector\.css\?v=20261007-premium-hair-v8/);
+  assert.match(html, /scripts\/child-selector\.js\?v=20261007-premium-hair-v8/);
   assert.match(html, /scripts\/main\.js\?v=20261007-premium-avatar-v13/);
   assert.doesNotMatch(mainScript, /syncStorySceneMonster/);
   assert.doesNotMatch(mainScript, /removeConnectedWhiteBackground/);
@@ -199,6 +199,25 @@ test("premium editor defaults include optimized original feature-animation boy a
     assert.equal(fs.existsSync(asset), true, `${filename} should exist`);
     assert.ok(fs.statSync(asset).size > 100_000, `${filename} should be a detailed rendered asset`);
     assert.ok(fs.statSync(asset).size < 500_000, `${filename} should be optimized for the editor`);
+  }
+});
+
+test("hair selector includes premium boy and girl thumbnail sets", () => {
+  const html = fs.readFileSync(path.join(root, "create.html"), "utf8");
+  const selectorScript = fs.readFileSync(path.join(root, "scripts", "child-selector.js"), "utf8");
+  assert.match(html, /data-hair-thumbnail="curly"/);
+  assert.match(html, /Hair color is applied to the selected style in the premium avatar/);
+  assert.match(selectorScript, /hair-style-boy/);
+  assert.match(selectorScript, /--selected-hair-color/);
+  for (const presentation of ["girl", "boy"]) {
+    for (const style of ["short", "curls", "coils", "waves", "straight", "braids"]) {
+      const prefix = presentation === "boy" ? "hair-style-boy" : "hair-style";
+      const filename = `${prefix}-${style}-v1.webp`;
+      const asset = path.join(root, "assets", "child-editor", filename);
+      assert.equal(fs.existsSync(asset), true, `${filename} should exist`);
+      assert.ok(fs.statSync(asset).size > 10_000, `${filename} should retain detailed hair texture`);
+      assert.ok(fs.statSync(asset).size < 100_000, `${filename} should stay lightweight for the selector`);
+    }
   }
 });
 

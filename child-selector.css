@@ -288,12 +288,35 @@
   font-weight: 950;
   box-shadow: inset 0 -4px 0 rgba(0,0,0,.06);
 }
-.child-hair-style-options label > span::before { position: absolute; inset: -3px 3px 19px; border-radius: 50% 50% 35% 35%; background: #4a2c23; content: ""; }
-.child-hair-style-options [data-style="curly"]::before { inset: -5px 0 17px; background: radial-gradient(circle, #4a2c23 0 6px, transparent 6.5px) 0 0 / 12px 12px; }
-.child-hair-style-options [data-style="coils"]::before { inset: -5px -1px 16px; background: radial-gradient(circle, #2a1a18 0 5px, transparent 5.5px) 0 0 / 10px 10px; }
-.child-hair-style-options [data-style="wavy"]::before { inset: -4px 0 12px; border-radius: 55% 55% 25% 25%; box-shadow: -6px 12px 0 -1px #4a2c23, 6px 12px 0 -1px #4a2c23; }
-.child-hair-style-options [data-style="straight"]::before { inset: -4px 2px 8px; border-radius: 50% 50% 15% 15%; }
-.child-hair-style-options [data-style="braids"]::before { inset: -4px 2px 18px; box-shadow: -9px 18px 0 -4px #4a2c23, 9px 18px 0 -4px #4a2c23; }
+.child-hair-style-options label > span {
+  width: 48px;
+  height: 48px;
+  overflow: hidden;
+  border: 1px solid rgba(79,49,101,.12);
+  border-radius: 15px;
+  background: radial-gradient(circle at 50% 28%, #fff 0 52%, #f2eaf7 100%);
+  box-shadow: 0 4px 10px rgba(59,25,100,.12);
+}
+.child-hair-style-options label > span::after {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  z-index: 2;
+  width: 10px;
+  height: 10px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: var(--selected-hair-color, #38231d);
+  content: "";
+  box-shadow: 0 1px 4px rgba(34,20,42,.3);
+}
+.child-hair-style-options img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transform: scale(1.1);
+  transform-origin: center 42%;
+}
 .child-outfit-style-options { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .child-outfit-style-options label > span { background: #eee8f7; color: #5c2a87; }
 .child-outfit-builder { gap: 18px; }

@@ -34,6 +34,7 @@
     skinTone: "medium", hairStyle: "curly", hairColor: "dark-brown", eyeColor: "brown",
     outfitStyle: "overalls", outfitColor: "teal",
   };
+  const hairAssetNames = { short: "short", curly: "curls", coils: "coils", wavy: "waves", straight: "straight", braids: "braids" };
   const legacyProfiles = {
     "warm-curly-dark": ["warm", "curly", "dark-brown"], "deep-coils-black": ["deep", "coils", "black"],
     "medium-wavy-brown": ["medium", "wavy", "brown"], "golden-straight-black": ["golden", "straight", "black"],
@@ -234,6 +235,15 @@
     if (!root) return getProfile();
     refreshWheelchairControls();
     const profile = getProfile();
+    const hairPalette = palettes.hairColor[profile.hairColor] || palettes.hairColor["dark-brown"];
+    const presentation = profile.presentation === "boy" ? "boy" : "girl";
+    root.dataset.presentation = presentation;
+    root.style.setProperty("--selected-hair-color", hairPalette[0]);
+    for (const thumbnail of root.querySelectorAll("[data-hair-thumbnail]")) {
+      const assetName = hairAssetNames[thumbnail.dataset.hairThumbnail];
+      const prefix = presentation === "boy" ? "hair-style-boy" : "hair-style";
+      if (assetName) thumbnail.src = `assets/child-editor/${prefix}-${assetName}-v1.webp`;
+    }
     if (recordHistory && lastProfile && profileKey(lastProfile) !== profileKey(profile)) { history.push(compactProfile(lastProfile)); if (history.length > 30) history.shift(); }
     const details = document.querySelector("#child-character-details");
     const selection = document.querySelector("#child-character-selection");
