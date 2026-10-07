@@ -36,6 +36,14 @@ try {
       document.querySelector("#proof-child-preview-avatar"),
       childProfile,
     );
+    if (savedProof.proof.childImage) {
+      const stage = document.querySelector("#proof-child-preview-stage");
+      const rendered = document.querySelector("#proof-child-rendered-preview");
+      rendered.src = savedProof.proof.childImage;
+      rendered.alt = `${childProfile.presentationLabel || "Child"} storybook character.`;
+      rendered.hidden = false;
+      stage.classList.add("has-book-render");
+    }
     profileSection.hidden = false;
   }
   for (const page of savedProof.proof.pages) {

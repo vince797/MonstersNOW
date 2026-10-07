@@ -57,3 +57,15 @@ test("monster generation rejects anonymous requests before using the image provi
   assert.equal(response.code, 403);
   assert.equal(response.body.code, "monster_submission_required");
 });
+
+test("child character rendering rejects anonymous requests before using the image provider", async () => {
+  const handler = require("../api/render-child-character");
+  const response = {
+    setHeader() {},
+    status(code) { this.code = code; return this; },
+    json(body) { this.body = body; return this; },
+  };
+  await handler({ method: "POST", headers: {}, body: { profile: { id: "custom" } } }, response);
+  assert.equal(response.code, 403);
+  assert.equal(response.body.code, "monster_submission_required");
+});

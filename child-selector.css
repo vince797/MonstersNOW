@@ -724,3 +724,91 @@
   .child-preview-character { right: auto; left: 50%; width: 82%; height: 95%; }
   .child-preview-stage.mobility-wheelchair .child-preview-character { left: 50%; width: 82%; height: 88%; }
 }
+
+/* The layered SVG stays instant while the final generated render becomes the book art. */
+.child-rendered-preview {
+  position: absolute;
+  z-index: 6;
+  inset: 2% 4% 0;
+  width: 92%;
+  height: 98%;
+  object-fit: contain;
+  filter: drop-shadow(0 22px 20px rgba(59,29,109,.22));
+}
+.child-preview-stage.has-book-render .child-preview-character { display: none; }
+.child-preview-stage.has-book-render::before { opacity: .55; }
+.child-render-progress {
+  position: absolute;
+  z-index: 8;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 10px;
+  padding: 34px;
+  background: rgba(255,251,246,.9);
+  color: #3b1d6d;
+  text-align: center;
+  backdrop-filter: blur(10px);
+}
+.child-render-progress[hidden] { display: none; }
+.child-render-progress i {
+  width: 54px;
+  height: 54px;
+  border: 6px solid #e8dcef;
+  border-top-color: #ff8a00;
+  border-right-color: #21c7c6;
+  border-radius: 50%;
+  animation: child-render-spin .9s linear infinite;
+}
+.child-render-progress strong { font-size: 1.12rem; }
+.child-render-progress small { max-width: 32ch; color: #665c70; font-size: .72rem; line-height: 1.45; }
+@keyframes child-render-spin { to { transform: rotate(360deg); } }
+
+.child-render-actions {
+  display: grid;
+  gap: 7px;
+  padding: 7px 7px 5px;
+  border-top: 1px solid #e6dce9;
+}
+.child-render-actions .button { width: 100%; min-height: 50px; }
+.child-render-actions p { margin: 0; color: #665c70; font-size: .7rem; line-height: 1.4; text-align: center; }
+.child-render-actions.is-complete .button { border-color: #00888e; background: #eff9f8; color: #006b70; box-shadow: none; }
+.proof-child-profile .child-rendered-preview { inset: 2%; width: 96%; height: 96%; }
+
+@media (max-width: 700px) {
+  .create-flow-section .result-book-offer { padding: 14px 8px 28px; border-radius: 20px; }
+  .create-flow-section .storybook-personalization { padding: 10px 8px 14px; border-radius: 18px; }
+  .child-character-picker { gap: 10px; }
+  .child-character-heading { gap: 8px; padding: 2px 3px 7px; }
+  .child-character-heading strong { font-size: clamp(1.45rem, 7vw, 1.9rem); }
+  .child-character-heading small { font-size: .72rem; }
+  .child-live-preview { padding: 9px; border-radius: 18px; }
+  .child-preview-topline { padding: 1px 4px 7px; }
+  .child-preview-updates { padding: 4px 7px; font-size: .54rem; }
+  .child-preview-stage { height: min(76vw, 340px); min-height: 300px; border-radius: 13px; }
+  .child-preview-character { width: 70%; height: 96%; }
+  .child-preview-stage.mobility-wheelchair .child-preview-character { width: 76%; height: 88%; }
+  .child-preview-specs { margin-top: 7px; }
+  .child-preview-specs span { min-height: 27px; padding: 3px; font-size: .49rem; }
+  .child-preview-copy { grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 2px 8px; padding: 7px 5px 6px; }
+  .child-preview-copy > span { grid-row: 1 / span 2; writing-mode: vertical-rl; transform: rotate(180deg); font-size: .52rem; }
+  .child-preview-copy strong { font-size: 1rem; }
+  .child-preview-copy p { overflow: hidden; font-size: .62rem; line-height: 1.32; text-overflow: ellipsis; white-space: nowrap; }
+  .child-render-actions { padding-inline: 4px; }
+  .child-render-actions .button { min-height: 48px; font-size: .83rem; }
+  .child-render-actions p { font-size: .63rem; }
+  .child-editor-controls { padding: 10px; border-radius: 17px; }
+  .child-presentation-options span { min-height: 46px; padding: 6px 8px; }
+}
+
+@media (max-width: 430px) {
+  .child-preview-stage { height: 300px; min-height: 300px; }
+  .child-preview-character { width: 74%; height: 97%; }
+  .child-render-progress { padding: 24px; }
+  .child-render-progress i { width: 46px; height: 46px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .child-render-progress i { animation: none; }
+}

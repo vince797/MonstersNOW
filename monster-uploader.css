@@ -778,8 +778,25 @@ body .has-generated-preview .result-actions { grid-template-columns: repeat(2, m
   body .has-generated-preview .monster-preview { min-height: 340px; }
   body .result-content { grid-template-columns: 1fr; }
   body .result-trust-points { grid-column: 1; grid-row: auto; justify-content: flex-start; max-width: none; margin-top: 12px; }
-  body .has-generated-preview .preview-choice { grid-template-columns: 58px minmax(0, 1fr); }
-  body .has-generated-preview .preview-choice img { width: 58px; }
+  body .preview-history { grid-template-columns: 1fr; gap: 7px; margin-top: 8px; }
+  body .has-generated-preview .preview-choice {
+    width: 100%;
+    grid-template-columns: 72px minmax(0, 1fr);
+    gap: 12px;
+    padding: 8px 10px;
+    border-radius: 14px;
+    font-size: .82rem;
+    line-height: 1.22;
+  }
+  body .has-generated-preview .preview-choice img { width: 72px; }
+  body .result-content > h2 { font-size: clamp(1.55rem, 8vw, 2rem); line-height: 1.02; }
+  body .result-content > p { font-size: .8rem; line-height: 1.42; }
+  body .result-trust-points { gap: 5px; margin-top: 8px; }
+  body .result-trust-points span { padding: 4px 7px; font-size: .59rem; }
+  body .choose-monster-button,
+  body .result-actions .button { min-height: 52px; padding: 12px 13px; font-size: .88rem; line-height: 1.15; }
+  body .choose-monster-button { margin-top: 9px; }
+  body .has-generated-preview .result-actions { gap: 7px; margin-top: 7px; }
   body .has-generated-preview .result-actions { grid-template-columns: 1fr; }
 }
 

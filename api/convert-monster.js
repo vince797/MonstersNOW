@@ -258,7 +258,17 @@ async function createColoringPage(monsterImage, references, timeoutMs) {
   });
 }
 
-async function createImageEdit({ prompt, negativePrompt, images, size, timeoutMs }) {
+async function createImageEdit({
+  prompt,
+  negativePrompt,
+  images,
+  size,
+  timeoutMs,
+  quality = IMAGE_QUALITY,
+  outputFormat = "png",
+  outputCompression,
+  background,
+}) {
   const models = getImageModels();
   let lastError;
 
@@ -272,6 +282,10 @@ async function createImageEdit({ prompt, negativePrompt, images, size, timeoutMs
         images,
         size,
         timeoutMs,
+        quality,
+        outputFormat,
+        outputCompression,
+        background,
       });
     } catch (error) {
       lastError = error;
@@ -320,7 +334,7 @@ function shouldRetryWithFallbackModel(error, index, models) {
   );
 }
 
-async function requestImageEdit({ model, prompt, images, size, timeoutMs }) {
+async function requestImageEdit({ model, prompt, images, size, timeoutMs, quality, outputFormat, outputCompression, background }) {
   const formData = new FormData();
   const controller = new AbortController();
   const requestTimeoutMs = Number.isFinite(timeoutMs)
@@ -332,8 +346,10 @@ async function requestImageEdit({ model, prompt, images, size, timeoutMs }) {
   formData.append("prompt", prompt);
   formData.append("n", "1");
   formData.append("size", size);
-  formData.append("quality", IMAGE_QUALITY);
-  formData.append("output_format", "png");
+  formData.append("quality", quality);
+  formData.append("output_format", outputFormat);
+  if (Number.isFinite(outputCompression)) formData.append("output_compression", String(outputCompression));
+  if (background) formData.append("background", background);
 
   images.forEach((image, index) => {
     formData.append(
@@ -385,7 +401,7 @@ async function requestImageEdit({ model, prompt, images, size, timeoutMs }) {
     throw new Error("OpenAI did not return image data.");
   }
 
-  return `data:image/png;base64,${base64}`;
+  return `data:image/${outputFormat};base64,${base64}`;
 }
 
 function dataUrlToImagePart(dataUrl, filename) {
@@ -426,3 +442,7 @@ function formatErrorForLog(error) {
     providerRequestId: error?.providerRequestId,
   };
 }
+
+module.exports.createImageEdit = createImageEdit;
+module.exports.loadReferenceImage = loadReferenceImage;
+module.exports.formatErrorForLog = formatErrorForLog;

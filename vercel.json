@@ -22,6 +22,10 @@
       "maxDuration": 60,
       "includeFiles": "assets/master-references/**"
     },
+    "api/render-child-character.js": {
+      "maxDuration": 60,
+      "includeFiles": "assets/child-editor/feature-animation-character-reference-v1.png"
+    },
     "api/convert-heic.js": {
       "maxDuration": 30
     },

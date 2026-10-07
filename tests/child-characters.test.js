@@ -4,6 +4,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const { childProfileKey, isSupportedWheelchairProfile, resolveChildCharacter } = require("../lib/child-characters");
+const { buildChildCharacterRenderPrompt } = require("../lib/child-character-style");
 const { buildStorybookInterestSubmission } = require("../lib/storybook-interest");
 const { buildHalloweenProof } = require("../lib/halloween-proof");
 
@@ -127,6 +128,12 @@ test("selector UI is a true layered character editor with a MonstersNOW storyboo
   assert.doesNotMatch(html, /id="child-preview-monster"/);
   assert.doesNotMatch(html, /child-board-label-monster/);
   assert.match(html, /Feature-animation style/);
+  assert.match(html, /id="render-child-character"/);
+  assert.match(html, /id="child-rendered-preview"/);
+  assert.match(mainScript, /fetch\("\/api\/render-child-character"/);
+  assert.match(mainScript, /childImage: personalization\.childCharacter/);
+  assert.match(css, /\.child-preview-stage\.has-book-render/);
+  assert.match(css, /height: 300px/);
   assert.doesNotMatch(css, /storybook-forest-stage-v1\.webp/);
   assert.match(css, /storybook-studio-stage-v1\.jpg/);
   assert.match(css, /radial-gradient\(ellipse at 70% 90%/);
@@ -140,11 +147,33 @@ test("selector UI is a true layered character editor with a MonstersNOW storyboo
   assert.match(css, /\.child-live-preview \{[\s\S]*position: sticky/);
   assert.match(css, /\.child-presence-toggle label\.is-selected::after/);
   assert.match(css, /\.child-preview-character/);
-  assert.match(html, /child-selector\.css\?v=20261007-boy-girl-editor-v5/);
+  assert.match(html, /child-selector\.css\?v=20261007-book-render-v6/);
   assert.match(html, /scripts\/child-selector\.js\?v=20261007-boy-girl-editor-v5/);
-  assert.match(html, /scripts\/main\.js\?v=20261007-child-focus-v10/);
+  assert.match(html, /scripts\/main\.js\?v=20261007-book-render-v11/);
   assert.doesNotMatch(mainScript, /syncStorySceneMonster/);
   assert.doesNotMatch(mainScript, /removeConnectedWhiteBackground/);
+});
+
+test("book render prompt preserves every independent editor choice", () => {
+  const prompt = buildChildCharacterRenderPrompt({
+    id: "custom", presentation: "boy", skinTone: "deep", hairStyle: "braids", hairColor: "auburn",
+    eyeColor: "green", outfitStyle: "hoodie", outfitColor: "purple",
+    ageBand: "7-8", relativeHeight: "taller", mobilityAid: "wheelchair",
+  });
+  assert.match(prompt, /boy/i);
+  assert.match(prompt, /deep illustrated skin tone/i);
+  assert.match(prompt, /auburn braids/i);
+  assert.match(prompt, /green eyes/i);
+  assert.match(prompt, /purple hoodie/i);
+  assert.match(prompt, /child-sized wheelchair/i);
+  assert.match(prompt, /transparent background/i);
+  assert.match(prompt, /Do not copy/i);
+});
+
+test("mobile result history uses a full-width readable monster choice", () => {
+  const css = fs.readFileSync(path.join(root, "monster-uploader.css"), "utf8");
+  assert.match(css, /body \.preview-history \{ grid-template-columns: 1fr/);
+  assert.match(css, /grid-template-columns: 72px minmax\(0, 1fr\)/);
 });
 
 test("character studio includes lightweight changing storybook previews", () => {
