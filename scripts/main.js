@@ -51,6 +51,7 @@ if (navToggle && siteNavigation) {
 const monsterUpload = document.querySelector("#monster-upload");
 const drawingPreview = document.querySelector("#drawing-preview");
 const monsterPreview = document.querySelector("#monster-preview");
+const monsterPreviewPlaceholder = document.querySelector("#monster-preview-placeholder");
 const convertButton = document.querySelector("#convert-button");
 const regenerateButton = document.querySelector("#regenerate-monster");
 const resultPanel = document.querySelector("#monster-result");
@@ -133,7 +134,6 @@ const heicUploadTypes = new Set(["image/heic", "image/heif", "image/heic-sequenc
 const maxUploadBytes = 8 * 1024 * 1024;
 const maxFreePreviews = 3;
 const heicConverterUrl = "https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js";
-const demoMonsterImage = "assets/step-2-character.jpg?v=20260515-horns";
 const defaultPreviewStyle = "storybook";
 const halloweenTestMode = createQuery.get("test") === "halloween";
 const storybookInterestButtonText = "Review Your 32-Page Book";
@@ -859,6 +859,7 @@ function selectGeneratedPreview(id, announce = false) {
   monsterConfirmed = false;
   monsterPreview.src = preview.image;
   monsterPreview.alt = `${getPreviewStyleLabel(preview.style)} generated monster character preview.`;
+  monsterPreview.hidden = false;
   syncStorySceneMonster();
   coloringPageUrl = preview.coloringPage;
   updatePreviewPresentation(true);
@@ -907,8 +908,9 @@ function resetPreviewState() {
   hideMonsterProgress();
 
   if (monsterPreview) {
-    monsterPreview.src = demoMonsterImage;
-    monsterPreview.alt = "Example generated monster character.";
+    monsterPreview.removeAttribute("src");
+    monsterPreview.alt = "";
+    monsterPreview.hidden = true;
   }
 
   updatePreviewPresentation(false);
@@ -1024,8 +1026,16 @@ function updatePreviewPresentation(hasPreview) {
   resultPanel?.classList.toggle("has-generated-preview", hasPreview);
   resultPanel?.classList.toggle("is-example-preview", !hasPreview);
 
+  if (monsterPreviewPlaceholder) {
+    monsterPreviewPlaceholder.hidden = hasPreview;
+  }
+
+  if (monsterPreview) {
+    monsterPreview.hidden = !hasPreview;
+  }
+
   if (monsterPreviewBadge) {
-    monsterPreviewBadge.textContent = hasPreview ? "Your preview" : "Example preview";
+    monsterPreviewBadge.textContent = hasPreview ? "Your preview" : "Preview studio";
   }
 }
 

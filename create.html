@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="storefront.css?v=20261002-public-storefront" />
     <link rel="apple-touch-icon" href="assets/brand/monstersnow-icon-180-v1.png" />
     <link rel="stylesheet" href="brand.css?v=20261004-selected-logo" />
-    <link rel="stylesheet" href="monster-uploader.css?v=20261004-conversion-progress-v7" />
+    <link rel="stylesheet" href="monster-uploader.css?v=20261007-preview-studio-v1" />
   </head>
   <body class="brand-theme">
     <a class="skip-link" href="#main-content">Skip to content</a>
@@ -160,7 +160,18 @@
               </div>
             </div>
             <div class="converter-preview monster-preview">
-              <span class="preview-badge" id="monster-preview-badge">Example preview</span>
+              <span class="preview-badge" id="monster-preview-badge">Preview studio</span>
+              <div class="monster-preview-placeholder" id="monster-preview-placeholder">
+                <span class="monster-preview-mark" aria-hidden="true"><i></i></span>
+                <small>Your preview space</small>
+                <strong>Their monster will<br />appear here.</strong>
+                <p>Upload their artwork and we’ll begin building the storybook character.</p>
+                <ol aria-label="Preview creation steps">
+                  <li class="is-ready"><i>1</i><span>Photo</span></li>
+                  <li><i>2</i><span>Character</span></li>
+                  <li><i>3</i><span>Finish</span></li>
+                </ol>
+              </div>
               <div class="monster-progress" id="monster-progress" aria-live="polite" hidden>
                 <span class="monster-progress-spinner" aria-hidden="true"><i></i></span>
                 <small id="monster-progress-kicker">Preparing artwork</small>
@@ -176,8 +187,8 @@
               </div>
               <img
                 id="monster-preview"
-                src="assets/step-2-character.jpg?v=20260515-horns"
-                alt="Example generated monster character."
+                alt=""
+                hidden
               />
             </div>
             <div class="result-content">
@@ -530,6 +541,6 @@
     </footer>
 
     <script src="scripts/child-selector.js?v=20261007-storybook-character-studio-v3"></script>
-    <script src="scripts/main.js?v=20261007-character-board-v8"></script>
+    <script src="scripts/main.js?v=20261007-preview-studio-v9"></script>
   </body>
 </html>

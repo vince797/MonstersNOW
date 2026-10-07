@@ -81,6 +81,22 @@ test("the create flow gives HEIC conversion and character generation prominent p
   assert.match(styles, /\.result-panel\.is-working \.monster-preview > img/);
 });
 
+test("the empty monster preview uses the branded studio state instead of stock character art", () => {
+  const create = read("create.html");
+  const script = read("scripts/main.js");
+  const styles = read("monster-uploader.css");
+
+  assert.match(create, /id="monster-preview-placeholder"/);
+  assert.match(create, /Their monster will/);
+  assert.match(create, /id="monster-preview"[\s\S]*?hidden/);
+  assert.doesNotMatch(create, /step-2-character\.jpg/);
+  assert.doesNotMatch(script, /demoMonsterImage/);
+  assert.match(script, /monsterPreviewPlaceholder\.hidden = hasPreview/);
+  assert.match(script, /monsterPreview\.removeAttribute\("src"\)/);
+  assert.match(styles, /\.monster-preview-placeholder/);
+  assert.match(styles, /\.monster-preview-mark/);
+});
+
 test("public storefront remains isolated from admin and Etsy", () => {
   const publicFiles = [...publicPages, "storefront.css"];
   const combined = publicFiles.map(read).join("\n");

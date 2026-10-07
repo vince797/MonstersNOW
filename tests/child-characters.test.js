@@ -133,7 +133,7 @@ test("selector UI is a true layered character editor with a MonstersNOW storyboo
   assert.match(css, /\.child-preview-character/);
   assert.match(html, /child-selector\.css\?v=20261007-storybook-character-studio-v3/);
   assert.match(html, /scripts\/child-selector\.js\?v=20261007-storybook-character-studio-v3/);
-  assert.match(html, /scripts\/main\.js\?v=20261007-character-board-v8/);
+  assert.match(html, /scripts\/main\.js\?v=20261007-preview-studio-v9/);
 });
 
 test("character studio includes lightweight changing storybook previews", () => {
