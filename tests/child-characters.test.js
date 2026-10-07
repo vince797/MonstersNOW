@@ -206,6 +206,32 @@ test("girl braid renders require the two-braid thumbnail silhouette", () => {
   assert.match(prompt, /selected hair.*authoritative.*override/i);
 });
 
+test("every boy and girl hairstyle has a thumbnail-specific render silhouette", () => {
+  const cases = [
+    ["girl", "short", /ear-length asymmetrical textured pixie-bob/i],
+    ["boy", "short", /short tapered crop/i],
+    ["girl", "curly", /high gathered curly ponytail with large springy ringlets/i],
+    ["boy", "curly", /short rounded crop of broad springy ringlets/i],
+    ["girl", "coils", /shoulder-length rounded halo of dense small natural corkscrew coils/i],
+    ["boy", "coils", /short close-shaped coily crop with dense small natural coils/i],
+    ["girl", "wavy", /shoulder-length hair with a soft side part and broad flowing S-shaped waves/i],
+    ["boy", "wavy", /ear-length side-parted cut with broad swept S-shaped waves/i],
+    ["girl", "straight", /shoulder-length blunt lob with a clean center part/i],
+    ["boy", "straight", /short smooth layered crop with a side-swept straight fringe/i],
+    ["girl", "braids", /two clearly separated, symmetrical shoulder-length three-strand braids/i],
+    ["boy", "braids", /short individual box braids with a clean center part/i],
+  ];
+  for (const [presentation, hairStyle, expected] of cases) {
+    const prompt = buildChildCharacterRenderPrompt({
+      id: "custom", presentation, skinTone: "medium", hairStyle, hairColor: "brown",
+      eyeColor: "brown", outfitStyle: "overalls", outfitColor: "teal",
+      ageBand: "5-6", relativeHeight: "average", mobilityAid: "none",
+    });
+    assert.match(prompt, expected, `${presentation} ${hairStyle} should match its selector thumbnail`);
+    assert.doesNotMatch(prompt, /Make the selected hairstyle visually unmistakable/i);
+  }
+});
+
 test("mobile result history uses a full-width readable monster choice", () => {
   const css = fs.readFileSync(path.join(root, "monster-uploader.css"), "utf8");
   assert.match(css, /body \.preview-history \{ grid-template-columns: 1fr/);
