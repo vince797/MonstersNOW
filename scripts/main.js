@@ -63,10 +63,7 @@ const coloringPageClose = document.querySelector("#coloring-page-close");
 const coloringPageDone = document.querySelector("#coloring-page-done");
 const converterStatus = document.querySelector("#converter-status");
 const converterNote = document.querySelector("#converter-note");
-const selectedPreviewPersonality = document.querySelector("#selected-preview-personality");
 const replaceDrawingButton = document.querySelector("#replace-drawing");
-const previewCount = document.querySelector("#preview-count");
-const nextPersonalityStatus = document.querySelector("#next-personality-status");
 const uploadActionStatus = document.querySelector("#upload-action-status");
 const uploadError = document.querySelector("#upload-error");
 const uploadDrop = document.querySelector(".upload-drop");
@@ -75,11 +72,9 @@ const selectedDrawingCard = document.querySelector("#selected-drawing");
 const selectedDrawingTitle = document.querySelector("#selected-drawing-title");
 const selectedDrawingMeta = document.querySelector("#selected-drawing-meta");
 const replaceSelectedDrawingButton = document.querySelector("#replace-selected-drawing");
-const previewOptions = document.querySelector(".preview-options");
 const converterTool = document.querySelector(".converter-tool");
 const resultActions = document.querySelector(".result-actions");
 const flowSteps = [...document.querySelectorAll(".converter-flow li")];
-const styleButtons = [...document.querySelectorAll("[data-monster-style]")];
 const previewHistory = document.querySelector("#preview-history");
 const confirmMonsterButton = document.querySelector("#confirm-monster");
 const resultBookOffer = document.querySelector("#result-book-offer");
@@ -160,16 +155,10 @@ const previewStyleLabels = {
   silly: "Soft 3D Silly Monster",
   adventure: "Soft 3D Adventure Monster",
 };
-const previewPersonalityLabels = {
-  storybook: "Classic",
-  cute: "Gentle",
-  silly: "Playful",
-  adventure: "Brave",
-};
 let drawingPreviewUrl;
 let selectedDrawingFile;
 let coloringPageUrl;
-let selectedMonsterStyle = defaultPreviewStyle;
+const selectedMonsterStyle = defaultPreviewStyle;
 let previewsUsed = 0;
 let generatedPreviews = [];
 let selectedPreviewId;
@@ -230,23 +219,6 @@ if (monsterUpload && drawingPreview && monsterPreview && convertButton) {
   coloringPageClose?.addEventListener("click", closeColoringPage);
   coloringPageDone?.addEventListener("click", closeColoringPage);
 
-  styleButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-      selectedMonsterStyle = normalizePreviewStyle(button.dataset.monsterStyle);
-      updateStyleButtons();
-
-      if (isGeneratingPreview) {
-        setUploadActionStatus(`${getPreviewPersonalityLabel(selectedMonsterStyle)} is queued for the next preview. The preview being created will not change.`);
-      } else if (selectedDrawingFile && previewsUsed < maxFreePreviews) {
-        setUploadActionStatus(`${getPreviewPersonalityLabel(selectedMonsterStyle)} is queued for the next preview. Your selected preview has not changed.`);
-      } else if (!selectedDrawingFile) {
-        setUploadActionStatus(`${getPreviewPersonalityLabel(selectedMonsterStyle)} is ready for the first preview. Upload a drawing, then continue when it looks right.`);
-      }
-      syncPreviewControls();
-    });
-  });
-
-  updateStyleButtons();
   syncPreviewControls();
 }
 
@@ -783,14 +755,14 @@ function applyMonsterResult(result) {
   }
 
   if (converterStatus) {
-    converterStatus.textContent = `${getPreviewPersonalityLabel(style)} preview ready.`;
+    converterStatus.textContent = "Your monster preview is ready.";
   }
 
   if (converterNote) {
     converterNote.textContent = `Choose this version, download the free coloring page, or try another version. ${describeRemainingPreviews(remaining)}`;
   }
 
-  setUploadActionStatus(`${getPreviewPersonalityLabel(style)} preview ready below. ${describeRemainingPreviews(remaining)}`);
+  setUploadActionStatus(`Monster preview ready below. ${describeRemainingPreviews(remaining)}`);
   scrollToResultPanel({ focus: true, delay: 120 });
 }
 
@@ -824,7 +796,6 @@ function renderPreviewHistory() {
     const image = document.createElement("img");
     const label = document.createElement("span");
     const styleLabel = getPreviewStyleLabel(preview.style);
-    const personalityLabel = getPreviewPersonalityLabel(preview.style);
 
     button.type = "button";
     button.className = "preview-choice";
@@ -835,7 +806,7 @@ function renderPreviewHistory() {
     image.src = preview.image;
     image.alt = `${styleLabel} monster preview ${index + 1}.`;
 
-    label.textContent = `${index + 1}. ${personalityLabel}`;
+    label.textContent = `Version ${index + 1}`;
 
     button.append(image, label);
     previewHistory.append(button);
@@ -856,11 +827,6 @@ function selectGeneratedPreview(id, announce = false) {
   syncStorySceneMonster();
   coloringPageUrl = preview.coloringPage;
   updatePreviewPresentation(true);
-
-  if (selectedPreviewPersonality) {
-    selectedPreviewPersonality.hidden = false;
-    selectedPreviewPersonality.textContent = `Selected preview · ${getPreviewPersonalityLabel(preview.style)}`;
-  }
 
   previewHistory?.querySelectorAll(".preview-choice").forEach((button) => {
     button.setAttribute("aria-pressed", button.dataset.previewId === id ? "true" : "false");
@@ -883,11 +849,11 @@ function selectGeneratedPreview(id, announce = false) {
   if (resultBookOffer) resultBookOffer.hidden = true;
 
   if (announce && converterStatus) {
-    converterStatus.textContent = `${getPreviewPersonalityLabel(preview.style)} preview selected.`;
+    converterStatus.textContent = "Monster preview selected.";
   }
 
   if (announce) {
-    setUploadActionStatus(`${getPreviewPersonalityLabel(preview.style)} preview selected. Personality changes above apply only to the next generated preview.`);
+    setUploadActionStatus("Monster preview selected. Continue with this version or return to another preview.");
   }
 }
 
@@ -908,11 +874,6 @@ function resetPreviewState() {
   if (monsterPreview) {
     monsterPreview.src = demoMonsterImage;
     monsterPreview.alt = "Example generated monster character.";
-  }
-
-  if (selectedPreviewPersonality) {
-    selectedPreviewPersonality.hidden = true;
-    selectedPreviewPersonality.textContent = "";
   }
 
   updatePreviewPresentation(false);
@@ -949,15 +910,6 @@ function resetPreviewState() {
 
   setUploadActionStatus("Upload a drawing to create the first preview.");
   syncPreviewControls();
-}
-
-function updateStyleButtons() {
-  styleButtons.forEach((button) => {
-    const isActive = normalizePreviewStyle(button.dataset.monsterStyle) === selectedMonsterStyle;
-
-    button.classList.toggle("is-active", isActive);
-    button.setAttribute("aria-pressed", isActive ? "true" : "false");
-  });
 }
 
 function syncPreviewControls() {
@@ -1020,7 +972,6 @@ function syncPreviewControls() {
   if (uploadDrop) uploadDrop.hidden = Boolean(selectedDrawingFile);
   if (uploadQuickTip) uploadQuickTip.hidden = Boolean(selectedDrawingFile);
   if (selectedDrawingCard) selectedDrawingCard.hidden = !selectedDrawingFile;
-  if (previewOptions) previewOptions.hidden = !selectedDrawingFile;
   resultPanel?.setAttribute("aria-busy", isGeneratingPreview ? "true" : "false");
   converterTool?.classList.toggle("is-generating-preview", isGeneratingPreview);
   selectedDrawingCard?.classList.toggle("is-generating-preview", isGeneratingPreview);
@@ -1028,20 +979,6 @@ function syncPreviewControls() {
   uploadActionStatus?.classList.toggle("is-ready", Boolean(selectedDrawingFile) && !isGeneratingPreview && !previewGenerationFailed);
   uploadActionStatus?.classList.toggle("is-error", previewGenerationFailed);
 
-  if (previewCount) {
-    previewCount.textContent = selectedDrawingFile
-      ? describeRemainingPreviews(remaining)
-      : `Upload once, then try up to ${maxFreePreviews} versions.`;
-  }
-
-  if (nextPersonalityStatus) {
-    const personality = getPreviewPersonalityLabel(selectedMonsterStyle);
-    nextPersonalityStatus.textContent = isGeneratingPreview
-      ? `${personality} is queued for the next preview.`
-      : selectedDrawingFile && hasPreview
-        ? `${personality} will be used when you create the next preview.`
-        : `${personality} is ready for the first preview.`;
-  }
 }
 
 function updatePreviewPresentation(hasPreview) {
@@ -1075,10 +1012,6 @@ function normalizePreviewStyle(style) {
 
 function getPreviewStyleLabel(style) {
   return previewStyleLabels[normalizePreviewStyle(style)];
-}
-
-function getPreviewPersonalityLabel(style) {
-  return previewPersonalityLabels[normalizePreviewStyle(style)];
 }
 
 function describeRemainingPreviews(remaining) {
@@ -1673,6 +1606,8 @@ function showColoringPagePreview(printablePage) {
   const imageUrl = printablePage.toDataURL("image/png");
   coloringPagePreview.src = imageUrl;
   coloringPageDownloadLink.href = imageUrl;
+  const dialogBody = coloringPageDialog.querySelector(".coloring-page-dialog-body");
+  if (dialogBody) dialogBody.scrollTop = 0;
 
   if (typeof coloringPageDialog.showModal === "function") {
     coloringPageDialog.showModal();

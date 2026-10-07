@@ -10,7 +10,7 @@
     <link rel="canonical" href="https://www.monstersnow.com/create" />
     <title>Create Your Monster | MonstersNOW</title>
     <link rel="icon" href="assets/brand/monstersnow-icon-32-v1.png" type="image/png" sizes="32x32" />
-    <link rel="stylesheet" href="styles.css?v=20261007-clean-preview-v3" />
+    <link rel="stylesheet" href="styles.css?v=20261007-create-preview-polish-v3" />
     <link rel="stylesheet" href="child-selector.css?v=20261007-child-editor-v4" />
     <link rel="stylesheet" href="storefront.css?v=20261002-public-storefront" />
     <link rel="apple-touch-icon" href="assets/brand/monstersnow-icon-180-v1.png" />
@@ -109,36 +109,6 @@
             <p class="upload-action-status" id="upload-action-status" role="status">
               Nothing is created until you choose a drawing and continue.
             </p>
-            <details class="variation-controls preview-options" hidden>
-              <summary>
-                <span>Preview personality</span>
-                <strong class="next-personality-status" id="next-personality-status">Classic is ready for the first preview.</strong>
-              </summary>
-              <div class="preview-options-body">
-                <div class="variation-heading">
-                  <p>Every option uses the same Soft 3D Storybook art style. A new choice takes effect only when the next preview is created.</p>
-                  <p id="preview-count">Upload once, then try up to three versions.</p>
-                </div>
-                <div class="style-options" role="group" aria-label="Choose the personality and pose for the next monster preview">
-                  <button class="style-option is-active" type="button" data-monster-style="storybook" aria-pressed="true">
-                    <strong>Classic</strong>
-                    <small>Balanced + faithful</small>
-                  </button>
-                  <button class="style-option" type="button" data-monster-style="cute" aria-pressed="false">
-                    <strong>Gentle</strong>
-                    <small>Warm + welcoming</small>
-                  </button>
-                  <button class="style-option" type="button" data-monster-style="silly" aria-pressed="false">
-                    <strong>Playful</strong>
-                    <small>Goofy + energetic</small>
-                  </button>
-                  <button class="style-option" type="button" data-monster-style="adventure" aria-pressed="false">
-                    <strong>Brave</strong>
-                    <small>Confident + ready</small>
-                  </button>
-                </div>
-              </div>
-            </details>
             <details class="upload-guidance">
               <summary><span>Photo tips &amp; privacy</span><small>Formats, framing, and how artwork is handled</small></summary>
               <div class="upload-guidance-body">
@@ -167,12 +137,13 @@
               />
             </div>
             <div class="result-content">
-              <span class="result-label">Step 2 · Monster preview</span>
-              <span class="selected-preview-personality" id="selected-preview-personality" hidden></span>
+              <div class="result-meta">
+                <span class="result-label">Step 2 · Monster preview</span>
+              </div>
               <h2 id="converter-status">Upload a drawing to begin.</h2>
               <p id="converter-note">
-                Classic is ready for the first preview. Every personality keeps
-                the same Soft 3D Storybook art style.
+                Your drawing becomes a polished character in our Soft 3D
+                Storybook style.
               </p>
               <div class="preview-loading-details" aria-hidden="true">
                 <span class="is-complete"><i>✓</i> Drawing received</span>
@@ -470,16 +441,30 @@
         <div>
           <span class="result-label">Free printable</span>
           <h2 id="coloring-page-title">Your monster coloring page</h2>
+          <p>Ready to print, color, and keep.</p>
         </div>
         <button class="coloring-page-close" id="coloring-page-close" type="button" aria-label="Close coloring page preview">×</button>
       </div>
-      <div class="coloring-page-sheet">
-        <img id="coloring-page-preview" alt="Printable MonstersNOW monster coloring page." />
-      </div>
-      <p class="coloring-page-help">On iPhone or iPad, touch and hold the coloring page to save it to Photos. You can also use the button below to open or download the full-size PNG.</p>
-      <div class="coloring-page-actions">
-        <a class="button primary" id="coloring-page-download-link" href="#" download="monstersnow-coloring-page.png" target="_blank" rel="noopener">Open / Save Full-Size Page</a>
-        <button class="button secondary" id="coloring-page-done" type="button">Done</button>
+      <div class="coloring-page-dialog-body">
+        <div class="coloring-page-sheet">
+          <img id="coloring-page-preview" alt="Printable MonstersNOW monster coloring page." />
+        </div>
+        <aside class="coloring-page-save-panel" aria-label="Coloring page download options">
+          <div class="coloring-page-ready">
+            <span aria-hidden="true">✓</span>
+            <div><strong>Ready for coloring</strong><small>Your selected monster is prepared as clean black-and-white line art.</small></div>
+          </div>
+          <div class="coloring-page-details" aria-label="Coloring page format">
+            <span>US letter</span>
+            <span>1700 × 2200 PNG</span>
+            <span>Free to keep</span>
+          </div>
+          <p class="coloring-page-help"><strong>Saving on a phone?</strong> Open the full-size page, then touch and hold the image to save it to Photos. On desktop, open it and use your browser’s save or print controls.</p>
+          <div class="coloring-page-actions">
+            <a class="button primary" id="coloring-page-download-link" href="#" download="monstersnow-coloring-page.png" target="_blank" rel="noopener">Open Full-Size Page</a>
+            <button class="button secondary" id="coloring-page-done" type="button">Back to My Monster</button>
+          </div>
+        </aside>
       </div>
     </dialog>
 
@@ -504,6 +489,6 @@
 
     <script src="scripts/child-selector.js?v=20261007-child-editor-v4"></script>
     <script src="scripts/monster-cutout.js?v=20261004-cutout-v1"></script>
-    <script src="scripts/main.js?v=20261007-upload-polish-v1"></script>
+    <script src="scripts/main.js?v=20261007-create-preview-polish-v3"></script>
   </body>
 </html>

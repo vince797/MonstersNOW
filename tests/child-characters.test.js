@@ -135,7 +135,7 @@ test("selector UI exposes only supported controls and states the current renderi
   assert.match(html, /child-selector\.css\?v=20261007-child-editor-v4/);
   assert.match(html, /scripts\/child-selector\.js\?v=20261007-child-editor-v4/);
   assert.match(html, /1\. Character[\s\S]*2\. Find a complete illustrated look/);
-  assert.match(html, /scripts\/main\.js\?v=20261007-upload-polish-v1/);
+  assert.match(html, /scripts\/main\.js\?v=20261007-create-preview-polish-v3/);
   assert.deepEqual(
     vercel.headers.find((entry) => entry.source === "/create")?.headers,
     [{ key: "Cache-Control", value: "private, no-store" }],

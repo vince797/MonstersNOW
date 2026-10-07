@@ -46,3 +46,18 @@ test("desktop upload and preview cards share a row height without forcing the mo
   assert.match(styles, /@media \(min-width: 981px\)[\s\S]*?\.converter-tool:not\(\.is-upload-only\)\s*\{[^}]*align-items:\s*stretch/s);
   assert.match(styles, /\.converter-tool:not\(\.is-upload-only\) > \.upload-panel,[\s\S]*?height:\s*100%/s);
 });
+
+test("completed preview gives the decision column enough room and keeps actions compact", () => {
+  assert.match(styles, /\.result-panel\s*\{[^}]*grid-template-columns:\s*minmax\(0,1fr\)\s+minmax\(300px,1fr\)/s);
+  assert.match(styles, /\.has-generated-preview \.preview-history\s*\{[^}]*grid-template-columns:\s*repeat\(3,\s*minmax\(72px,\s*92px\)\)/s);
+  assert.match(styles, /\.result-actions\s*\{[^}]*grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\)/s);
+  assert.match(styles, /@media \(max-width: 700px\)[\s\S]*?\.result-actions\s*\{[^}]*grid-template-columns:\s*1fr/s);
+});
+
+test("coloring page viewer keeps the printable and save controls visible across screen sizes", () => {
+  assert.match(styles, /\.coloring-page-dialog-body\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)\s+minmax\(270px,\s*320px\)/s);
+  assert.match(styles, /\.coloring-page-sheet img\s*\{[^}]*max-height:\s*calc\(100dvh - 190px\)/s);
+  assert.match(styles, /@media \(max-width: 720px\)[\s\S]*?\.coloring-page-dialog-body\s*\{[^}]*grid-template-columns:\s*1fr/s);
+  assert.match(styles, /@media \(max-width: 720px\)[\s\S]*?\.coloring-page-actions\s*\{[^}]*position:\s*sticky/s);
+  assert.match(mainScript, /dialogBody\.scrollTop = 0/);
+});

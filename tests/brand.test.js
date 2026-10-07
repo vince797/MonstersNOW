@@ -59,7 +59,7 @@ test('private workspace receives logo-only styling without public palette inheri
   const admin = read('admin.html');
   assert.match(admin, /<body class="admin-page">/);
   assert.doesNotMatch(admin, /brand-theme|storefront\.css/);
-  assert.match(admin, /monstersnow-primary-v1\.png" alt="MonstersNow\.com"/);
+  assert.match(admin, /monstersnow-stacked-footer-v1\.png" alt="MonstersNow\.com"/);
   assert.match(admin, /monstersnow-stacked-v1\.png" alt="MonstersNow\.com"/);
   assert.match(admin, /id="admin-login-form"/);
 });

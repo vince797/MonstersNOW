@@ -26,8 +26,8 @@ test("upload progress stays customer-friendly while HEIC handling remains intern
 });
 
 test("create flow cache-busts the corrected upload script", () => {
-  assert.match(createPage, /scripts\/main\.js\?v=20261007-upload-polish-v1/);
-  assert.match(createPage, /styles\.css\?v=20261007-clean-preview-v3/);
+  assert.match(createPage, /scripts\/main\.js\?v=20261007-create-preview-polish-v3/);
+  assert.match(createPage, /styles\.css\?v=20261007-create-preview-polish-v3/);
   assert.doesNotMatch(createPage, /scripts\/main\.js\?v=20261004-upload-timeout-v7/);
 });
 

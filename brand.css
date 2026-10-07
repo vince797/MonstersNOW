@@ -138,5 +138,5 @@
 }
 
 /* Only the marks change inside the private workspace. */
-.admin-page .admin-login-brand img { width: 270px; height: auto; }
+.admin-page .admin-login-brand img { width: clamp(220px, 22vw, 280px); height: auto; }
 .admin-page .admin-rail-brand img { width: 160px; height: auto; padding: 8px; }

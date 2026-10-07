@@ -12,12 +12,27 @@ const adminBooksStyles = fs.readFileSync(path.join(root, "admin-books.css"), "ut
 const poseJobs = fs.readFileSync(path.join(root, "lib/storybook-pose-jobs.js"), "utf8");
 
 test("admin workspace and homepage collection use the readable system typeface", () => {
-  assert.match(adminMarkup, /styles\.css\?v=20261007-gallery-pairs-v1/);
+  assert.match(adminMarkup, /styles\.css\?v=20261007-admin-purple-v3/);
   assert.match(styles, /--admin-ui-font: Inter, ui-sans-serif, system-ui/);
   assert.match(styles, /\.admin-page strong \{[\s\S]*font-family: var\(--admin-ui-font\)/);
   assert.doesNotMatch(styles, /Admin Fredoka/);
   assert.doesNotMatch(publicPolish, /Fredoka|Arial Rounded MT Bold/);
   assert.match(publicPolish, /\.books-section \.section-heading h2 \{[\s\S]*font-family: inherit/);
+});
+
+test("gallery collection uses compact responsive transformation cards", () => {
+  assert.match(styles, /\.monster-library \{[^}]*repeat\(auto-fit, minmax\(280px, 1fr\)\)/s);
+  assert.match(styles, /\.monster-library-images \{[^}]*grid-template-columns:\s*minmax\(0, 1fr\) 22px minmax\(0, 1fr\)/s);
+  assert.match(styles, /\.monster-library-info \{[^}]*gap:\s*9px;[^}]*padding:\s*11px/s);
+  assert.match(styles, /\.monster-library-actions \.button \{[^}]*min-height:\s*34px/s);
+  assert.match(styles, /@media \(max-width: 520px\)[^{]*\{[^}]*\.monster-library \{ grid-template-columns: 1fr; \}/s);
+});
+
+test("admin sign-in matches the public purple brand treatment", () => {
+  assert.match(adminMarkup, /monstersnow-stacked-footer-v1\.png" alt="MonstersNow\.com"/);
+  assert.match(styles, /\.admin-login-brand \{[\s\S]*linear-gradient\(135deg, #291448, #3b1d6d 68%, #422278\)/);
+  assert.match(styles, /\.admin-login-brand > a \{[^}]*background:\s*transparent/s);
+  assert.match(styles, /\.admin-login-brand \.eyebrow \{ color: #21c7c6; \}/);
 });
 
 test("admin sign-in does not blame the device for a server credential timestamp error", () => {
