@@ -75,7 +75,7 @@ test("custom child profiles preserve independently editable appearance choices",
   }), /valid child eye color/i);
 });
 
-test("selector UI is a true layered character editor with a game-style loadout preview", () => {
+test("selector UI is a true layered character editor with a MonstersNOW storybook preview", () => {
   const html = fs.readFileSync(path.join(root, "create.html"), "utf8");
   const script = fs.readFileSync(path.join(root, "scripts/child-selector.js"), "utf8");
   const mainScript = fs.readFileSync(path.join(root, "scripts/main.js"), "utf8");
@@ -119,18 +119,20 @@ test("selector UI is a true layered character editor with a game-style loadout p
   assert.match(mainScript, /function syncStorySceneMonster/);
   assert.match(mainScript, /function removeConnectedWhiteBackground/);
   assert.doesNotMatch(css, /storybook-forest-stage-v1\.webp/);
+  assert.match(css, /storybook-studio-stage-v1\.jpg/);
   assert.match(css, /radial-gradient\(ellipse at 70% 90%/);
   assert.match(css, /\.child-editor-tabs button\.is-active/);
   assert.match(css, /\.custom-child-svg\[data-hair-style="curly"\]/);
   assert.match(mainScript, /resultBookOffer\.hidden = false/);
   assert.match(mainScript, /function showCharacterStep/);
   assert.match(mainScript, /function showMonsterStep/);
+  assert.match(mainScript, /classList\.add\("is-character-step"\)/);
   assert.match(css, /\.child-preview-stage\.mobility-wheelchair/);
   assert.match(css, /\.child-live-preview \{[\s\S]*position: sticky/);
   assert.match(css, /\.child-presence-toggle label\.is-selected::after/);
   assert.match(css, /\.child-preview-character/);
-  assert.match(html, /child-selector\.css\?v=20261007-true-character-editor-v1/);
-  assert.match(html, /scripts\/child-selector\.js\?v=20261007-true-character-editor-v1/);
+  assert.match(html, /child-selector\.css\?v=20261007-storybook-character-studio-v3/);
+  assert.match(html, /scripts\/child-selector\.js\?v=20261007-storybook-character-studio-v3/);
   assert.match(html, /scripts\/main\.js\?v=20261007-character-board-v8/);
 });
 

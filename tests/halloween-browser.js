@@ -101,7 +101,7 @@ const server = http.createServer(async (req, res) => {
     await page.locator("#confirm-monster").waitFor({ state: "visible" });
     await page.locator("#confirm-monster").click();
     await page.locator("#child-editor-start").waitFor({ state: "visible" });
-    assert.equal(await page.locator("#child-character-title").textContent(), "Build their storybook hero.");
+    assert.equal(await page.locator("#child-character-title").textContent(), "Create their storybook character.");
     assert.equal(await page.evaluate(() => document.activeElement?.id), "child-editor-start");
     await page.waitForTimeout(350);
     const editorPosition = await page.locator("#child-editor-start").evaluate((element) => {

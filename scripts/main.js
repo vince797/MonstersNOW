@@ -84,10 +84,11 @@ const confirmMonsterButton = document.querySelector("#confirm-monster");
 const resultBookOffer = document.querySelector("#result-book-offer");
 const monsterCreatorHeader = document.querySelector("#monster-creator-header");
 const monsterCreatorPanels = [...document.querySelectorAll("[data-monster-step-panel]")];
+const converterTool = document.querySelector("[data-converter]");
 const backToMonsterButton = document.querySelector("#back-to-monster");
 const childEditorStart = document.querySelector("#child-editor-start");
 const childPreviewMonster = document.querySelector("#child-preview-monster");
-const childEditorKicker = document.querySelector("#child-editor-kicker");
+const childEditorKickerLabel = document.querySelector("#child-editor-kicker-label");
 const bookOfferStatus = document.querySelector("#book-offer-status");
 const storybookInterestButton = document.querySelector("#storybook-interest");
 const storybookInterestForm = document.querySelector("#storybook-interest-form");
@@ -1221,6 +1222,7 @@ function showCharacterStep({ scroll = true } = {}) {
   syncStorySceneMonster();
   if (monsterCreatorHeader) monsterCreatorHeader.hidden = true;
   monsterCreatorPanels.forEach((panel) => { panel.hidden = true; });
+  converterTool?.classList.add("is-character-step");
   resultBookOffer.hidden = false;
   setConverterStage("personalize");
   window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}#child-editor-start`);
@@ -1319,6 +1321,7 @@ function showMonsterStep({ scroll = true } = {}) {
   isCharacterStepVisible = false;
   if (monsterCreatorHeader) monsterCreatorHeader.hidden = false;
   monsterCreatorPanels.forEach((panel) => { panel.hidden = false; });
+  converterTool?.classList.remove("is-character-step");
   if (resultBookOffer) resultBookOffer.hidden = true;
   setConverterStage(selectedPreviewId ? "preview" : "upload");
   window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}#monster-upload`);
@@ -1326,10 +1329,10 @@ function showMonsterStep({ scroll = true } = {}) {
 }
 
 function syncBookOfferStatus(hasPreview = Boolean(selectedPreviewId)) {
-  if (childEditorKicker) {
-    childEditorKicker.textContent = monsterConfirmed
-      ? "Monster locked · character locker"
-      : "Character locker";
+  if (childEditorKickerLabel) {
+    childEditorKickerLabel.textContent = monsterConfirmed
+      ? "Monster ready · child character"
+      : "Child character";
   }
   if (!bookOfferStatus) return;
   if (monsterConfirmed) {
@@ -1337,7 +1340,7 @@ function syncBookOfferStatus(hasPreview = Boolean(selectedPreviewId)) {
   } else if (hasPreview) {
     bookOfferStatus.textContent = "Choose one generated monster to continue to the character step.";
   } else {
-    bookOfferStatus.textContent = "Create and lock in a monster first, then open the character locker.";
+    bookOfferStatus.textContent = "Create and lock in a monster first, then open the child character editor.";
   }
 }
 
