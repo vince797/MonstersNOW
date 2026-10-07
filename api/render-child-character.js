@@ -9,8 +9,24 @@ const DEFAULT_REFERENCES = {
   boy: "assets/child-editor/default-boy-feature-animation-v1.webp",
   girl: "assets/child-editor/default-girl-feature-animation-v1.webp",
 };
+const MOBILITY_REFERENCES = {
+  wheelchair: {
+    boy: "assets/child-characters/warm-curly-dark-wheelchair-v1.webp",
+    girl: "assets/child-characters/deep-braids-black-wheelchair-v1.webp",
+  },
+  "forearm-crutches": {
+    boy: "assets/child-editor/default-boy-forearm-crutches-feature-animation-v1.webp",
+    girl: "assets/child-editor/default-girl-forearm-crutches-feature-animation-v1.webp",
+  },
+};
 const FUNCTION_TIMEOUT_MS = 54 * 1000;
 const MAX_PREVIOUS_CHILD_BYTES = 2 * 1024 * 1024;
+
+function referenceFor(profile) {
+  return MOBILITY_REFERENCES[profile.mobilityAid]?.[profile.presentation]
+    || DEFAULT_REFERENCES[profile.presentation]
+    || DEFAULT_REFERENCES.girl;
+}
 
 module.exports = async function handler(request, response) {
   response.setHeader("Cache-Control", "private, no-store");
@@ -54,7 +70,7 @@ module.exports = async function handler(request, response) {
       }
     }
     const [identityReference, styleReference] = await Promise.all([
-      previousReference || convertMonster.loadReferenceImage(DEFAULT_REFERENCES[profile.presentation] || DEFAULT_REFERENCES.girl),
+      previousReference || convertMonster.loadReferenceImage(referenceFor(profile)),
       convertMonster.loadReferenceImage(STYLE_REFERENCE),
     ]);
     const childImage = await convertMonster.createImageEdit({

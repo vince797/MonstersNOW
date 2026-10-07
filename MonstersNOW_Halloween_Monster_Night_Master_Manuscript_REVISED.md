@@ -17,6 +17,7 @@
 - `{child_name}` wears the same fall outfit throughout the story. The monster—not a costume worn by the child—is the personalized Halloween character.
 - Depict `{child_name}` with the selected appearance, age profile, relative height, and any supported mobility aid consistently in every illustration. Do not infer a diagnosis or medical history.
 - If a wheelchair profile is selected, keep the same wheelchair visible with seated proportions on every child page. Use accessible routes and equally active participation; never frame disability as tragedy, pity, a lesson for others, or something to cure.
+- If a forearm-crutch profile is selected, keep the same two correctly fitted forearm crutches visible on every child page, including cuffs, grips, shafts, and grounded rubber tips. Use accessible routes and movement-neutral actions; never replace them with underarm crutches, canes, or a walker.
 - Stage `{child_name}` with movement-neutral actions such as move, join, follow, or lead. Do not force standing, walking, running, jumping, or climbing.
 - Treat all personalized text areas as flexible templates. Test the longest supported child and monster names before print, and reduce type size or rebalance line breaks without changing the wording.
 - Physical spreads follow standard bound-book pagination: even-numbered page on the left, odd-numbered page on the right.
@@ -367,7 +368,7 @@ Created by `{child_name}`
 10. The parade banner remains repaired after pages 20–21.
 11. Friends A and B appear in every appropriate subsequent group scene and in the parade.
 12. Keep a flexible monster-safe composition zone in every personalized illustration.
-13. When a mobility aid is selected, preserve its exact design, the child's seated proportions, and an accessible path through every child scene.
+13. When a mobility aid is selected, preserve its exact design and an accessible path through every child scene. Keep seated proportions for wheelchair profiles and natural supported standing proportions for forearm-crutch profiles.
 
 ## Personalization QA
 

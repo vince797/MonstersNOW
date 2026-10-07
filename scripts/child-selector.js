@@ -2,6 +2,7 @@
   const storageKey = "monstersnow_child_character_profile_v3";
   const ageLabels = { "2-4": "Ages 2–4", "5-6": "Ages 5–6", "7-8": "Ages 7–8" };
   const heightLabels = { shorter: "Shorter", average: "About average", taller: "Taller" };
+  const mobilityLabels = { none: "Standing", wheelchair: "Wheelchair", "forearm-crutches": "Forearm crutches" };
   const optionLabels = {
     presentation: { boy: "Boy", girl: "Girl" },
     skinTone: { light: "Light", golden: "Golden", medium: "Medium", warm: "Warm brown", deep: "Deep" },
@@ -28,6 +29,7 @@
     },
   };
   const wheelchairSupport = { appearanceIds: ["custom"], ageBands: ["5-6", "7-8"], relativeHeights: ["average", "taller"] };
+  const forearmCrutchSupport = { appearanceIds: ["custom"], ageBands: ["2-4", "5-6", "7-8"], relativeHeights: ["shorter", "average", "taller"] };
   const defaultProfile = {
     id: "custom", ageBand: "5-6", relativeHeight: "average", mobilityAid: "none",
     presentation: "girl",
@@ -113,14 +115,33 @@
   }
 
   function supportsWheelchair(profile) { return Boolean(profile?.included && profile.id === "custom" && wheelchairSupport.ageBands.includes(profile.ageBand) && wheelchairSupport.relativeHeights.includes(profile.relativeHeight)); }
+  function supportsForearmCrutches(profile) { return Boolean(profile?.included && profile.id === "custom" && forearmCrutchSupport.ageBands.includes(profile.ageBand) && forearmCrutchSupport.relativeHeights.includes(profile.relativeHeight)); }
+
+  function premiumReferenceFor(profile) {
+    if (profile.mobilityAid === "forearm-crutches") {
+      return profile.presentation === "boy"
+        ? "assets/child-editor/default-boy-forearm-crutches-feature-animation-v1.webp"
+        : "assets/child-editor/default-girl-forearm-crutches-feature-animation-v1.webp";
+    }
+    if (profile.mobilityAid === "wheelchair") {
+      return profile.presentation === "boy"
+        ? "assets/child-characters/warm-curly-dark-wheelchair-v1.webp"
+        : "assets/child-characters/deep-braids-black-wheelchair-v1.webp";
+    }
+    return profile.presentation === "boy"
+      ? "assets/child-editor/default-boy-feature-animation-v1.webp"
+      : "assets/child-editor/default-girl-feature-animation-v1.webp";
+  }
 
   function refreshWheelchairControls() {
     const wheelchair = document.querySelector('input[name="child-mobility-aid"][value="wheelchair"]');
+    const crutches = document.querySelector('input[name="child-mobility-aid"][value="forearm-crutches"]');
     const none = document.querySelector('input[name="child-mobility-aid"][value="none"]');
-    if (!wheelchair || !none) return;
+    if (!wheelchair || !crutches || !none) return;
     let profile = getProfile();
-    if (!supportsWheelchair(profile) && wheelchair.checked) { none.checked = true; profile = getProfile(); }
+    if ((!supportsWheelchair(profile) && wheelchair.checked) || (!supportsForearmCrutches(profile) && crutches.checked)) { none.checked = true; profile = getProfile(); }
     wheelchair.disabled = !supportsWheelchair(profile);
+    crutches.disabled = !supportsForearmCrutches(profile);
     const wheelchairSelected = wheelchair.checked;
     for (const input of document.querySelectorAll('input[name="child-age-band"]')) {
       input.disabled = wheelchairSelected && !wheelchairSupport.ageBands.includes(input.value);
@@ -133,8 +154,13 @@
     const label = wheelchair.closest("label");
     label?.classList.toggle("is-unavailable", wheelchair.disabled);
     label?.setAttribute("aria-disabled", wheelchair.disabled ? "true" : "false");
+    const crutchesLabel = crutches.closest("label");
+    crutchesLabel?.classList.toggle("is-unavailable", crutches.disabled);
+    crutchesLabel?.setAttribute("aria-disabled", crutches.disabled ? "true" : "false");
     const copy = document.querySelector("#child-wheelchair-option-copy");
-    if (copy) copy.textContent = wheelchair.disabled ? "Choose ages 5–8 and average or taller." : "Available with the current age and height.";
+    if (copy) copy.textContent = wheelchair.disabled ? "Choose ages 5–8 · average or taller" : "Ready with these choices";
+    const crutchesCopy = document.querySelector("#child-crutches-option-copy");
+    if (crutchesCopy) crutchesCopy.textContent = crutches.disabled ? "Unavailable with these choices" : "Two child-sized crutches";
   }
 
   function ensureCharacterArt(stage) {
@@ -186,9 +212,7 @@
     }
     stage.classList.add(`age-${profile.ageBand || "5-6"}`, `height-${profile.relativeHeight || "average"}`, `mobility-${profile.mobilityAid || "none"}`, "has-character-art", "has-premium-art");
     if (premiumDefault) {
-      premiumDefault.src = profile.presentation === "boy"
-        ? "assets/child-editor/default-boy-feature-animation-v1.webp"
-        : "assets/child-editor/default-girl-feature-animation-v1.webp";
+      premiumDefault.src = premiumReferenceFor(profile);
       premiumDefault.hidden = stage.classList.contains("has-book-render");
     }
     if (character) character.hidden = true;
@@ -267,7 +291,7 @@
     if (selection) selection.textContent = profile.included ? "Character in progress" : "Monster-only story";
     if (title) title.textContent = profile.included ? "Their storybook character is taking shape." : "Their monster takes center stage.";
     if (copy) copy.textContent = profile.included
-      ? `${optionLabels.presentation[profile.presentation]} · ${optionLabels.skinTone[profile.skinTone]} skin · ${optionLabels.hairColor[profile.hairColor]} ${optionLabels.hairStyle[profile.hairStyle].toLowerCase()} · ${optionLabels.eyeColor[profile.eyeColor]} eyes · ${optionLabels.outfitColor[profile.outfitColor]} ${optionLabels.outfitStyle[profile.outfitStyle].toLowerCase()}. ${ageLabels[profile.ageBand]} · ${heightLabels[profile.relativeHeight]}.`
+      ? `${optionLabels.presentation[profile.presentation]} · ${optionLabels.skinTone[profile.skinTone]} skin · ${optionLabels.hairColor[profile.hairColor]} ${optionLabels.hairStyle[profile.hairStyle].toLowerCase()} · ${optionLabels.eyeColor[profile.eyeColor]} eyes · ${optionLabels.outfitColor[profile.outfitColor]} ${optionLabels.outfitStyle[profile.outfitStyle].toLowerCase()}. ${ageLabels[profile.ageBand]} · ${heightLabels[profile.relativeHeight]}${profile.mobilityAid !== "none" ? ` · ${mobilityLabels[profile.mobilityAid]}` : ""}.`
       : "Your selected monster is shown here and will star in the story.";
     renderProfile(document.querySelector("#child-preview-stage"), document.querySelector("#child-preview-avatar"), profile);
     if (save) persist(profile);
@@ -297,7 +321,7 @@
     }
   }
 
-  window.MonstersNowChildSelector = { getProfile, renderProfile, restore, sync, undo, reset, supportsWheelchair, storageKey, wheelchairSupport };
+  window.MonstersNowChildSelector = { getProfile, renderProfile, restore, sync, undo, reset, supportsWheelchair, supportsForearmCrutches, storageKey, wheelchairSupport, forearmCrutchSupport };
   if (!root) return;
   restore();
   root.addEventListener("change", () => sync({ recordHistory: true }));

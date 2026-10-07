@@ -3,7 +3,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 
-const { childProfileKey, isSupportedWheelchairProfile, resolveChildCharacter } = require("../lib/child-characters");
+const { childProfileKey, isSupportedForearmCrutchProfile, isSupportedWheelchairProfile, resolveChildCharacter } = require("../lib/child-characters");
 const { buildChildCharacterRenderPrompt } = require("../lib/child-character-style");
 const { buildStorybookInterestSubmission } = require("../lib/storybook-interest");
 const { buildHalloweenProof } = require("../lib/halloween-proof");
@@ -29,6 +29,16 @@ test("server validation rejects unsupported age or height values instead of sile
   assert.throws(() => buildStorybookInterestSubmission({ ...base, childCharacter: { ...base.childCharacter, relativeHeight: "121cm" } }), /valid relative height/i);
   assert.throws(() => buildStorybookInterestSubmission({ ...base, childCharacter: { ...base.childCharacter, mobilityAid: "diagnosis-detail" } }), /supported mobility option/i);
   assert.throws(() => buildStorybookInterestSubmission({ ...base, childCharacter: { id: "deep-coils-black", ageBand: "7-8", relativeHeight: "taller", mobilityAid: "wheelchair" } }), /supported wheelchair appearance/i);
+  assert.throws(() => buildStorybookInterestSubmission({ ...base, childCharacter: { id: "deep-coils-black", ageBand: "7-8", relativeHeight: "taller", mobilityAid: "forearm-crutches" } }), /supported forearm-crutch character/i);
+});
+
+test("forearm crutches are available across the custom child editor", () => {
+  const profile = resolveChildCharacter({
+    id: "custom", presentation: "boy", ageBand: "2-4", relativeHeight: "shorter", mobilityAid: "forearm-crutches",
+  });
+  assert.equal(isSupportedForearmCrutchProfile(profile), true);
+  assert.equal(profile.mobilityAidLabel, "Forearm crutches");
+  assert.equal(childProfileKey(profile), "custom:boy:medium:curly:dark-brown:brown:overalls:teal:2-4:shorter:forearm-crutches");
 });
 
 test("wheelchair support is an explicit eight-combination matrix with exact profile keys", () => {
@@ -90,12 +100,13 @@ test("selector UI is a true layered character editor with a MonstersNOW storyboo
   assert.match(html, /name="child-age-band"/);
   assert.match(html, /name="child-relative-height"/);
   assert.match(html, /name="child-mobility-aid" value="wheelchair"/);
+  assert.match(html, /name="child-mobility-aid" value="forearm-crutches"/);
   assert.doesNotMatch(html, /href="#child-editor-start">Explore the child creator/);
   assert.equal((html.match(/data-monster-step-panel/g) || []).length, 2);
   assert.match(html, /id="result-book-offer" aria-labelledby="result-book-title" hidden/);
   assert.match(html, /id="back-to-monster"/);
   assert.match(html, /No diagnosis or medical details needed/);
-  assert.match(html, /Available for ages 5–8 and average or taller/i);
+  assert.match(html, /Ages 5–8 · average or taller/i);
   assert.doesNotMatch(html, /type="date"|name="child-(?:birthdate|date-of-birth|height-(?:cm|in))"/i);
   assert.match(html, />Face &amp; hair<|>Outfit<|>Age, height &amp; accessibility/);
   assert.match(html, /name="child-character" value="custom" checked/);
@@ -118,6 +129,7 @@ test("selector UI is a true layered character editor with a MonstersNOW storyboo
   assert.match(script, /function undo\(/);
   assert.match(script, /function reset\(/);
   assert.match(script, /function supportsWheelchair/);
+  assert.match(script, /function supportsForearmCrutches/);
   assert.match(script, /const customCharacterSvg/);
   assert.match(script, /dataset\.hairStyle/);
   assert.match(script, /dataset\.outfitStyle/);
@@ -136,7 +148,12 @@ test("selector UI is a true layered character editor with a MonstersNOW storyboo
   assert.match(mainScript, /fetch\("\/api\/render-child-character"/);
   assert.match(mainScript, /childImage: personalization\.childCharacter/);
   assert.match(css, /\.child-preview-stage\.has-book-render/);
-  assert.match(css, /height: 300px/);
+  assert.match(css, /height: 280px; min-height: 260px/);
+  assert.match(css, /\.create-flow-section \.child-editor-controls \{ grid-column: 1; grid-row: 1; \}/);
+  assert.match(css, /\.create-flow-section \.child-live-preview \{ grid-column: 1; grid-row: 2; \}/);
+  assert.match(css, /\.child-preview-copy p \{[\s\S]*white-space: normal;[\s\S]*-webkit-line-clamp: 2;/);
+  assert.match(mainScript, /function getSelectedMonsterImage\(\)/);
+  assert.match(mainScript, /monsterPreview\?\.hasAttribute\("src"\)/);
   assert.doesNotMatch(css, /storybook-forest-stage-v1\.webp/);
   assert.match(css, /storybook-studio-stage-v1\.jpg/);
   assert.match(css, /radial-gradient\(ellipse at 70% 90%/);
@@ -147,12 +164,13 @@ test("selector UI is a true layered character editor with a MonstersNOW storyboo
   assert.match(mainScript, /function showMonsterStep/);
   assert.match(mainScript, /classList\.add\("is-character-step"\)/);
   assert.match(css, /\.child-preview-stage\.mobility-wheelchair/);
+  assert.match(css, /\.child-preview-stage\.mobility-forearm-crutches/);
   assert.match(css, /\.child-live-preview \{[\s\S]*position: sticky/);
   assert.match(css, /\.child-presence-toggle label\.is-selected::after/);
   assert.match(css, /\.child-preview-character/);
-  assert.match(html, /child-selector\.css\?v=20261007-character-loader-v13/);
-  assert.match(html, /scripts\/child-selector\.js\?v=20261007-avatar-continuity-v9/);
-  assert.match(html, /scripts\/main\.js\?v=20261007-character-loader-v16/);
+  assert.match(html, /child-selector\.css\?v=20261007-mobile-editor-v15/);
+  assert.match(html, /scripts\/child-selector\.js\?v=20261007-mobility-editor-v10/);
+  assert.match(html, /scripts\/main\.js\?v=20261007-mobile-editor-v18/);
   assert.match(mainScript, /childMonsterOnlyPreview\.src = monsterImage/);
   assert.match(mainScript, /classList\.toggle\("has-monster-only", showMonster\)/);
   assert.match(css, /\.child-monster-only-preview/);
@@ -206,6 +224,19 @@ test("girl braid renders require the two-braid thumbnail silhouette", () => {
   assert.match(prompt, /selected hair.*authoritative.*override/i);
 });
 
+test("forearm-crutch renders preserve two correctly fitted devices", () => {
+  const prompt = buildChildCharacterRenderPrompt({
+    id: "custom", presentation: "girl", skinTone: "warm", hairStyle: "curly", hairColor: "dark-brown",
+    eyeColor: "hazel", outfitStyle: "hoodie", outfitColor: "teal",
+    ageBand: "5-6", relativeHeight: "average", mobilityAid: "forearm-crutches",
+  });
+  assert.match(prompt, /exactly two correctly fitted child-sized forearm crutches/i);
+  assert.match(prompt, /cuffs secured around the forearms/i);
+  assert.match(prompt, /both hands resting naturally on the grips/i);
+  assert.match(prompt, /both rubber tips touching the ground/i);
+  assert.match(prompt, /never underarm crutches, canes, or a walker/i);
+});
+
 test("every boy and girl hairstyle has a thumbnail-specific render silhouette", () => {
   const cases = [
     ["girl", "short", /ear-length asymmetrical textured pixie-bob/i],
@@ -252,7 +283,10 @@ test("character studio includes lightweight changing storybook previews", () => 
 });
 
 test("premium editor defaults include optimized original feature-animation boy and girl artwork", () => {
-  for (const filename of ["default-boy-feature-animation-v1.webp", "default-girl-feature-animation-v1.webp"]) {
+  for (const filename of [
+    "default-boy-feature-animation-v1.webp", "default-girl-feature-animation-v1.webp",
+    "default-boy-forearm-crutches-feature-animation-v1.webp", "default-girl-forearm-crutches-feature-animation-v1.webp",
+  ]) {
     const asset = path.join(root, "assets", "child-editor", filename);
     assert.equal(fs.existsSync(asset), true, `${filename} should exist`);
     assert.ok(fs.statSync(asset).size > 100_000, `${filename} should be a detailed rendered asset`);
@@ -282,6 +316,8 @@ test("hair selector includes premium boy and girl thumbnail sets", () => {
 test("Halloween story directions keep wheelchair participation consistent and movement neutral", () => {
   const manuscript = fs.readFileSync(path.join(root, "lib/story-data/halloween-monster-night.md"), "utf8");
   assert.match(manuscript, /same wheelchair visible with seated proportions on every child page/i);
+  assert.match(manuscript, /same two correctly fitted forearm crutches visible on every child page/i);
+  assert.match(manuscript, /never replace them with underarm crutches, canes, or a walker/i);
   assert.match(manuscript, /step-free route/i);
   assert.match(manuscript, /move, join, follow, or lead/i);
   assert.doesNotMatch(manuscript, /\{child_name\}\s+(?:stands|walks|runs|jumps|climbs|hurried|marched)\b/i);

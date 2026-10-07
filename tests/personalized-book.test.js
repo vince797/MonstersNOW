@@ -154,6 +154,42 @@ test("wheelchair profiles require an exact seated child-and-wheelchair asset on 
   assert.ok(ready.pages.every((page) => /actively participating.*seated pose/i.test(page.child.actionGuidance)));
 });
 
+test("forearm-crutch profiles preserve both crutches on every child page", () => {
+  const story = {
+    id: "story-1",
+    pages: Array.from({ length: 32 }, (_, index) => ({
+      text: "{child_name} and {monster_name} follow the glowing trail.",
+      artworkUrl: `https://assets.example/page-${index + 1}.jpg`,
+      artworkStatus: "final",
+      backgroundPlateConfirmed: true,
+      backgroundPlateVersion: 2,
+      childRequired: true,
+      childPlacement: { x: 54, y: 78, scale: 30, facing: "right", layer: "front" },
+    })),
+  };
+  const childCharacter = {
+    id: "custom", presentation: "boy", skinTone: "golden", hairStyle: "short", hairColor: "brown",
+    eyeColor: "green", outfitStyle: "hoodie", outfitColor: "blue",
+    ageBand: "5-6", relativeHeight: "average", mobilityAid: "forearm-crutches",
+  };
+  const profileKey = "custom:boy:golden:short:brown:green:hoodie:blue:5-6:average:forearm-crutches";
+  const ready = buildPersonalizedBook(story, {
+    childName: "Riley", monsterName: "Fizz", childCharacter, selectedPreviewId: "preview-1",
+  }, { selectedPreviewUrl: "https://assets.example/fizz.png", selectedPreviewId: "preview-1" }, {
+    childImageUrl: "https://assets.example/children/riley-crutches.png",
+    childProfileKey: profileKey,
+    childDepiction: "standing-forearm-crutches",
+    childAssetComposition: "child-and-forearm-crutches",
+    childAssetApproved: true,
+    childPageVerification: "all-required-pages",
+    rendererVersion: "personalized-composite-v1",
+  });
+  assert.equal(ready.readiness.productionReady, true);
+  assert.ok(ready.pages.every((page) => page.child.pose === "standing-forearm-crutches"));
+  assert.ok(ready.pages.every((page) => page.child.preserveMobilityAid && !page.child.seatedProportions));
+  assert.ok(ready.pages.every((page) => /same two forearm crutches fully visible/i.test(page.child.actionGuidance)));
+});
+
 test("unsupported wheelchair combinations remain blocked even with an otherwise complete asset contract", () => {
   const story = {
     id: "story-1",

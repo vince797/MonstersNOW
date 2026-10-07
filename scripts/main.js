@@ -283,9 +283,17 @@ syncChildCharacterPicker();
 childRenderButton?.addEventListener("click", renderBookCharacter);
 childEditorStart?.addEventListener("childprofilechange", (event) => {
   const nextKey = getChildProfileKey(event.detail);
+  let renderedMobilityAid = "";
+  try { renderedMobilityAid = JSON.parse(renderedChildProfileKey || "{}").mobilityAid || "none"; } catch {}
   syncPremiumDefault(event.detail);
   if (renderedChildImage && event.detail?.included && renderedChildProfileKey !== nextKey) {
     markRenderedChildStale();
+    if ((event.detail.mobilityAid || "none") !== renderedMobilityAid) {
+      childPreviewStage?.classList.remove("has-book-render");
+      if (childRenderedPreview) childRenderedPreview.hidden = true;
+      if (childPremiumDefault) childPremiumDefault.hidden = false;
+      if (childRenderStatus) childRenderStatus.textContent = "The new mobility preview is shown. Apply the choices to create the exact book character.";
+    }
   } else if (!event.detail?.included && childRenderStatus) {
     childRenderStatus.textContent = "Monster-only stories use the selected monster and do not need a child character render.";
   }
@@ -397,6 +405,17 @@ function getSelectedStorybookFormat() {
 
 function getSelectedPreview() {
   return generatedPreviews.find((preview) => preview.id === selectedPreviewId);
+}
+
+function getSelectedMonsterImage() {
+  const selectedImage = getSelectedPreview()?.image;
+
+  if (selectedImage) return selectedImage;
+
+  if (!monsterPreview?.hasAttribute("src")) return "";
+
+  const displayedImage = monsterPreview?.currentSrc || monsterPreview?.src;
+  return displayedImage || "";
 }
 
 function persistStorybookInterest(submission, selectedFormat, featurePermission) {
@@ -584,15 +603,29 @@ function hideChildRenderProgress() {
   childRenderProgressStartedAt = 0;
 }
 
+function getPremiumChildReference(profile = {}) {
+  if (profile.mobilityAid === "forearm-crutches") {
+    return profile.presentation === "boy"
+      ? "assets/child-editor/default-boy-forearm-crutches-feature-animation-v1.webp"
+      : "assets/child-editor/default-girl-forearm-crutches-feature-animation-v1.webp";
+  }
+  if (profile.mobilityAid === "wheelchair") {
+    return profile.presentation === "boy"
+      ? "assets/child-characters/warm-curly-dark-wheelchair-v1.webp"
+      : "assets/child-characters/deep-braids-black-wheelchair-v1.webp";
+  }
+  return profile.presentation === "boy"
+    ? "assets/child-editor/default-boy-feature-animation-v1.webp"
+    : "assets/child-editor/default-girl-feature-animation-v1.webp";
+}
+
 function syncPremiumDefault(profile = getSelectedChildCharacter()) {
   if (!childPremiumDefault) return;
   const included = Boolean(profile?.included);
-  const monsterImage = getSelectedPreview()?.image || "";
+  const monsterImage = getSelectedMonsterImage();
   const showMonster = !included && Boolean(monsterImage);
   childPremiumDefault.hidden = !included || Boolean(renderedChildImage);
-  childPremiumDefault.src = profile?.presentation === "boy"
-    ? "assets/child-editor/default-boy-feature-animation-v1.webp"
-    : "assets/child-editor/default-girl-feature-animation-v1.webp";
+  childPremiumDefault.src = getPremiumChildReference(profile);
   if (childMonsterOnlyPreview) {
     childMonsterOnlyPreview.hidden = !showMonster;
     if (showMonster) {
@@ -641,7 +674,7 @@ async function renderBookCharacter() {
     if (renderedChildImage && renderedChildProfileKey) {
       try {
         const previousProfile = JSON.parse(renderedChildProfileKey);
-        if (previousProfile.presentation === profile.presentation) previousChildImage = renderedChildImage;
+        if (previousProfile.presentation === profile.presentation && previousProfile.mobilityAid === profile.mobilityAid) previousChildImage = renderedChildImage;
       } catch {}
     }
     const response = await fetch("/api/render-child-character", {
@@ -1414,6 +1447,7 @@ function showCharacterStep({ scroll = true } = {}) {
   monsterCreatorPanels.forEach((panel) => { panel.hidden = true; });
   converterTool?.classList.add("is-character-step");
   resultBookOffer.hidden = false;
+  syncPremiumDefault(getSelectedChildCharacter());
   setConverterStage("personalize");
   window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}#child-editor-start`);
   window.setTimeout(() => {
