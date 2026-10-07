@@ -611,8 +611,8 @@ function getPremiumChildReference(profile = {}) {
   }
   if (profile.mobilityAid === "wheelchair") {
     return profile.presentation === "boy"
-      ? "assets/child-characters/warm-curly-dark-wheelchair-v1.webp"
-      : "assets/child-characters/deep-braids-black-wheelchair-v1.webp";
+      ? "assets/child-editor/default-boy-wheelchair-feature-animation-v1.webp"
+      : "assets/child-editor/default-girl-wheelchair-feature-animation-v1.webp";
   }
   return profile.presentation === "boy"
     ? "assets/child-editor/default-boy-feature-animation-v1.webp"

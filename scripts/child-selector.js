@@ -28,7 +28,7 @@
       rose: ["#c85273", "#e7829d", "#923650"], green: ["#4b8b55", "#79b56f", "#32673b"],
     },
   };
-  const wheelchairSupport = { appearanceIds: ["custom"], ageBands: ["5-6", "7-8"], relativeHeights: ["average", "taller"] };
+  const wheelchairSupport = { appearanceIds: ["custom"], ageBands: ["2-4", "5-6", "7-8"], relativeHeights: ["shorter", "average", "taller"] };
   const forearmCrutchSupport = { appearanceIds: ["custom"], ageBands: ["2-4", "5-6", "7-8"], relativeHeights: ["shorter", "average", "taller"] };
   const defaultProfile = {
     id: "custom", ageBand: "5-6", relativeHeight: "average", mobilityAid: "none",
@@ -125,8 +125,8 @@
     }
     if (profile.mobilityAid === "wheelchair") {
       return profile.presentation === "boy"
-        ? "assets/child-characters/warm-curly-dark-wheelchair-v1.webp"
-        : "assets/child-characters/deep-braids-black-wheelchair-v1.webp";
+        ? "assets/child-editor/default-boy-wheelchair-feature-animation-v1.webp"
+        : "assets/child-editor/default-girl-wheelchair-feature-animation-v1.webp";
     }
     return profile.presentation === "boy"
       ? "assets/child-editor/default-boy-feature-animation-v1.webp"
@@ -158,7 +158,7 @@
     crutchesLabel?.classList.toggle("is-unavailable", crutches.disabled);
     crutchesLabel?.setAttribute("aria-disabled", crutches.disabled ? "true" : "false");
     const copy = document.querySelector("#child-wheelchair-option-copy");
-    if (copy) copy.textContent = wheelchair.disabled ? "Choose ages 5–8 · average or taller" : "Ready with these choices";
+    if (copy) copy.textContent = wheelchair.disabled ? "Unavailable with these choices" : "Sized to their age and height";
     const crutchesCopy = document.querySelector("#child-crutches-option-copy");
     if (crutchesCopy) crutchesCopy.textContent = crutches.disabled ? "Unavailable with these choices" : "Two child-sized crutches";
   }

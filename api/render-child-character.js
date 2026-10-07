@@ -11,8 +11,8 @@ const DEFAULT_REFERENCES = {
 };
 const MOBILITY_REFERENCES = {
   wheelchair: {
-    boy: "assets/child-characters/warm-curly-dark-wheelchair-v1.webp",
-    girl: "assets/child-characters/deep-braids-black-wheelchair-v1.webp",
+    boy: "assets/child-editor/default-boy-wheelchair-feature-animation-v1.webp",
+    girl: "assets/child-editor/default-girl-wheelchair-feature-animation-v1.webp",
   },
   "forearm-crutches": {
     boy: "assets/child-editor/default-boy-forearm-crutches-feature-animation-v1.webp",

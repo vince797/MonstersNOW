@@ -41,10 +41,12 @@ test("forearm crutches are available across the custom child editor", () => {
   assert.equal(childProfileKey(profile), "custom:boy:medium:curly:dark-brown:brown:overalls:teal:2-4:shorter:forearm-crutches");
 });
 
-test("wheelchair support is an explicit eight-combination matrix with exact profile keys", () => {
+test("wheelchair support spans every age and height choice with exact profile keys", () => {
   const supported = resolveChildCharacter({ id: "deep-braids-black", ageBand: "7-8", relativeHeight: "taller", mobilityAid: "wheelchair" });
-  const unsupported = resolveChildCharacter({ id: "deep-braids-black", ageBand: "2-4", relativeHeight: "taller", mobilityAid: "wheelchair" });
+  const youngerShorter = resolveChildCharacter({ id: "deep-braids-black", ageBand: "2-4", relativeHeight: "shorter", mobilityAid: "wheelchair" });
+  const unsupported = resolveChildCharacter({ id: "deep-coils-black", ageBand: "7-8", relativeHeight: "taller", mobilityAid: "wheelchair" });
   assert.equal(isSupportedWheelchairProfile(supported), true);
+  assert.equal(isSupportedWheelchairProfile(youngerShorter), true);
   assert.equal(isSupportedWheelchairProfile(unsupported), false);
   assert.equal(childProfileKey(supported), "deep-braids-black:7-8:taller:wheelchair");
 });
@@ -106,7 +108,7 @@ test("selector UI is a true layered character editor with a MonstersNOW storyboo
   assert.match(html, /id="result-book-offer" aria-labelledby="result-book-title" hidden/);
   assert.match(html, /id="back-to-monster"/);
   assert.match(html, /No diagnosis or medical details needed/);
-  assert.match(html, /Ages 5–8 · average or taller/i);
+  assert.match(html, /Sized to their age and height/i);
   assert.doesNotMatch(html, /type="date"|name="child-(?:birthdate|date-of-birth|height-(?:cm|in))"/i);
   assert.match(html, />Face &amp; hair<|>Outfit<|>Age, height &amp; accessibility/);
   assert.match(html, /name="child-character" value="custom" checked/);
@@ -168,9 +170,9 @@ test("selector UI is a true layered character editor with a MonstersNOW storyboo
   assert.match(css, /\.child-live-preview \{[\s\S]*position: sticky/);
   assert.match(css, /\.child-presence-toggle label\.is-selected::after/);
   assert.match(css, /\.child-preview-character/);
-  assert.match(html, /child-selector\.css\?v=20261007-mobile-editor-v15/);
-  assert.match(html, /scripts\/child-selector\.js\?v=20261007-mobility-editor-v10/);
-  assert.match(html, /scripts\/main\.js\?v=20261007-mobile-editor-v18/);
+  assert.match(html, /child-selector\.css\?v=20261007-wheelchair-editor-v16/);
+  assert.match(html, /scripts\/child-selector\.js\?v=20261007-wheelchair-editor-v11/);
+  assert.match(html, /scripts\/main\.js\?v=20261007-wheelchair-editor-v19/);
   assert.match(mainScript, /childMonsterOnlyPreview\.src = monsterImage/);
   assert.match(mainScript, /classList\.toggle\("has-monster-only", showMonster\)/);
   assert.match(css, /\.child-monster-only-preview/);
@@ -286,6 +288,7 @@ test("premium editor defaults include optimized original feature-animation boy a
   for (const filename of [
     "default-boy-feature-animation-v1.webp", "default-girl-feature-animation-v1.webp",
     "default-boy-forearm-crutches-feature-animation-v1.webp", "default-girl-forearm-crutches-feature-animation-v1.webp",
+    "default-boy-wheelchair-feature-animation-v1.webp", "default-girl-wheelchair-feature-animation-v1.webp",
   ]) {
     const asset = path.join(root, "assets", "child-editor", filename);
     assert.equal(fs.existsSync(asset), true, `${filename} should exist`);

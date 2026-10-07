@@ -792,7 +792,7 @@
 .child-preview-stage.has-premium-art .child-preview-character { display: none; }
 .child-preview-stage.has-book-render .child-preview-character { display: none; }
 .child-preview-stage.has-book-render .child-premium-default { display: none; }
-.child-preview-stage.mobility-wheelchair .child-premium-default,
+.child-preview-stage.mobility-wheelchair .child-premium-default { top: 0; left: 1%; width: 98%; height: 92%; }
 .child-preview-stage.mobility-forearm-crutches .child-premium-default { top: 0; left: 1%; width: 98%; height: 89%; }
 .child-preview-stage.has-monster-only .child-rendered-preview { display: none; }
 .child-preview-stage.has-book-render::before { opacity: .55; }
