@@ -115,9 +115,9 @@ test("selector UI is a true layered character editor with a MonstersNOW storyboo
   assert.match(script, /--eye/);
   assert.match(script, /--outfit/);
   assert.match(script, /child-preview-character/);
-  assert.match(html, /id="child-preview-monster"/);
-  assert.match(mainScript, /function syncStorySceneMonster/);
-  assert.match(mainScript, /function removeConnectedWhiteBackground/);
+  assert.doesNotMatch(html, /id="child-preview-monster"/);
+  assert.doesNotMatch(html, /child-board-label-monster/);
+  assert.match(html, /Feature-animation style/);
   assert.doesNotMatch(css, /storybook-forest-stage-v1\.webp/);
   assert.match(css, /storybook-studio-stage-v1\.jpg/);
   assert.match(css, /radial-gradient\(ellipse at 70% 90%/);
@@ -131,9 +131,11 @@ test("selector UI is a true layered character editor with a MonstersNOW storyboo
   assert.match(css, /\.child-live-preview \{[\s\S]*position: sticky/);
   assert.match(css, /\.child-presence-toggle label\.is-selected::after/);
   assert.match(css, /\.child-preview-character/);
-  assert.match(html, /child-selector\.css\?v=20261007-storybook-character-studio-v3/);
-  assert.match(html, /scripts\/child-selector\.js\?v=20261007-storybook-character-studio-v3/);
-  assert.match(html, /scripts\/main\.js\?v=20261007-preview-studio-v9/);
+  assert.match(html, /child-selector\.css\?v=20261007-feature-character-studio-v4/);
+  assert.match(html, /scripts\/child-selector\.js\?v=20261007-feature-character-studio-v4/);
+  assert.match(html, /scripts\/main\.js\?v=20261007-child-focus-v10/);
+  assert.doesNotMatch(mainScript, /syncStorySceneMonster/);
+  assert.doesNotMatch(mainScript, /removeConnectedWhiteBackground/);
 });
 
 test("character studio includes lightweight changing storybook previews", () => {
