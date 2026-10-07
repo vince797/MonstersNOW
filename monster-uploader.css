@@ -330,6 +330,39 @@ body .upload-original-card .upload-tips li {
 
 body .upload-original-card .upload-tips li::before { left: 7px; width: 6px; height: 6px; }
 
+.automatic-style-note {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 12px;
+  background: linear-gradient(135deg, #f2fbfa, #fff9f1);
+  border: 1px solid #cce8e5;
+  border-radius: 13px;
+}
+.automatic-style-note > i {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  background: #35115f;
+  border-radius: 11px;
+  color: #ff9a3c;
+  font-size: 1rem;
+  font-style: normal;
+  box-shadow: 0 7px 15px rgba(53,17,95,.13);
+}
+.automatic-style-note > span { display: grid; gap: 1px; }
+.automatic-style-note small {
+  color: #00727a;
+  font-size: .58rem;
+  font-weight: 950;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+.automatic-style-note strong { color: #35115f; font-size: .79rem; line-height: 1.15; }
+.automatic-style-note p { max-width: 185px; margin: 0; color: #6c6374; font-size: .67rem; line-height: 1.35; text-align: right; }
+
 body .variation-controls {
   gap: 10px;
   margin: 0;
@@ -888,4 +921,6 @@ body .result-content > p { max-width: 62ch; }
   body .is-example-preview .monster-preview { min-height: 340px; padding: 46px 12px 16px; }
   body .is-example-preview .monster-preview-placeholder { min-height: 270px; padding: 20px 14px 17px; }
   body .is-example-preview .monster-preview-mark { width: 52px; height: 52px; margin-bottom: 10px; }
+  .automatic-style-note { grid-template-columns: 36px minmax(0, 1fr); }
+  .automatic-style-note p { grid-column: 2; max-width: none; text-align: left; }
 }

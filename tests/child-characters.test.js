@@ -149,7 +149,7 @@ test("selector UI is a true layered character editor with a MonstersNOW storyboo
   assert.match(css, /\.child-preview-character/);
   assert.match(html, /child-selector\.css\?v=20261007-book-render-v6/);
   assert.match(html, /scripts\/child-selector\.js\?v=20261007-boy-girl-editor-v5/);
-  assert.match(html, /scripts\/main\.js\?v=20261007-book-render-v11/);
+  assert.match(html, /scripts\/main\.js\?v=20261007-auto-style-v12/);
   assert.doesNotMatch(mainScript, /syncStorySceneMonster/);
   assert.doesNotMatch(mainScript, /removeConnectedWhiteBackground/);
 });

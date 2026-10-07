@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="storefront.css?v=20261002-public-storefront" />
     <link rel="apple-touch-icon" href="assets/brand/monstersnow-icon-180-v1.png" />
     <link rel="stylesheet" href="brand.css?v=20261004-selected-logo" />
-    <link rel="stylesheet" href="monster-uploader.css?v=20261007-studio-polish-v3" />
+    <link rel="stylesheet" href="monster-uploader.css?v=20261007-auto-style-v4" />
   </head>
   <body class="brand-theme">
     <a class="skip-link" href="#main-content">Skip to content</a>
@@ -45,7 +45,7 @@
             <p class="eyebrow">Monster Studio · Step 1 of 4</p>
             <h1 id="converter-title">Let’s bring their monster to life.</h1>
             <p>
-              Add the drawing and choose its personality. We’ll turn the original
+              Add the drawing and we’ll turn the original
               idea into a polished storybook character—without losing what makes it theirs.
             </p>
             <div class="create-promise-row" role="group" aria-label="Monster creation benefits">
@@ -115,29 +115,10 @@
               </ul>
             </div>
 
-            <div class="variation-controls" role="group" aria-label="Monster preview options">
-              <div>
-                <span>Choose a personality</span>
-                <p id="preview-count">Choose a style. Upload once, then try up to three versions.</p>
-              </div>
-              <div class="style-options" role="group" aria-label="Choose a monster preview style">
-                <button class="style-option is-active" type="button" data-monster-style="storybook" aria-pressed="true">
-                  <strong>Storybook</strong>
-                  <small>Soft 3D keepsake</small>
-                </button>
-                <button class="style-option" type="button" data-monster-style="cute" aria-pressed="false">
-                  <strong>Cute</strong>
-                  <small>Softer face</small>
-                </button>
-                <button class="style-option" type="button" data-monster-style="silly" aria-pressed="false">
-                  <strong>Silly</strong>
-                  <small>Goofy expression</small>
-                </button>
-                <button class="style-option" type="button" data-monster-style="adventure" aria-pressed="false">
-                  <strong>Adventure</strong>
-                  <small>Braver pose</small>
-                </button>
-              </div>
+            <div class="automatic-style-note" aria-label="Automatic monster art style">
+              <i aria-hidden="true">✦</i>
+              <span><small>Automatic book style</small><strong>MonstersNOW Storybook</strong></span>
+              <p id="preview-count">Upload once, then try up to three versions.</p>
             </div>
             <p class="privacy-note"><strong>Private by default.</strong> Upload the artwork only—no child photo or personal details. <a href="privacy.html">How artwork is handled</a></p>
             <p class="converter-error" id="upload-error" role="alert" hidden></p>
@@ -196,7 +177,7 @@
               <h2 id="converter-status">Ready when they are.</h2>
               <p id="converter-note">
                 Add a drawing on the left. The first character preview starts
-                automatically and keeps their shapes, colors, and personality.
+                automatically and keeps their shapes, colors, and special details.
               </p>
               <button class="button secondary replace-drawing-button" id="replace-drawing" type="button" hidden>
                 Choose a Different Photo
@@ -551,6 +532,6 @@
     </footer>
 
     <script src="scripts/child-selector.js?v=20261007-boy-girl-editor-v5"></script>
-    <script src="scripts/main.js?v=20261007-book-render-v11"></script>
+    <script src="scripts/main.js?v=20261007-auto-style-v12"></script>
   </body>
 </html>

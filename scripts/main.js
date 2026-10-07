@@ -79,7 +79,6 @@ const uploadTitle = document.querySelector(".upload-drop strong");
 const uploadMeta = document.querySelector(".upload-drop small");
 const resultActions = document.querySelector(".result-actions");
 const flowSteps = [...document.querySelectorAll(".converter-flow li")];
-const styleButtons = [...document.querySelectorAll("[data-monster-style]")];
 const previewHistory = document.querySelector("#preview-history");
 const confirmMonsterButton = document.querySelector("#confirm-monster");
 const resultBookOffer = document.querySelector("#result-book-offer");
@@ -231,26 +230,6 @@ if (monsterUpload && drawingPreview && monsterPreview && convertButton) {
   coloringPageClose?.addEventListener("click", closeColoringPage);
   coloringPageDone?.addEventListener("click", closeColoringPage);
 
-  styleButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-      selectedMonsterStyle = normalizePreviewStyle(button.dataset.monsterStyle);
-      updateStyleButtons();
-
-      if (selectedDrawingFile && previewsUsed < maxFreePreviews && converterNote && !isGeneratingPreview) {
-        converterNote.textContent = `${getPreviewStyleLabel(selectedMonsterStyle)} selected. Create another version when ready.`;
-      }
-
-      if (isGeneratingPreview) {
-        setUploadActionStatus(`${getPreviewStyleLabel(selectedMonsterStyle)} selected for the next version.`);
-      } else if (selectedDrawingFile && previewsUsed < maxFreePreviews) {
-        setUploadActionStatus(`${getPreviewStyleLabel(selectedMonsterStyle)} selected. Try another version when ready.`);
-      } else if (!selectedDrawingFile) {
-        setUploadActionStatus(`${getPreviewStyleLabel(selectedMonsterStyle)} selected. Upload a drawing to start automatically.`);
-      }
-    });
-  });
-
-  updateStyleButtons();
   syncPreviewControls();
 }
 
@@ -1052,15 +1031,6 @@ function resetPreviewState() {
   syncPreviewControls();
 }
 
-function updateStyleButtons() {
-  styleButtons.forEach((button) => {
-    const isActive = normalizePreviewStyle(button.dataset.monsterStyle) === selectedMonsterStyle;
-
-    button.classList.toggle("is-active", isActive);
-    button.setAttribute("aria-pressed", isActive ? "true" : "false");
-  });
-}
-
 function syncPreviewControls() {
   const remaining = Math.max(0, maxFreePreviews - previewsUsed);
   const canGenerate = Boolean(selectedDrawingFile) && remaining > 0 && !isGeneratingPreview && !isPreparingUpload;
@@ -1121,7 +1091,7 @@ function syncPreviewControls() {
   if (previewCount) {
     previewCount.textContent = selectedDrawingFile
       ? describeRemainingPreviews(remaining)
-      : `Choose a style. Upload once, then try up to ${maxFreePreviews} versions.`;
+      : `Upload once, then try up to ${maxFreePreviews} versions.`;
   }
 }
 
