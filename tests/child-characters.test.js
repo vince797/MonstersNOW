@@ -150,7 +150,7 @@ test("selector UI is a true layered character editor with a MonstersNOW storyboo
   assert.match(css, /\.child-live-preview \{[\s\S]*position: sticky/);
   assert.match(css, /\.child-presence-toggle label\.is-selected::after/);
   assert.match(css, /\.child-preview-character/);
-  assert.match(html, /child-selector\.css\?v=20261007-avatar-continuity-v11/);
+  assert.match(html, /child-selector\.css\?v=20261007-mobile-containment-v12/);
   assert.match(html, /scripts\/child-selector\.js\?v=20261007-avatar-continuity-v9/);
   assert.match(html, /scripts\/main\.js\?v=20261007-avatar-continuity-v15/);
   assert.match(mainScript, /childMonsterOnlyPreview\.src = monsterImage/);
@@ -159,6 +159,9 @@ test("selector UI is a true layered character editor with a MonstersNOW storyboo
   assert.match(css, /\.child-premium-default[\s\S]*height: 84%/);
   assert.match(css, /\.child-rendered-preview[\s\S]*object-position: center bottom/);
   assert.match(css, /has-book-render \.child-premium-default/);
+  assert.match(css, /\.create-flow-section \.interest-form > \*/);
+  assert.match(css, /grid-template-columns: minmax\(0, 1fr\)/);
+  assert.match(css, /overscroll-behavior-inline: contain/);
   assert.match(mainScript, /function markRenderedChildStale/);
   assert.match(mainScript, /previousChildImage/);
   assert.match(script, /Keep render lifecycle classes owned by main\.js/);
