@@ -54,6 +54,21 @@ test("the homepage and catalog use the approved v4/v5 cover collection", () => {
   assert.match(books, /class="book-hero-steps"/);
 });
 
+test("the homepage explains the complete four-step creation journey", () => {
+  const home = read("index.html");
+  const styles = read("styles.css");
+  const steps = home.match(/<article class="step-card">/g) || [];
+
+  assert.equal(steps.length, 4);
+  assert.match(home, /Draw their monster/);
+  assert.match(home, /Meet their monster/);
+  assert.match(home, /Design their child/);
+  assert.match(home, /Preview their storybook/);
+  assert.match(home, /<span class="step-badge">Optional<\/span>/);
+  assert.match(home, /feature-animation-character-reference-v1\.png/);
+  assert.match(styles, /\.steps-grid\s*\{[\s\S]*?grid-template-columns: repeat\(4, minmax\(0, 1fr\)\)/);
+});
+
 test("the create flow displays and forwards the allowlisted story", () => {
   const create = read("create.html");
   const script = read("scripts/main.js");
