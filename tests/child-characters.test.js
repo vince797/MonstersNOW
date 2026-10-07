@@ -17,7 +17,7 @@ test("child profiles use canonical appearance data plus privacy-minimized age an
     mobilityAid: "none", mobilityAidLabel: "No mobility aid",
   });
   assert.deepEqual(resolveChildCharacter("none"), {
-    id: "none", label: "Monster only", included: false, skinTone: "", hairColor: "", hairStyle: "",
+    id: "none", label: "Monster only", included: false, skinTone: "", hairColor: "", hairStyle: "", presentation: "", presentationLabel: "",
     ageBand: "", ageBandLabel: "", relativeHeight: "", relativeHeightLabel: "", mobilityAid: "", mobilityAidLabel: "",
   });
 });
@@ -52,27 +52,33 @@ test("proof identity includes the full canonical child profile", () => {
 
 test("custom child profiles preserve independently editable appearance choices", () => {
   const custom = resolveChildCharacter({
-    id: "custom", skinTone: "deep", hairStyle: "braids", hairColor: "auburn",
+    id: "custom", presentation: "boy", skinTone: "deep", hairStyle: "braids", hairColor: "auburn",
     eyeColor: "green", outfitStyle: "hoodie", outfitColor: "purple",
     ageBand: "7-8", relativeHeight: "taller", mobilityAid: "wheelchair",
   });
   assert.equal(custom.id, "custom");
+  assert.equal(custom.presentation, "boy");
   assert.equal(custom.skinTone, "deep");
   assert.equal(custom.hairStyle, "braids");
   assert.equal(custom.hairColor, "auburn");
   assert.equal(custom.eyeColor, "green");
   assert.equal(custom.outfitStyle, "hoodie");
   assert.equal(custom.outfitColor, "purple");
-  assert.match(childProfileKey(custom), /custom:deep:braids:auburn:green:hoodie:purple/);
+  assert.match(childProfileKey(custom), /custom:boy:deep:braids:auburn:green:hoodie:purple/);
   const submission = buildStorybookInterestSubmission({
     email: "parent@example.com", childName: "Sam", monsterName: "Noodle", childCharacter: custom,
   });
   assert.equal(submission.personalization.childCharacter.eyeColor, "green");
+  assert.equal(submission.personalization.childCharacter.presentation, "boy");
   assert.equal(submission.personalization.childCharacter.outfitStyle, "hoodie");
   assert.throws(() => buildStorybookInterestSubmission({
     email: "parent@example.com", childName: "Sam", monsterName: "Noodle",
     childCharacter: { ...custom, eyeColor: "laser-red" },
   }), /valid child eye color/i);
+  assert.throws(() => buildStorybookInterestSubmission({
+    email: "parent@example.com", childName: "Sam", monsterName: "Noodle",
+    childCharacter: { ...custom, presentation: "unknown" },
+  }), /valid child presentation/i);
 });
 
 test("selector UI is a true layered character editor with a MonstersNOW storybook preview", () => {
@@ -92,6 +98,8 @@ test("selector UI is a true layered character editor with a MonstersNOW storyboo
   assert.doesNotMatch(html, /type="date"|name="child-(?:birthdate|date-of-birth|height-(?:cm|in))"/i);
   assert.match(html, />Face &amp; hair<|>Outfit<|>Age, height &amp; accessibility/);
   assert.match(html, /name="child-character" value="custom" checked/);
+  assert.match(html, /name="child-presentation" value="boy"/);
+  assert.match(html, /name="child-presentation" value="girl" checked/);
   assert.match(html, /name="child-skin-tone" value="light"/);
   assert.match(html, /name="child-hair-style" value="braids"/);
   assert.match(html, /name="child-hair-color" value="auburn"/);
@@ -103,7 +111,8 @@ test("selector UI is a true layered character editor with a MonstersNOW storyboo
   assert.match(html, /data-editor-tab="build"/);
   assert.match(html, /id="child-editor-undo" disabled/);
   assert.match(html, /id="child-editor-reset"/);
-  assert.match(script, /monstersnow_child_character_profile_v2/);
+  assert.match(script, /monstersnow_child_character_profile_v3/);
+  assert.match(script, /dataset\.presentation/);
   assert.match(script, /localStorage\.setItem/);
   assert.match(script, /function undo\(/);
   assert.match(script, /function reset\(/);
@@ -131,8 +140,8 @@ test("selector UI is a true layered character editor with a MonstersNOW storyboo
   assert.match(css, /\.child-live-preview \{[\s\S]*position: sticky/);
   assert.match(css, /\.child-presence-toggle label\.is-selected::after/);
   assert.match(css, /\.child-preview-character/);
-  assert.match(html, /child-selector\.css\?v=20261007-feature-character-studio-v4/);
-  assert.match(html, /scripts\/child-selector\.js\?v=20261007-feature-character-studio-v4/);
+  assert.match(html, /child-selector\.css\?v=20261007-boy-girl-editor-v5/);
+  assert.match(html, /scripts\/child-selector\.js\?v=20261007-boy-girl-editor-v5/);
   assert.match(html, /scripts\/main\.js\?v=20261007-child-focus-v10/);
   assert.doesNotMatch(mainScript, /syncStorySceneMonster/);
   assert.doesNotMatch(mainScript, /removeConnectedWhiteBackground/);

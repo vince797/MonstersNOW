@@ -148,8 +148,8 @@ const server = http.createServer(async (req, res) => {
     assert.equal(await page.locator('input[name="child-outfit-style"][value="hoodie"]').isChecked(), true);
     assert.equal(await page.locator('input[name="child-age-band"][value="7-8"]').isChecked(), true);
     assert.equal(await page.locator('input[name="child-relative-height"][value="taller"]').isChecked(), true);
-    const savedProfile = await page.evaluate(() => JSON.parse(localStorage.getItem("monstersnow_child_character_profile_v2")));
-    assert.deepEqual(savedProfile, { id: "custom", skinTone: "deep", hairStyle: "braids", hairColor: "auburn", eyeColor: "green", outfitStyle: "hoodie", outfitColor: "purple", ageBand: "7-8", relativeHeight: "taller", mobilityAid: "wheelchair" });
+    const savedProfile = await page.evaluate(() => JSON.parse(localStorage.getItem("monstersnow_child_character_profile_v3")));
+    assert.deepEqual(savedProfile, { id: "custom", presentation: "girl", skinTone: "deep", hairStyle: "braids", hairColor: "auburn", eyeColor: "green", outfitStyle: "hoodie", outfitColor: "purple", ageBand: "7-8", relativeHeight: "taller", mobilityAid: "wheelchair" });
     await page.setViewportSize({ width: 1280, height: 900 });
     await page.reload();
     assert.equal(await page.locator('input[name="child-character"][value="custom"]').isChecked(), true);

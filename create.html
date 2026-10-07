@@ -11,7 +11,7 @@
     <title>Create Your Monster | MonstersNOW</title>
     <link rel="icon" href="assets/brand/monstersnow-icon-32-v1.png" type="image/png" sizes="32x32" />
     <link rel="stylesheet" href="styles.css?v=20261004-monster-studio-v5" />
-    <link rel="stylesheet" href="child-selector.css?v=20261007-feature-character-studio-v4" />
+    <link rel="stylesheet" href="child-selector.css?v=20261007-boy-girl-editor-v5" />
     <link rel="stylesheet" href="storefront.css?v=20261002-public-storefront" />
     <link rel="apple-touch-icon" href="assets/brand/monstersnow-icon-180-v1.png" />
     <link rel="stylesheet" href="brand.css?v=20261004-selected-logo" />
@@ -266,6 +266,14 @@
                           <details class="child-editor-section child-appearance-section is-active" data-editor-panel="appearance" open>
                             <summary><span>Face &amp; hair</span><small>Every choice changes the figure—not just the label.</small></summary>
                             <div class="child-appearance-builder">
+                              <fieldset class="child-presentation-picker">
+                                <legend>Character</legend>
+                                <p>Choose boy or girl, then customize every detail below.</p>
+                                <div class="child-presentation-options" role="radiogroup" aria-label="Boy or girl character">
+                                  <label><input type="radio" name="child-presentation" value="boy" /><span><i aria-hidden="true">B</i><b>Boy</b></span></label>
+                                  <label><input type="radio" name="child-presentation" value="girl" checked /><span><i aria-hidden="true">G</i><b>Girl</b></span></label>
+                                </div>
+                              </fieldset>
                               <fieldset class="child-skin-tone-picker">
                                 <legend>Skin tone</legend>
                                 <p>Choose the closest illustrated shade. This does not identify race or ethnicity.</p>
@@ -536,7 +544,7 @@
       </div>
     </footer>
 
-    <script src="scripts/child-selector.js?v=20261007-feature-character-studio-v4"></script>
+    <script src="scripts/child-selector.js?v=20261007-boy-girl-editor-v5"></script>
     <script src="scripts/main.js?v=20261007-child-focus-v10"></script>
   </body>
 </html>

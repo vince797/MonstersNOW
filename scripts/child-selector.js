@@ -1,8 +1,9 @@
 (() => {
-  const storageKey = "monstersnow_child_character_profile_v2";
+  const storageKey = "monstersnow_child_character_profile_v3";
   const ageLabels = { "2-4": "Ages 2–4", "5-6": "Ages 5–6", "7-8": "Ages 7–8" };
   const heightLabels = { shorter: "Shorter", average: "About average", taller: "Taller" };
   const optionLabels = {
+    presentation: { boy: "Boy", girl: "Girl" },
     skinTone: { light: "Light", golden: "Golden", medium: "Medium", warm: "Warm brown", deep: "Deep" },
     hairStyle: { short: "Short", curly: "Curls", coils: "Coils", wavy: "Waves", straight: "Straight", braids: "Braids" },
     hairColor: { black: "Black", "dark-brown": "Dark brown", brown: "Brown", auburn: "Auburn", blonde: "Blonde" },
@@ -29,6 +30,7 @@
   const wheelchairSupport = { appearanceIds: ["custom"], ageBands: ["5-6", "7-8"], relativeHeights: ["average", "taller"] };
   const defaultProfile = {
     id: "custom", ageBand: "5-6", relativeHeight: "average", mobilityAid: "none",
+    presentation: "girl",
     skinTone: "medium", hairStyle: "curly", hairColor: "dark-brown", eyeColor: "brown",
     outfitStyle: "overalls", outfitColor: "teal",
   };
@@ -76,6 +78,8 @@
             <circle cx="159" cy="171" r="4" fill="#fff"/><circle cx="218" cy="171" r="4" fill="#fff"/><circle cx="168" cy="184" r="2" fill="#fff" opacity=".72"/><circle cx="227" cy="184" r="2" fill="#fff" opacity=".72"/>
           </g>
           <path d="M135 158c8-10 21-15 35-11M204 147c14-4 27 1 35 11" fill="none" stroke="var(--hair)" stroke-width="7" stroke-linecap="round"/>
+          <g class="presentation-detail presentation-girl" fill="none" stroke="var(--hair)" stroke-width="3" stroke-linecap="round"><path d="M135 171l-7-4M137 164l-6-7M250 171l7-4M248 164l6-7"/></g>
+          <g class="presentation-detail presentation-boy" fill="var(--skin-shadow)" opacity=".48"><circle cx="143" cy="209" r="1.8"/><circle cx="150" cy="212" r="1.5"/><circle cx="225" cy="212" r="1.5"/><circle cx="232" cy="209" r="1.8"/></g>
           <path d="M183 179c-3 13-6 24 3 29 5 2 10 0 13-3" fill="none" stroke="var(--skin-shadow)" stroke-width="4" stroke-linecap="round" opacity=".72"/>
           <path d="M175 204c7 3 14 3 20 0" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".34"/>
           <ellipse cx="136" cy="214" rx="17" ry="8" fill="var(--blush)" opacity=".43"/><ellipse cx="232" cy="214" rx="17" ry="8" fill="var(--blush)" opacity=".43"/>
@@ -95,9 +99,10 @@
 
   function getProfile() {
     const id = selected("child-character", "custom");
-    if (id === "none") return { id: "none", label: "Monster only", included: false, skinTone: "", hairColor: "", hairStyle: "", eyeColor: "", outfitStyle: "", outfitColor: "", ageBand: "", relativeHeight: "", mobilityAid: "" };
+    if (id === "none") return { id: "none", label: "Monster only", included: false, presentation: "", skinTone: "", hairColor: "", hairStyle: "", eyeColor: "", outfitStyle: "", outfitColor: "", ageBand: "", relativeHeight: "", mobilityAid: "" };
     return {
       id: "custom", label: "Custom illustrated child", included: true,
+      presentation: selected("child-presentation", defaultProfile.presentation),
       skinTone: selected("child-skin-tone", defaultProfile.skinTone), hairStyle: selected("child-hair-style", defaultProfile.hairStyle),
       hairColor: selected("child-hair-color", defaultProfile.hairColor), eyeColor: selected("child-eye-color", defaultProfile.eyeColor),
       outfitStyle: selected("child-outfit-style", defaultProfile.outfitStyle), outfitColor: selected("child-outfit-color", defaultProfile.outfitColor),
@@ -154,6 +159,7 @@
     const outfit = palettes.outfitColor[profile.outfitColor] || palettes.outfitColor.teal;
     const art = character?.querySelector(".custom-child-svg");
     if (art) {
+      art.dataset.presentation = profile.presentation || defaultProfile.presentation;
       art.dataset.hairStyle = profile.hairStyle;
       art.dataset.outfitStyle = profile.outfitStyle;
       art.dataset.mobility = profile.mobilityAid || "none";
@@ -170,7 +176,7 @@
   function compactProfile(profile) {
     if (!profile?.included) return { id: "none" };
     return {
-      id: "custom", skinTone: profile.skinTone || defaultProfile.skinTone, hairStyle: profile.hairStyle || defaultProfile.hairStyle,
+      id: "custom", presentation: profile.presentation || defaultProfile.presentation, skinTone: profile.skinTone || defaultProfile.skinTone, hairStyle: profile.hairStyle || defaultProfile.hairStyle,
       hairColor: profile.hairColor || defaultProfile.hairColor, eyeColor: profile.eyeColor || defaultProfile.eyeColor,
       outfitStyle: profile.outfitStyle || defaultProfile.outfitStyle, outfitColor: profile.outfitColor || defaultProfile.outfitColor,
       ageBand: profile.ageBand || defaultProfile.ageBand, relativeHeight: profile.relativeHeight || defaultProfile.relativeHeight,
@@ -184,13 +190,13 @@
     if (profile.id === "custom") return { ...defaultProfile, ...profile, id: "custom" };
     const legacy = legacyProfiles[profile.id];
     if (!legacy) return defaultProfile;
-    return { ...defaultProfile, ...profile, id: "custom", skinTone: legacy[0], hairStyle: legacy[1], hairColor: legacy[2], eyeColor: "brown", outfitStyle: "overalls", outfitColor: "teal" };
+    return { ...defaultProfile, ...profile, id: "custom", presentation: profile.presentation || defaultProfile.presentation, skinTone: legacy[0], hairStyle: legacy[1], hairColor: legacy[2], eyeColor: "brown", outfitStyle: "overalls", outfitColor: "teal" };
   }
 
   function applyProfile(profile) {
     const value = migrateProfile(profile);
     const fields = {
-      "child-character": value.id, "child-skin-tone": value.skinTone, "child-hair-style": value.hairStyle,
+      "child-character": value.id, "child-presentation": value.presentation, "child-skin-tone": value.skinTone, "child-hair-style": value.hairStyle,
       "child-hair-color": value.hairColor, "child-eye-color": value.eyeColor, "child-outfit-style": value.outfitStyle,
       "child-outfit-color": value.outfitColor, "child-age-band": value.ageBand,
       "child-relative-height": value.relativeHeight, "child-mobility-aid": value.mobilityAid,
@@ -206,7 +212,7 @@
   function persist(profile) { try { localStorage.setItem(storageKey, JSON.stringify(compactProfile(profile))); } catch (error) { console.warn("Child character choices could not be saved locally.", error); } }
   function restore() {
     let saved = null;
-    try { saved = JSON.parse(localStorage.getItem(storageKey) || localStorage.getItem("monstersnow_child_character_profile_v1") || "null"); } catch { return; }
+    try { saved = JSON.parse(localStorage.getItem(storageKey) || localStorage.getItem("monstersnow_child_character_profile_v2") || localStorage.getItem("monstersnow_child_character_profile_v1") || "null"); } catch { return; }
     if (saved) applyProfile(saved);
   }
   function updateHistoryControls(message = "") {
@@ -230,7 +236,7 @@
     if (selection) selection.textContent = profile.included ? "Character in progress" : "Monster-only story";
     if (title) title.textContent = profile.included ? "Their storybook character is taking shape." : "Their monster takes center stage.";
     if (copy) copy.textContent = profile.included
-      ? `${optionLabels.skinTone[profile.skinTone]} skin · ${optionLabels.hairColor[profile.hairColor]} ${optionLabels.hairStyle[profile.hairStyle].toLowerCase()} · ${optionLabels.eyeColor[profile.eyeColor]} eyes · ${optionLabels.outfitColor[profile.outfitColor]} ${optionLabels.outfitStyle[profile.outfitStyle].toLowerCase()}. ${ageLabels[profile.ageBand]} · ${heightLabels[profile.relativeHeight]}.`
+      ? `${optionLabels.presentation[profile.presentation]} · ${optionLabels.skinTone[profile.skinTone]} skin · ${optionLabels.hairColor[profile.hairColor]} ${optionLabels.hairStyle[profile.hairStyle].toLowerCase()} · ${optionLabels.eyeColor[profile.eyeColor]} eyes · ${optionLabels.outfitColor[profile.outfitColor]} ${optionLabels.outfitStyle[profile.outfitStyle].toLowerCase()}. ${ageLabels[profile.ageBand]} · ${heightLabels[profile.relativeHeight]}.`
       : "The child character is turned off. Their monster remains on the drawing board.";
     renderProfile(document.querySelector("#child-preview-stage"), document.querySelector("#child-preview-avatar"), profile);
     if (save) persist(profile);

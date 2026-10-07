@@ -18,6 +18,7 @@ try {
     const profileSection = document.querySelector("#proof-child-profile");
     document.querySelector("#proof-child-profile-title").textContent = childProfile.label;
     const customDetails = childProfile.id === "custom" ? [
+      childProfile.presentationLabel,
       childProfile.skinToneLabel,
       `${childProfile.hairColorLabel} ${childProfile.hairStyleLabel}`,
       `${childProfile.eyeColorLabel} eyes`,
