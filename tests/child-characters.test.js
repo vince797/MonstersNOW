@@ -170,7 +170,7 @@ test("selector UI is a true layered character editor with a MonstersNOW storyboo
   assert.match(css, /\.child-live-preview \{[\s\S]*position: sticky/);
   assert.match(css, /\.child-presence-toggle label\.is-selected::after/);
   assert.match(css, /\.child-preview-character/);
-  assert.match(html, /child-selector\.css\?v=20261007-wheelchair-editor-v16/);
+  assert.match(html, /child-selector\.css\?v=20261007-logo-loaders-v17/);
   assert.match(html, /scripts\/child-selector\.js\?v=20261007-wheelchair-editor-v11/);
   assert.match(html, /scripts\/main\.js\?v=20261007-wheelchair-editor-v19/);
   assert.match(mainScript, /childMonsterOnlyPreview\.src = monsterImage/);
@@ -191,6 +191,7 @@ test("selector UI is a true layered character editor with a MonstersNOW storyboo
   assert.match(mainScript, /function showChildRenderProgress/);
   assert.match(mainScript, /elapsed >= 35 \? 3 : 2/);
   assert.match(css, /\.child-render-progress-track/);
+  assert.match(css, /\.child-render-progress-spinner \{[\s\S]*conic-gradient\([\s\S]*var\(--brand-purple[\s\S]*var\(--brand-orange[\s\S]*var\(--brand-teal[\s\S]*var\(--brand-blue/);
   assert.doesNotMatch(mainScript, /syncStorySceneMonster/);
   assert.doesNotMatch(mainScript, /removeConnectedWhiteBackground/);
 });

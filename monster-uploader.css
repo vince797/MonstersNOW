@@ -615,7 +615,13 @@ body .is-example-preview .monster-preview {
   height: 72px;
   place-items: center;
   margin-bottom: 18px;
-  background: linear-gradient(145deg, #6ee5e2, #8b55e7 60%, #ff7a18);
+  background: conic-gradient(
+    from -18deg,
+    var(--brand-purple, #3b1d6d) 0 25%,
+    var(--brand-orange, #ff8a00) 25% 50%,
+    var(--brand-teal, #21c7c6) 50% 75%,
+    var(--brand-blue, #59b8e8) 75% 100%
+  );
   border-radius: 50%;
   box-shadow: 0 15px 32px rgba(81,31,120,.2);
   animation: monster-progress-turn 1.6s linear infinite;
@@ -632,8 +638,8 @@ body .is-example-preview .monster-preview {
   z-index: 1;
   width: 26px;
   height: 26px;
-  background: #ff7a18;
-  border: 7px solid #42166e;
+  background: var(--brand-orange, #ff8a00);
+  border: 7px solid var(--brand-purple, #3b1d6d);
   border-radius: 46% 54% 48% 52%;
 }
 .monster-progress small {
@@ -672,7 +678,7 @@ body .is-example-preview .monster-preview {
   inset-block: 0;
   left: -35%;
   width: 35%;
-  background: linear-gradient(90deg, #39c5c7, #8b55e7, #ff7a18);
+  background: linear-gradient(90deg, var(--brand-purple, #3b1d6d), var(--brand-orange, #ff8a00), var(--brand-teal, #21c7c6), var(--brand-blue, #59b8e8));
   border-radius: inherit;
   animation: monster-progress-slide 1.5s ease-in-out infinite;
 }
@@ -706,12 +712,12 @@ body .is-example-preview .monster-preview {
 }
 .monster-progress-steps li.is-active { color: #35115f; }
 .monster-progress-steps li.is-active > i {
-  background: #ff7a18;
+  background: var(--brand-orange, #ff8a00);
   box-shadow: 0 0 0 5px rgba(255,122,24,.13);
   color: #fff;
 }
 .monster-progress-steps li.is-complete { color: #00727a; }
-.monster-progress-steps li.is-complete > i { background: #39c5c7; color: #fff; }
+.monster-progress-steps li.is-complete > i { background: var(--brand-teal, #21c7c6); color: #291448; }
 .monster-progress > em {
   margin-top: 15px;
   color: #776d80;

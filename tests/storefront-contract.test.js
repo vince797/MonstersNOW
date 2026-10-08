@@ -93,6 +93,7 @@ test("the create flow gives HEIC conversion and character generation prominent p
   assert.match(script, /Promise\.any\(\[browserAttempt, delayedServerAttempt\]\)/);
   assert.match(script, /HEIC conversion is taking longer than expected/);
   assert.match(styles, /\.monster-progress-track i/);
+  assert.match(styles, /\.monster-progress-spinner \{[\s\S]*conic-gradient\([\s\S]*var\(--brand-purple[\s\S]*var\(--brand-orange[\s\S]*var\(--brand-teal[\s\S]*var\(--brand-blue/);
   assert.match(styles, /\.result-panel\.is-working \.monster-preview > img/);
 });
 
