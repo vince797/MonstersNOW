@@ -11,7 +11,7 @@
     <title>Create Your Monster | MonstersNOW</title>
     <link rel="icon" href="assets/brand/monstersnow-icon-32-v1.png" type="image/png" sizes="32x32" />
     <link rel="stylesheet" href="styles.css?v=20261004-monster-studio-v5" />
-    <link rel="stylesheet" href="child-selector.css?v=20261007-accessible-stage-v22" />
+    <link rel="stylesheet" href="child-selector.css?v=20261007-child-studio-v23" />
     <link rel="stylesheet" href="storefront.css?v=20261002-public-storefront" />
     <link rel="apple-touch-icon" href="assets/brand/monstersnow-icon-180-v1.png" />
     <link rel="stylesheet" href="brand.css?v=20261004-selected-logo" />
@@ -205,7 +205,7 @@
                 <div class="book-offer-header">
                   <div class="child-step-nav">
                     <button type="button" id="back-to-monster">← Back to monster</button>
-                    <span class="result-label">Step 2 · Story character</span>
+                    <span class="result-label">Step 3 of 4 · Character studio</span>
                   </div>
                   <h2 id="result-book-title">Now design their story character.</h2>
                   <p id="book-offer-status">Build an illustrated child by choosing the hair, skin, eyes, and outfit, then continue to the 32-page book review.</p>
@@ -215,9 +215,9 @@
                     <legend>Personalize the story</legend>
                     <section class="child-character-picker" id="child-editor-start" aria-labelledby="child-character-title" data-child-selector tabindex="-1">
                       <div class="child-character-heading">
-                        <div><span class="child-editor-kicker" id="child-editor-kicker"><i aria-hidden="true">02</i> <span id="child-editor-kicker-label">Child character</span></span><strong id="child-character-title">Create their storybook character.</strong><small>Choose their features, then apply them to the premium character. No child photo is needed.</small></div>
+                        <div><span class="child-editor-kicker" id="child-editor-kicker"><i aria-hidden="true">03</i> <span id="child-editor-kicker-label">Child character studio</span></span><strong id="child-character-title">Create their storybook character.</strong><small>Shape their look, outfit, and details while the book-ready preview updates. No child photo is needed.</small></div>
                         <div class="child-editor-heading-actions">
-                          <span id="child-character-selection">Character in progress</span>
+                          <span id="child-character-selection">Live preview</span>
                           <div class="child-editor-toolbar" role="group" aria-label="Character editor history">
                             <button type="button" id="child-editor-undo" disabled>Undo</button>
                             <button type="button" id="child-editor-reset">Start over</button>
@@ -241,15 +241,15 @@
                           <div class="child-character-details" id="child-character-details">
                           <div class="child-accessibility-section">
                             <fieldset class="child-mobility-options" aria-describedby="child-mobility-help child-mobility-blocker">
-                              <legend>Mobility &amp; positioning</legend>
-                              <p id="child-mobility-help">Choose how the child appears in the story. No diagnosis or medical details needed.</p>
+                              <legend>Movement &amp; support</legend>
+                              <p id="child-mobility-help">Choose how they move through the story. No diagnosis or medical details needed.</p>
                               <div class="child-segmented-options child-mobility-choices">
-                                <label><input type="radio" name="child-mobility-aid" value="none" checked /><span><strong>Standing</strong><small>No mobility aid</small></span></label>
-                                <label aria-disabled="false"><input type="radio" name="child-mobility-aid" value="wheelchair" /><span><strong>Wheelchair</strong><small id="child-wheelchair-option-copy">Sized to their age and height</small></span></label>
-                                <label aria-disabled="false"><input type="radio" name="child-mobility-aid" value="forearm-crutches" /><span><strong>Forearm crutches</strong><small id="child-crutches-option-copy">Two child-sized crutches</small></span></label>
+                                <label><input type="radio" name="child-mobility-aid" value="none" checked /><span><strong>Standing</strong><small>No support</small></span></label>
+                                <label aria-disabled="false"><input type="radio" name="child-mobility-aid" value="wheelchair" /><span><strong>Wheelchair</strong><small id="child-wheelchair-option-copy">Age-sized chair</small></span></label>
+                                <label aria-disabled="false"><input type="radio" name="child-mobility-aid" value="forearm-crutches" /><span><strong>Forearm crutches</strong><small id="child-crutches-option-copy">Two fitted crutches</small></span></label>
                               </div>
                             </fieldset>
-                            <p class="child-render-limit" id="child-mobility-blocker" role="note"><strong>Fully customizable.</strong> Hair, skin, eyes, clothes, age, and height remain editable with every mobility choice.</p>
+                            <p class="child-render-limit" id="child-mobility-blocker" role="note"><strong>Every look stays editable</strong> with any movement choice.</p>
                           </div>
                           <div class="child-editor-tabs" role="tablist" aria-label="Character customization categories">
                             <button type="button" class="is-active" role="tab" aria-selected="true" data-editor-tab="appearance"><span aria-hidden="true">01</span> Look</button>
@@ -372,7 +372,7 @@
                             <span class="child-stage-corners"></span>
                             <span class="child-stage-scanline"></span>
                             <img class="child-monster-only-preview" id="child-monster-only-preview" alt="" hidden />
-                            <img class="child-premium-default" id="child-premium-default" src="assets/child-editor/default-girl-feature-animation-v1.webp" alt="" />
+                            <img class="child-premium-default" id="child-premium-default" src="assets/child-editor/default-girl-feature-animation-v1.webp" alt="" width="1024" height="1536" decoding="async" />
                             <span class="child-preview-character" id="child-preview-character" hidden></span>
                             <img class="child-rendered-preview" id="child-rendered-preview" alt="" hidden />
                             <div class="child-render-progress" id="child-render-progress" aria-live="polite" hidden>
@@ -547,7 +547,7 @@
       </div>
     </footer>
 
-    <script src="scripts/child-selector.js?v=20261007-wheelchair-editor-v11"></script>
-    <script src="scripts/main.js?v=20261007-mobile-studio-v20"></script>
+    <script src="scripts/child-selector.js?v=20261007-child-studio-v12"></script>
+    <script src="scripts/main.js?v=20261007-child-studio-v21"></script>
   </body>
 </html>

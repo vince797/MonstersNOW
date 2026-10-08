@@ -7,6 +7,45 @@
   max-width: 820px;
 }
 
+/* Keep the story context present without making the editor feel like a page
+   nested inside another page. */
+.create-flow-section .book-offer-header {
+  display: grid;
+  max-width: none;
+  grid-template-columns: minmax(250px, .42fr) minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  column-gap: clamp(22px, 3vw, 46px);
+  row-gap: 3px;
+  align-items: center;
+  padding: 2px 4px 6px;
+}
+.create-flow-section .book-offer-header .child-step-nav {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  align-content: center;
+}
+.create-flow-section .book-offer-header > h2 {
+  grid-column: 2;
+  max-width: none;
+  font-size: clamp(1.65rem, 2.4vw, 2.45rem);
+  line-height: 1.02;
+  letter-spacing: -.035em;
+}
+.create-flow-section .book-offer-header > p {
+  grid-column: 2;
+  max-width: 72ch;
+  font-size: .82rem;
+  line-height: 1.4;
+}
+.create-flow-section .storybook-personalization > legend {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 .child-step-nav button {
   min-height: 44px;
   padding: 9px 14px;
@@ -37,13 +76,15 @@
 
 .child-character-heading > div:first-child { display: grid; gap: 4px; }
 
-.child-editor-heading-actions {
-  display: grid;
-  gap: 9px;
-  justify-items: end;
+.child-character-heading > .child-editor-heading-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
 }
 
-.child-editor-heading-actions > span {
+.child-character-heading > .child-editor-heading-actions > span {
   display: inline-flex;
   min-height: 31px;
   align-items: center;
@@ -55,6 +96,15 @@
   font-size: .7rem;
   font-weight: 950;
   white-space: nowrap;
+}
+.child-character-heading > .child-editor-heading-actions > span::before {
+  width: 6px;
+  height: 6px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: #21c7c6;
+  box-shadow: 0 0 0 4px rgba(33,199,198,.12);
+  content: "";
 }
 
 .child-editor-kicker {
@@ -77,7 +127,7 @@
   box-shadow: 0 5px 13px rgba(255, 122, 24, .28);
 }
 
-.child-editor-toolbar { display: flex; gap: 7px; align-items: center; }
+.child-character-heading .child-editor-toolbar { display: flex; gap: 7px; align-items: center; }
 .child-editor-toolbar button {
   min-width: 72px;
   min-height: 40px;
@@ -345,8 +395,8 @@
 .child-accessibility-section {
   grid-column: 1 / -1;
   display: grid;
-  gap: 9px;
-  padding: 13px;
+  gap: 7px;
+  padding: 12px;
   border: 1px solid #c9e7e5;
   border-radius: 15px;
   background: linear-gradient(145deg, #f2fbfa, #fffaf4);
@@ -354,7 +404,7 @@
 }
 .child-mobility-options { min-width: 0; margin: 0; padding: 0; border: 0; }
 .child-mobility-options legend { color: #006b70; font-size: .72rem; font-weight: 950; letter-spacing: .075em; text-transform: uppercase; }
-.child-mobility-options > p { margin: 3px 0 9px; color: #665d70; font-size: .66rem; line-height: 1.4; }
+.child-mobility-options > p { margin: 3px 0 8px; color: #665d70; font-size: .66rem; line-height: 1.4; }
 .child-mobility-choices { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .child-mobility-choices span { min-height: 58px; gap: 3px; border-color: #d8e7e8; }
 .child-mobility-choices strong { color: #3b1d6d; font-size: .7rem; }
@@ -363,10 +413,10 @@
 .child-segmented-options .is-unavailable span { border-style: dashed; background: #f3f5f6; color: #64727c; box-shadow: none; }
 .child-render-limit {
   margin: 0;
-  padding: 10px 11px;
-  border-left: 4px solid var(--teal);
-  border-radius: 7px;
-  background: #edf8f7;
+  padding: 7px 9px;
+  border: 1px solid rgba(0,136,142,.14);
+  border-radius: 9px;
+  background: rgba(237,248,247,.72);
   color: #3b5660;
   font-size: .68rem !important;
   line-height: 1.4;
@@ -799,7 +849,13 @@
   object-fit: contain;
   object-position: center bottom;
   filter: drop-shadow(0 24px 22px rgba(59,29,109,.22));
+  transform-origin: center bottom;
   transition: opacity .2s ease, filter .2s ease;
+}
+.child-premium-default.is-refreshing { animation: child-premium-refresh 360ms cubic-bezier(.22,.84,.28,1) both; }
+@keyframes child-premium-refresh {
+  from { opacity: .45; transform: translateY(10px) scale(.985); filter: blur(2px) drop-shadow(0 18px 18px rgba(59,29,109,.14)); }
+  to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0) drop-shadow(0 24px 22px rgba(59,29,109,.22)); }
 }
 .child-premium-default[hidden] { display: none; }
 .child-preview-stage.has-premium-art .child-preview-character { display: none; }
@@ -898,7 +954,10 @@
     scroll-margin-top: 148px;
   }
   #child-editor-start { scroll-margin-top: 148px; }
-  .book-offer-header { gap: 4px; }
+  .create-flow-section .book-offer-header {
+    display: block;
+    padding: 0 4px 5px;
+  }
   .book-offer-header > h2,
   .book-offer-header > p { display: none; }
   .child-step-nav { gap: 7px; }
@@ -970,7 +1029,7 @@
   }
   .child-editor-heading-actions > span { min-height: 29px; justify-self: start; padding: 5px 10px; }
   .child-editor-toolbar { display: grid; grid-template-columns: repeat(2, auto); margin-left: 0; }
-  .child-editor-toolbar button { min-width: 0; min-height: 34px; padding: 6px 9px; font-size: .66rem; }
+  .child-editor-toolbar button { min-width: 0; min-height: 40px; padding: 7px 10px; font-size: .68rem; }
   .child-live-preview { padding: 9px; border-radius: 18px; }
   .child-preview-topline { padding: 1px 4px 7px; }
   .child-preview-updates { padding: 4px 7px; font-size: .54rem; }
@@ -1002,6 +1061,10 @@
   .child-render-actions p { font-size: .63rem; }
   .child-editor-controls { padding: 10px; border-radius: 17px; }
   .child-accessibility-section { padding: 11px; }
+  .child-mobility-choices { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+  .child-mobility-choices span { min-height: 66px; padding: 6px 3px; }
+  .child-mobility-choices strong { font-size: .64rem; line-height: 1.1; }
+  .child-mobility-choices small { font-size: .52rem; }
   .child-presentation-options span { min-height: 46px; padding: 6px 8px; }
   .child-render-progress { inset: 8px; padding: 13px 10px; border-radius: 14px; }
   .child-render-progress-spinner { width: 48px; height: 48px; margin-bottom: 9px; }
@@ -1015,6 +1078,10 @@
   .child-render-progress-steps li { gap: 3px; font-size: .57rem; }
   .child-render-progress-steps li > i { width: 23px; height: 23px; font-size: .56rem; }
   .child-render-progress > em { margin-top: 8px; font-size: .58rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .child-premium-default.is-refreshing { animation: none; }
 }
 
 @media (max-width: 430px) {

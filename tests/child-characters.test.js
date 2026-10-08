@@ -108,7 +108,7 @@ test("selector UI is a true layered character editor with a MonstersNOW storyboo
   assert.match(html, /id="result-book-offer" aria-labelledby="result-book-title" hidden/);
   assert.match(html, /id="back-to-monster"/);
   assert.match(html, /No diagnosis or medical details needed/);
-  assert.match(html, /Sized to their age and height/i);
+  assert.match(html, /Age-sized chair/i);
   assert.doesNotMatch(html, /type="date"|name="child-(?:birthdate|date-of-birth|height-(?:cm|in))"/i);
   assert.match(html, />Face &amp; hair<|>Outfit<|>Age, height &amp; accessibility/);
   assert.match(html, /name="child-character" value="custom" checked/);
@@ -170,14 +170,14 @@ test("selector UI is a true layered character editor with a MonstersNOW storyboo
   assert.match(css, /\.child-live-preview \{[\s\S]*position: sticky/);
   assert.match(css, /\.child-presence-toggle label\.is-selected::after/);
   assert.match(css, /\.child-preview-character/);
-  assert.match(html, /child-selector\.css\?v=20261007-accessible-stage-v22/);
-  assert.match(html, /scripts\/child-selector\.js\?v=20261007-wheelchair-editor-v11/);
-  assert.match(html, /scripts\/main\.js\?v=20261007-mobile-studio-v20/);
+  assert.match(html, /child-selector\.css\?v=20261007-child-studio-v23/);
+  assert.match(html, /scripts\/child-selector\.js\?v=20261007-child-studio-v12/);
+  assert.match(html, /scripts\/main\.js\?v=20261007-child-studio-v21/);
   assert.match(html, /id="child-preview-stage"[\s\S]*id="child-preview-details"[\s\S]*id="render-child-character"/);
   assert.match(mainScript, /Ready when you are\. Every choice stays editable\./);
   assert.match(html, /id="child-character-details"[\s\S]*class="child-accessibility-section"[\s\S]*class="child-editor-tabs"/);
-  assert.match(html, /Mobility &amp; positioning/);
-  assert.match(html, /Fully customizable\./);
+  assert.match(html, /Movement &amp; support/);
+  assert.match(html, /Every look stays editable/);
   assert.match(css, /\.child-preview-stage\.mobility-wheelchair \.child-premium-default \{ top: 4%; height: 89%; \}/);
   assert.match(css, /\.child-preview-stage\.mobility-forearm-crutches \.child-premium-default \{ top: 6%; height: 89%; \}/);
   assert.match(mainScript, /childMonsterOnlyPreview\.src = monsterImage/);

@@ -151,7 +151,7 @@ if (selectedStoryCard && selectedStoryTitle) {
   selectedStoryCard.dataset.storyId = selectedStory.id;
   selectedStoryTitle.textContent = selectedStory.label;
   const offerTitle = document.querySelector("#result-book-title");
-  if (offerTitle) offerTitle.textContent = `Personalize ${selectedStory.label}.`;
+  if (offerTitle) offerTitle.textContent = selectedStory.label;
 }
 if (halloweenTestMode && storybookInterestButton) {
   storybookInterestButton.textContent = storybookInterestButtonText;

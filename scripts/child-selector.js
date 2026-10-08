@@ -158,9 +158,9 @@
     crutchesLabel?.classList.toggle("is-unavailable", crutches.disabled);
     crutchesLabel?.setAttribute("aria-disabled", crutches.disabled ? "true" : "false");
     const copy = document.querySelector("#child-wheelchair-option-copy");
-    if (copy) copy.textContent = wheelchair.disabled ? "Unavailable with these choices" : "Sized to their age and height";
+    if (copy) copy.textContent = wheelchair.disabled ? "Unavailable with these choices" : "Age-sized chair";
     const crutchesCopy = document.querySelector("#child-crutches-option-copy");
-    if (crutchesCopy) crutchesCopy.textContent = crutches.disabled ? "Unavailable with these choices" : "Two child-sized crutches";
+    if (crutchesCopy) crutchesCopy.textContent = crutches.disabled ? "Unavailable with these choices" : "Two fitted crutches";
   }
 
   function ensureCharacterArt(stage) {
@@ -212,7 +212,12 @@
     }
     stage.classList.add(`age-${profile.ageBand || "5-6"}`, `height-${profile.relativeHeight || "average"}`, `mobility-${profile.mobilityAid || "none"}`, "has-character-art", "has-premium-art");
     if (premiumDefault) {
-      premiumDefault.src = premiumReferenceFor(profile);
+      const nextPremiumSource = premiumReferenceFor(profile);
+      if (premiumDefault.getAttribute("src") !== nextPremiumSource) {
+        premiumDefault.classList.remove("is-refreshing");
+        premiumDefault.src = nextPremiumSource;
+        window.requestAnimationFrame(() => premiumDefault.classList.add("is-refreshing"));
+      }
       premiumDefault.hidden = stage.classList.contains("has-book-render");
     }
     if (character) character.hidden = true;
@@ -288,7 +293,7 @@
     const copy = document.querySelector("#child-preview-details");
     for (const input of root.querySelectorAll('input[type="radio"]')) input.closest("label")?.classList.toggle("is-selected", input.checked);
     if (details) details.hidden = !profile.included;
-    if (selection) selection.textContent = profile.included ? "Character in progress" : "Monster-only story";
+    if (selection) selection.textContent = profile.included ? "Live preview" : "Monster-only story";
     if (title) title.textContent = profile.included ? "Their storybook character is taking shape." : "Their monster takes center stage.";
     if (copy) copy.textContent = profile.included
       ? `${optionLabels.presentation[profile.presentation]} · ${optionLabels.skinTone[profile.skinTone]} skin · ${optionLabels.hairColor[profile.hairColor]} ${optionLabels.hairStyle[profile.hairStyle].toLowerCase()} · ${optionLabels.eyeColor[profile.eyeColor]} eyes · ${optionLabels.outfitColor[profile.outfitColor]} ${optionLabels.outfitStyle[profile.outfitStyle].toLowerCase()}. ${ageLabels[profile.ageBand]} · ${heightLabels[profile.relativeHeight]}${profile.mobilityAid !== "none" ? ` · ${mobilityLabels[profile.mobilityAid]}` : ""}.`
