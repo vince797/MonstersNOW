@@ -77,3 +77,13 @@ test("tampered print URLs are rejected before rendering", async () => {
   assert.equal(response.statusCode, 403);
   assert.equal(response.chunks.length, 0);
 });
+
+test("print modules keep the project root opaque to Vercel's file tracer", () => {
+  // A constant root joined with a dynamic path makes nft bundle the whole repo
+  // into the function (>250 MB). See lib/repo-root.js.
+  const fs = require("node:fs");
+  for (const file of ["print-assets.js", "print-raster.js", "storybook-print-files.js", "storybook-print-job.js"]) {
+    const source = fs.readFileSync(require.resolve(`../lib/${file}`), "utf8");
+    assert.doesNotMatch(source, /path\.(resolve|join)\(__dirname/, `${file} must use repoRoot()`);
+  }
+});
