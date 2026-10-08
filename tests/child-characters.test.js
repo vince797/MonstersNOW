@@ -151,8 +151,8 @@ test("selector UI is a true layered character editor with a MonstersNOW storyboo
   assert.match(mainScript, /childImage: personalization\.childCharacter/);
   assert.match(css, /\.child-preview-stage\.has-book-render/);
   assert.match(css, /height: 280px; min-height: 260px/);
-  assert.match(css, /\.create-flow-section \.child-editor-controls \{ grid-column: 1; grid-row: 1; \}/);
-  assert.match(css, /\.create-flow-section \.child-live-preview \{ grid-column: 1; grid-row: 2; \}/);
+  assert.match(css, /\.create-flow-section \.child-live-preview \{ grid-column: 1; grid-row: 1; \}/);
+  assert.match(css, /\.create-flow-section \.child-editor-controls \{ grid-column: 1; grid-row: 2; \}/);
   assert.match(css, /\.child-preview-copy p \{[\s\S]*white-space: normal;[\s\S]*-webkit-line-clamp: 2;/);
   assert.match(mainScript, /function getSelectedMonsterImage\(\)/);
   assert.match(mainScript, /monsterPreview\?\.hasAttribute\("src"\)/);
@@ -170,7 +170,7 @@ test("selector UI is a true layered character editor with a MonstersNOW storyboo
   assert.match(css, /\.child-live-preview \{[\s\S]*position: sticky/);
   assert.match(css, /\.child-presence-toggle label\.is-selected::after/);
   assert.match(css, /\.child-preview-character/);
-  assert.match(html, /child-selector\.css\?v=20261007-logo-loaders-v17/);
+  assert.match(html, /child-selector\.css\?v=20261007-mobile-preview-v18/);
   assert.match(html, /scripts\/child-selector\.js\?v=20261007-wheelchair-editor-v11/);
   assert.match(html, /scripts\/main\.js\?v=20261007-wheelchair-editor-v19/);
   assert.match(mainScript, /childMonsterOnlyPreview\.src = monsterImage/);

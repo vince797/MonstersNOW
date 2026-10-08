@@ -906,8 +906,8 @@
     max-width: 100%;
   }
   .create-flow-section .child-selector-layout { grid-template-columns: minmax(0, 1fr); }
-  .create-flow-section .child-editor-controls { grid-column: 1; grid-row: 1; }
-  .create-flow-section .child-live-preview { grid-column: 1; grid-row: 2; }
+  .create-flow-section .child-live-preview { grid-column: 1; grid-row: 1; }
+  .create-flow-section .child-editor-controls { grid-column: 1; grid-row: 2; }
   .create-flow-section .child-color-options,
   .create-flow-section .child-style-options {
     width: 100%;
