@@ -1,19 +1,6 @@
 const login = document.querySelector("#admin-login");
 const loginForm = document.querySelector("#admin-login-form");
 const passwordInput = document.querySelector("#admin-password");
-const luluShippingFields = document.querySelector("#lulu-shipping-fields");
-if (luluShippingFields && !document.querySelector("#lulu-email")) {
-  const emailLabel = document.createElement("label");
-  emailLabel.textContent = "Email";
-  const emailInput = document.createElement("input");
-  emailInput.id = "lulu-email";
-  emailInput.type = "email";
-  emailInput.autocomplete = "email";
-  emailLabel.append(emailInput);
-  luluShippingFields.querySelector("label")?.after(emailLabel);
-}
-const paymentNotice = document.querySelector(".order-payment-notice");
-if (paymentNotice) paymentNotice.textContent = "Payment status is controlled by verified Stripe events. Unpaid orders cannot advance to production.";
 const loginStatus = document.querySelector("#admin-login-status");
 const adminApp = document.querySelector("#admin-app");
 const dashboard = document.querySelector("#admin-dashboard");
@@ -40,15 +27,10 @@ let loadingStory = false;
 let storyRevision = 0;
 let savingStory = false;
 let storyAutosaveTimer = null;
-let selectedOrder = null;
-let orderView = "board";
-let orderQuickFilter = "all";
 let selectedPageIndex = 0;
 let artworkFilter = "all";
 let productionReport = null;
 let productionStoryId = null;
-const orderStatuses = ["checkout_started", "paid", "proofing", "approved", "printing", "shipped", "completed", "cancelled"];
-const orderDialog = document.querySelector("#order-detail");
 const artworkDialog = document.querySelector("#artwork-overview");
 const storyReviewDialog = document.querySelector("#story-review");
 const commandDialog = document.querySelector("#admin-command");
@@ -76,22 +58,10 @@ editor.addEventListener("input", (event) => {
 });
 window.addEventListener("beforeunload", (event) => { if (storyDirty) { event.preventDefault(); event.returnValue = ""; } });
 ["story-search", "story-filter"].forEach((id) => document.getElementById(id).addEventListener("input", renderStoryList));
-document.querySelector("#order-search").addEventListener("input", renderOrders);
 document.querySelector("#customer-search").addEventListener("input", renderCustomers);
 document.querySelector("#monster-search").addEventListener("input", renderMonsters);
 document.querySelector("#monster-filter").addEventListener("change", renderMonsters);
 document.querySelector("#monster-sort").addEventListener("change", renderMonsters);
-document.querySelectorAll("[data-order-view]").forEach((button) => button.addEventListener("click", () => { orderView = button.dataset.orderView; renderOrders(); }));
-document.querySelectorAll("[data-order-quick-filter]").forEach((button) => button.addEventListener("click", () => { orderQuickFilter = button.dataset.orderQuickFilter; renderOrders(); }));
-document.querySelector("#close-order-detail").addEventListener("click", closeOrderDetail);
-orderDialog.addEventListener("cancel", (event) => { event.preventDefault(); closeOrderDetail(); });
-document.querySelector("#order-detail-form").addEventListener("submit", saveOrderDetail);
-document.querySelector("#advance-order").addEventListener("click", advanceSelectedOrder);
-document.querySelector("#approve-order-proof").addEventListener("click", approveSelectedOrderProof);
-document.querySelector("#revoke-order-proof").addEventListener("click", revokeSelectedOrderProof);
-document.querySelector("#send-order-lulu").addEventListener("click", sendSelectedOrderToLulu);
-document.querySelector("#publish-customer-proof").addEventListener("click", publishSelectedCustomerProof);
-document.querySelector("#copy-customer-proof-link").addEventListener("click", copySelectedCustomerProofLink);
 document.querySelector("#open-artwork-overview").addEventListener("click", openArtworkOverview);
 document.querySelector("#open-story-review").addEventListener("click", openStoryReview);
 document.querySelector("#close-artwork-overview").addEventListener("click", () => artworkDialog.close());
@@ -116,8 +86,6 @@ loginForm.addEventListener("submit", async (event) => {
 newStoryButton.addEventListener("click", () => editStory());
 document.querySelector("#setup-catalog").addEventListener("click", () => setupCatalog({ announce: true }));
 document.querySelector("#dashboard-new-story").addEventListener("click", () => { showView("stories"); editStory(); });
-document.querySelector("#rail-new-story").addEventListener("click", () => { showView("stories"); editStory(); });
-document.querySelector("#halloween-story").addEventListener("click", () => { showView("stories"); editStory({ title_template: "{child_name} and {monster_name}'s Halloween Adventure", slug: "halloween-adventure", description: "A playful Halloween quest filled with costumes, pumpkins, and friendly surprises.", is_seasonal: true, available_from: "2026-09-15", available_until: "2026-10-31", pages: [] }); });
 document.querySelector("#production-open-book").addEventListener("click", openProductionBook);
 document.querySelector("#production-open-orders").addEventListener("click", () => showView("orders"));
 document.querySelector("#production-view-orders").addEventListener("click", () => showView("orders"));
@@ -156,7 +124,6 @@ async function loadProductionReadiness() {
 loadProductionReadiness();
 document.querySelector("#toggle-admin-password").addEventListener("click", togglePassword);
 document.querySelector("#admin-sign-out").addEventListener("click", signOut);
-document.querySelector("#order-filter").addEventListener("change", renderOrders);
 document.querySelectorAll("[data-admin-view]").forEach((button) => button.addEventListener("click", () => showView(button.dataset.adminView)));
 document.querySelectorAll("[data-open-stories]").forEach((button) => button.addEventListener("click", () => showView("stories")));
 document.querySelectorAll("[data-open-orders]").forEach((button) => button.addEventListener("click", () => showView("orders")));
@@ -165,9 +132,8 @@ document.querySelectorAll("[data-admin-view-jump]").forEach((button) => button.a
     document.querySelector("#story-filter").value = button.dataset.adminStoryFilter;
     renderStoryList();
   }
-  if (button.dataset.adminOrderFilter === "active") orderQuickFilter = "active";
+  if (button.dataset.adminOrderFilter) setOrderTab(button.dataset.adminOrderFilter);
   showView(button.dataset.adminViewJump);
-  if (button.dataset.adminViewJump === "orders") renderOrders();
 }));
 document.querySelector("#open-admin-command").addEventListener("click", openAdminCommand);
 document.querySelector("#close-admin-command").addEventListener("click", closeAdminCommand);
@@ -218,11 +184,13 @@ async function openLibrary() {
   loginStatus.textContent = "Opening story library...";
   submitButton.disabled = true;
   try {
+    // One request checks the password first, so a wrong password counts as a
+    // single attempt against the sign-in rate limit.
+    const orderResult = await apiRequest("?resource=orders");
     const reviewFilesPromise = apiRequest("?resource=book-review-files")
       .catch((error) => ({ files: [], error: error.message || "Review files are unavailable." }));
-    const [storyResult, orderResult, monsterResult, reviewFilesResult] = await Promise.all([
+    const [storyResult, monsterResult, reviewFilesResult] = await Promise.all([
       apiRequest(),
-      apiRequest("?resource=orders"),
       apiRequest("?resource=monsters"),
       reviewFilesPromise,
     ]);
@@ -245,7 +213,7 @@ async function openLibrary() {
     renderCustomers();
     renderMonsters();
     renderProductionHub();
-    showView("dashboard");
+    showView("orders");
   } catch (error) {
     sessionStorage.removeItem("monstersnow_admin_password");
     console.error("Admin sign-in failed", error);
@@ -263,6 +231,9 @@ function formatAdminLoginError(error) {
   const code = String(error?.code || "").toLowerCase();
   if (message.includes("issued at future") || message.includes("not yet valid") || message.includes("clock")) {
     return "The MonstersNOW database credential has a timestamp problem. Your device clock is not the cause. Try again shortly; if it continues, update the Supabase secret key in Vercel.";
+  }
+  if (code === "admin_rate_limited" || error?.status === 429) {
+    return "Too many incorrect attempts. Wait a few minutes, then try again.";
   }
   if (code === "invalid_admin_password" || message.includes("password")) {
     return "That password wasn’t accepted. Check it and try again.";
@@ -282,19 +253,21 @@ function showView(view) {
   monstersAdmin.hidden = view !== "monsters";
   const viewCopy = {
     dashboard: ["Overview", "A clear view of the work that needs you."],
-    orders: ["Orders", "Move every book from payment to delivery."],
-    stories: ["Books & stories", "Draft and review master books without making them public."],
+    orders: ["Orders", "Every book from payment to delivery."],
+    stories: ["Books", "Draft and review master books without making them public."],
     production: ["Review & print", "Prepare review files and clear print-release gates."],
-    monsters: ["Artwork & monsters", "Manage reusable characters, original drawings, and permissions."],
+    monsters: ["Monsters", "Saved characters, original drawings, and gallery permissions."],
     customers: ["Customers", "See families, books, and order history together."],
   };
-  const [title, context] = viewCopy[view] || viewCopy.dashboard;
+  const [title, context] = viewCopy[view] || viewCopy.orders;
   document.querySelector("#admin-view-title").textContent = title;
   document.querySelector("#admin-view-context").textContent = context;
   document.title = `${title} | MonstersNOW Admin`;
   document.querySelectorAll("[data-admin-view]").forEach((button) => button.classList.toggle("is-active", button.dataset.adminView === view));
   if (view === "stories" && editor.hidden && stories[0]) editStory(stories[0]);
   if (view === "production") renderProductionHub();
+  const moreTools = document.querySelector(".admin-nav-more");
+  if (moreTools && ["dashboard", "production", "customers"].includes(view)) moreTools.open = true;
 }
 
 function openAdminCommand() {
@@ -607,87 +580,6 @@ function renderStoryList() {
   renderDashboard();
 }
 
-function renderOrders() {
-  const filter = document.querySelector("#order-filter").value;
-  const query = document.querySelector("#order-search").value.trim().toLowerCase();
-  const matchesQuickFilter = (order) => orderQuickFilter === "all"
-    || (orderQuickFilter === "active" ? ["proofing", "approved", "printing"].includes(order.status) : false)
-    || (orderQuickFilter === "attention" ? orderNeedsAttention(order) : order.status === orderQuickFilter);
-  const visible = orders.filter((order) => matchesQuickFilter(order) && (filter === "all" || order.status === filter) && [order.customer_email, order.child_name, order.monster_name, order.story_label, order.id].join(" ").toLowerCase().includes(query));
-  document.querySelector("#queue-all").textContent = orders.length;
-  document.querySelector("#queue-attention").textContent = orders.filter(orderNeedsAttention).length;
-  document.querySelector("#queue-paid").textContent = orders.filter((order) => order.status === "paid").length;
-  document.querySelector("#queue-printing").textContent = orders.filter((order) => order.status === "printing").length;
-  document.querySelectorAll("[data-order-quick-filter]").forEach((button) => button.classList.toggle("is-active", button.dataset.orderQuickFilter === orderQuickFilter));
-  const body = document.querySelector("#orders-list");
-  const board = document.querySelector("#orders-board");
-  const table = document.querySelector(".orders-table-wrap");
-  board.hidden = orderView !== "board";
-  table.hidden = orderView !== "table";
-  document.querySelectorAll("[data-order-view]").forEach((button) => button.classList.toggle("is-active", button.dataset.orderView === orderView));
-  document.querySelector("#orders-empty").hidden = visible.length > 0;
-  body.replaceChildren(...visible.map((order) => {
-    const row = document.createElement("tr");
-    row.innerHTML = '<td><strong></strong><small></small></td><td><strong></strong><small></small></td><td></td><td></td><td></td><td><button class="button secondary" type="button"></button></td>';
-    row.classList.toggle("needs-attention", orderNeedsAttention(order));
-    const cells = row.children;
-    cells[0].querySelector("strong").textContent = order.customer_email;
-    cells[0].querySelector("small").textContent = `For ${order.child_name}`;
-    cells[1].querySelector("strong").textContent = order.monster_name;
-    cells[1].querySelector("small").textContent = order.story_label;
-    cells[2].textContent = order.format_id === "hardcover" ? "Hardcover" : "Softcover";
-    cells[3].textContent = formatMoney(order.stripe_total_cents ?? order.amount_cents, order.currency || "USD");
-    cells[4].textContent = new Date(order.created_at).toLocaleDateString();
-    const button = cells[5].querySelector("button");
-    button.textContent = `${order.status.replaceAll("_", " ")} →`;
-    button.setAttribute("aria-label", `Open order for ${order.child_name}`);
-    button.addEventListener("click", () => openOrderDetail(order));
-    return row;
-  }));
-  renderOrderBoard(visible);
-}
-
-function renderOrderBoard(visible) {
-  const columns = [
-    { key: "intake", title: "Intake", statuses: ["checkout_started"] },
-    { key: "proof", title: "Proof", statuses: ["paid", "proofing"] },
-    { key: "production", title: "Production", statuses: ["approved", "printing"] },
-    { key: "delivery", title: "Delivery", statuses: ["shipped", "completed"] },
-    { key: "exceptions", title: "Exceptions", statuses: ["cancelled"] },
-  ];
-  const board = document.querySelector("#orders-board");
-  board.replaceChildren(...columns.map((column) => {
-    const section = document.createElement("section");
-    const matching = visible.filter((order) => column.statuses.includes(order.status));
-    section.className = "order-board-column";
-    section.innerHTML = '<header><strong></strong><span></span></header><div></div>';
-    section.querySelector("strong").textContent = column.title;
-    section.querySelector("span").textContent = matching.length;
-    const list = section.querySelector("div");
-    if (!matching.length) list.innerHTML = '<p class="board-empty">No orders</p>';
-    else list.replaceChildren(...matching.map((order) => {
-      const card = document.createElement("button");
-      card.type = "button";
-      card.className = "order-board-card";
-      card.classList.toggle("needs-attention", orderNeedsAttention(order));
-      card.innerHTML = '<span></span><strong></strong><small></small><em></em>';
-      card.querySelector("span").textContent = order.status.replaceAll("_", " ");
-      card.querySelector("strong").textContent = `${order.child_name} + ${order.monster_name}`;
-      card.querySelector("small").textContent = `${order.story_label} · ${order.format_id === "hardcover" ? "Hardcover" : "Softcover"}`;
-      card.querySelector("em").textContent = `${order.payment_issue ? `${order.payment_issue.replaceAll("_", " ")} · ` : orderNeedsAttention(order) ? "Needs follow-up · " : ""}${relativeAge(order.updated_at || order.created_at)} · Review →`;
-      card.addEventListener("click", () => openOrderDetail(order));
-      return card;
-    }));
-    return section;
-  }));
-}
-
-function orderNeedsAttention(order) {
-  if (order.payment_issue) return true;
-  const ageHours = Math.max(0, (Date.now() - new Date(order.updated_at || order.created_at).getTime()) / 3600000);
-  const limits = { checkout_started: 24, paid: 24, proofing: 48, approved: 24, printing: 168, shipped: 168 };
-  return Number.isFinite(ageHours) && limits[order.status] !== undefined && ageHours >= limits[order.status];
-}
 
 function renderCustomers() {
   const query = document.querySelector("#customer-search").value.trim().toLowerCase();
@@ -861,17 +753,6 @@ function formatMoney(cents, currency = "USD") {
 
 function escapeHtml(value = "") {
   return String(value).replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[character]);
-}
-
-async function updateOrderStatus(order, status) {
-  const output = document.querySelector("#orders-status");
-  output.textContent = "Updating order...";
-  try {
-    const result = await apiRequest(`?resource=orders&id=${encodeURIComponent(order.id)}`, { method: "PATCH", body: { status } });
-    Object.assign(order, result.order);
-    output.textContent = `Order moved to ${status.replaceAll("_", " ")}.`;
-    renderOrders();
-  } catch (error) { output.textContent = error.message; }
 }
 
 function editStory(story = null) {
@@ -1836,336 +1717,4 @@ function refreshPageTools() {
   document.querySelector("#story-stage").className = `is-${stage.toLowerCase().replaceAll(" ", "-")}`;
   if (artworkDialog.open) renderArtworkOverview();
   selectPage(selectedPageIndex);
-}
-
-function openOrderDetail(order) {
-  selectedOrder = order;
-  document.querySelector("#order-detail-id").textContent = `Order ${order.id}`;
-  document.querySelector("#order-detail-age").textContent = `${orderNeedsAttention(order) ? "Needs follow-up · " : "Updated "}${relativeAge(order.updated_at || order.created_at)}`;
-  const fields = { Customer: order.customer_email, Child: order.child_name, "Child character": order.child_character?.label || "Monster only", Monster: order.monster_name, Story: order.story_label, Format: order.format_id, Style: order.monster_style, Total: formatMoney(order.stripe_total_cents ?? order.amount_cents, order.currency || "USD"), Created: new Date(order.created_at).toLocaleString(), Paid: order.stripe_paid_at ? new Date(order.stripe_paid_at).toLocaleString() : "Not verified", "Stripe checkout": order.stripe_checkout_session_id || "Not recorded", "Payment intent": order.stripe_payment_intent_id || "Not recorded", "Payment issue": order.payment_issue?.replaceAll("_", " ") || "None", "Preview ID": order.selected_preview_id || "Not recorded" };
-  const list = document.querySelector("#order-detail-fields");
-  list.replaceChildren();
-  Object.entries(fields).forEach(([label, value]) => { const term = document.createElement("dt"); const detail = document.createElement("dd"); term.textContent = label; detail.textContent = value || "—"; list.append(term, detail); });
-  renderOrderArtwork(order.monster_assets);
-  const savedAddress = order.shipping_address || {};
-  document.querySelector("#lulu-recipient-name").value = order.shipping_name || "";
-  document.querySelector("#lulu-email").value = order.customer_email || "";
-  document.querySelector("#lulu-phone").value = order.shipping_phone || "";
-  document.querySelector("#lulu-street").value = savedAddress.line1 || "";
-  document.querySelector("#lulu-city").value = savedAddress.city || "";
-  document.querySelector("#lulu-state").value = savedAddress.state || "";
-  document.querySelector("#lulu-postcode").value = savedAddress.postal_code || "";
-  document.querySelector("#lulu-country").value = savedAddress.country || "US";
-  document.querySelector("#lulu-shipping-level").value = "MAIL";
-  renderProofApproval(order);
-  syncOrderStatusOptions(order);
-  document.querySelector("#order-detail-notes").value = order.notes || "";
-  document.querySelector("#order-detail-message").textContent = "";
-  renderOrderProgress(order);
-  renderOrderNextAction(order);
-  orderDialog.showModal();
-}
-
-function syncOrderStatusOptions(order) {
-  const select = document.querySelector("#order-detail-status");
-  const editableStatuses = new Set([order.status, "cancelled"]);
-  if (!order.payment_issue) {
-    if (order.status === "paid") editableStatuses.add("proofing");
-    if (order.status === "printing" && order.lulu_print_job_id) editableStatuses.add("shipped");
-    if (order.status === "shipped") editableStatuses.add("completed");
-  }
-  select.replaceChildren(...orderStatuses.filter((status) => editableStatuses.has(status)).map((status) => new Option(status.replaceAll("_", " "), status, false, status === order.status)));
-}
-
-function renderOrderNextAction(order) {
-  const actions = {
-    checkout_started: ["Verify payment in Stripe", "Confirm payment before beginning proof production."],
-    paid: ["Begin personalized proof", "Advance the order to proofing when production work starts."],
-    proofing: ["Review and approve the proof", "Approval fingerprints the exact master, names, and selected monster."],
-    approved: ["Enter shipping and send to Lulu Sandbox", "Lulu validates both PDFs before creating the print job."],
-    printing: ["Monitor the Lulu print job", order.lulu_print_job_id ? `Print job ${order.lulu_print_job_id} is in production.` : "Confirm the printer accepted the order."],
-    shipped: ["Add delivery follow-up", "Confirm delivery, then complete the order."],
-    completed: ["No action required", "This order is complete."],
-    cancelled: ["No action required", "This order was cancelled."],
-  };
-  const [title, help] = order.payment_issue
-    ? ["Resolve the Stripe payment issue", `Fulfillment is blocked: ${order.payment_issue.replaceAll("_", " ")}. Review the payment in Stripe.`]
-    : actions[order.status] || ["Review this order", "Confirm the current fulfillment state."];
-  document.querySelector(".order-next-action").classList.toggle("is-blocked", Boolean(order.payment_issue));
-  document.querySelector("#order-next-action").textContent = title;
-  document.querySelector("#order-next-help").textContent = help;
-}
-
-function renderProofApproval(order) {
-  const approved = Boolean(order.proof_fingerprint && order.proof_approved_at);
-  const submitted = Boolean(order.lulu_print_job_id);
-  const customerStatus = order.customer_proof_status || "not_ready";
-  const state = document.querySelector("#proof-approval-state");
-  const approve = document.querySelector("#approve-order-proof");
-  const revoke = document.querySelector("#revoke-order-proof");
-  const send = document.querySelector("#send-order-lulu");
-  const help = document.querySelector("#proof-approval-help");
-  const blocked = Boolean(order.payment_issue);
-  if (submitted) {
-    state.textContent = `Sent to Lulu · job ${order.lulu_print_job_id}`;
-    help.textContent = order.lulu_submitted_at ? `Submitted ${new Date(order.lulu_submitted_at).toLocaleString()}.` : "The print job has been submitted.";
-  } else if (approved) {
-    state.textContent = `Approved ${new Date(order.proof_approved_at).toLocaleString()} by ${order.proof_approved_by || "MonstersNOW admin"}.`;
-    help.textContent = `Master v${order.master_story_version || "?"} · fingerprint ${order.proof_fingerprint.slice(0, 12)}… Final PDFs must pass Lulu validation before sending.`;
-  } else if (customerStatus === "approved") {
-    state.textContent = `Customer approved PDF ${order.customer_proof_fingerprint?.slice(0, 12) || ""}…`;
-    help.textContent = "Complete the final production check, then lock this exact proof for print handoff.";
-  } else if (customerStatus === "changes_requested") {
-    state.textContent = "Customer requested proof changes.";
-    help.textContent = order.customer_proof_revision_notes || "Prepare and publish a revised PDF for review.";
-  } else if (customerStatus === "ready") {
-    state.textContent = "Customer proof published · awaiting customer response.";
-    help.textContent = `PDF fingerprint ${order.customer_proof_fingerprint?.slice(0, 12) || ""}… Copy the private link if email delivery is handled separately.`;
-  } else {
-    state.textContent = "No customer proof has been published.";
-    help.textContent = "Upload the exact cover-and-interior PDF. Customer approval is required before final production approval.";
-  }
-  approve.hidden = approved || submitted;
-  approve.disabled = blocked || customerStatus !== "approved" || !["proofing", "approved"].includes(order.status);
-  revoke.hidden = !approved || submitted;
-  document.querySelector("#customer-proof-upload").hidden = approved || submitted || order.status !== "proofing";
-  document.querySelector("#publish-customer-proof").disabled = blocked || order.status !== "proofing";
-  document.querySelector("#copy-customer-proof-link").hidden = !order.customer_proof_path;
-  document.querySelector("#lulu-shipping-fields").hidden = !approved || submitted;
-  send.disabled = blocked || !approved || submitted;
-  send.title = blocked ? "Resolve the Stripe payment issue first." : approved ? "Validate the production PDFs and create the Lulu Sandbox print job." : "Approve the proof first.";
-}
-
-async function publishSelectedCustomerProof() {
-  if (!selectedOrder) return;
-  const fileInput = document.querySelector("#customer-proof-file");
-  const file = fileInput.files?.[0];
-  const message = document.querySelector("#order-detail-message");
-  if (!file || file.type !== "application/pdf") { message.textContent = "Choose the exact customer-review PDF first."; return; }
-  if (file.size > 20 * 1024 * 1024) { message.textContent = "Choose a PDF smaller than 20 MB."; return; }
-  if (!window.confirm("Publish this exact PDF for the customer? Publishing a revision invalidates the previous customer response.")) return;
-  const button = document.querySelector("#publish-customer-proof");
-  button.disabled = true;
-  message.textContent = "Fingerprinting and publishing the private proof…";
-  try {
-    const proofData = await readFileAsDataUrl(file);
-    const result = await apiRequest(`?resource=orders&id=${encodeURIComponent(selectedOrder.id)}`, {
-      method: "PATCH",
-      body: { action: "publish_customer_proof", proofData },
-    });
-    Object.assign(selectedOrder, result.order);
-    fileInput.value = "";
-    renderProofApproval(selectedOrder);
-    renderOrderNextAction(selectedOrder);
-    renderOrders(); renderDashboard();
-    const copied = result.order.customer_proof_link ? await copyText(result.order.customer_proof_link) : false;
-    message.textContent = copied
-      ? "Customer proof published and its private link copied."
-      : "Customer proof published. Use Copy private proof link to send it through your approved customer communication channel.";
-  } catch (error) { message.textContent = error.message; }
-  finally { renderProofApproval(selectedOrder); }
-}
-
-async function copySelectedCustomerProofLink() {
-  if (!selectedOrder) return;
-  const message = document.querySelector("#order-detail-message");
-  message.textContent = "Creating the private customer link…";
-  try {
-    const result = await apiRequest(`?resource=orders&id=${encodeURIComponent(selectedOrder.id)}`, { method: "PATCH", body: { action: "get_customer_proof_link" } });
-    const copied = await copyText(result.order.customer_proof_link);
-    message.textContent = copied ? "Private customer proof link copied." : "Private customer proof link is ready in the copy dialog.";
-  } catch (error) { message.textContent = error.message; }
-}
-
-async function copyText(value) {
-  if (navigator.clipboard?.writeText) {
-    try { await navigator.clipboard.writeText(value); return true; } catch {}
-  }
-  window.prompt("Copy this private customer proof link:", value);
-  return false;
-}
-
-async function approveSelectedOrderProof() {
-  if (!selectedOrder || !window.confirm("Lock the exact customer-approved PDF for production handoff?")) return;
-  const button = document.querySelector("#approve-order-proof");
-  const message = document.querySelector("#order-detail-message");
-  button.disabled = true;
-  message.textContent = "Checking and fingerprinting the personalized proof…";
-  try {
-    const result = await apiRequest(`?resource=orders&id=${encodeURIComponent(selectedOrder.id)}`, { method: "PATCH", body: { action: "approve_proof", approvedBy: "MonstersNOW admin" } });
-    Object.assign(selectedOrder, result.order);
-    syncOrderStatusOptions(selectedOrder);
-    renderProofApproval(selectedOrder);
-    renderOrderProgress(selectedOrder);
-    renderOrderNextAction(selectedOrder);
-    renderOrders(); renderDashboard(); renderProductionHub();
-    message.textContent = "Proof approved and locked. Lulu submission remains a separate action.";
-  } catch (error) { message.textContent = error.message; }
-  finally { button.disabled = false; }
-}
-
-async function sendSelectedOrderToLulu() {
-  if (!selectedOrder) return;
-  const values = {
-    name: document.querySelector("#lulu-recipient-name").value.trim(),
-    email: document.querySelector("#lulu-email").value.trim(),
-    phone_number: document.querySelector("#lulu-phone").value.trim(),
-    street1: document.querySelector("#lulu-street").value.trim(),
-    city: document.querySelector("#lulu-city").value.trim(),
-    state_code: document.querySelector("#lulu-state").value.trim(),
-    postcode: document.querySelector("#lulu-postcode").value.trim(),
-    country_code: document.querySelector("#lulu-country").value.trim().toUpperCase(),
-  };
-  const missing = Object.entries(values).filter(([key, value]) => !value && key !== "state_code").map(([key]) => key.replaceAll("_", " "));
-  const message = document.querySelector("#order-detail-message");
-  if (missing.length) {
-    message.textContent = `Complete the shipping fields: ${missing.join(", ")}.`;
-    return;
-  }
-  if (!window.confirm("Validate the production PDFs and create this print job in Lulu Sandbox?")) return;
-  const button = document.querySelector("#send-order-lulu");
-  button.disabled = true;
-  button.textContent = "Validating and sending…";
-  message.textContent = "Lulu is validating the cover and interior PDFs…";
-  try {
-    const result = await apiRequest(`?resource=orders&id=${encodeURIComponent(selectedOrder.id)}`, {
-      method: "PATCH",
-      body: { action: "submit_to_lulu", shippingLevel: document.querySelector("#lulu-shipping-level").value, shippingAddress: values },
-    });
-    Object.assign(selectedOrder, result.order);
-    syncOrderStatusOptions(selectedOrder);
-    renderProofApproval(selectedOrder);
-    renderOrderProgress(selectedOrder);
-    renderOrderNextAction(selectedOrder);
-    renderOrders(); renderDashboard(); renderProductionHub();
-    message.textContent = `Sent to Lulu Sandbox. Print job ${selectedOrder.lulu_print_job_id} is now tracked on this order.`;
-  } catch (error) { message.textContent = error.message; }
-  finally { button.textContent = "Send to Lulu Sandbox"; renderProofApproval(selectedOrder); }
-}
-
-async function revokeSelectedOrderProof() {
-  if (!selectedOrder || !window.confirm("Revoke this proof approval? The order will return to proofing.")) return;
-  const message = document.querySelector("#order-detail-message");
-  message.textContent = "Revoking approval…";
-  try {
-    const result = await apiRequest(`?resource=orders&id=${encodeURIComponent(selectedOrder.id)}`, { method: "PATCH", body: { action: "revoke_proof_approval" } });
-    Object.assign(selectedOrder, result.order);
-    syncOrderStatusOptions(selectedOrder);
-    renderProofApproval(selectedOrder);
-    renderOrderProgress(selectedOrder);
-    renderOrderNextAction(selectedOrder);
-    renderOrders(); renderDashboard(); renderProductionHub();
-    message.textContent = "Approval revoked. Review and approve a new proof before printing.";
-  } catch (error) { message.textContent = error.message; }
-}
-
-function renderOrderArtwork(assets) {
-  const panel = document.querySelector("#order-artwork-panel");
-  const grid = document.querySelector("#order-artwork-grid");
-  grid.replaceChildren();
-  const files = [
-    ["Original drawing", assets?.originalUrl],
-    ["Selected monster", assets?.selectedPreviewUrl],
-    ["Coloring page", assets?.coloringPageUrl],
-  ].filter(([, url]) => url);
-  panel.hidden = files.length === 0;
-  files.forEach(([label, url]) => {
-    const figure = document.createElement("figure");
-    const image = document.createElement("img");
-    const caption = document.createElement("figcaption");
-    image.src = url;
-    image.alt = label;
-    caption.textContent = label;
-    figure.append(image, caption);
-    grid.append(figure);
-  });
-}
-
-function renderOrderProgress(order) {
-  const flow = ["checkout_started", "paid", "proofing", "approved", "printing", "shipped", "completed"];
-  const current = flow.indexOf(order.status);
-  document.querySelector("#order-progress").replaceChildren(...flow.map((status, index) => {
-    const item = document.createElement("li");
-    item.className = order.status === "cancelled" ? "is-cancelled" : index < current ? "is-complete" : index === current ? "is-current" : "";
-    item.innerHTML = `<span>${index < current ? "✓" : index + 1}</span><small></small>`;
-    item.querySelector("small").textContent = status === "checkout_started" ? "Checkout" : status.charAt(0).toUpperCase() + status.slice(1);
-    return item;
-  }));
-  const advance = document.querySelector("#advance-order");
-  const next = flow[current + 1];
-  advance.hidden = !next || order.status === "cancelled";
-  advance.textContent = next ? `Advance to ${next.replaceAll("_", " ")} →` : "Order complete";
-  if (order.status === "checkout_started") {
-    advance.hidden = false;
-    advance.disabled = true;
-    advance.textContent = "Verify Stripe payment first";
-  } else if (order.status === "proofing") {
-    advance.hidden = false;
-    advance.disabled = true;
-    advance.textContent = "Approve proof to continue";
-  } else if (order.status === "approved") {
-    advance.hidden = false;
-    advance.disabled = true;
-    advance.textContent = "Send to Lulu to continue";
-  } else advance.disabled = false;
-}
-
-async function advanceSelectedOrder() {
-  if (!selectedOrder) return;
-  const flow = ["checkout_started", "paid", "proofing", "approved", "printing", "shipped", "completed"];
-  const next = flow[flow.indexOf(selectedOrder.status) + 1];
-  if (!next || selectedOrder.status === "checkout_started") return;
-  const button = document.querySelector("#advance-order");
-  const message = document.querySelector("#order-detail-message");
-  button.disabled = true;
-  message.textContent = `Moving order to ${next.replaceAll("_", " ")}…`;
-  try {
-    const result = await apiRequest(`?resource=orders&id=${encodeURIComponent(selectedOrder.id)}`, { method: "PATCH", body: { status: next, notes: document.querySelector("#order-detail-notes").value } });
-    Object.assign(selectedOrder, result.order);
-    syncOrderStatusOptions(selectedOrder);
-    document.querySelector("#order-detail-status").value = selectedOrder.status;
-    document.querySelector("#order-detail-age").textContent = "Updated just now";
-    renderOrderProgress(selectedOrder);
-    renderProofApproval(selectedOrder);
-    renderOrderNextAction(selectedOrder);
-    renderOrders(); renderDashboard(); renderProductionHub();
-    message.textContent = `Order advanced to ${next.replaceAll("_", " ")}.`;
-  } catch (error) { message.textContent = error.message; }
-  finally { button.disabled = false; }
-}
-
-function closeOrderDetail() {
-  const notes = document.querySelector("#order-detail-notes").value;
-  const status = document.querySelector("#order-detail-status").value;
-  if (selectedOrder && (notes !== (selectedOrder.notes || "") || status !== selectedOrder.status) && !window.confirm("Discard unsaved order changes?")) return;
-  orderDialog.close();
-  selectedOrder = null;
-}
-
-async function saveOrderDetail(event) {
-  event.preventDefault();
-  if (!selectedOrder) return;
-  const order = selectedOrder;
-  const button = document.querySelector("#save-order-detail");
-  const message = document.querySelector("#order-detail-message");
-  const status = document.querySelector("#order-detail-status").value;
-  if (status === "paid" && order.status !== "paid" && !window.confirm("Have you verified this payment in Stripe? This does not charge the customer.")) return;
-  button.disabled = true;
-  message.textContent = "Saving order…";
-  try {
-    const result = await apiRequest(`?resource=orders&id=${encodeURIComponent(order.id)}`, { method: "PATCH", body: { status, notes: document.querySelector("#order-detail-notes").value } });
-    if (!result.order) throw new Error("This order no longer exists. Refresh the dashboard.");
-    Object.assign(order, result.order);
-    syncOrderStatusOptions(order);
-    renderOrders();
-    renderDashboard();
-    renderCustomers();
-    renderProductionHub();
-    renderOrderProgress(order);
-    renderProofApproval(order);
-    renderOrderNextAction(order);
-    document.querySelector("#order-detail-age").textContent = "Updated just now";
-    message.textContent = "Order saved.";
-  } catch (error) { message.textContent = error.message; }
-  finally { button.disabled = false; }
 }

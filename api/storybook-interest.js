@@ -4,7 +4,7 @@ const {
   sendStorybookInterestEmail,
   storybookInterestErrorToResponse,
 } = require("../lib/storybook-interest");
-const { assertAdminRequest } = require("../lib/admin-auth");
+const { applyAdminAuthHeaders, assertAdminRequest } = require("../lib/admin-auth");
 const { adminDataErrorContext, shouldLogAdminDataError } = require("../lib/admin-errors");
 const { createStory, ensureCatalogStories, getStory, listStories, updateStory } = require("../lib/story-library");
 const { listOrders, updateOrder } = require("../lib/order-library");
@@ -69,6 +69,7 @@ module.exports = async function handler(request, response) {
       response.setHeader("Cache-Control", "private, no-store");
       return response.status(200).send(pdf);
     } catch (error) {
+      applyAdminAuthHeaders(response, error);
       return sendJson(response, error.status || 500, { error: error.message || "The editorial proof could not be generated." });
     }
   }
@@ -77,6 +78,7 @@ module.exports = async function handler(request, response) {
       assertAdminRequest(request);
       return sendJson(response, 200, await importManuscript(await readJsonBody(request)));
     } catch (error) {
+      applyAdminAuthHeaders(response, error);
       return sendJson(response, error.status || 500, {
         code: error.code || "manuscript_import_failed",
         error: error.message || "The manuscript could not be imported.",
@@ -88,6 +90,7 @@ module.exports = async function handler(request, response) {
       assertAdminRequest(request);
       return sendJson(response, 201, { artwork: await uploadStoryArtwork(await readJsonBody(request)) });
     } catch (error) {
+      applyAdminAuthHeaders(response, error);
       return sendJson(response, error.status || 500, {
         code: error.code || "artwork_upload_failed",
         error: error.message || "Artwork could not be uploaded.",
@@ -99,6 +102,7 @@ module.exports = async function handler(request, response) {
       assertAdminRequest(request);
       return sendJson(response, 200, await ensureCatalogStories());
     } catch (error) {
+      applyAdminAuthHeaders(response, error);
       return sendJson(response, error.status || 500, {
         code: error.code || "catalog_setup_failed",
         error: error.message || "The catalog books could not be created.",
@@ -113,6 +117,7 @@ module.exports = async function handler(request, response) {
       response.setHeader("Cache-Control", "private, no-store");
       return sendJson(response, 200, { files: await listBookReviewFiles(firstQueryValue(request.query?.story_slug)) });
     } catch (error) {
+      applyAdminAuthHeaders(response, error);
       return sendJson(response, error.status || 500, { code: error.code || "review_files_failed", error: error.message || "Review files could not be opened." });
     }
   }
@@ -123,6 +128,7 @@ module.exports = async function handler(request, response) {
       if (request.method !== "POST") return rejectUnsupportedMethod(request, response, ["POST"]);
       return sendJson(response, 200, await createBookReviewUpload(await readJsonBody(request)));
     } catch (error) {
+      applyAdminAuthHeaders(response, error);
       return sendJson(response, error.status || 500, { code: error.code || "review_upload_failed", error: error.message || "The review upload could not be prepared." });
     }
   }
@@ -134,6 +140,7 @@ module.exports = async function handler(request, response) {
       const payload = await readJsonBody(request);
       return sendJson(response, 200, { file: await confirmBookReviewUpload(payload.id) });
     } catch (error) {
+      applyAdminAuthHeaders(response, error);
       return sendJson(response, error.status || 500, { code: error.code || "review_confirm_failed", error: error.message || "The review upload could not be confirmed." });
     }
   }
@@ -228,6 +235,7 @@ async function handleAdminStories(request, response) {
     if (!story) return sendJson(response, 404, { error: "Story not found." });
     return sendJson(response, request.method === "PUT" ? 201 : 200, { story });
   } catch (error) {
+    applyAdminAuthHeaders(response, error);
     if (shouldLogAdminDataError(error)) {
       console.error("Admin data request failed", adminDataErrorContext(error, request, resource));
     }

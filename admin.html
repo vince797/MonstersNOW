@@ -4,12 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex, nofollow" />
-    <title>Dashboard | MonstersNOW Admin</title>
+    <title>Orders | MonstersNOW Admin</title>
     <link rel="stylesheet" href="styles.css?v=20261002-admin-system-type" />
     <link rel="stylesheet" href="admin-books.css?v=20261004-book-workspace" />
     <link rel="icon" href="assets/brand/monstersnow-icon-32-v1.png" type="image/png" sizes="32x32" />
     <link rel="apple-touch-icon" href="assets/brand/monstersnow-icon-180-v1.png" />
     <link rel="stylesheet" href="brand.css?v=20261007-admin-login-theme" />
+    <link rel="stylesheet" href="admin-orders.css?v=20261008-simple-orders" />
   </head>
   <body class="admin-page">
     <main>
@@ -53,17 +54,17 @@
             <span>Operations</span>
           </a>
           <nav class="admin-nav" aria-label="Admin navigation">
-            <span class="admin-nav-label">Workspace</span>
-            <button class="is-active" type="button" data-admin-view="dashboard"><span aria-hidden="true">⌂</span>Overview</button>
-            <button type="button" data-admin-view="orders"><span aria-hidden="true">↗</span>Orders <em id="nav-order-count">0</em></button>
-            <button type="button" data-admin-view="stories"><span aria-hidden="true">▤</span>Books &amp; stories <em id="nav-story-count">0</em></button>
-            <button type="button" data-admin-view="production"><span aria-hidden="true">◇</span>Review &amp; print <em id="nav-production-count">0</em></button>
-            <span class="admin-nav-label">Library</span>
-            <button type="button" data-admin-view="monsters"><span aria-hidden="true">●</span>Artwork &amp; monsters <em id="nav-monster-count">0</em></button>
-            <button type="button" data-admin-view="customers"><span aria-hidden="true">♙</span>Customers <em id="nav-customer-count">0</em></button>
+            <button class="is-active" type="button" data-admin-view="orders"><span aria-hidden="true">↗</span>Orders <em id="nav-order-count">0</em></button>
+            <button type="button" data-admin-view="stories"><span aria-hidden="true">▤</span>Books <em id="nav-story-count">0</em></button>
+            <button type="button" data-admin-view="monsters"><span aria-hidden="true">●</span>Monsters <em id="nav-monster-count">0</em></button>
+            <details class="admin-nav-more">
+              <summary>More tools</summary>
+              <button type="button" data-admin-view="dashboard"><span aria-hidden="true">⌂</span>Overview</button>
+              <button type="button" data-admin-view="production"><span aria-hidden="true">◇</span>Review &amp; print <em id="nav-production-count">0</em></button>
+              <button type="button" data-admin-view="customers"><span aria-hidden="true">♙</span>Customers <em id="nav-customer-count">0</em></button>
+            </details>
           </nav>
           <div class="admin-rail-footer">
-            <button type="button" id="rail-new-story"><span aria-hidden="true">＋</span>New book</button>
             <a href="index.html" target="_blank" rel="noopener"><span aria-hidden="true">↗</span>View storefront</a>
           </div>
         </aside>
@@ -71,17 +72,16 @@
         <div class="admin-workspace">
           <header class="admin-topbar">
             <div class="admin-topbar-title">
-              <h1 id="admin-view-title">Dashboard</h1>
-              <p id="admin-view-context">A clear view of the work that needs you.</p>
+              <h1 id="admin-view-title">Orders</h1>
+              <p id="admin-view-context">Every book from payment to delivery.</p>
             </div>
             <div class="admin-topbar-actions">
               <button class="admin-command-trigger" id="open-admin-command" type="button"><span aria-hidden="true">⌕</span> Quick find <kbd>⌘ K</kbd></button>
-              <span class="admin-status"><i></i>Connected</span>
               <button class="admin-sign-out-button" id="admin-sign-out" type="button">Sign out</button>
             </div>
           </header>
 
-          <section class="admin-dashboard" id="admin-dashboard">
+          <section class="admin-dashboard" id="admin-dashboard" hidden>
             <div class="admin-welcome-card">
               <div>
                 <p class="eyebrow" id="dashboard-date">Today</p>
@@ -121,13 +121,6 @@
                 <div class="production-checks" id="production-checks"></div>
                 <div class="production-next"><strong>Next production step</strong><p id="production-next-action">Loading…</p></div>
               </section>
-              <aside class="admin-panel admin-next-panel">
-                <p class="eyebrow">Launch focus</p>
-                <h2>Halloween is next.</h2>
-                <p>Finish the seasonal master, verify the art, and test the purchase flow.</p>
-                <button class="button secondary" type="button" id="halloween-story">Open Halloween book</button>
-                <a class="button primary" href="create.html?test=halloween" target="_blank" rel="noopener">Run test order ↗</a>
-              </aside>
             </div>
           </section>
 
@@ -304,47 +297,22 @@
             </section>
           </section>
 
-          <section class="orders-admin" id="orders-admin" hidden>
-            <div class="orders-toolbar">
-              <div>
-                <p class="eyebrow">Fulfillment</p>
-                <h2>Storybook orders</h2>
-                <p>Track each personalized book from checkout through delivery.</p>
+          <section class="orders-admin simple-orders" id="orders-admin">
+            <div class="orders-bar">
+              <nav class="order-tabs" id="order-tabs" aria-label="Filter orders by status"></nav>
+              <div class="orders-bar-tools">
+                <label class="orders-search"><span class="sr-only">Search orders</span><input id="order-search" type="search" placeholder="Search name, email, monster, or order ID" autocomplete="off" /></label>
+                <button class="button secondary" id="orders-refresh" type="button">Refresh</button>
               </div>
-              <label>Filter status
-                <select id="order-filter">
-                  <option value="all">All orders</option>
-                  <option value="checkout_started">Checkout started</option>
-                  <option value="paid">Paid</option>
-                  <option value="proofing">Proofing</option>
-                  <option value="approved">Approved</option>
-                  <option value="printing">Printing</option>
-                  <option value="shipped">Shipped</option>
-                  <option value="completed">Completed</option>
-                  <option value="cancelled">Cancelled</option>
-                </select>
-              </label>
-              <div class="view-switch" aria-label="Order view"><button class="is-active" type="button" data-order-view="board">Board</button><button type="button" data-order-view="table">Table</button></div>
             </div>
-            <div class="order-queue-summary" aria-label="Order queue summary">
-              <button type="button" data-order-quick-filter="all"><strong id="queue-all">0</strong><span>All orders</span><small>Complete history</small></button>
-              <button type="button" data-order-quick-filter="attention"><strong id="queue-attention">0</strong><span>Needs attention</span><small>Waiting too long</small></button>
-              <button type="button" data-order-quick-filter="paid"><strong id="queue-paid">0</strong><span>Ready to proof</span><small>Payment verified</small></button>
-              <button type="button" data-order-quick-filter="printing"><strong id="queue-printing">0</strong><span>At printer</span><small>Production active</small></button>
-            </div>
-            <div class="orders-controls">
-              <label class="admin-search">Find an order<input id="order-search" type="search" placeholder="Email, child, monster, story, or order ID" /></label>
-              <p><i></i> Orange cards need follow-up based on time in their current stage.</p>
-            </div>
-            <div id="orders-board" class="orders-board" aria-label="Production board"></div>
-            <div class="orders-table-wrap">
-              <table class="orders-table">
-                <thead><tr><th>Customer</th><th>Book</th><th>Format</th><th>Total</th><th>Date</th><th>Status</th></tr></thead>
+            <div class="orders-list-wrap">
+              <table class="orders-list">
+                <thead><tr><th scope="col">Order</th><th scope="col">Customer</th><th scope="col">Status</th><th scope="col">Payment</th><th scope="col">Proof</th><th scope="col">Total</th><th scope="col">Updated</th></tr></thead>
                 <tbody id="orders-list"></tbody>
               </table>
-              <div class="orders-empty" id="orders-empty"><strong>No orders yet</strong><p>New storybook checkouts will appear here automatically.</p></div>
+              <div class="orders-empty" id="orders-empty" hidden><strong>No orders here</strong><p>Try another status or search.</p></div>
             </div>
-            <p id="orders-status" role="status"></p>
+            <p id="orders-status" class="orders-status" role="status" aria-live="polite"></p>
           </section>
 
           <section class="customers-admin" id="customers-admin" hidden>
@@ -379,7 +347,83 @@
     <dialog id="admin-command" class="admin-command"><div class="admin-command-shell"><header><span aria-hidden="true">⌕</span><input id="admin-command-input" type="search" placeholder="Find a book, order, customer, or monster…" autocomplete="off" aria-label="Quick find" /><button id="close-admin-command" type="button" aria-label="Close quick find">Esc</button></header><div class="admin-command-hint"><span>Quick navigation</span><span>↑↓ move · Enter open</span></div><div id="admin-command-results" class="admin-command-results"></div></div></dialog>
     <dialog id="artwork-overview" class="artwork-overview"><div class="artwork-overview-shell"><header><div><p class="eyebrow">Visual production</p><h2>Artwork overview</h2><p id="artwork-overview-summary">Review all 32 pages at a glance.</p></div><button class="button secondary" id="close-artwork-overview" type="button">Close</button></header><nav class="artwork-filters" aria-label="Filter artwork"><button class="is-active" type="button" data-artwork-filter="all">All</button><button type="button" data-artwork-filter="missing">Missing</button><button type="button" data-artwork-filter="draft">Draft</button><button type="button" data-artwork-filter="approved">Approved</button><button type="button" data-artwork-filter="final">Final</button></nav><div id="artwork-overview-grid" class="artwork-overview-grid"></div></div></dialog>
     <dialog id="story-review" class="story-review"><div class="story-review-shell"><header><div><p class="eyebrow">Final master review</p><h2 id="story-review-title">Review book</h2><p id="story-review-summary">Check every spread before approval.</p></div><button class="button secondary" id="close-story-review" type="button">Return to editor</button></header><div class="story-review-toolbar"><div class="sample-fields"><label>Child<input id="review-child" value="Alex" maxlength="40" /></label><label>Monster<input id="review-monster" value="Milo" maxlength="40" /></label></div><nav id="story-review-spread-nav" aria-label="Book spreads"></nav></div><div class="story-review-body"><main><div class="story-review-progress"><button class="button secondary" id="review-previous" type="button">← Previous</button><strong id="review-spread-label">Spread 1</strong><button class="button secondary" id="review-next" type="button">Next →</button></div><article id="story-review-spread" class="review-spread"></article></main><aside><div class="review-readiness"><strong id="review-readiness-title">Checking book…</strong><span id="review-readiness-count"></span></div><ul id="story-review-issues"></ul><button class="button primary" id="approve-master-story" type="button">Approve master book</button><p id="story-review-status" role="status"></p></aside></div></div></dialog>
-    <dialog id="order-detail" class="order-detail"><form id="order-detail-form"><div class="admin-panel-heading"><div><p class="eyebrow">Fulfillment record</p><h2>Order details</h2></div><button type="button" id="close-order-detail" class="button secondary">Close</button></div><div class="order-detail-summary"><p id="order-detail-id"></p><span id="order-detail-age"></span></div><section class="order-next-action" aria-live="polite"><span>Next required action</span><strong id="order-next-action">Review this order</strong><small id="order-next-help"></small></section><ol class="order-progress" id="order-progress" aria-label="Order progress"></ol><dl id="order-detail-fields"></dl><section class="order-artwork-panel" id="order-artwork-panel" hidden><div><p class="eyebrow">Customer artwork</p><h3>Saved monster files</h3></div><div class="order-artwork-grid" id="order-artwork-grid"></div></section><section class="proof-approval-panel"><div><p class="eyebrow">Required production gate</p><h3>Customer proof and print handoff</h3><p id="proof-approval-state">This order has not been approved for printing.</p></div><div class="customer-proof-upload" id="customer-proof-upload"><label>Exact customer proof PDF<input id="customer-proof-file" type="file" accept="application/pdf,.pdf" /></label><button class="button secondary" id="publish-customer-proof" type="button">Publish proof for customer</button><button class="button secondary" id="copy-customer-proof-link" type="button" hidden>Copy private proof link</button></div><div class="lulu-shipping-fields" id="lulu-shipping-fields" hidden><label>Recipient name<input id="lulu-recipient-name" autocomplete="name" /></label><label>Phone<input id="lulu-phone" autocomplete="tel" /></label><label class="wide">Street address<input id="lulu-street" autocomplete="street-address" /></label><label>City<input id="lulu-city" autocomplete="address-level2" /></label><label>State / region<input id="lulu-state" autocomplete="address-level1" /></label><label>Postal code<input id="lulu-postcode" autocomplete="postal-code" /></label><label>Country code<input id="lulu-country" value="US" maxlength="2" autocomplete="country" /></label><label>Shipping level<select id="lulu-shipping-level"><option value="MAIL">Mail</option><option value="PRIORITY_MAIL">Priority mail</option><option value="GROUND">Ground</option><option value="EXPEDITED">Expedited</option><option value="EXPRESS">Express</option></select></label></div><div class="proof-approval-actions"><button class="button secondary" id="approve-order-proof" type="button">Approve proof</button><button class="button secondary" id="revoke-order-proof" type="button" hidden>Revoke approval</button><button class="button primary" id="send-order-lulu" type="button" disabled>Send to Lulu Sandbox</button></div><small id="proof-approval-help">Approval locks the exact master version, names, monster, and print-package fingerprint.</small></section><p class="order-payment-notice">A checkout record is not proof of payment. Verify payment in Stripe before advancing the order.</p><label>Operational status<select id="order-detail-status"></select></label><label>Production notes<textarea id="order-detail-notes" rows="6" maxlength="2000" placeholder="Proof review, approval details, printer updates, tracking follow-up…"></textarea></label><div class="order-detail-actions"><button class="button secondary" id="advance-order" type="button">Advance order</button><button class="button primary" id="save-order-detail" type="submit">Save changes</button></div><p id="order-detail-message" role="status"></p></form></dialog>
-    <script src="scripts/admin.js?v=20261002-customer-proofs"></script>
+    <dialog id="order-panel" class="order-panel" aria-labelledby="order-panel-title">
+      <div class="order-panel-shell">
+        <header class="order-panel-header">
+          <div>
+            <p class="order-panel-kicker"><span id="order-panel-ref">Order</span> <button type="button" class="link-button" id="order-copy-id">Copy ID</button></p>
+            <h2 id="order-panel-title">Order</h2>
+            <div class="order-panel-chips" id="order-panel-chips"></div>
+          </div>
+          <button type="button" class="order-panel-close" id="order-panel-close" aria-label="Close order">×</button>
+        </header>
+        <div class="order-panel-body" id="order-panel-body">
+          <section class="order-next" id="order-next"><span>Next step</span><strong id="order-next-title"></strong><small id="order-next-help"></small></section>
+          <ol class="order-steps" id="order-steps" aria-label="Order progress"></ol>
+
+          <section class="order-card">
+            <h3>Characters</h3>
+            <div class="order-characters" id="order-characters"></div>
+          </section>
+
+          <div class="order-card-grid">
+            <section class="order-card"><h3>Customer</h3><dl id="order-customer"></dl></section>
+            <section class="order-card"><h3>Book</h3><dl id="order-book"></dl></section>
+          </div>
+
+          <section class="order-card"><h3>Payment</h3><dl id="order-payment"></dl></section>
+
+          <section class="order-card" id="order-proof-card">
+            <h3>Customer proof</h3>
+            <p class="order-card-state" id="order-proof-state"></p>
+            <div class="order-actions">
+              <button class="button secondary" type="button" id="order-copy-proof">Copy proof link</button>
+              <button class="button secondary" type="button" id="order-email-proof">Email link to customer</button>
+            </div>
+            <div class="order-proof-upload" id="order-proof-upload">
+              <label>Upload the exact proof PDF<input id="order-proof-file" type="file" accept="application/pdf,.pdf" /></label>
+              <button class="button primary" type="button" id="order-publish-proof">Publish proof</button>
+            </div>
+          </section>
+
+          <section class="order-card" id="order-print-card">
+            <h3>Print &amp; shipping (Lulu)</h3>
+            <p class="order-card-state" id="order-print-state"></p>
+            <dl id="order-print"></dl>
+            <div class="order-actions">
+              <button class="button secondary" type="button" id="order-approve-proof">Approve proof for print</button>
+              <button class="button secondary" type="button" id="order-revoke-proof">Revoke approval</button>
+              <button class="button secondary" type="button" id="order-regenerate-print">Generate print PDFs</button>
+            </div>
+            <div class="order-print-files" id="order-print-files" hidden></div>
+            <div class="order-shipping" id="order-shipping" hidden>
+              <label>Recipient name<input id="lulu-recipient-name" autocomplete="name" /></label>
+              <label>Email<input id="lulu-email" type="email" autocomplete="email" /></label>
+              <label>Phone<input id="lulu-phone" autocomplete="tel" /></label>
+              <label class="wide">Street address<input id="lulu-street" autocomplete="street-address" /></label>
+              <label>City<input id="lulu-city" autocomplete="address-level2" /></label>
+              <label>State / region<input id="lulu-state" autocomplete="address-level1" /></label>
+              <label>Postal code<input id="lulu-postcode" autocomplete="postal-code" /></label>
+              <label>Country code<input id="lulu-country" value="US" maxlength="2" autocomplete="country" /></label>
+              <label>Shipping level<select id="lulu-shipping-level"><option value="MAIL">Mail</option><option value="PRIORITY_MAIL">Priority mail</option><option value="GROUND">Ground</option><option value="EXPEDITED">Expedited</option><option value="EXPRESS">Express</option></select></label>
+              <button class="button primary wide" type="button" id="order-send-lulu">Send to Lulu Sandbox</button>
+            </div>
+          </section>
+
+          <section class="order-card">
+            <h3>Status &amp; notes</h3>
+            <form id="order-status-form" class="order-status-form">
+              <label>Mark status<select id="order-status-select"></select></label>
+              <label class="wide">Internal notes<textarea id="order-notes" rows="4" maxlength="1300" placeholder="Proof review, customer contact, printer follow-up…"></textarea></label>
+              <button class="button primary" type="submit" id="order-save">Save</button>
+            </form>
+            <p class="order-hint">Payment status comes from verified Stripe events. Paid, approved, and printing are set by their own steps.</p>
+          </section>
+        </div>
+        <p class="order-panel-message" id="order-panel-message" role="status" aria-live="polite"></p>
+      </div>
+    </dialog>
+    <script src="scripts/admin.js?v=20261008-simple-orders"></script>
+    <script src="scripts/admin-orders.js?v=20261008-simple-orders"></script>
   </body>
 </html>
