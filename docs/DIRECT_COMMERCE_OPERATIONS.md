@@ -64,6 +64,38 @@ preview ID, child-character object, format, and monster submission ID retain
 their existing shapes. The proof workflow consumes a finished PDF and therefore
 does not change the personalized-book render manifest.
 
+## Admin orders view
+
+Admin opens on **Orders**: a status-filtered, searchable list with a
+"Needs action" tab. Clicking an order opens one panel with the customer, book,
+chosen monster, child character, original drawing, payment, proof, and Lulu
+print details, plus these actions:
+
+- **Copy proof link** / **Email link to customer**. The email action opens a
+  prefilled draft in the operator's own mail app; nothing is sent
+  automatically.
+- **Generate print PDFs** mints fresh 7-day signed interior and cover URLs
+  (requires `STORYBOOK_PRINT_FILE_SECRET`; the cover link also needs the Lulu
+  sandbox credentials for cover dimensions). It never changes order status.
+- **Mark status** offers only the transitions the server allows.
+
+Lulu live status and tracking are shown as placeholders until tracking
+ingestion exists.
+
+### Saved child character
+
+Checkout stores the exact child render from the signed proof in the private
+`monster-submissions` bucket (`<monster submission id>/child/<hash>.<ext>`, or
+`checkout/<submission id>/child-<hash>.<ext>` without a saved monster) and
+records the path in `storybook_orders.child_image_path` (migration
+`20261008120000_add_order_child_image.sql`). Until that migration is applied,
+checkout keeps working and stores the path in `child_character.imagePath`
+instead; the migration backfills it into the new column.
+
+Admin sign-in failures are limited to 10 per client IP per 15 minutes (HTTP
+429 with `Retry-After`). The counter lives in function memory, so it is
+per-instance; a WAF rule is still recommended for production.
+
 ## Security and recovery
 
 - Keep `SUPABASE_SECRET_KEY`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, and
