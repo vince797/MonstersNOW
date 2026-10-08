@@ -170,9 +170,14 @@ test("selector UI is a true layered character editor with a MonstersNOW storyboo
   assert.match(css, /\.child-live-preview \{[\s\S]*position: sticky/);
   assert.match(css, /\.child-presence-toggle label\.is-selected::after/);
   assert.match(css, /\.child-preview-character/);
-  assert.match(html, /child-selector\.css\?v=20261007-mobile-preview-v18/);
+  assert.match(html, /child-selector\.css\?v=20261007-mobility-picker-v20/);
   assert.match(html, /scripts\/child-selector\.js\?v=20261007-wheelchair-editor-v11/);
-  assert.match(html, /scripts\/main\.js\?v=20261007-wheelchair-editor-v19/);
+  assert.match(html, /scripts\/main\.js\?v=20261007-mobile-studio-v20/);
+  assert.match(html, /id="child-preview-stage"[\s\S]*id="child-preview-details"[\s\S]*id="render-child-character"/);
+  assert.match(mainScript, /Ready when you are\. Every choice stays editable\./);
+  assert.match(html, /id="child-character-details"[\s\S]*class="child-accessibility-section"[\s\S]*class="child-editor-tabs"/);
+  assert.match(html, /Mobility &amp; positioning/);
+  assert.match(html, /Fully customizable\./);
   assert.match(mainScript, /childMonsterOnlyPreview\.src = monsterImage/);
   assert.match(mainScript, /classList\.toggle\("has-monster-only", showMonster\)/);
   assert.match(css, /\.child-monster-only-preview/);

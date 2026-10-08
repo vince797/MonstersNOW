@@ -558,7 +558,7 @@ function clearRenderedChild(message) {
   childPreviewStage?.classList.remove("has-book-render", "has-pending-child-changes");
   if (childPreviewCharacter) childPreviewCharacter.hidden = true;
   childRenderButton?.closest(".child-render-actions")?.classList.remove("is-complete");
-  if (childRenderButton) childRenderButton.textContent = "Apply My Choices to This Avatar";
+  if (childRenderButton) childRenderButton.textContent = "Create This Character";
   if (childRenderStatus && message) childRenderStatus.textContent = message;
 }
 
@@ -1447,7 +1447,12 @@ function showCharacterStep({ scroll = true } = {}) {
   monsterCreatorPanels.forEach((panel) => { panel.hidden = true; });
   converterTool?.classList.add("is-character-step");
   resultBookOffer.hidden = false;
-  syncPremiumDefault(getSelectedChildCharacter());
+  const selectedChild = getSelectedChildCharacter();
+  syncPremiumDefault(selectedChild);
+  if (selectedChild?.included && !renderedChildImage) {
+    if (childRenderButton) childRenderButton.textContent = "Create This Character";
+    if (childRenderStatus) childRenderStatus.textContent = "Ready when you are. Every choice stays editable.";
+  }
   setConverterStage("personalize");
   window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}#child-editor-start`);
   window.setTimeout(() => {

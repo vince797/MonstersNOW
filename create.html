@@ -11,7 +11,7 @@
     <title>Create Your Monster | MonstersNOW</title>
     <link rel="icon" href="assets/brand/monstersnow-icon-32-v1.png" type="image/png" sizes="32x32" />
     <link rel="stylesheet" href="styles.css?v=20261004-monster-studio-v5" />
-    <link rel="stylesheet" href="child-selector.css?v=20261007-mobile-preview-v18" />
+    <link rel="stylesheet" href="child-selector.css?v=20261007-mobility-picker-v20" />
     <link rel="stylesheet" href="storefront.css?v=20261002-public-storefront" />
     <link rel="apple-touch-icon" href="assets/brand/monstersnow-icon-180-v1.png" />
     <link rel="stylesheet" href="brand.css?v=20261004-selected-logo" />
@@ -239,6 +239,18 @@
                             </div>
                           </fieldset>
                           <div class="child-character-details" id="child-character-details">
+                          <div class="child-accessibility-section">
+                            <fieldset class="child-mobility-options" aria-describedby="child-mobility-help child-mobility-blocker">
+                              <legend>Mobility &amp; positioning</legend>
+                              <p id="child-mobility-help">Choose how the child appears in the story. No diagnosis or medical details needed.</p>
+                              <div class="child-segmented-options child-mobility-choices">
+                                <label><input type="radio" name="child-mobility-aid" value="none" checked /><span><strong>Standing</strong><small>No mobility aid</small></span></label>
+                                <label aria-disabled="false"><input type="radio" name="child-mobility-aid" value="wheelchair" /><span><strong>Wheelchair</strong><small id="child-wheelchair-option-copy">Sized to their age and height</small></span></label>
+                                <label aria-disabled="false"><input type="radio" name="child-mobility-aid" value="forearm-crutches" /><span><strong>Forearm crutches</strong><small id="child-crutches-option-copy">Two child-sized crutches</small></span></label>
+                              </div>
+                            </fieldset>
+                            <p class="child-render-limit" id="child-mobility-blocker" role="note"><strong>Fully customizable.</strong> Hair, skin, eyes, clothes, age, and height remain editable with every mobility choice.</p>
+                          </div>
                           <div class="child-editor-tabs" role="tablist" aria-label="Character customization categories">
                             <button type="button" class="is-active" role="tab" aria-selected="true" data-editor-tab="appearance"><span aria-hidden="true">01</span> Look</button>
                             <button type="button" role="tab" aria-selected="false" data-editor-tab="outfit"><span aria-hidden="true">02</span> Clothes</button>
@@ -326,7 +338,7 @@
                             </div>
                           </details>
                         <details class="child-editor-section" data-editor-panel="build">
-                          <summary><span>Age, height &amp; accessibility</span><small>Optional illustration proportions.</small></summary>
+                          <summary><span>Age &amp; height</span><small>Optional illustration proportions.</small></summary>
                           <div class="child-editor-section-body child-basics-grid">
                             <fieldset>
                               <legend>Age range</legend>
@@ -346,18 +358,6 @@
                                 <label><input type="radio" name="child-relative-height" value="taller" /><span>Taller</span></label>
                               </div>
                             </fieldset>
-                            <div class="child-accessibility-section">
-                            <fieldset class="child-mobility-options" aria-describedby="child-mobility-help child-mobility-blocker">
-                              <legend>Mobility and positioning</legend>
-                              <p id="child-mobility-help">No diagnosis or medical details needed.</p>
-                              <div class="child-segmented-options child-mobility-choices">
-                                <label><input type="radio" name="child-mobility-aid" value="none" checked /><span><strong>Standing</strong><small>No mobility aid</small></span></label>
-                                <label aria-disabled="false"><input type="radio" name="child-mobility-aid" value="wheelchair" /><span><strong>Wheelchair</strong><small id="child-wheelchair-option-copy">Sized to their age and height</small></span></label>
-                                <label aria-disabled="false"><input type="radio" name="child-mobility-aid" value="forearm-crutches" /><span><strong>Forearm crutches</strong><small id="child-crutches-option-copy">Two child-sized crutches</small></span></label>
-                              </div>
-                            </fieldset>
-                            <p class="child-render-limit" id="child-mobility-blocker" role="note"><strong>Their character stays theirs.</strong> Hair, skin, eyes, clothes, age, and height remain editable with either mobility option.</p>
-                            </div>
                           </div>
                         </details>
                           </div>
@@ -367,10 +367,6 @@
                           <div class="child-preview-topline">
                             <span class="child-preview-label"><i aria-hidden="true"></i> <span id="child-preview-label-text">Premium character preview</span></span>
                             <span class="child-preview-updates"><i aria-hidden="true"></i> <span id="child-preview-mode-text">Book-quality avatar</span></span>
-                          </div>
-                          <div class="child-render-actions">
-                            <button class="button primary" id="render-child-character" type="button">Apply My Choices to This Avatar</button>
-                            <p id="child-render-status" role="status" aria-live="polite">The premium sample updates to the exact selected hair, skin, eyes, and clothes when you apply the choices.</p>
                           </div>
                           <div class="child-preview-stage" id="child-preview-stage" aria-hidden="true">
                             <span class="child-stage-corners"></span>
@@ -399,6 +395,10 @@
                             <span>Their character</span>
                             <strong id="child-preview-title">Build the hero of their story.</strong>
                             <p id="child-preview-details">Choose the hair, skin, eyes, and clothes, then apply them to create the book-quality character.</p>
+                          </div>
+                          <div class="child-render-actions">
+                            <button class="button primary" id="render-child-character" type="button">Create This Character</button>
+                            <p id="child-render-status" role="status" aria-live="polite">Ready when you are. Every choice stays editable.</p>
                           </div>
                         </aside>
                       </div>
@@ -548,6 +548,6 @@
     </footer>
 
     <script src="scripts/child-selector.js?v=20261007-wheelchair-editor-v11"></script>
-    <script src="scripts/main.js?v=20261007-wheelchair-editor-v19"></script>
+    <script src="scripts/main.js?v=20261007-mobile-studio-v20"></script>
   </body>
 </html>
