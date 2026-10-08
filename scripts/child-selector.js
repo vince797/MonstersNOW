@@ -307,6 +307,11 @@
     const hint = row.parentElement?.querySelector(":scope > .child-swipe-hint");
     if (hint) hint.hidden = !overflow || row.dataset.swiped === "true";
   }
+  // Rows can change size without a sync (e.g. the editor step being revealed,
+  // fonts or art loading), so re-check each row whenever its box changes.
+  const rowObserver = typeof ResizeObserver === "function"
+    ? new ResizeObserver((entries) => { for (const entry of entries) updateRowHint(entry.target); })
+    : null;
   function refreshScrollHints() {
     if (!root) return;
     for (const row of root.querySelectorAll(scrollRowSelector)) {
@@ -322,6 +327,7 @@
           if (row.scrollLeft > 8) row.dataset.swiped = "true";
           updateRowHint(row);
         }, { passive: true });
+        rowObserver?.observe(row);
       }
       updateRowHint(row);
     }

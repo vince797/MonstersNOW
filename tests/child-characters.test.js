@@ -136,8 +136,8 @@ test("selector UI is a true layered character editor with a MonstersNOW storyboo
   assert.match(html, /id="child-monster-only-preview"/);
   assert.doesNotMatch(html, /id="child-premium-default"/, "the static sample no longer poses as the child's preview");
   // Scripts load sketch → selector → studio → main.
-  assert.match(html, /child-sketch\.js\?v=20261008-child-editor-v2[\s\S]*child-selector\.js\?v=20261008-child-editor-v2[\s\S]*child-studio\.js\?v=20261008-child-editor-v2[\s\S]*main\.js\?v=20261008-child-editor-v2/);
-  assert.match(html, /child-selector\.css\?v=20261008-child-editor-v2/);
+  assert.match(html, /child-sketch\.js\?v=20261008-child-editor-v2b[\s\S]*child-selector\.js\?v=20261008-child-editor-v2b[\s\S]*child-studio\.js\?v=20261008-child-editor-v2b[\s\S]*main\.js\?v=20261008-child-editor-v2b"/);
+  assert.match(html, /child-selector\.css\?v=20261008-child-editor-v2b"/);
   assert.match(script, /monstersnow_child_character_profile_v3/);
   assert.match(script, /function undo\(/);
   assert.match(script, /function reset\(/);
@@ -156,7 +156,7 @@ test("selector UI is a true layered character editor with a MonstersNOW storyboo
   assert.doesNotMatch(mainScript, /renderedChildImage/);
   assert.match(css, /\.custom-child-svg \.layer \{ display: none; \}/);
   assert.match(css, /\.custom-child-svg\[data-headwear="hijab"\] \.headwear-hijab/);
-  assert.match(css, /\.child-mini-preview \{[\s\S]*position: sticky/);
+  assert.match(css, /\.child-mini-preview \{\s*position: fixed/);
   assert.match(css, /html body \.create-flow-section \{ overflow: clip; \}/);
   assert.match(css, /\.child-preview-stage\.has-book-render/);
   assert.match(css, /\.child-live-preview \{[\s\S]*position: sticky/);

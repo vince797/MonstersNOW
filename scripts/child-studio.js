@@ -16,6 +16,7 @@
   const els = {
     editor: $("#child-editor-start"),
     stage: $("#child-preview-stage"),
+    controls: $("#child-character-details"),
     rendered: $("#child-rendered-preview"),
     preset: $("#child-preset-preview"),
     monsterOnly: $("#child-monster-only-preview"),
@@ -54,7 +55,7 @@
   };
   let options = { getSubmission: () => null, getMonsterImage: () => "", isStepVisible: () => true };
   let progressTimer;
-  let stageVisible = true;
+  let revealUntil = 0; // performance.now() deadline for revealChosenChip after a tap
 
   const selector = () => window.MonstersNowChildSelector;
   const currentProfile = () => selector()?.getProfile() || { included: false };
@@ -209,10 +210,17 @@
 
   function syncMini(profile, render) {
     if (!els.mini) return;
-    const narrow = window.matchMedia("(max-width: 980px)").matches;
-    const show = narrow && profile?.included && !stageVisible && options.isStepVisible();
-    if (show) els.mini.style.setProperty("--child-mini-top", `${headerOffset() + 8}px`);
-    els.mini.hidden = !show;
+    const top = headerOffset();
+    const show = Boolean(window.matchMedia("(max-width: 980px)").matches && profile?.included && options.isStepVisible() && miniWanted(top));
+    if (show) els.mini.style.setProperty("--child-mini-top", `${top}px`);
+    const appeared = show && els.mini.hidden;
+    if (els.mini.hidden === show) els.mini.hidden = !show;
+    // Keep focused / scrolled-to controls clear of the bar.
+    const padding = show ? `${top + Math.ceil(els.mini.getBoundingClientRect().height) + 10}px` : "";
+    if (document.documentElement.style.scrollPaddingTop !== padding) document.documentElement.style.scrollPaddingTop = padding;
+    // The tap itself can shift the page (a row appears, scroll anchoring) so the
+    // bar only shows a frame later: still keep the chip just tapped in view.
+    if (appeared && performance.now() < revealUntil) revealChosenChip();
     if (els.miniRender) {
       els.miniRender.hidden = !render;
       if (render && els.miniRender.getAttribute("src") !== render.image) els.miniRender.src = render.image;
@@ -220,6 +228,28 @@
     els.mini.classList.toggle("has-render", Boolean(render));
     if (els.miniTitle) els.miniTitle.textContent = state.job ? "Painting…" : render ? "Painted character" : "Live sketch";
     if (els.miniStatus) els.miniStatus.textContent = state.job ? "You can keep editing" : render ? "Used in the book" : "Updates with every choice";
+  }
+
+  // The bar shows while the controls fill the screen and the big preview is scrolled away.
+  function miniWanted(top) {
+    if (!els.stage || !els.controls) return false;
+    const stage = els.stage.getBoundingClientRect();
+    const controls = els.controls.getBoundingClientRect();
+    if (!stage.height || !controls.height) return false;
+    const stageGone = stage.bottom < top + stage.height * 0.35 || stage.top > window.innerHeight;
+    const controlsOnScreen = controls.top < window.innerHeight * 0.6 && controls.bottom > top + 160;
+    return stageGone && controlsOnScreen;
+  }
+
+  // A chip tapped while half under the phone bar slides fully into view (the
+  // bar's height is already in scroll-padding-top, so "nearest" clears it).
+  // Only right after a tap, and never once the user starts scrolling.
+  function revealChosenChip() {
+    if (!els.mini || els.mini.hidden) return;
+    const label = document.activeElement?.closest?.("#child-editor-start label");
+    if (!label) return;
+    const chip = label.getBoundingClientRect();
+    if (chip.height && chip.top < els.mini.getBoundingClientRect().bottom && chip.bottom > 0) label.scrollIntoView({ block: "nearest", inline: "nearest" });
   }
 
   function headerOffset() {
@@ -417,7 +447,7 @@
         ? `${job.done} of ${job.total} ready—tap it below while the other finishes.`
         : job.retried ? "A connection hiccup happened, so we’re trying once more automatically."
           : elapsed >= SLOW_NOTICE_SECONDS ? "Taking longer than usual. You can keep waiting or cancel and try again."
-            : "Applying every choice in the animated storybook style—usually 40–90 seconds.";
+            : "Applying every choice in the animated storybook style. This usually takes 40–90 seconds.";
     }
     if (els.elapsed) els.elapsed.textContent = elapsed < 3 ? "Just started" : `${elapsed} seconds elapsed · Still working`;
   }
@@ -507,12 +537,19 @@
   els.miniJump?.addEventListener("click", () => els.stage?.scrollIntoView({ behavior: "smooth", block: "center" }));
   els.editor?.addEventListener("childprofilechange", () => {
     if (state.failure && state.failure.key !== keyOf(currentProfile())) state.failure = null;
+    revealUntil = performance.now() + 1000;
     sync();
+    revealChosenChip();
   });
-  if (els.stage && "IntersectionObserver" in window) {
-    // The sticky site header covers the top band, so it doesn't count as visible.
-    new IntersectionObserver(([entry]) => { stageVisible = entry.isIntersecting; sync(); }, { threshold: 0.12, rootMargin: "-100px 0px 0px 0px" }).observe(els.stage);
-  }
+  for (const type of ["touchmove", "wheel"]) window.addEventListener(type, () => { revealUntil = 0; }, { passive: true });
+  // The bar is position: fixed, so it lives directly in <body> (no transformed ancestor can trap it).
+  if (els.mini && els.mini.parentElement !== document.body) document.body.append(els.mini);
+  let miniFrame = 0;
+  const queueMini = () => {
+    if (miniFrame) return;
+    miniFrame = requestAnimationFrame(() => { miniFrame = 0; syncMini(currentProfile(), currentRender(currentProfile())); });
+  };
+  window.addEventListener("scroll", queueMini, { passive: true });
   window.addEventListener("resize", () => sync(), { passive: true });
 
   window.MonstersNowChildStudio = {

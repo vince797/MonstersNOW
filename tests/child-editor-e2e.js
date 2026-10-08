@@ -8,6 +8,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { chromium, devices } = require("playwright");
 const harness = require("./support/child-editor-harness");
+const { assertCleanLayout, horizontalOverflow, stickyOverlap } = require("./support/layout-checks");
 
 const SCREENS = process.env.CHILD_EDITOR_SCREENS || path.join(harness.root, "tmp", "child-editor-v2-screens");
 fs.mkdirSync(SCREENS, { recursive: true });
@@ -46,6 +47,8 @@ const DATA_FOR = {
 const VAR_FOR = { "child-skin-tone": "--skin", "child-hair-color": "--hair", "child-eye-color": "--eye", "child-outfit-color": "--outfit" };
 
 function log(step) { console.log(`  ✓ ${step}`); }
+// Every logged step also proves the layout is clean at that moment.
+async function step(page, label) { await assertCleanLayout(page, label); log(label); }
 
 async function pick(page, name, value) {
   const input = page.locator(`input[name="${name}"][value="${value}"]`);
@@ -128,7 +131,7 @@ async function runDesktop(browser, h) {
   await openEditor(page, h.base);
   assert.equal(await noHorizontalOverflow(page), true);
   assert.equal(await page.locator("#child-preview-label-text").textContent(), "Live sketch");
-  log("editor opens after monster confirm; live sketch label");
+  await step(page, "editor opens after monster confirm; live sketch label");
 
   // (1) Every option in every category changes the live sketch.
   for (const [name, values] of Object.entries(OPTIONS)) {
@@ -169,7 +172,7 @@ async function runDesktop(browser, h) {
   assert.equal(thumbHair, "#c4521f", "hair thumbnails use the chosen hair color");
   await pick(page, "child-presentation", "neutral");
   assert.match(await page.locator("#child-preview-details").textContent(), /Kid · .*Red \/ ginger/);
-  log("all 14 option categories + 6 costumes update the sketch; hijab hides hair; thumbnails recolor");
+  await step(page, "all 14 option categories + 6 costumes update the sketch; hijab hides hair; thumbnails recolor");
 
   // Special detail is sanitized and counted.
   await page.locator('[data-editor-tab="build"]').click();
@@ -180,7 +183,7 @@ async function runDesktop(browser, h) {
   assert.equal(await page.locator("#child-special-detail").getAttribute("maxlength"), "80");
   await page.locator("#child-special-detail").fill("");
   await page.locator("#child-special-detail").blur();
-  log("special detail sanitized, length-limited, counted");
+  await step(page, "special detail sanitized, length-limited, counted");
 
   // Undo / reset.
   await page.locator("#child-editor-reset").click();
@@ -189,7 +192,7 @@ async function runDesktop(browser, h) {
   await page.locator("#child-editor-undo").click();
   assert.equal(await page.locator('input[name="child-presentation"][value="neutral"]').isChecked(), true);
   await page.locator("#child-editor-reset").click();
-  log("undo/reset still work");
+  await step(page, "undo/reset still work");
 
   // Quick-start look applies a full profile and is undoable.
   await page.locator('[data-preset-id="finn"]').click();
@@ -199,7 +202,7 @@ async function runDesktop(browser, h) {
   assert.equal(await page.locator("#child-preset-preview").isHidden(), true, "ungenerated preset falls back to the sketch");
   await page.locator("#child-editor-undo").click();
   assert.equal(await page.locator('input[name="child-hair-color"][value="dark-brown"]').isChecked(), true);
-  log("quick-start looks apply + undo; ungenerated preset falls back to sketch");
+  await step(page, "quick-start looks apply + undo; ungenerated preset falls back to sketch");
   await settleScroll(page); await page.screenshot({ path: path.join(SCREENS, "desktop-1-live-sketch.png"), fullPage: false, clip: await page.locator("#child-editor-start").boundingBox().then((b) => ({ x: 0, y: Math.max(0, b.y - 10), width: 1440, height: 1000 })) });
 
   // (6) Paint 2 versions.
@@ -225,7 +228,7 @@ async function runDesktop(browser, h) {
   const master = h.state.storage.get(childObjects.find((key) => key.endsWith(".png")));
   assert.equal(master.contentType, "image/png");
   assert.ok(h.state.imageCalls.slice(-1)[0].prompt.length > 200);
-  log("paints 2 versions in parallel; lossless master + display saved privately");
+  await step(page, "paints 2 versions in parallel; lossless master + display saved privately");
 
   // Choose version 2.
   const second = page.locator(".child-render-version").nth(1);
@@ -233,7 +236,7 @@ async function runDesktop(browser, h) {
   await second.click();
   assert.equal(await second.getAttribute("aria-checked"), "true");
   assert.equal(await page.evaluate(() => window.MonstersNowChildStudio.currentRender().id), secondId);
-  log("choosing a version updates the book selection");
+  await step(page, "choosing a version updates the book selection");
 
   // Changing a choice shows the sketch + earlier painted version card; tapping it restores.
   await pick(page, "child-hair-color", "blonde");
@@ -245,7 +248,7 @@ async function runDesktop(browser, h) {
   await page.locator("#child-stale-render").click();
   assert.equal(await page.locator('input[name="child-hair-color"][value="dark-brown"]').isChecked(), true);
   assert.equal(await page.evaluate(() => window.MonstersNowChildStudio.currentRender()?.id), secondId);
-  log("editing shows the sketch; earlier painted version restores its choices");
+  await step(page, "editing shows the sketch; earlier painted version restores its choices");
 
   // One more version → 3 max per look.
   await page.locator("#render-child-character").click();
@@ -253,7 +256,7 @@ async function runDesktop(browser, h) {
   assert.equal(await page.locator(".child-render-version").count(), 3);
   assert.equal(await page.locator("#render-child-character").isDisabled(), true);
   assert.match(await page.locator("#render-child-character").textContent(), /3 Versions Painted/);
-  log("one more version → capped at 3 per look");
+  await step(page, "one more version → capped at 3 per look");
 
   // (2) Refresh restores monster, step, versions, and the chosen version.
   await page.reload();
@@ -264,7 +267,7 @@ async function runDesktop(browser, h) {
   assert.equal(await page.locator("#child-rendered-preview").isVisible(), true);
   assert.match(await statusText(page), /Welcome back/);
   assert.equal(await page.locator("#preview-history .preview-choice").count(), 1, "monster preview restored");
-  log("refresh restores monster preview, character step, 3 versions, chosen version");
+  await step(page, "refresh restores monster preview, character step, 3 versions, chosen version");
   await settleScroll(page); await page.screenshot({ path: path.join(SCREENS, "desktop-4-versions-restored.png") });
 
   // (5) Error paths, on a new look.
@@ -278,7 +281,7 @@ async function runDesktop(browser, h) {
   assert.equal(h.state.imageCalls.length - calls, 3, "one auto-retry after a 5xx");
   assert.match(await statusText(page), /2 versions are ready/);
   assert.equal(await page.locator("#child-render-retry").isHidden(), true);
-  log("5xx → automatic single retry → success");
+  await step(page, "5xx → automatic single retry → success");
 
   // b) busy on both → no auto retry, Retry button → success
   await pick(page, "child-outfit-color", "rose");
@@ -293,7 +296,7 @@ async function runDesktop(browser, h) {
   await page.locator("#child-render-retry").click();
   await waitIdle(page);
   assert.match(await statusText(page), /2 versions are ready/);
-  log("busy → specific message + Retry → success");
+  await step(page, "busy → specific message + Retry → success");
 
   // c) partial: one busy, one ok → "1 of 2" + paint the missing version
   await pick(page, "child-outfit-color", "green");
@@ -305,7 +308,7 @@ async function runDesktop(browser, h) {
   await page.locator("#child-render-retry").click();
   await waitIdle(page);
   assert.equal(await page.evaluate(() => window.MonstersNowChildStudio.versions().filter((v) => v.profile.outfitColor === "green").length), 2);
-  log("partial failure → keeps the finished one, paints the missing version");
+  await step(page, "partial failure → keeps the finished one, paints the missing version");
 
   // d) image service policy block → 422, no retry button
   await pick(page, "child-outfit-color", "orange");
@@ -314,7 +317,7 @@ async function runDesktop(browser, h) {
   await waitIdle(page);
   assert.match(await statusText(page), /declined these choices/);
   assert.equal(await page.locator("#child-render-retry").isHidden(), true);
-  log("policy block → specific message, no blind retry");
+  await step(page, "policy block → specific message, no blind retry");
 
   // e) special detail rejected before any image call
   await page.locator('[data-editor-tab="build"]').click();
@@ -328,7 +331,7 @@ async function runDesktop(browser, h) {
   assert.equal(await page.evaluate(() => document.activeElement?.id), "child-special-detail");
   await page.locator("#child-special-detail").fill("");
   await page.locator("#child-special-detail").blur();
-  log("rejected special detail → message + focus, no image call");
+  await step(page, "rejected special detail → message + focus, no image call");
 
   // f) daily limit
   h.state.scenario.rateLimit = "child-session";
@@ -337,7 +340,7 @@ async function runDesktop(browser, h) {
   assert.equal(await page.locator("#child-render-retry").isHidden(), true);
   assert.notEqual(await statusText(page), "");
   h.state.scenario.rateLimit = null;
-  log("rate limit → message, no retry");
+  await step(page, "rate limit → message, no retry");
 
   // g) client timeout → message + Retry; h) cancel
   h.state.scenario.imageQueue = [{ kind: "hang" }, { kind: "hang" }];
@@ -345,7 +348,7 @@ async function runDesktop(browser, h) {
   await waitIdle(page);
   assert.match(await statusText(page), /took longer than usual/);
   assert.equal(await page.locator("#child-render-retry").isVisible(), true);
-  log("timeout → specific message + Retry");
+  await step(page, "timeout → specific message + Retry");
   h.state.scenario.imageQueue = [{ kind: "hang" }, { kind: "hang" }];
   const before = await page.evaluate(() => window.MonstersNowChildStudio.versions().length);
   await page.locator("#child-render-retry").click();
@@ -355,7 +358,7 @@ async function runDesktop(browser, h) {
   assert.match(await statusText(page), /cancelled/i);
   assert.equal(await page.locator("#render-child-character").isEnabled(), true);
   assert.equal(await page.evaluate(() => window.MonstersNowChildStudio.versions().length), before);
-  log("cancel stops painting immediately and keeps choices");
+  await step(page, "cancel stops painting immediately and keeps choices");
 
   // i) dropped connection → automatic single retry
   h.state.scenario.imageQueue = [];
@@ -369,7 +372,7 @@ async function runDesktop(browser, h) {
   await page.unroute("**/api/render-child-character");
   assert.equal(aborted, 1);
   assert.match(await statusText(page), /2 versions are ready/);
-  log("network drop → automatic retry → success");
+  await step(page, "network drop → automatic retry → success");
 
   // Proof → test checkout regression with the chosen painted version.
   await pick(page, "child-outfit-style", "overalls");
@@ -396,7 +399,7 @@ async function runDesktop(browser, h) {
   const { loadImage } = require("@napi-rs/canvas");
   const printImage = await loadImage(h.state.storage.get(printKey).bytes);
   assert.deepEqual([printImage.width, printImage.height], [2048, 3072]);
-  log("proof → approval → test checkout uses the chosen version; 2048×3072 PNG print master stored");
+  await step(page, "proof → approval → test checkout uses the chosen version; 2048×3072 PNG print master stored");
 
   assert.deepEqual(errors, []);
   assert.ok(h.state.external.every((call) => !/lulu|resend/i.test(call.url)));
@@ -426,7 +429,7 @@ async function runPhone(browser, h) {
     .map((el) => ({ el: el.textContent.trim().slice(0, 24) || el.id, h: el.getBoundingClientRect().height, w: el.getBoundingClientRect().width }))
     .filter((t) => t.h < 44 || t.w < 44));
   assert.deepEqual(small, [], `small tap targets: ${JSON.stringify(small)}`);
-  log("all visible tap targets ≥ 44 px");
+  await step(page, "all visible tap targets ≥ 44 px");
 
   // Painted quick-start art shows only for an exact match; broken art falls back to the sketch.
   await page.locator('[data-preset-id="finn"] img').waitFor({ state: "attached" });
@@ -449,7 +452,7 @@ async function runPhone(browser, h) {
   assert.equal(await page.locator("#child-preview-character").isVisible(), true);
   assert.match(await page.locator("#child-preview-label-text").textContent(), /^Live sketch$/);
   await page.locator("#child-editor-reset").click();
-  log("painted quick-start art on exact match only; broken art falls back to the sketch");
+  await step(page, "painted quick-start art on exact match only; broken art falls back to the sketch");
 
   // Swipe rows: overflowing rows are scrollable with a hint that hides after a swipe.
   await page.locator('[data-editor-tab="appearance"]').click();
@@ -462,7 +465,63 @@ async function runPhone(browser, h) {
   await page.waitForTimeout(50);
   assert.equal(await hint.isHidden(), true);
   await pick(page, "child-skin-tone", "rich");
-  log("rows swipe sideways with a hint that hides after swiping");
+  await step(page, "rows swipe sideways with a hint that hides after swiping");
+
+  // If the bar appears as a chip is tapped (its state was stale after a tab
+  // switch changed the page height), the tapped chip slides out from under it.
+  await pick(page, "child-outfit-style", "hoodie");
+  await settleScroll(page);
+  const tee = 'label:has(input[name="child-outfit-style"][value="tee"])';
+  await page.evaluate((sel) => {
+    const header = document.querySelector(".site-header").getBoundingClientRect().bottom;
+    scrollTo({ top: scrollY + document.querySelector(sel).getBoundingClientRect().top - header - 12, behavior: "instant" });
+  }, tee);
+  await settleScroll(page);
+  await page.evaluate(() => { document.querySelector("#child-mini-preview").hidden = true; document.documentElement.style.scrollPaddingTop = ""; });
+  await page.locator(tee).click();
+  await settleScroll(page);
+  assert.equal(await page.locator("#child-mini-preview").isVisible(), true, "the bar is back after the change");
+  const cleared = await page.evaluate((sel) => document.querySelector(sel).getBoundingClientRect().top - document.querySelector("#child-mini-preview").getBoundingClientRect().bottom, tee);
+  assert.ok(cleared >= 0, `tapped chip still ${Math.round(-cleared)}px under the bar`);
+  assert.deepEqual(await stickyOverlap(page), []);
+  await pick(page, "child-outfit-style", "overalls");
+
+  // Same when the bar only appears a frame after the tap (the page shifted
+  // under the finger) — but never once the user has started scrolling.
+  const tuckUnderBar = (sel) => page.evaluate((s) => {
+    document.querySelector("#child-mini-preview").hidden = true;
+    document.documentElement.style.scrollPaddingTop = "";
+    const header = document.querySelector(".site-header").getBoundingClientRect().bottom;
+    scrollTo({ top: scrollY + document.querySelector(s).getBoundingClientRect().top - header - 6, behavior: "instant" });
+    dispatchEvent(new Event("scroll"));
+  }, sel);
+  const underBar = (sel) => page.evaluate((s) => document.querySelector("#child-mini-preview").getBoundingClientRect().bottom - document.querySelector(s).getBoundingClientRect().top, sel);
+  const dress = 'label:has(input[name="child-outfit-style"][value="dress"])';
+  await pick(page, "child-outfit-style", "dress");
+  await tuckUnderBar(dress);
+  await settleScroll(page);
+  assert.equal(await page.locator("#child-mini-preview").isVisible(), true, "the bar shows once the preview is scrolled away");
+  assert.ok(await underBar(dress) <= 0, `late bar still covers the tapped chip by ${Math.round(await underBar(dress))}px`);
+  const sweater = 'label:has(input[name="child-outfit-style"][value="sweater"])';
+  await pick(page, "child-outfit-style", "sweater");
+  await page.mouse.wheel(0, 1);
+  await tuckUnderBar(sweater);
+  await settleScroll(page);
+  assert.ok(await underBar(sweater) > 0, "a user scroll is never pulled back to the tapped chip");
+  await pick(page, "child-outfit-style", "overalls");
+  await settleScroll(page);
+
+  // Tap every option in every category on the phone: no sideways shift, no overflow, bar never covers the tapped chip.
+  for (const [name, values] of Object.entries(OPTIONS)) {
+    for (const value of values) {
+      await pick(page, name, value);
+      await settleScroll(page);
+      const problems = [...(await horizontalOverflow(page)), ...(await stickyOverlap(page))];
+      assert.deepEqual(problems, [], `${name}=${value}: ${problems.join("; ")}`);
+    }
+  }
+  await page.locator("#child-editor-reset").click();
+  await step(page, "every option tapped on the phone: no sideways shift, overflow, or covered controls");
 
   // Sticky mini-preview appears once the big preview scrolls away, and follows choices.
   await page.locator('[data-editor-tab="extras"]').click();
@@ -472,12 +531,17 @@ async function runPhone(browser, h) {
   await pick(page, "child-glasses", "square");
   await page.locator("#child-mini-preview").waitFor({ state: "visible" });
   assert.equal(await page.evaluate(() => document.querySelector("#child-mini-preview .custom-child-svg").dataset.glasses), "square");
-  const miniTop = await page.locator("#child-mini-preview").evaluate((el) => el.getBoundingClientRect().top);
-  assert.ok(miniTop >= 0 && miniTop < 200, `mini preview pinned near the top (${miniTop})`);
+  const mini = await page.evaluate(() => {
+    const bar = document.querySelector("#child-mini-preview").getBoundingClientRect();
+    return { top: bar.top, left: bar.left, width: bar.width, header: document.querySelector(".site-header").getBoundingClientRect().bottom, inBody: document.querySelector("#child-mini-preview").parentElement === document.body, padding: document.documentElement.style.scrollPaddingTop };
+  });
+  assert.ok(Math.abs(mini.top - mini.header) <= 1, `mini preview flush under the header (${mini.top} vs ${mini.header})`);
+  assert.deepEqual([mini.left, mini.width, mini.inBody], [0, 390, true]);
+  assert.ok(parseInt(mini.padding, 10) >= mini.header + 60, `scroll padding keeps controls below the bar (${mini.padding})`);
   await settleScroll(page); await page.screenshot({ path: path.join(SCREENS, "mobile-2-sticky-mini-preview.png") });
   await page.locator("#child-mini-jump").click();
   await page.waitForFunction(() => { const r = document.querySelector("#child-preview-stage").getBoundingClientRect(); return r.top < innerHeight && r.bottom > 0; });
-  log("sticky mini-preview follows choices; jump-to-preview works");
+  await step(page, "sticky mini-preview follows choices; jump-to-preview works");
 
   // Paint + refresh on phone.
   await page.locator("#render-child-character").click();
@@ -489,7 +553,7 @@ async function runPhone(browser, h) {
   await page.waitForFunction(() => document.querySelectorAll(".child-render-version").length === 2, null, { timeout: 15000 });
   assert.equal(await page.locator("#child-rendered-preview").isVisible(), true);
   assert.equal(await noHorizontalOverflow(page), true);
-  log("paint 2 versions + refresh restore on phone");
+  await step(page, "paint 2 versions + refresh restore on phone");
 
   // Monster-only path still builds a proof.
   await page.locator('label:has(input[name="child-character"][value="none"])').click();
@@ -504,7 +568,7 @@ async function runPhone(browser, h) {
   const saved = JSON.parse(await page.evaluate(() => sessionStorage.getItem("monstersnow_halloween_test_proof")));
   assert.equal(saved.submission.childImage, null);
   assert.equal(saved.submission.childRenderId, undefined);
-  log("monster-only story → proof without a child");
+  await step(page, "monster-only story → proof without a child");
   assert.deepEqual(errors, []);
   await context.close();
 }

@@ -130,10 +130,27 @@ SITE_URL=https://monstersnow.com ADMIN_PASSWORD='…' node scripts/generate-chil
   swipe rows, the sticky mini preview, the proof → test checkout path with
   the 2× print master, and the monster-only story.
 
+  Every step also runs the layout checks in `tests/support/layout-checks.js`,
+  which fail on: anything wider than the viewport (page-level horizontal
+  scroll), the phone mini-preview bar covering a control or the focused
+  field, a visible control that is hidden under another element at its
+  center, text or a control cut off by an `overflow: hidden`/`clip`/`auto`
+  ancestor (swipe rows are allowed to clip along their scroll axis), and a
+  visible control collapsed to under 8 px.
+- `npm run test:visual`: the visual QA pass. Walks every editor section
+  (quick-start looks, movement, each tab, costumes, special detail,
+  painting, painted versions, the phone painted-character bar, error/retry,
+  full page after painting) at 375, 390 and 414 px (touch) plus 768 and
+  1280 px, runs the same layout checks at each stop, and writes viewport and
+  full-page screenshots to `CHILD_EDITOR_QA_DIR` (default
+  `tmp/child-editor-qa` in the repo). Look through them after any layout
+  change; the checks catch overflow and overlap, not taste.
+
 ## Known limits
 
-- Safari before 16 has no `overflow: clip`, so the phone mini preview is not
-  sticky there (it still works as a normal block).
+- Safari before 16 has no `overflow: clip`; the editor sections fall back to
+  `overflow: hidden`, which looks the same but can scroll sideways when a
+  swipe-row chip is focused from the keyboard.
 - The static sample images in `assets/child-editor/` are unchanged; the
   e2e "painting" uses them as mock output.
 - New aids (walker, prosthetic leg, leg braces) and the new extras rely on
