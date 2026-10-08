@@ -65,7 +65,8 @@ test("the homepage explains the complete four-step creation journey", () => {
   assert.match(home, /Design their child/);
   assert.match(home, /Preview their storybook/);
   assert.match(home, /<span class="step-badge">Optional<\/span>/);
-  assert.match(home, /feature-animation-character-reference-v1\.png/);
+  assert.match(home, /home-child-editor-wheelchair-v1\.webp/);
+  assert.match(home, /step-4-storybook-personalized-v1\.webp/);
   assert.match(styles, /\.steps-grid\s*\{[\s\S]*?grid-template-columns: repeat\(4, minmax\(0, 1fr\)\)/);
 });
 
