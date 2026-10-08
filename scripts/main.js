@@ -1714,19 +1714,83 @@ function fileToDataUrl(file) {
   });
 }
 
+// Optional Cloudflare Turnstile check before a drawing upload. The server says
+// whether it is enabled; when it is off this costs one small cached request.
+let botCheckConfigPromise = null;
+let turnstileScriptPromise = null;
+
+async function getBotCheckToken(configOverride = null) {
+  if (!configOverride) {
+    botCheckConfigPromise ||= fetch("/api/monster-submissions", { headers: { Accept: "application/json" } })
+      .then((response) => (response.ok ? response.json() : {}))
+      .then((result) => result.botCheck || { enabled: false })
+      .catch(() => ({ enabled: false }));
+  }
+  const config = configOverride || await botCheckConfigPromise;
+  if (!config?.enabled || config.provider !== "turnstile" || !config.siteKey) return null;
+  await loadTurnstile();
+  const container = document.createElement("div");
+  container.className = "bot-check-widget";
+  container.setAttribute("role", "region");
+  container.setAttribute("aria-label", "Quick human check");
+  (document.querySelector("#upload-action-status")?.parentElement || document.body).append(container);
+  try {
+    return await new Promise((resolve, reject) => {
+      window.turnstile.render(container, {
+        sitekey: config.siteKey,
+        action: config.action || "monster_upload",
+        appearance: "interaction-only",
+        callback: resolve,
+        "error-callback": () => reject(Object.assign(new Error("The quick “I'm human” check couldn't load. Please refresh the page and try again."), { code: "bot_check_unavailable" })),
+        "expired-callback": () => reject(Object.assign(new Error("The “I'm human” check expired. Please try again."), { code: "bot_check_expired" })),
+      });
+    });
+  } finally {
+    container.remove();
+  }
+}
+
+function loadTurnstile() {
+  if (window.turnstile?.render) return Promise.resolve();
+  turnstileScriptPromise ||= new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+    script.async = true;
+    script.addEventListener("load", () => resolve());
+    script.addEventListener("error", () => {
+      turnstileScriptPromise = null;
+      reject(Object.assign(new Error("The quick “I'm human” check couldn't load. Please check your connection and try again."), { code: "bot_check_unavailable" }));
+    });
+    document.head.append(script);
+  });
+  return turnstileScriptPromise;
+}
+
 async function ensureMonsterSubmission(drawing) {
   if (monsterSubmission?.id && monsterSubmission?.token) return monsterSubmission;
-  const response = await fetch("/api/monster-submissions", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ drawing, filename: selectedDrawingFile?.name || "monster-drawing.jpg" }),
-  });
-  const result = await response.json().catch(() => ({ error: "The upload service did not return a readable response." }));
+  const upload = async (turnstileToken) => {
+    const response = await fetch("/api/monster-submissions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ drawing, filename: selectedDrawingFile?.name || "monster-drawing.jpg", ...(turnstileToken ? { turnstileToken } : {}) }),
+    });
+    const result = await response.json().catch(() => ({ error: "The upload service did not return a readable response." }));
+    return { response, result };
+  };
+  let { response, result } = await upload(await getBotCheckToken());
+  if (response.status === 403 && ["bot_check_required", "bot_check_failed"].includes(result.code) && result.botCheck?.enabled) {
+    ({ response, result } = await upload(await getBotCheckToken(result.botCheck)));
+  }
   if (!response.ok && (response.status >= 500 || result.code === "PGRST205" || result.code === "story_database_error")) {
     console.warn("Private monster persistence is unavailable; continuing with the existing in-session preview flow.");
     return null;
   }
-  if (!response.ok || !result.submission?.id || !result.submission?.token) throw new Error(result.error || "Your drawing could not be saved safely.");
+  if (!response.ok || !result.submission?.id || !result.submission?.token) {
+    const error = new Error(result.error || "Your drawing could not be saved safely.");
+    error.code = result.code;
+    error.status = response.status;
+    throw error;
+  }
   monsterSubmission = result.submission;
   try { sessionStorage.setItem("monstersnow_monster_submission", JSON.stringify(monsterSubmission)); } catch {}
   return monsterSubmission;
@@ -1790,6 +1854,17 @@ async function convertMonster(drawing, style, variationNumber, savedSubmission) 
 
 function showMonsterGenerationError(error) {
   const hasPreview = generatedPreviews.length > 0;
+
+  if (error?.status === 429 || String(error?.code || "").startsWith("bot_check")) {
+    // Friendly limit or "I'm human" message from the server, shown as-is.
+    if (converterStatus) converterStatus.textContent = error.status === 429 ? "Taking a short monster break." : "Quick check needed.";
+    if (converterNote) converterNote.textContent = hasPreview ? `${error.message} Your existing previews are still here.` : error.message;
+    syncPreviewControls();
+    setUploadActionStatus(error.message);
+    setConverterStage(selectedDrawingFile ? "preview" : "upload");
+    scrollToResultPanel({ focus: true, delay: 120 });
+    return;
+  }
 
   if (error?.code === "monster_drawing_not_found") {
     const message = "We couldn't find a clear monster drawing in this photo. Try a closer, brighter picture with the artwork filling most of the frame.";

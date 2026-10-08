@@ -11,6 +11,8 @@ const { listOrders, updateOrder } = require("../lib/order-library");
 const { importManuscript } = require("../lib/manuscript-import");
 const { uploadStoryArtwork } = require("../lib/story-artwork");
 const { createMonsterSubmission, deleteAdminMonster, finalizeMonsterSubmission, listAdminMonsters } = require("../lib/monster-submissions");
+const { enforceAiRateLimit, isAiLimitError, sendAiProtectionError } = require("../lib/ai-abuse-protection");
+const { publicBotCheckConfig, verifyBotCheck } = require("../lib/bot-check");
 const { createAdminStoryProof } = require("../lib/admin-story-proof");
 const { getCustomerOrderView, reviewCustomerProof } = require("../lib/customer-orders");
 const { confirmBookReviewUpload, createBookReviewUpload, listBookReviewFiles } = require("../lib/book-review-files");
@@ -40,14 +42,26 @@ module.exports = async function handler(request, response) {
       });
     }
   }
+  if (resource === "monster-submissions" && request.method === "GET") {
+    // Tells the storefront whether to show the optional "I'm human" check.
+    response.setHeader("Cache-Control", "public, max-age=300");
+    return sendJson(response, 200, { botCheck: publicBotCheckConfig() });
+  }
   if (resource === "monster-submissions" && ["POST", "PATCH"].includes(request.method)) {
     try {
       const payload = await readJsonBody(request);
+      if (request.method === "POST") {
+        // A saved submission unlocks the paid AI endpoints, so uploads are
+        // rate limited and (when enabled) bot checked.
+        await enforceAiRateLimit(request, { scope: "upload" });
+        await verifyBotCheck(request, payload?.turnstileToken);
+      }
       const submission = request.method === "POST"
         ? await createMonsterSubmission(payload)
         : await finalizeMonsterSubmission(payload);
       return sendJson(response, request.method === "POST" ? 201 : 200, { submission });
     } catch (error) {
+      if (isAiLimitError(error)) return sendAiProtectionError(response, error);
       if ((error.status || 500) >= 500) console.error("Monster submission request failed", { code: error.code, message: error.message });
       return sendJson(response, error.status || 500, {
         code: error.code || "monster_submission_failed",

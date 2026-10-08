@@ -93,5 +93,7 @@ does not change the personalized-book render manifest.
 - A transactional customer-email channel for automatically delivering the
   private proof link. Admin can copy the link today, but sending it is an
   explicit operator step.
-- Production rate limiting/WAF rules for checkout, customer-order, upload, and
-  admin routes.
+- Production rate limiting/WAF rules for checkout, customer-order, and admin
+  routes. The paid AI endpoints and drawing upload have application limits;
+  see `docs/AI_ABUSE_PROTECTION.md` for their migration and recommended
+  firewall rule.
