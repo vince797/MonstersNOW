@@ -21,13 +21,13 @@
     },
     {
       "label": "Print-art quality review",
-      "status": "blocked",
-      "detail": "Create and approve child-free and monster-free background plates for all 32 pages"
+      "status": "review",
+      "detail": "300 PPI masters for all 32 pages are in the repo (Real-ESRGAN upscales of the approved character-free plates; pp 1-3 and 32 from the approved cover plates). Needs a human look at the physical proof."
     },
     {
       "label": "Child character render asset",
       "status": "blocked",
-      "detail": "Create an approved transparent render asset (PNG/WebP, at least 1024 x 1536) for each selectable child preset. Current 512 x 768 presets print at about 170 PPI."
+      "detail": "Sample builds use the 512 x 768 preset (about 168-174 PPI, 28 pages flagged). Real orders use the saved 1024 x 1536 child render (child_image_path); the presets still need 1024 x 1536 masters."
     },
     {
       "label": "Personalized page compositor",
@@ -36,19 +36,24 @@
     },
     {
       "label": "Softcover package cover",
-      "status": "blocked",
-      "detail": "Generator built from the Lulu spine formula (17.382 x 8.75 in at 32 pp). Needs a 5215 x 2625 px wrap and a Lulu cover-dimensions check."
+      "status": "pass",
+      "detail": "5215 x 2625 px wrap from the Books-page cover art (title in art); 0 preflight blockers at 32 pp. Confirm with Lulu /cover-dimensions/."
     },
     {
       "label": "Hardcover package cover",
-      "status": "blocked",
-      "detail": "Casewrap generator built (19.0 x 10.25 in at 32 pp). Needs a 5700 x 3075 px wrap and a Lulu cover-dimensions check."
+      "status": "pass",
+      "detail": "5700 x 3075 px casewrap from the Books-page cover art; 0 preflight blockers at 32 pp. Confirm with Lulu /cover-dimensions/."
+    },
+    {
+      "label": "Personalized character art (per order)",
+      "status": "review",
+      "detail": "Remaining sample-build blockers are character assets: child preset 168-174 PPI (28 pages), sample monster 294 PPI (6 pages), framed original drawing 78-92 PPI (pp 2, 32). Real orders need a monster render of at least 1536 px and an original drawing photo of at least about 1000 px."
     },
     {
       "label": "Lulu file validation",
       "status": "blocked",
-      "detail": "Run after final-resolution art and covers exist"
+      "detail": "Ready to run: POST /api/lulu-sandbox-storybook-order with validate_files (sandbox), then order one physical proof from a live Lulu account."
     }
   ],
-  "next_action": "Create the 300 PPI background plates (14 spreads at 5250 x 2625 px plus pages 1, 2, 3 and 32 at 2625 x 2625 px) and the two cover wraps, then transparent child preset masters. Run npm run build:print-samples until the preflight shows no blockers, then validate the files with Lulu and order a physical proof."
+  "next_action": "Run Lulu sandbox file validation on the interior and both covers, then order one physical proof (live Lulu account) from a real test order with a high-resolution child render, monster and drawing."
 }

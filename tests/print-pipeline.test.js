@@ -144,7 +144,8 @@ test("production mode refuses to emit a book with placeholder or sub-300 PPI art
   const job = buildSamplePrintJob("halloween-monster-night", { useRepoArt: true });
   await assert.rejects(
     renderStorybookInteriorPdf({ book: job.book, sources: job.sources, format: "softcover", pageCount: 32, mode: "production" }),
-    (error) => /not print-ready/.test(error.message) && error.report.blockers.some((b) => /background 101(\.\d)? PPI/.test(b)),
+    // Repo print masters are 300 PPI; the 512x768 child preset still is not.
+    (error) => /not print-ready/.test(error.message) && error.report.blockers.some((b) => /child \d+(\.\d)? PPI \(< 300\)/.test(b)),
   );
 });
 
