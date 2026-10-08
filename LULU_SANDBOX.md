@@ -183,11 +183,29 @@ interior: 32-page 8.5 x 8.5 in PDF
 cover: single-page cover spread PDF using Lulu cover-dimensions output
 ```
 
-The current PDFs are sandbox proof files for validating the Lulu pipeline. The
-proof PDFs are vector-only so they do not depend on embedded fonts. The next
-production step is replacing the proof artwork with the paid order's stored
-monster art and final story content using print-ready embedded fonts or
-rasterized page art.
+The endpoint renders the order's real book with the personalized compositor
+(`lib/storybook-print-files.js`):
+
+- The master story comes from Supabase, along with the order's selected
+  monster preview and child character.
+- Each page's background plate, the child, and the monster are flattened
+  into a 2625 x 2625 px (300 PPI) image.
+- Text is vector, in embedded TrueType fonts.
+- TrimBox and BleedBox are set for 0.125 in bleed.
+- The cover is one wrap sized from Lulu's cover-dimensions output, checked
+  against the spine formula.
+
+URLs without an order identity (story, monster submission, and preview IDs)
+render a labelled sample book.
+
+The route renders in proof mode. Missing or low-resolution art becomes a
+labelled placeholder or a red `PROOF` stamp, and the response header
+`X-MonstersNOW-Print-Blockers` counts what still blocks production. PDFs are
+streamed in chunks, because a 32-page interior is about 28 MB, far over the
+Vercel 4.5 MB buffered-response limit.
+
+See `docs/PRINT_PIPELINE.md` for the exact specs, the art files each book
+needs, and the local sample builder (`npm run build:print-samples`).
 
 ### Prepare a Storybook Sandbox Order
 

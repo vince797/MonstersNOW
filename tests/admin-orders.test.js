@@ -175,6 +175,7 @@ test("regenerating print files mints fresh signed PDF links for an active order"
     child_name: "Sam", monster_name: "Noodle", monster_style: "Soft 3D storybook", format_id: "softcover",
     monster_submission_id: "123e4567-e89b-42d3-a456-426614174000", selected_preview_id: "123e4567-e89b-42d3-a456-426614174001",
     child_character: { id: "light-short-brown", included: true },
+    child_image_path: "123e4567-e89b-42d3-a456-426614174000/child/abc123.webp",
   };
   let current = row;
   return withFetch(async (url) => {
@@ -186,6 +187,7 @@ test("regenerating print files mints fresh signed PDF links for an active order"
     assert.match(order.print_files.interior, /^https:\/\/preview\.monstersnow\.com\/api\/lulu-sandbox-storybook-order\?type=interior&/);
     assert.match(order.print_files.interior, /signature=/);
     assert.match(order.print_files.interior, /child_name=Sam/);
+    assert.match(order.print_files.interior, /child_image_path=123e4567-e89b-42d3-a456-426614174000%2Fchild%2Fabc123\.webp/);
     assert.equal(order.print_files.cover, null);
     assert.ok(order.print_files.coverError, "a missing Lulu cover-size lookup drops only the cover link");
     assert.ok(order.print_files.generatedAt);

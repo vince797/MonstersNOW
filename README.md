@@ -93,3 +93,9 @@ sandbox routes use `LULU_SANDBOX_CLIENT_KEY` and
 storybook variants are an 8.5 x 8.5 in premium-color softcover and hardcover.
 The sandbox storybook order route can generate signed proof PDFs, start Lulu
 file validations, and optionally submit a sandbox print job.
+
+The print files are composited per order: each page's background plate, the
+child character, the selected monster, and vector text in embedded fonts, at
+Lulu's trim, bleed, and 300 PPI specs. Softcover and hardcover cover wraps use
+Lulu's spine formulas. See `docs/PRINT_PIPELINE.md` for specs, the art each book
+needs, and `npm run build:print-samples`.
