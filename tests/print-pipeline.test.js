@@ -120,12 +120,17 @@ test("interior PDF: 32 full-bleed pages, trim boxes, one 300 PPI image per page,
   }
 });
 
-test("interior report places both characters on story pages and blocks placeholders/low resolution", async () => {
+test("interior report places one child + monster pair per story spread and blocks placeholders/low resolution", async () => {
   const { report } = await sampleInterior();
   const storyPages = report.pages.filter((page) => page.template === "story");
   assert.equal(storyPages.length, 28);
-  for (const page of storyPages) {
-    assert.ok(page.monster && page.child, `page ${page.number} composites child and monster`);
+  for (let left = 4; left <= 30; left += 2) {
+    const spread = storyPages.filter((page) => page.number === left || page.number === left + 1);
+    assert.equal(spread.filter((page) => page.child).length, 1, `spread ${left}-${left + 1} shows the child once`);
+    assert.equal(spread.filter((page) => page.monster).length, 1, `spread ${left}-${left + 1} shows the monster once`);
+  }
+  for (const page of storyPages.filter((p) => p.monster || p.child)) {
+    assert.ok(page.monster && page.child, `page ${page.number} composites child and monster together`);
     assert.ok(page.monster.effectivePpi > 0 && page.child.effectivePpi > 0);
     const textBottom = page.text.panelIn.y + page.text.panelIn.height;
     for (const kind of ["monster", "child"]) {
@@ -190,4 +195,29 @@ test("other catalog stories use the same pipeline through shared defaults", asyn
   assert.equal(job.book.pages.length, 32);
   const { report } = await renderStorybookCoverPdf({ book: job.book, sources: job.sources, format: "hardcover", pageCount: 32, creationDate: FIXED_DATE });
   assert.equal(report.storySlug, "bedtime-monster");
+});
+
+test("planSpreadCharacters keeps one pair per spread and applies per-spread overrides", () => {
+  const { planSpreadCharacters } = require("../lib/storybook-print-files");
+  const pages = [4, 5, 6, 7, 32].map((number) => ({
+    number,
+    child: { x: 28, y: 84, scale: 30, facing: "left" },
+    monster: { x: 70, y: 82, scale: 35, facing: "left" },
+  }));
+  const config = {
+    defaultTemplate: "story",
+    templates: { 32: "meet-monster" },
+    spreadCharacters: { 4: { page: 4, child: { x: 60, facing: "right" }, layer: "front" } },
+  };
+  const plan = planSpreadCharacters(pages, config);
+  assert.deepEqual(plan.get(5), { child: null, monster: null });
+  assert.equal(plan.get(4).child.x, 60);
+  assert.equal(plan.get(4).child.facing, "right");
+  assert.equal(plan.get(4).child.scale, 30, "Admin scale kept");
+  assert.equal(plan.get(4).monster.x, 70);
+  assert.equal(plan.get(4).monster.layer, "front");
+  assert.deepEqual(plan.get(6), { child: null, monster: null }, "default carrier is the right page");
+  assert.equal(plan.get(7).monster.x, 70);
+  assert.equal(plan.has(32), false, "non-story pages untouched");
+  assert.equal(planSpreadCharacters(pages, { ...config, charactersPerSpread: false }).size, 0);
 });
