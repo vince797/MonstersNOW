@@ -135,20 +135,47 @@ A wrap size that depends on page count (spine) is computed by
 
 ### Halloween Monster Night file list
 
-Put files in `assets/storybook/halloween-monster-night/`, or set them as the
-master page `artworkUrl` in Admin:
+These print masters are in `assets/storybook/halloween-monster-night/` (built
+by `scripts/build_halloween_print_masters.py`, see below):
 
 - `pages-04-05-environment-print.jpg` … `pages-30-31-environment-print.jpg`:
   14 spread plates, **5250 x 2625 px** each. Pairs: 04-05, 06-07, 08-09,
   10-11, 12-13, 14-15, 16-17, 18-19, 20-21, 22-23, 24-25, 26-27, 28-29, 30-31.
-  The current `-environment-v1.png` plates are 1774 x 887 (about 101 PPI), so
-  they're review art only.
-- `page-01-half-title-background-print.jpg`, **2625 x 2625 px**
-- `page-02-title-dedication-background-print.jpg`, **2625 x 2625 px**
-- `page-03-copyright-background-print.jpg`, **2625 x 2625 px**
-- `page-32-meet-monster-background-print.jpg`, **2625 x 2625 px**
+  (The `-environment-v1.png` review plates are 1774 x 887, about 101 PPI.)
+- `page-01-half-title-background-print.jpg`, **2625 x 2625 px**: the Books cover scene with its title removed
+- `page-02-title-dedication-background-print.jpg`, **2625 x 2625 px**: porch-gate plate
+- `page-03-copyright-background-print.jpg`, **2625 x 2625 px**: garden-arch plate, lightened for small type
+- `page-32-meet-monster-background-print.jpg`, **2625 x 2625 px**: town-square plate
 - `cover-softcover-wrap-print.jpg`, **5215 x 2625 px**
 - `cover-hardcover-wrap-print.jpg`, **5700 x 3075 px**
+
+Where they are used:
+
+- Sample builds (`npm run build:print-samples`) use them for every page and
+  pick the wrap that matches the binding.
+- Real orders use each master page's uploaded Admin `artworkUrl` when there is
+  one; pages without uploaded art, and the cover, fall back to these shipped
+  masters (`withShippedPrintMasters`). The files ship with the
+  `lulu-sandbox-storybook-order` function (`vercel.json` `includeFiles`).
+
+Cover: the wraps use the approved Books-page cover
+(`cover-series/minimal-concepts/halloween-monster-night-v5`). Its imprint and
+title are part of the art, so the config sets `coverArt.titleInArt` and the
+compositor only adds the monster (below the title), the "Starring" line, and
+the back-cover blurb. The back panel is the same scene with the title removed,
+mirrored so it meets the front at the spine.
+
+How the masters were made (no new AI imagery; only upscaling of approved art):
+
+- Spreads: Real-ESRGAN `RealESRGAN_x2plus` on the 1774 x 887 environment plates
+  (to 3548 x 1774), then Lanczos + light unsharp mask to 5250 x 2625.
+- Singles: `RealESRGAN_x2plus` on the 1254 px cover plates, 2625 x 2625.
+- Cover: `RealESRGAN_x4plus` on the 1254 px Books cover (to 5016 px); the title-free back-panel copy uses `RealESRGAN_x2plus`.
+- Run `python3 scripts/build_halloween_print_masters.py upscale` then
+  `... assemble` (CPU is fine; about 30 minutes).
+
+Replace any of them with higher-quality artist masters at the same pixel size
+when available; nothing else needs to change.
 
 ## Before going live
 
