@@ -805,8 +805,8 @@
 .child-preview-stage.has-premium-art .child-preview-character { display: none; }
 .child-preview-stage.has-book-render .child-preview-character { display: none; }
 .child-preview-stage.has-book-render .child-premium-default { display: none; }
-.child-preview-stage.mobility-wheelchair .child-premium-default { top: 0; left: 1%; width: 98%; height: 92%; }
-.child-preview-stage.mobility-forearm-crutches .child-premium-default { top: 0; left: 1%; width: 98%; height: 89%; }
+.child-preview-stage.mobility-wheelchair .child-premium-default { top: 3%; left: 1%; width: 98%; height: 92%; }
+.child-preview-stage.mobility-forearm-crutches .child-premium-default { top: 4%; left: 1%; width: 98%; height: 89%; }
 .child-preview-stage.has-monster-only .child-rendered-preview { display: none; }
 .child-preview-stage.has-book-render::before { opacity: .55; }
 .child-preview-stage.has-pending-child-changes .child-rendered-preview {
@@ -977,6 +977,8 @@
   .child-preview-stage { height: min(68vw, 300px); min-height: 260px; border-radius: 13px; }
   .child-premium-default,
   .child-rendered-preview { top: 0; height: 89%; }
+  .child-preview-stage.mobility-wheelchair .child-premium-default { top: 4%; height: 89%; }
+  .child-preview-stage.mobility-forearm-crutches .child-premium-default { top: 6%; height: 89%; }
   .child-monster-only-preview { top: 2%; height: 88%; }
   .child-preview-character { width: 70%; height: 96%; }
   .child-preview-stage.mobility-wheelchair .child-preview-character { width: 76%; height: 88%; }
