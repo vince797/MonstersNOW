@@ -1,7 +1,7 @@
 {
   "title": "Halloween Monster Night",
   "status": "blocked",
-  "updated": "2026-10-01",
+  "updated": "2026-10-08",
   "format": "8.5 \u00d7 8.5 in, full color, 32 pages",
   "checks": [
     {
@@ -27,22 +27,22 @@
     {
       "label": "Child character render asset",
       "status": "blocked",
-      "detail": "Create an approved transparent render asset for each selectable child preset"
+      "detail": "Create an approved transparent render asset (PNG/WebP, at least 1024 x 1536) for each selectable child preset. Current 512 x 768 presets print at about 170 PPI."
     },
     {
       "label": "Personalized page compositor",
-      "status": "blocked",
-      "detail": "Replace the generic placeholder PDF generator with the approved background + child + monster compositor"
+      "status": "pass",
+      "detail": "Background + child + monster compositor renders 32 pages at 300 PPI with embedded fonts. Missing or low-resolution art is flagged as a preflight blocker."
     },
     {
       "label": "Softcover package cover",
       "status": "blocked",
-      "detail": "Awaiting exact Lulu cover dimensions"
+      "detail": "Generator built from the Lulu spine formula (17.382 x 8.75 in at 32 pp). Needs a 5215 x 2625 px wrap and a Lulu cover-dimensions check."
     },
     {
       "label": "Hardcover package cover",
       "status": "blocked",
-      "detail": "Awaiting exact Lulu cover dimensions"
+      "detail": "Casewrap generator built (19.0 x 10.25 in at 32 pp). Needs a 5700 x 3075 px wrap and a Lulu cover-dimensions check."
     },
     {
       "label": "Lulu file validation",
@@ -50,5 +50,5 @@
       "detail": "Run after final-resolution art and covers exist"
     }
   ],
-  "next_action": "Create clean background plates first, then approved transparent child preset assets. The selected customer monster is already pinned by preview ID and image URL in the order manifest, but production approval remains locked until the personalized compositor replaces the placeholder PDF generator."
+  "next_action": "Create the 300 PPI background plates (14 spreads at 5250 x 2625 px plus pages 1, 2, 3 and 32 at 2625 x 2625 px) and the two cover wraps, then transparent child preset masters. Run npm run build:print-samples until the preflight shows no blockers, then validate the files with Lulu and order a physical proof."
 }

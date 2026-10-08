@@ -8,3 +8,6 @@ deploy/
 node_modules/
 tmp/
 scripts/__pycache__/
+
+# Generated print samples (PNG previews + preflight JSON are committed)
+samples/*.pdf

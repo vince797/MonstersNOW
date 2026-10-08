@@ -86,8 +86,14 @@ does not change the personalized-book render manifest.
   rates, Stripe Tax registration/configuration, and the production webhook.
 - A production Supabase project with every migration applied and backup/
   retention settings reviewed.
-- A real personalized cover/interior PDF compositor and print preflight. The
-  current Lulu integration is sandbox-only and must not be promoted to live.
+- Print-ready art and a validated proof for the personalized PDFs. The
+  compositor and preflight exist (`docs/PRINT_PIPELINE.md`), but they need:
+  - 300 PPI background plates and cover wraps
+  - transparent child and monster masters
+  - Lulu sandbox file validation
+  - a physical proof
+
+  The Lulu integration is still sandbox-only and must not be promoted to live.
 - Live print-provider credentials, product/package confirmation, shipping SLA,
   cancellation policy, and tracking ingestion.
 - A transactional customer-email channel for automatically delivering the

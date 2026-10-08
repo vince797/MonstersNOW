@@ -30,7 +30,8 @@
       "maxDuration": 30
     },
     "api/lulu-sandbox-storybook-order.js": {
-      "maxDuration": 60
+      "maxDuration": 60,
+      "includeFiles": "{lib/**,assets/fonts/**,assets/storybook/halloween-monster-night/covers/demo-monster-cutout-v1.png,assets/child-characters/warm-curly-dark-v1.webp}"
     }
   },
   "headers": [

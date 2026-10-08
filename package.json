@@ -2,12 +2,18 @@
   "name": "monstersnow",
   "version": "1.0.0",
   "private": true,
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "build:print-samples": "node scripts/build-print-samples.js"
+  },
   "dependencies": {
+    "@napi-rs/canvas": "0.1.80",
     "heic-convert": "2.1.0",
     "mammoth": "1.12.3",
     "pdf-parse": "2.4.5"
   },
   "devDependencies": {
-    "agent-browser": "^0.38.2"
+    "agent-browser": "^0.38.2",
+    "pngjs": "6.0.0"
   }
 }

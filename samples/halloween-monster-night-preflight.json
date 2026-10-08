@@ -1,0 +1,2113 @@
+{
+  "slug": "halloween-monster-night",
+  "generatedWith": "scripts/build-print-samples.js",
+  "interiorRenderMs": 6734,
+  "interior": {
+    "renderer": "personalized-composite-v1",
+    "type": "interior",
+    "mode": "proof",
+    "storySlug": "halloween-monster-night",
+    "spec": {
+      "podPackageId": "0850X0850.FC.PRE.PB.080CW444.MXX",
+      "pageCount": 32,
+      "trimWidthIn": 8.5,
+      "trimHeightIn": 8.5,
+      "bleedIn": 0.125,
+      "safetyIn": 0.5,
+      "gutterExtraIn": 0,
+      "pageWidthIn": 8.75,
+      "pageHeightIn": 8.75,
+      "pageWidthPt": 630,
+      "pageHeightPt": 630,
+      "pageWidthPx": 2625,
+      "pageHeightPx": 2625,
+      "dpi": 300,
+      "maxDpi": 600,
+      "trimBox": {
+        "x": 0.125,
+        "y": 0.125,
+        "width": 8.5,
+        "height": 8.5
+      },
+      "bleedBox": {
+        "x": 0,
+        "y": 0,
+        "width": 8.75,
+        "height": 8.75
+      }
+    },
+    "pages": [
+      {
+        "number": 1,
+        "template": "half-title",
+        "notes": [],
+        "background": {
+          "placeholder": true
+        },
+        "text": {
+          "lines": 1,
+          "panelIn": {
+            "x": 0.625,
+            "y": 0.625,
+            "width": 7.5,
+            "height": 1.151
+          }
+        },
+        "monster": {
+          "effectivePpi": 372.9,
+          "boxIn": {
+            "x": 4.63,
+            "y": 3.413,
+            "width": 2.55,
+            "height": 2.832
+          },
+          "fit": 1,
+          "mirrored": false,
+          "layer": "front"
+        },
+        "issues": [
+          "placeholder background"
+        ],
+        "imagePixels": [
+          2625,
+          2625
+        ]
+      },
+      {
+        "number": 2,
+        "template": "title-dedication",
+        "notes": [],
+        "background": {
+          "placeholder": true
+        },
+        "text": {
+          "lines": 3,
+          "panelIn": {
+            "x": 0.625,
+            "y": 0.625,
+            "width": 7.5,
+            "height": 1.874
+          }
+        },
+        "frame": {
+          "effectivePpi": 92.4
+        },
+        "issues": [
+          "placeholder background",
+          "framed image 92.4 PPI (< 300)"
+        ],
+        "imagePixels": [
+          2625,
+          2625
+        ]
+      },
+      {
+        "number": 3,
+        "template": "copyright",
+        "notes": [],
+        "background": {
+          "placeholder": true
+        },
+        "text": {
+          "lines": 2,
+          "panelIn": {
+            "x": 0.625,
+            "y": 3.879,
+            "width": 7.5,
+            "height": 0.992
+          }
+        },
+        "issues": [
+          "placeholder background"
+        ],
+        "imagePixels": [
+          2625,
+          2625
+        ]
+      },
+      {
+        "number": 4,
+        "template": "story",
+        "notes": [],
+        "background": {
+          "placeholder": false,
+          "origin": "assets/storybook/halloween-monster-night/pages-04-05-environment-v1.png",
+          "label": "pages-04-05-environment-v1.png",
+          "spreadHalf": "left",
+          "sourcePixels": [
+            1774,
+            887
+          ],
+          "effectivePpi": 101.4
+        },
+        "child": {
+          "effectivePpi": 168.3,
+          "boxIn": {
+            "x": 5.389,
+            "y": 2.868,
+            "width": 1.711,
+            "height": 4.397
+          },
+          "fit": 1,
+          "mirrored": false,
+          "layer": "front"
+        },
+        "monster": {
+          "effectivePpi": 319.7,
+          "boxIn": {
+            "x": 1.187,
+            "y": 3.792,
+            "width": 2.975,
+            "height": 3.303
+          },
+          "fit": 1,
+          "mirrored": true,
+          "layer": "front"
+        },
+        "text": {
+          "fontSize": 17,
+          "lines": 4,
+          "panelIn": {
+            "x": 0.625,
+            "y": 0.625,
+            "width": 7.5,
+            "height": 1.812
+          }
+        },
+        "issues": [
+          "background 101.4 PPI (< 300)",
+          "child 168.3 PPI (< 300)"
+        ],
+        "imagePixels": [
+          2625,
+          2625
+        ]
+      },
+      {
+        "number": 5,
+        "template": "story",
+        "notes": [],
+        "background": {
+          "placeholder": false,
+          "origin": "assets/storybook/halloween-monster-night/pages-04-05-environment-v1.png",
+          "label": "pages-04-05-environment-v1.png",
+          "spreadHalf": "right",
+          "sourcePixels": [
+            1774,
+            887
+          ],
+          "effectivePpi": 101.4
+        },
+        "child": {
+          "effectivePpi": 168.3,
+          "boxIn": {
+            "x": 1.649,
+            "y": 2.868,
+            "width": 1.711,
+            "height": 4.397
+          },
+          "fit": 1,
+          "mirrored": true,
+          "layer": "front"
+        },
+        "monster": {
+          "effectivePpi": 319.7,
+          "boxIn": {
+            "x": 4.588,
+            "y": 3.792,
+            "width": 2.975,
+            "height": 3.303
+          },
+          "fit": 1,
+          "mirrored": false,
+          "layer": "front"
+        },
+        "text": {
+          "fontSize": 17,
+          "lines": 3,
+          "panelIn": {
+            "x": 0.625,
+            "y": 0.625,
+            "width": 7.5,
+            "height": 1.495
+          }
+        },
+        "issues": [
+          "background 101.4 PPI (< 300)",
+          "child 168.3 PPI (< 300)"
+        ],
+        "imagePixels": [
+          2625,
+          2625
+        ]
+      },
+      {
+        "number": 6,
+        "template": "story",
+        "notes": [],
+        "background": {
+          "placeholder": false,
+          "origin": "assets/storybook/halloween-monster-night/pages-06-07-environment-v1.png",
+          "label": "pages-06-07-environment-v1.png",
+          "spreadHalf": "left",
+          "sourcePixels": [
+            1774,
+            887
+          ],
+          "effectivePpi": 101.4
+        },
+        "child": {
+          "effectivePpi": 174.1,
+          "boxIn": {
+            "x": 1.678,
+            "y": 3.015,
+            "width": 1.654,
+            "height": 4.25
+          },
+          "fit": 1,
+          "mirrored": true,
+          "layer": "front"
+        },
+        "monster": {
+          "effectivePpi": 329.1,
+          "boxIn": {
+            "x": 4.63,
+            "y": 3.886,
+            "width": 2.89,
+            "height": 3.209
+          },
+          "fit": 1,
+          "mirrored": true,
+          "layer": "front"
+        },
+        "text": {
+          "fontSize": 17,
+          "lines": 4,
+          "panelIn": {
+            "x": 0.625,
+            "y": 0.625,
+            "width": 7.5,
+            "height": 1.812
+          }
+        },
+        "issues": [
+          "background 101.4 PPI (< 300)",
+          "child 174.1 PPI (< 300)"
+        ],
+        "imagePixels": [
+          2625,
+          2625
+        ]
+      },
+      {
+        "number": 7,
+        "template": "story",
+        "notes": [],
+        "background": {
+          "placeholder": false,
+          "origin": "assets/storybook/halloween-monster-night/pages-06-07-environment-v1.png",
+          "label": "pages-06-07-environment-v1.png",
+          "spreadHalf": "right",
+          "sourcePixels": [
+            1774,
+            887
+          ],
+          "effectivePpi": 101.4
+        },
+        "child": {
+          "effectivePpi": 174.1,
+          "boxIn": {
+            "x": 5.418,
+            "y": 3.015,
+            "width": 1.654,
+            "height": 4.25
+          },
+          "fit": 1,
+          "mirrored": false,
+          "layer": "front"
+        },
+        "monster": {
+          "effectivePpi": 329.1,
+          "boxIn": {
+            "x": 1.23,
+            "y": 3.886,
+            "width": 2.89,
+            "height": 3.209
+          },
+          "fit": 1,
+          "mirrored": false,
+          "layer": "front"
+        },
+        "text": {
+          "fontSize": 17,
+          "lines": 2,
+          "panelIn": {
+            "x": 0.625,
+            "y": 0.625,
+            "width": 7.5,
+            "height": 1.073
+          }
+        },
+        "issues": [
+          "background 101.4 PPI (< 300)",
+          "child 174.1 PPI (< 300)"
+        ],
+        "imagePixels": [
+          2625,
+          2625
+        ]
+      },
+      {
+        "number": 8,
+        "template": "story",
+        "notes": [],
+        "background": {
+          "placeholder": false,
+          "origin": "assets/storybook/halloween-monster-night/pages-08-09-environment-v1.png",
+          "label": "pages-08-09-environment-v1.png",
+          "spreadHalf": "left",
+          "sourcePixels": [
+            1774,
+            887
+          ],
+          "effectivePpi": 101.4
+        },
+        "child": {
+          "effectivePpi": 171.9,
+          "boxIn": {
+            "x": 5.407,
+            "y": 2.959,
+            "width": 1.676,
+            "height": 4.306
+          },
+          "fit": 0.89,
+          "mirrored": false,
+          "layer": "front"
+        },
+        "monster": {
+          "effectivePpi": 294.4,
+          "boxIn": {
+            "x": 1.23,
+            "y": 3.508,
+            "width": 3.23,
+            "height": 3.587
+          },
+          "fit": 1,
+          "mirrored": true,
+          "layer": "front"
+        },
+        "text": {
+          "fontSize": 17,
+          "lines": 5,
+          "panelIn": {
+            "x": 0.625,
+            "y": 0.625,
+            "width": 7.5,
+            "height": 2.234
+          }
+        },
+        "issues": [
+          "background 101.4 PPI (< 300)",
+          "child 171.9 PPI (< 300)",
+          "monster 294.4 PPI (< 300)"
+        ],
+        "imagePixels": [
+          2625,
+          2625
+        ]
+      },
+      {
+        "number": 9,
+        "template": "story",
+        "notes": [],
+        "background": {
+          "placeholder": false,
+          "origin": "assets/storybook/halloween-monster-night/pages-08-09-environment-v1.png",
+          "label": "pages-08-09-environment-v1.png",
+          "spreadHalf": "right",
+          "sourcePixels": [
+            1774,
+            887
+          ],
+          "effectivePpi": 101.4
+        },
+        "child": {
+          "effectivePpi": 176.2,
+          "boxIn": {
+            "x": 1.688,
+            "y": 3.066,
+            "width": 1.634,
+            "height": 4.199
+          },
+          "fit": 0.868,
+          "mirrored": true,
+          "layer": "front"
+        },
+        "monster": {
+          "effectivePpi": 294.4,
+          "boxIn": {
+            "x": 4.29,
+            "y": 3.508,
+            "width": 3.23,
+            "height": 3.587
+          },
+          "fit": 1,
+          "mirrored": false,
+          "layer": "front"
+        },
+        "text": {
+          "fontSize": 17,
+          "lines": 5,
+          "panelIn": {
+            "x": 0.625,
+            "y": 0.625,
+            "width": 7.5,
+            "height": 2.341
+          }
+        },
+        "issues": [
+          "background 101.4 PPI (< 300)",
+          "child 176.2 PPI (< 300)",
+          "monster 294.4 PPI (< 300)"
+        ],
+        "imagePixels": [
+          2625,
+          2625
+        ]
+      },
+      {
+        "number": 10,
+        "template": "story",
+        "notes": [],
+        "background": {
+          "placeholder": false,
+          "origin": "assets/storybook/halloween-monster-night/pages-10-11-environment-v1.png",
+          "label": "pages-10-11-environment-v1.png",
+          "spreadHalf": "left",
+          "sourcePixels": [
+            1774,
+            887
+          ],
+          "effectivePpi": 101.4
+        },
+        "child": {
+          "effectivePpi": 162.9,
+          "boxIn": {
+            "x": 1.621,
+            "y": 2.722,
+            "width": 1.768,
+            "height": 4.543
+          },
+          "fit": 1,
+          "mirrored": true,
+          "layer": "front"
+        },
+        "monster": {
+          "effectivePpi": 310.8,
+          "boxIn": {
+            "x": 4.205,
+            "y": 3.697,
+            "width": 3.06,
+            "height": 3.398
+          },
+          "fit": 1,
+          "mirrored": true,
+          "layer": "front"
+        },
+        "text": {
+          "fontSize": 17,
+          "lines": 4,
+          "panelIn": {
+            "x": 0.625,
+            "y": 0.625,
+            "width": 7.5,
+            "height": 1.812
+          }
+        },
+        "issues": [
+          "background 101.4 PPI (< 300)",
+          "child 162.9 PPI (< 300)"
+        ],
+        "imagePixels": [
+          2625,
+          2625
+        ]
+      },
+      {
+        "number": 11,
+        "template": "story",
+        "notes": [],
+        "background": {
+          "placeholder": false,
+          "origin": "assets/storybook/halloween-monster-night/pages-10-11-environment-v1.png",
+          "label": "pages-10-11-environment-v1.png",
+          "spreadHalf": "right",
+          "sourcePixels": [
+            1774,
+            887
+          ],
+          "effectivePpi": 101.4
+        },
+        "child": {
+          "effectivePpi": 162.9,
+          "boxIn": {
+            "x": 5.361,
+            "y": 2.722,
+            "width": 1.768,
+            "height": 4.543
+          },
+          "fit": 1,
+          "mirrored": false,
+          "layer": "front"
+        },
+        "monster": {
+          "effectivePpi": 310.8,
+          "boxIn": {
+            "x": 1.485,
+            "y": 3.697,
+            "width": 3.06,
+            "height": 3.398
+          },
+          "fit": 1,
+          "mirrored": false,
+          "layer": "front"
+        },
+        "text": {
+          "fontSize": 17,
+          "lines": 4,
+          "panelIn": {
+            "x": 0.625,
+            "y": 0.625,
+            "width": 7.5,
+            "height": 1.918
+          }
+        },
+        "issues": [
+          "background 101.4 PPI (< 300)",
+          "child 162.9 PPI (< 300)"
+        ],
+        "imagePixels": [
+          2625,
+          2625
+        ]
+      },
+      {
+        "number": 12,
+        "template": "story",
+        "notes": [],
+        "background": {
+          "placeholder": false,
+          "origin": "assets/storybook/halloween-monster-night/pages-12-13-environment-v1.png",
+          "label": "pages-12-13-environment-v1.png",
+          "spreadHalf": "left",
+          "sourcePixels": [
+            1774,
+            887
+          ],
+          "effectivePpi": 101.4
+        },
+        "child": {
+          "effectivePpi": 191.5,
+          "boxIn": {
+            "x": 5.493,
+            "y": 3.4,
+            "width": 1.504,
+            "height": 3.865
+          },
+          "fit": 0.879,
+          "mirrored": false,
+          "layer": "front"
+        },
+        "monster": {
+          "effectivePpi": 319.7,
+          "boxIn": {
+            "x": 1.187,
+            "y": 3.792,
+            "width": 2.975,
+            "height": 3.303
+          },
+          "fit": 1,
+          "mirrored": true,
+          "layer": "front"
+        },
+        "text": {
+          "fontSize": 15,
+          "lines": 7,
+          "panelIn": {
+            "x": 0.625,
+            "y": 0.625,
+            "width": 7.5,
+            "height": 2.675
+          }
+        },
+        "issues": [
+          "background 101.4 PPI (< 300)",
+          "child 191.5 PPI (< 300)"
+        ],
+        "imagePixels": [
+          2625,
+          2625
+        ]
+      },
+      {
+        "number": 13,
+        "template": "story",
+        "notes": [],
+        "background": {
+          "placeholder": false,
+          "origin": "assets/storybook/halloween-monster-night/pages-12-13-environment-v1.png",
+          "label": "pages-12-13-environment-v1.png",
+          "spreadHalf": "right",
+          "sourcePixels": [
+            1774,
+            887
+          ],
+          "effectivePpi": 101.4
+        },
+        "child": {
+          "effectivePpi": 168.3,
+          "boxIn": {
+            "x": 1.649,
+            "y": 2.868,
+            "width": 1.711,
+            "height": 4.397
+          },
+          "fit": 1,
+          "mirrored": true,
+          "layer": "front"
+        },
+        "monster": {
+          "effectivePpi": 319.7,
+          "boxIn": {
+            "x": 4.588,
+            "y": 3.792,
+            "width": 2.975,
+            "height": 3.303
+          },
+          "fit": 1,
+          "mirrored": false,
+          "layer": "front"
+        },
+        "text": {
+          "fontSize": 17,
+          "lines": 1,
+          "panelIn": {
+            "x": 0.625,
+            "y": 0.625,
+            "width": 7.5,
+            "height": 0.756
+          }
+        },
+        "issues": [
+          "background 101.4 PPI (< 300)",
+          "child 168.3 PPI (< 300)"
+        ],
+        "imagePixels": [
+          2625,
+          2625
+        ]
+      },
+      {
+        "number": 14,
+        "template": "story",
+        "notes": [],
+        "background": {
+          "placeholder": false,
+          "origin": "assets/storybook/halloween-monster-night/pages-14-15-environment-v1.png",
+          "label": "pages-14-15-environment-v1.png",
+          "spreadHalf": "left",
+          "sourcePixels": [
+            1774,
+            887
+          ],
+          "effectivePpi": 101.4
+        },
+        "child": {
+          "effectivePpi": 174.1,
+          "boxIn": {
+            "x": 1.678,
+            "y": 3.015,
+            "width": 1.654,
+            "height": 4.25
+          },
+          "fit": 1,
+          "mirrored": true,
+          "layer": "front"
+        },
+        "monster": {
+          "effectivePpi": 329.1,
+          "boxIn": {
+            "x": 4.63,
+            "y": 3.886,
+            "width": 2.89,
+            "height": 3.209
+          },
+          "fit": 1,
+          "mirrored": true,
+          "layer": "front"
+        },
+        "text": {
+          "fontSize": 17,
+          "lines": 4,
+          "panelIn": {
+            "x": 0.625,
+            "y": 0.625,
+            "width": 7.5,
+            "height": 1.812
+          }
+        },
+        "issues": [
+          "background 101.4 PPI (< 300)",
+          "child 174.1 PPI (< 300)"
+        ],
+        "imagePixels": [
+          2625,
+          2625
+        ]
+      },
+      {
+        "number": 15,
+        "template": "story",
+        "notes": [],
+        "background": {
+          "placeholder": false,
+          "origin": "assets/storybook/halloween-monster-night/pages-14-15-environment-v1.png",
+          "label": "pages-14-15-environment-v1.png",
+          "spreadHalf": "right",
+          "sourcePixels": [
+            1774,
+            887
+          ],
+          "effectivePpi": 101.4
+        },
+        "child": {
+          "effectivePpi": 174.1,
+          "boxIn": {
+            "x": 5.418,
+            "y": 3.015,
+            "width": 1.654,
+            "height": 4.25
+          },
+          "fit": 1,
+          "mirrored": false,
+          "layer": "front"
+        },
+        "monster": {
+          "effectivePpi": 329.1,
+          "boxIn": {
+            "x": 1.23,
+            "y": 3.886,
+            "width": 2.89,
+            "height": 3.209
+          },
+          "fit": 1,
+          "mirrored": false,
+          "layer": "front"
+        },
+        "text": {
+          "fontSize": 17,
+          "lines": 4,
+          "panelIn": {
+            "x": 0.625,
+            "y": 0.625,
+            "width": 7.5,
+            "height": 2.024
+          }
+        },
+        "issues": [
+          "background 101.4 PPI (< 300)",
+          "child 174.1 PPI (< 300)"
+        ],
+        "imagePixels": [
+          2625,
+          2625
+        ]
+      },
+      {
+        "number": 16,
+        "template": "story",
+        "notes": [],
+        "background": {
+          "placeholder": false,
+          "origin": "assets/storybook/halloween-monster-night/pages-16-17-environment-v1.png",
+          "label": "pages-16-17-environment-v1.png",
+          "spreadHalf": "left",
+          "sourcePixels": [
+            1774,
+            887
+          ],
+          "effectivePpi": 101.4
+        },
+        "child": {
+          "effectivePpi": 176.2,
+          "boxIn": {
+            "x": 5.428,
+            "y": 3.066,
+            "width": 1.634,
+            "height": 4.199
+          },
+          "fit": 0.868,
+          "mirrored": false,
+          "layer": "front"
+        },
+        "monster": {
+          "effectivePpi": 294.4,
+          "boxIn": {
+            "x": 1.23,
+            "y": 3.508,
+            "width": 3.23,
+            "height": 3.587
+          },
+          "fit": 1,
+          "mirrored": true,
+          "layer": "front"
+        },
+        "text": {
+          "fontSize": 17,
+          "lines": 5,
+          "panelIn": {
+            "x": 0.625,
+            "y": 0.625,
+            "width": 7.5,
+            "height": 2.341
+          }
+        },
+        "issues": [
+          "background 101.4 PPI (< 300)",
+          "child 176.2 PPI (< 300)",
+          "monster 294.4 PPI (< 300)"
+        ],
+        "imagePixels": [
+          2625,
+          2625
+        ]
+      },
+      {
+        "number": 17,
+        "template": "story",
+        "notes": [],
+        "background": {
+          "placeholder": false,
+          "origin": "assets/storybook/halloween-monster-night/pages-16-17-environment-v1.png",
+          "label": "pages-16-17-environment-v1.png",
+          "spreadHalf": "right",
+          "sourcePixels": [
+            1774,
+            887
+          ],
+          "effectivePpi": 101.4
+        },
+        "child": {
+          "effectivePpi": 153,
+          "boxIn": {
+            "x": 1.564,
+            "y": 2.429,
+            "width": 1.882,
+            "height": 4.836
+          },
+          "fit": 1,
+          "mirrored": true,
+          "layer": "front"
+        },
+        "monster": {
+          "effectivePpi": 294.4,
+          "boxIn": {
+            "x": 4.29,
+            "y": 3.508,
+            "width": 3.23,
+            "height": 3.587
+          },
+          "fit": 1,
+          "mirrored": false,
+          "layer": "front"
+        },
+        "text": {
+          "fontSize": 17,
+          "lines": 3,
+          "panelIn": {
+            "x": 0.625,
+            "y": 0.625,
+            "width": 7.5,
+            "height": 1.602
+          }
+        },
+        "issues": [
+          "background 101.4 PPI (< 300)",
+          "child 153 PPI (< 300)",
+          "monster 294.4 PPI (< 300)"
+        ],
+        "imagePixels": [
+          2625,
+          2625
+        ]
+      },
+      {
+        "number": 18,
+        "template": "story",
+        "notes": [],
+        "background": {
+          "placeholder": false,
+          "origin": "assets/storybook/halloween-monster-night/pages-18-19-environment-v1.png",
+          "label": "pages-18-19-environment-v1.png",
+          "spreadHalf": "left",
+          "sourcePixels": [
+            1774,
+            887
+          ],
+          "effectivePpi": 101.4
+        },
+        "child": {
+          "effectivePpi": 190.6,
+          "boxIn": {
+            "x": 1.749,
+            "y": 3.382,
+            "width": 1.511,
+            "height": 3.883
+          },
+          "fit": 0.855,
+          "mirrored": true,
+          "layer": "front"
+        },
+        "monster": {
+          "effectivePpi": 310.8,
+          "boxIn": {
+            "x": 4.205,
+            "y": 3.697,
+            "width": 3.06,
+            "height": 3.398
+          },
+          "fit": 1,
+          "mirrored": true,
+          "layer": "front"
+        },
+        "text": {
+          "fontSize": 17,
+          "lines": 6,
+          "panelIn": {
+            "x": 0.625,
+            "y": 0.625,
+            "width": 7.5,
+            "height": 2.657
+          }
+        },
+        "issues": [
+          "background 101.4 PPI (< 300)",
+          "child 190.6 PPI (< 300)"
+        ],
+        "imagePixels": [
+          2625,
+          2625
+        ]
+      },
+      {
+        "number": 19,
+        "template": "story",
+        "notes": [],
+        "background": {
+          "placeholder": false,
+          "origin": "assets/storybook/halloween-monster-night/pages-18-19-environment-v1.png",
+          "label": "pages-18-19-environment-v1.png",
+          "spreadHalf": "right",
+          "sourcePixels": [
+            1774,
+            887
+          ],
+          "effectivePpi": 101.4
+        },
+        "child": {
+          "effectivePpi": 162.9,
+          "boxIn": {
+            "x": 5.361,
+            "y": 2.722,
+            "width": 1.768,
+            "height": 4.543
+          },
+          "fit": 1,
+          "mirrored": false,
+          "layer": "front"
+        },
+        "monster": {
+          "effectivePpi": 310.8,
+          "boxIn": {
+            "x": 1.485,
+            "y": 3.697,
+            "width": 3.06,
+            "height": 3.398
+          },
+          "fit": 1,
+          "mirrored": false,
+          "layer": "front"
+        },
+        "text": {
+          "fontSize": 17,
+          "lines": 3,
+          "panelIn": {
+            "x": 0.625,
+            "y": 0.625,
+            "width": 7.5,
+            "height": 1.602
+          }
+        },
+        "issues": [
+          "background 101.4 PPI (< 300)",
+          "child 162.9 PPI (< 300)"
+        ],
+        "imagePixels": [
+          2625,
+          2625
+        ]
+      },
+      {
+        "number": 20,
+        "template": "story",
+        "notes": [],
+        "background": {
+          "placeholder": false,
+          "origin": "assets/storybook/halloween-monster-night/pages-20-21-environment-v1.png",
+          "label": "pages-20-21-environment-v1.png",
+          "spreadHalf": "left",
+          "sourcePixels": [
+            1774,
+            887
+          ],
+          "effectivePpi": 101.4
+        },
+        "monster": {
+          "effectivePpi": 319.7,
+          "boxIn": {
+            "x": 1.187,
+            "y": 3.792,
+            "width": 2.975,
+            "height": 3.303
+          },
+          "fit": 1,
+          "mirrored": true,
+          "layer": "behind"
+        },
+        "child": {
+          "effectivePpi": 180.7,
+          "boxIn": {
+            "x": 5.448,
+            "y": 3.17,
+            "width": 1.594,
+            "height": 4.095
+          },
+          "fit": 0.932,
+          "mirrored": false,
+          "layer": "front"
+        },
+        "text": {
+          "fontSize": 17,
+          "lines": 6,
+          "panelIn": {
+            "x": 0.625,
+            "y": 0.625,
+            "width": 7.5,
+            "height": 2.445
+          }
+        },
+        "issues": [
+          "background 101.4 PPI (< 300)",
+          "child 180.7 PPI (< 300)"
+        ],
+        "imagePixels": [
+          2625,
+          2625
+        ]
+      },
+      {
+        "number": 21,
+        "template": "story",
+        "notes": [],
+        "background": {
+          "placeholder": false,
+          "origin": "assets/storybook/halloween-monster-night/pages-20-21-environment-v1.png",
+          "label": "pages-20-21-environment-v1.png",
+          "spreadHalf": "right",
+          "sourcePixels": [
+            1774,
+            887
+          ],
+          "effectivePpi": 101.4
+        },
+        "monster": {
+          "effectivePpi": 319.7,
+          "boxIn": {
+            "x": 4.588,
+            "y": 3.792,
+            "width": 2.975,
+            "height": 3.303
+          },
+          "fit": 1,
+          "mirrored": false,
+          "layer": "behind"
+        },
+        "child": {
+          "effectivePpi": 168.3,
+          "boxIn": {
+            "x": 1.649,
+            "y": 2.868,
+            "width": 1.711,
+            "height": 4.397
+          },
+          "fit": 1,
+          "mirrored": true,
+          "layer": "front"
+        },
+        "text": {
+          "fontSize": 17,
+          "lines": 3,
+          "panelIn": {
+            "x": 0.625,
+            "y": 0.625,
+            "width": 7.5,
+            "height": 1.495
+          }
+        },
+        "issues": [
+          "background 101.4 PPI (< 300)",
+          "child 168.3 PPI (< 300)"
+        ],
+        "imagePixels": [
+          2625,
+          2625
+        ]
+      },
+      {
+        "number": 22,
+        "template": "story",
+        "notes": [],
+        "background": {
+          "placeholder": false,
+          "origin": "assets/storybook/halloween-monster-night/pages-22-23-environment-v1.png",
+          "label": "pages-22-23-environment-v1.png",
+          "spreadHalf": "left",
+          "sourcePixels": [
+            1774,
+            887
+          ],
+          "effectivePpi": 101.4
+        },
+        "child": {
+          "effectivePpi": 186.6,
+          "boxIn": {
+            "x": 1.733,
+            "y": 2.959,
+            "width": 1.543,
+            "height": 3.966
+          },
+          "fit": 0.933,
+          "mirrored": true,
+          "layer": "front"
+        },
+        "monster": {
+          "effectivePpi": 329.1,
+          "boxIn": {
+            "x": 4.63,
+            "y": 3.546,
+            "width": 2.89,
+            "height": 3.209
+          },
+          "fit": 1,
+          "mirrored": true,
+          "layer": "front"
+        },
+        "text": {
+          "fontSize": 17,
+          "lines": 5,
+          "panelIn": {
+            "x": 0.625,
+            "y": 0.625,
+            "width": 7.5,
+            "height": 2.234
+          }
+        },
+        "issues": [
+          "background 101.4 PPI (< 300)",
+          "child 186.6 PPI (< 300)"
+        ],
+        "imagePixels": [
+          2625,
+          2625
+        ]
+      },
+      {
+        "number": 23,
+        "template": "story",
+        "notes": [],
+        "background": {
+          "placeholder": false,
+          "origin": "assets/storybook/halloween-monster-night/pages-22-23-environment-v1.png",
+          "label": "pages-22-23-environment-v1.png",
+          "spreadHalf": "right",
+          "sourcePixels": [
+            1774,
+            887
+          ],
+          "effectivePpi": 101.4
+        },
+        "child": {
+          "effectivePpi": 174.1,
+          "boxIn": {
+            "x": 5.418,
+            "y": 2.675,
+            "width": 1.654,
+            "height": 4.25
+          },
+          "fit": 1,
+          "mirrored": false,
+          "layer": "front"
+        },
+        "monster": {
+          "effectivePpi": 329.1,
+          "boxIn": {
+            "x": 1.23,
+            "y": 3.546,
+            "width": 2.89,
+            "height": 3.209
+          },
+          "fit": 1,
+          "mirrored": false,
+          "layer": "front"
+        },
+        "text": {
+          "fontSize": 17,
+          "lines": 4,
+          "panelIn": {
+            "x": 0.625,
+            "y": 0.625,
+            "width": 7.5,
+            "height": 1.918
+          }
+        },
+        "issues": [
+          "background 101.4 PPI (< 300)",
+          "child 174.1 PPI (< 300)"
+        ],
+        "imagePixels": [
+          2625,
+          2625
+        ]
+      },
+      {
+        "number": 24,
+        "template": "story",
+        "notes": [],
+        "background": {
+          "placeholder": false,
+          "origin": "assets/storybook/halloween-monster-night/pages-24-25-environment-v1.png",
+          "label": "pages-24-25-environment-v1.png",
+          "spreadHalf": "left",
+          "sourcePixels": [
+            1774,
+            887
+          ],
+          "effectivePpi": 101.4
+        },
+        "child": {
+          "effectivePpi": 172.8,
+          "boxIn": {
+            "x": 5.412,
+            "y": 2.643,
+            "width": 1.666,
+            "height": 4.282
+          },
+          "fit": 0.885,
+          "mirrored": false,
+          "layer": "front"
+        },
+        "monster": {
+          "effectivePpi": 294.4,
+          "boxIn": {
+            "x": 1.23,
+            "y": 3.168,
+            "width": 3.23,
+            "height": 3.587
+          },
+          "fit": 1,
+          "mirrored": true,
+          "layer": "front"
+        },
+        "text": {
+          "fontSize": 17,
+          "lines": 4,
+          "panelIn": {
+            "x": 0.625,
+            "y": 0.625,
+            "width": 7.5,
+            "height": 1.918
+          }
+        },
+        "issues": [
+          "background 101.4 PPI (< 300)",
+          "child 172.8 PPI (< 300)",
+          "monster 294.4 PPI (< 300)"
+        ],
+        "imagePixels": [
+          2625,
+          2625
+        ]
+      },
+      {
+        "number": 25,
+        "template": "story",
+        "notes": [],
+        "background": {
+          "placeholder": false,
+          "origin": "assets/storybook/halloween-monster-night/pages-24-25-environment-v1.png",
+          "label": "pages-24-25-environment-v1.png",
+          "spreadHalf": "right",
+          "sourcePixels": [
+            1774,
+            887
+          ],
+          "effectivePpi": 101.4
+        },
+        "child": {
+          "effectivePpi": 160.9,
+          "boxIn": {
+            "x": 1.61,
+            "y": 2.327,
+            "width": 1.79,
+            "height": 4.598
+          },
+          "fit": 0.951,
+          "mirrored": true,
+          "layer": "front"
+        },
+        "monster": {
+          "effectivePpi": 294.4,
+          "boxIn": {
+            "x": 4.29,
+            "y": 3.168,
+            "width": 3.23,
+            "height": 3.587
+          },
+          "fit": 1,
+          "mirrored": false,
+          "layer": "front"
+        },
+        "text": {
+          "fontSize": 17,
+          "lines": 3,
+          "panelIn": {
+            "x": 0.625,
+            "y": 0.625,
+            "width": 7.5,
+            "height": 1.602
+          }
+        },
+        "issues": [
+          "background 101.4 PPI (< 300)",
+          "child 160.9 PPI (< 300)",
+          "monster 294.4 PPI (< 300)"
+        ],
+        "imagePixels": [
+          2625,
+          2625
+        ]
+      },
+      {
+        "number": 26,
+        "template": "story",
+        "notes": [],
+        "background": {
+          "placeholder": false,
+          "origin": "assets/storybook/halloween-monster-night/pages-26-27-environment-v1.png",
+          "label": "pages-26-27-environment-v1.png",
+          "spreadHalf": "left",
+          "sourcePixels": [
+            1774,
+            887
+          ],
+          "effectivePpi": 101.4
+        },
+        "child": {
+          "effectivePpi": 186.6,
+          "boxIn": {
+            "x": 1.733,
+            "y": 2.959,
+            "width": 1.543,
+            "height": 3.966
+          },
+          "fit": 0.873,
+          "mirrored": true,
+          "layer": "front"
+        },
+        "monster": {
+          "effectivePpi": 310.8,
+          "boxIn": {
+            "x": 4.205,
+            "y": 3.357,
+            "width": 3.06,
+            "height": 3.398
+          },
+          "fit": 1,
+          "mirrored": true,
+          "layer": "front"
+        },
+        "text": {
+          "fontSize": 17,
+          "lines": 5,
+          "panelIn": {
+            "x": 0.625,
+            "y": 0.625,
+            "width": 7.5,
+            "height": 2.234
+          }
+        },
+        "issues": [
+          "background 101.4 PPI (< 300)",
+          "child 186.6 PPI (< 300)"
+        ],
+        "imagePixels": [
+          2625,
+          2625
+        ]
+      },
+      {
+        "number": 27,
+        "template": "story",
+        "notes": [],
+        "background": {
+          "placeholder": false,
+          "origin": "assets/storybook/halloween-monster-night/pages-26-27-environment-v1.png",
+          "label": "pages-26-27-environment-v1.png",
+          "spreadHalf": "right",
+          "sourcePixels": [
+            1774,
+            887
+          ],
+          "effectivePpi": 101.4
+        },
+        "child": {
+          "effectivePpi": 172.8,
+          "boxIn": {
+            "x": 5.412,
+            "y": 2.643,
+            "width": 1.666,
+            "height": 4.282
+          },
+          "fit": 0.943,
+          "mirrored": false,
+          "layer": "front"
+        },
+        "monster": {
+          "effectivePpi": 310.8,
+          "boxIn": {
+            "x": 1.485,
+            "y": 3.357,
+            "width": 3.06,
+            "height": 3.398
+          },
+          "fit": 1,
+          "mirrored": false,
+          "layer": "front"
+        },
+        "text": {
+          "fontSize": 17,
+          "lines": 4,
+          "panelIn": {
+            "x": 0.625,
+            "y": 0.625,
+            "width": 7.5,
+            "height": 1.918
+          }
+        },
+        "issues": [
+          "background 101.4 PPI (< 300)",
+          "child 172.8 PPI (< 300)"
+        ],
+        "imagePixels": [
+          2625,
+          2625
+        ]
+      },
+      {
+        "number": 28,
+        "template": "story",
+        "notes": [],
+        "background": {
+          "placeholder": false,
+          "origin": "assets/storybook/halloween-monster-night/pages-28-29-environment-v1.png",
+          "label": "pages-28-29-environment-v1.png",
+          "spreadHalf": "left",
+          "sourcePixels": [
+            1774,
+            887
+          ],
+          "effectivePpi": 101.4
+        },
+        "child": {
+          "effectivePpi": 171.9,
+          "boxIn": {
+            "x": 5.407,
+            "y": 2.959,
+            "width": 1.676,
+            "height": 4.306
+          },
+          "fit": 0.979,
+          "mirrored": false,
+          "layer": "front"
+        },
+        "monster": {
+          "effectivePpi": 319.7,
+          "boxIn": {
+            "x": 1.187,
+            "y": 3.792,
+            "width": 2.975,
+            "height": 3.303
+          },
+          "fit": 1,
+          "mirrored": true,
+          "layer": "front"
+        },
+        "text": {
+          "fontSize": 17,
+          "lines": 5,
+          "panelIn": {
+            "x": 0.625,
+            "y": 0.625,
+            "width": 7.5,
+            "height": 2.234
+          }
+        },
+        "issues": [
+          "background 101.4 PPI (< 300)",
+          "child 171.9 PPI (< 300)"
+        ],
+        "imagePixels": [
+          2625,
+          2625
+        ]
+      },
+      {
+        "number": 29,
+        "template": "story",
+        "notes": [],
+        "background": {
+          "placeholder": false,
+          "origin": "assets/storybook/halloween-monster-night/pages-28-29-environment-v1.png",
+          "label": "pages-28-29-environment-v1.png",
+          "spreadHalf": "right",
+          "sourcePixels": [
+            1774,
+            887
+          ],
+          "effectivePpi": 101.4
+        },
+        "child": {
+          "effectivePpi": 168.3,
+          "boxIn": {
+            "x": 1.649,
+            "y": 2.868,
+            "width": 1.711,
+            "height": 4.397
+          },
+          "fit": 1,
+          "mirrored": true,
+          "layer": "front"
+        },
+        "monster": {
+          "effectivePpi": 319.7,
+          "boxIn": {
+            "x": 4.588,
+            "y": 3.792,
+            "width": 2.975,
+            "height": 3.303
+          },
+          "fit": 1,
+          "mirrored": false,
+          "layer": "front"
+        },
+        "text": {
+          "fontSize": 17,
+          "lines": 4,
+          "panelIn": {
+            "x": 0.625,
+            "y": 0.625,
+            "width": 7.5,
+            "height": 1.918
+          }
+        },
+        "issues": [
+          "background 101.4 PPI (< 300)",
+          "child 168.3 PPI (< 300)"
+        ],
+        "imagePixels": [
+          2625,
+          2625
+        ]
+      },
+      {
+        "number": 30,
+        "template": "story",
+        "notes": [],
+        "background": {
+          "placeholder": false,
+          "origin": "assets/storybook/halloween-monster-night/pages-30-31-environment-v1.png",
+          "label": "pages-30-31-environment-v1.png",
+          "spreadHalf": "left",
+          "sourcePixels": [
+            1774,
+            887
+          ],
+          "effectivePpi": 101.4
+        },
+        "child": {
+          "effectivePpi": 178.6,
+          "boxIn": {
+            "x": 1.699,
+            "y": 3.121,
+            "width": 1.613,
+            "height": 4.144
+          },
+          "fit": 0.975,
+          "mirrored": true,
+          "layer": "front"
+        },
+        "monster": {
+          "effectivePpi": 329.1,
+          "boxIn": {
+            "x": 4.63,
+            "y": 3.886,
+            "width": 2.89,
+            "height": 3.209
+          },
+          "fit": 1,
+          "mirrored": true,
+          "layer": "front"
+        },
+        "text": {
+          "fontSize": 15,
+          "lines": 6,
+          "panelIn": {
+            "x": 0.625,
+            "y": 0.625,
+            "width": 7.5,
+            "height": 2.396
+          }
+        },
+        "issues": [
+          "background 101.4 PPI (< 300)",
+          "child 178.6 PPI (< 300)"
+        ],
+        "imagePixels": [
+          2625,
+          2625
+        ]
+      },
+      {
+        "number": 31,
+        "template": "story",
+        "notes": [],
+        "background": {
+          "placeholder": false,
+          "origin": "assets/storybook/halloween-monster-night/pages-30-31-environment-v1.png",
+          "label": "pages-30-31-environment-v1.png",
+          "spreadHalf": "right",
+          "sourcePixels": [
+            1774,
+            887
+          ],
+          "effectivePpi": 101.4
+        },
+        "child": {
+          "effectivePpi": 174.1,
+          "boxIn": {
+            "x": 5.418,
+            "y": 3.015,
+            "width": 1.654,
+            "height": 4.25
+          },
+          "fit": 1,
+          "mirrored": false,
+          "layer": "front"
+        },
+        "monster": {
+          "effectivePpi": 329.1,
+          "boxIn": {
+            "x": 1.23,
+            "y": 3.886,
+            "width": 2.89,
+            "height": 3.209
+          },
+          "fit": 1,
+          "mirrored": false,
+          "layer": "front"
+        },
+        "text": {
+          "fontSize": 17,
+          "lines": 3,
+          "panelIn": {
+            "x": 0.625,
+            "y": 0.625,
+            "width": 7.5,
+            "height": 1.602
+          }
+        },
+        "issues": [
+          "background 101.4 PPI (< 300)",
+          "child 174.1 PPI (< 300)"
+        ],
+        "imagePixels": [
+          2625,
+          2625
+        ]
+      },
+      {
+        "number": 32,
+        "template": "meet-monster",
+        "notes": [],
+        "background": {
+          "placeholder": true
+        },
+        "text": {
+          "lines": 3,
+          "panelIn": {
+            "x": 0.625,
+            "y": 0.625,
+            "width": 7.5,
+            "height": 1.945
+          }
+        },
+        "frames": [
+          {
+            "effectivePpi": 77.6
+          },
+          {
+            "effectivePpi": 285.2
+          }
+        ],
+        "issues": [
+          "placeholder background",
+          "framed image 77.6 PPI (< 300)",
+          "framed image 285.2 PPI (< 300)"
+        ],
+        "imagePixels": [
+          2625,
+          2625
+        ]
+      }
+    ],
+    "warnings": [],
+    "blockers": [
+      "page 1: placeholder background",
+      "page 2: placeholder background",
+      "page 2: framed image 92.4 PPI (< 300)",
+      "page 3: placeholder background",
+      "page 4: background 101.4 PPI (< 300)",
+      "page 4: child 168.3 PPI (< 300)",
+      "page 5: background 101.4 PPI (< 300)",
+      "page 5: child 168.3 PPI (< 300)",
+      "page 6: background 101.4 PPI (< 300)",
+      "page 6: child 174.1 PPI (< 300)",
+      "page 7: background 101.4 PPI (< 300)",
+      "page 7: child 174.1 PPI (< 300)",
+      "page 8: background 101.4 PPI (< 300)",
+      "page 8: child 171.9 PPI (< 300)",
+      "page 8: monster 294.4 PPI (< 300)",
+      "page 9: background 101.4 PPI (< 300)",
+      "page 9: child 176.2 PPI (< 300)",
+      "page 9: monster 294.4 PPI (< 300)",
+      "page 10: background 101.4 PPI (< 300)",
+      "page 10: child 162.9 PPI (< 300)",
+      "page 11: background 101.4 PPI (< 300)",
+      "page 11: child 162.9 PPI (< 300)",
+      "page 12: background 101.4 PPI (< 300)",
+      "page 12: child 191.5 PPI (< 300)",
+      "page 13: background 101.4 PPI (< 300)",
+      "page 13: child 168.3 PPI (< 300)",
+      "page 14: background 101.4 PPI (< 300)",
+      "page 14: child 174.1 PPI (< 300)",
+      "page 15: background 101.4 PPI (< 300)",
+      "page 15: child 174.1 PPI (< 300)",
+      "page 16: background 101.4 PPI (< 300)",
+      "page 16: child 176.2 PPI (< 300)",
+      "page 16: monster 294.4 PPI (< 300)",
+      "page 17: background 101.4 PPI (< 300)",
+      "page 17: child 153 PPI (< 300)",
+      "page 17: monster 294.4 PPI (< 300)",
+      "page 18: background 101.4 PPI (< 300)",
+      "page 18: child 190.6 PPI (< 300)",
+      "page 19: background 101.4 PPI (< 300)",
+      "page 19: child 162.9 PPI (< 300)",
+      "page 20: background 101.4 PPI (< 300)",
+      "page 20: child 180.7 PPI (< 300)",
+      "page 21: background 101.4 PPI (< 300)",
+      "page 21: child 168.3 PPI (< 300)",
+      "page 22: background 101.4 PPI (< 300)",
+      "page 22: child 186.6 PPI (< 300)",
+      "page 23: background 101.4 PPI (< 300)",
+      "page 23: child 174.1 PPI (< 300)",
+      "page 24: background 101.4 PPI (< 300)",
+      "page 24: child 172.8 PPI (< 300)",
+      "page 24: monster 294.4 PPI (< 300)",
+      "page 25: background 101.4 PPI (< 300)",
+      "page 25: child 160.9 PPI (< 300)",
+      "page 25: monster 294.4 PPI (< 300)",
+      "page 26: background 101.4 PPI (< 300)",
+      "page 26: child 186.6 PPI (< 300)",
+      "page 27: background 101.4 PPI (< 300)",
+      "page 27: child 172.8 PPI (< 300)",
+      "page 28: background 101.4 PPI (< 300)",
+      "page 28: child 171.9 PPI (< 300)",
+      "page 29: background 101.4 PPI (< 300)",
+      "page 29: child 168.3 PPI (< 300)",
+      "page 30: background 101.4 PPI (< 300)",
+      "page 30: child 178.6 PPI (< 300)",
+      "page 31: background 101.4 PPI (< 300)",
+      "page 31: child 174.1 PPI (< 300)",
+      "page 32: placeholder background",
+      "page 32: framed image 77.6 PPI (< 300)",
+      "page 32: framed image 285.2 PPI (< 300)"
+    ],
+    "childAsset": {
+      "origin": "assets/child-characters/warm-curly-dark-v1.webp",
+      "method": "existing-alpha",
+      "label": "child",
+      "sourcePixels": [
+        512,
+        768
+      ],
+      "trimmedPixels": [
+        288,
+        740
+      ]
+    },
+    "monsterAsset": {
+      "origin": "assets/master-references/soft-3d-storybook-monster-01.png",
+      "method": "keyed-flat-background",
+      "label": "monster",
+      "keyColor": [
+        254,
+        254,
+        254
+      ],
+      "removedFraction": 0.5986,
+      "shadowFraction": 0.0197,
+      "sourcePixels": [
+        1254,
+        1254
+      ],
+      "trimmedPixels": [
+        951,
+        1056
+      ]
+    },
+    "bytes": 29642366
+  },
+  "covers": {
+    "softcover": {
+      "renderer": "personalized-composite-v1",
+      "type": "cover",
+      "mode": "proof",
+      "storySlug": "halloween-monster-night",
+      "layout": {
+        "binding": "paperback",
+        "podPackageId": "0850X0850.FC.PRE.PB.080CW444.MXX",
+        "pageCount": 32,
+        "spineIn": 0.13207207207207206,
+        "widthIn": 17.382072072072074,
+        "heightIn": 8.75,
+        "back": {
+          "x": 0.125,
+          "y": 0.125,
+          "width": 8.5,
+          "height": 8.5
+        },
+        "spine": {
+          "x": 8.625,
+          "y": 0.125,
+          "width": 0.13207207207207206,
+          "height": 8.5
+        },
+        "front": {
+          "x": 8.757072072072072,
+          "y": 0.125,
+          "width": 8.5,
+          "height": 8.5
+        },
+        "outerMarginIn": 0.125,
+        "frontSafe": {
+          "x": 9.382072072072072,
+          "y": 0.625,
+          "width": 7.375,
+          "height": 7.5
+        },
+        "backSafe": {
+          "x": 0.625,
+          "y": 0.625,
+          "width": 7.375,
+          "height": 7.5
+        },
+        "trimWidthIn": 8.5,
+        "trimHeightIn": 8.5,
+        "widthPt": 1251.5091891891893,
+        "heightPt": 630,
+        "widthPx": 5215,
+        "heightPx": 2625,
+        "spineTextAllowed": false,
+        "spineSafe": {
+          "x": 8.75,
+          "y": 0.625,
+          "width": 0,
+          "height": 7.5
+        },
+        "dpi": 300,
+        "source": "lulu-published-formula"
+      },
+      "warnings": [],
+      "blockers": [
+        "placeholder cover wrap background",
+        "front cover art 143.3 PPI (< 300)",
+        "cover monster 262.9 PPI (< 300)"
+      ],
+      "front": {
+        "origin": "assets/storybook/halloween-monster-night/covers/background-minimal-halloween-v3.png",
+        "effectivePpi": 143.3
+      },
+      "monsterAsset": {
+        "origin": "assets/master-references/soft-3d-storybook-monster-01.png",
+        "method": "keyed-flat-background",
+        "label": "monster",
+        "keyColor": [
+          254,
+          254,
+          254
+        ],
+        "removedFraction": 0.5986,
+        "shadowFraction": 0.0197,
+        "sourcePixels": [
+          1254,
+          1254
+        ],
+        "trimmedPixels": [
+          951,
+          1056
+        ]
+      },
+      "monster": {
+        "effectivePpi": 262.9,
+        "boxIn": {
+          "width": 3.617,
+          "height": 4.016,
+          "x": 11.261,
+          "y": 3.386
+        }
+      },
+      "spineText": "omitted (Lulu: no spine text at 32 pages)",
+      "bytes": 993363,
+      "imagePixels": [
+        5215,
+        2625
+      ]
+    },
+    "hardcover": {
+      "renderer": "personalized-composite-v1",
+      "type": "cover",
+      "mode": "proof",
+      "storySlug": "halloween-monster-night",
+      "layout": {
+        "binding": "hardcover-casewrap",
+        "podPackageId": "0850X0850.FC.PRE.CW.080CW444.MXX",
+        "pageCount": 32,
+        "spineIn": 0.25,
+        "widthIn": 19,
+        "heightIn": 10.25,
+        "back": {
+          "x": 0.75,
+          "y": 0.75,
+          "width": 8.625,
+          "height": 8.75
+        },
+        "spine": {
+          "x": 9.375,
+          "y": 0.75,
+          "width": 0.25,
+          "height": 8.75
+        },
+        "front": {
+          "x": 9.625,
+          "y": 0.75,
+          "width": 8.625,
+          "height": 8.75
+        },
+        "outerMarginIn": 0.75,
+        "frontSafe": {
+          "x": 10.125,
+          "y": 1.25,
+          "width": 7.625,
+          "height": 7.75
+        },
+        "backSafe": {
+          "x": 1.25,
+          "y": 1.25,
+          "width": 7.625,
+          "height": 7.75
+        },
+        "hingeIn": 0.25,
+        "trimWidthIn": 8.5,
+        "trimHeightIn": 8.5,
+        "widthPt": 1368,
+        "heightPt": 738,
+        "widthPx": 5700,
+        "heightPx": 3075,
+        "spineTextAllowed": false,
+        "spineSafe": {
+          "x": 9.5,
+          "y": 1.25,
+          "width": 0,
+          "height": 7.75
+        },
+        "dpi": 300,
+        "source": "lulu-published-formula"
+      },
+      "warnings": [],
+      "blockers": [
+        "placeholder cover wrap background",
+        "front cover art 122.3 PPI (< 300)",
+        "cover monster 247.5 PPI (< 300)"
+      ],
+      "front": {
+        "origin": "assets/storybook/halloween-monster-night/covers/background-minimal-halloween-v3.png",
+        "effectivePpi": 122.3
+      },
+      "monsterAsset": {
+        "origin": "assets/master-references/soft-3d-storybook-monster-01.png",
+        "method": "keyed-flat-background",
+        "label": "monster",
+        "keyColor": [
+          254,
+          254,
+          254
+        ],
+        "removedFraction": 0.5986,
+        "shadowFraction": 0.0197,
+        "sourcePixels": [
+          1254,
+          1254
+        ],
+        "trimmedPixels": [
+          951,
+          1056
+        ]
+      },
+      "monster": {
+        "effectivePpi": 247.5,
+        "boxIn": {
+          "width": 3.842,
+          "height": 4.266,
+          "x": 12.017,
+          "y": 4.011
+        }
+      },
+      "spineText": "omitted (Lulu: no spine text at 32 pages)",
+      "bytes": 1157635,
+      "imagePixels": [
+        5700,
+        3075
+      ]
+    }
+  }
+}
