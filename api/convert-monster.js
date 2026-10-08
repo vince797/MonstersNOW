@@ -16,6 +16,7 @@ const {
 } = require("../lib/monster-submissions");
 const { readJsonBody } = require("../lib/http");
 const { validateMonsterDrawing } = require("../lib/drawing-validator");
+const { enforceAiRateLimit, isAiLimitError, sendAiProtectionError } = require("../lib/ai-abuse-protection");
 
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 const IMAGE_MODEL = process.env.OPENAI_IMAGE_MODEL || "gpt-image-1.5";
@@ -79,6 +80,8 @@ module.exports = async function handler(request, response) {
   let previewRecord;
   try {
     await requireSubmission(submissionId, submissionToken);
+    // Checked before any OpenAI call (including drawing validation).
+    await enforceAiRateLimit(request, { scope: "monster", sessionId: submissionId });
     const startedAt = Date.now();
     await validateMonsterDrawing(drawing, {
       timeoutMs: Math.min(12 * 1000, getRemainingRequestBudget(startedAt)),
@@ -127,6 +130,7 @@ module.exports = async function handler(request, response) {
         : "Monster preview created. Coloring page will be prepared in the browser.",
     });
   } catch (error) {
+    if (isAiLimitError(error)) return sendAiProtectionError(response, error);
     await failMonsterPreview({ submissionId, previewId: previewRecord?.id, code: error?.code });
     console.error("Monster preview generation failed", formatErrorForLog(error));
 
