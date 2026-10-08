@@ -40,6 +40,17 @@ Without `OPENAI_API_KEY`, the API route returns a configuration error. This
 prevents the UI from showing sample artwork as if it came from a customer's
 upload.
 
+Optional AI abuse-protection variables (see `docs/AI_ABUSE_PROTECTION.md`):
+
+```text
+AI_GLOBAL_DAILY_LIMIT        # default 1000 AI requests per UTC day; "off" disables
+AI_RATE_LIMITS_ENABLED       # set to "false" only in an emergency
+AI_RATE_LIMIT_SECRET         # optional IP-hash key; defaults to ORDER_ACCESS_SECRET
+TURNSTILE_ENABLED            # "true" to require Cloudflare Turnstile on drawing uploads
+TURNSTILE_SITE_KEY
+TURNSTILE_SECRET_KEY
+```
+
 ## Storybook checkout and interest variables
 
 The create flow starts with Stripe Checkout and falls back to a server-side

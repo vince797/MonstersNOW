@@ -2,6 +2,7 @@ const { buildChildCharacterRenderPrompt, CHILD_CHARACTER_NEGATIVE_PROMPT } = req
 const { resolveChildCharacter } = require("../lib/child-characters");
 const { readJsonBody } = require("../lib/http");
 const { requireSubmission } = require("../lib/monster-submissions");
+const { enforceAiRateLimit, isAiLimitError, sendAiProtectionError } = require("../lib/ai-abuse-protection");
 const convertMonster = require("./convert-monster");
 
 const STYLE_REFERENCE = "assets/child-editor/feature-animation-character-reference-v1.png";
@@ -51,6 +52,7 @@ module.exports = async function handler(request, response) {
 
   try {
     await requireSubmission(payload.submissionId, payload.submissionToken);
+    await enforceAiRateLimit(request, { scope: "child", sessionId: payload.submissionId });
     const profile = resolveChildCharacter(payload.profile);
     let previousReference = null;
     if (payload.previousChildImage) {
@@ -90,6 +92,7 @@ module.exports = async function handler(request, response) {
       styleLabel: "Feature-animation storybook character",
     });
   } catch (error) {
+    if (isAiLimitError(error)) return sendAiProtectionError(response, error);
     console.error("Child character render failed", convertMonster.formatErrorForLog(error));
     const clientError = error.status >= 400 && error.status < 500;
     return response.status(clientError ? error.status : 502).json({

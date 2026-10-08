@@ -87,3 +87,26 @@ test("print modules keep the project root opaque to Vercel's file tracer", () =>
     assert.doesNotMatch(source, /path\.(resolve|join)\(__dirname/, `${file} must use repoRoot()`);
   }
 });
+
+test("signed print URLs carry the order's saved child render so the compositor uses it", () => {
+  const previous = process.env.STORYBOOK_PRINT_FILE_SECRET;
+  process.env.STORYBOOK_PRINT_FILE_SECRET = "print-url-child-test-secret";
+  try {
+    const { buildSignedPrintFileUrl, verifySignedPrintFileQuery } = require("../lib/storybook-print-urls");
+    const request = { headers: { host: "www.monstersnow.com", "x-forwarded-proto": "https" } };
+    const base = { submissionId: "order-1", childName: "Sam", storyId: "halloween-monster-night", childCharacter: { id: "light-short-brown" } };
+    const childImagePath = "123e4567-e89b-42d3-a456-426614174000/child/abc123.webp";
+    const withChild = new URL(buildSignedPrintFileUrl({ request, type: "interior", submission: { ...base, childImagePath }, variant: { id: "softcover" }, pageCount: 32 }));
+    const verified = verifySignedPrintFileQuery(Object.fromEntries(withChild.searchParams));
+    assert.equal(verified.childImagePath, childImagePath);
+    const tampered = Object.fromEntries(withChild.searchParams);
+    tampered.child_image_path = "123e4567-e89b-42d3-a456-426614174000/original.png";
+    assert.throws(() => verifySignedPrintFileQuery(tampered), /Invalid signed print file URL/);
+    // Orders without a saved render keep the previous URL shape.
+    const withoutChild = new URL(buildSignedPrintFileUrl({ request, type: "interior", submission: base, variant: { id: "softcover" }, pageCount: 32 }));
+    assert.equal(withoutChild.searchParams.has("child_image_path"), false);
+    assert.equal(verifySignedPrintFileQuery(Object.fromEntries(withoutChild.searchParams)).childImagePath, "");
+  } finally {
+    if (previous === undefined) delete process.env.STORYBOOK_PRINT_FILE_SECRET; else process.env.STORYBOOK_PRINT_FILE_SECRET = previous;
+  }
+});

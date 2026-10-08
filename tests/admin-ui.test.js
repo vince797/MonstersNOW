@@ -40,9 +40,9 @@ test("admin sign-in uses the MonstersNOW purple, orange, and teal identity", () 
 
 test("admin book workspace groups status, review files, and the next action", () => {
   assert.match(adminMarkup, /admin-books\.css\?v=20261004-book-workspace/);
-  assert.match(adminMarkup, /Books &amp; stories/);
+  assert.match(adminMarkup, /data-admin-view="stories"><span aria-hidden="true">▤<\/span>Books /);
   assert.match(adminMarkup, /Review &amp; print/);
-  assert.match(adminMarkup, /Artwork &amp; monsters/);
+  assert.match(adminMarkup, /data-admin-view="monsters"><span aria-hidden="true">●<\/span>Monsters /);
   assert.match(adminMarkup, /id="book-workspace-summary"/);
   assert.match(adminMarkup, /id="book-review-files-list"/);
   assert.match(adminScript, /function renderBookWorkspace/);

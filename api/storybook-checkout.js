@@ -11,7 +11,7 @@ const {
 } = require("../lib/stripe-checkout");
 const { attachCheckoutSession, recordCheckoutOrder } = require("../lib/order-library");
 const { deriveOrderAccess } = require("../lib/customer-orders");
-const { getAdminMonsterAssets, requireSubmission } = require("../lib/monster-submissions");
+const { getAdminMonsterAssets, requireSubmission, saveCheckoutChildImage } = require("../lib/monster-submissions");
 const { listStories, validateStoryPublishReadiness } = require("../lib/story-library");
 const { buildHalloweenProof, verifyProof, STORY_ID, TITLE } = require("../lib/halloween-proof");
 
@@ -101,7 +101,11 @@ module.exports = async function handler(request, response) {
 
     // Persist the initial order before opening a payment session. Stripe
     // idempotency and the deterministic submission identity make retries safe.
-    const initialOrder = await recordCheckoutOrder(submission, null, { orderAccessTokenHash: access.tokenHash });
+    // Pin the exact child render the customer approved in the signed proof.
+    const childImagePath = submission.personalization.childCharacter?.included && proof.childImage
+      ? await saveCheckoutChildImage({ submissionId: submission.submissionId, monsterSubmissionId: submission.monsterSubmissionId, childImage: proof.childImage })
+      : null;
+    const initialOrder = await recordCheckoutOrder(submission, null, { orderAccessTokenHash: access.tokenHash, childImagePath });
     if (!initialOrder || initialOrder.status !== "checkout_started") {
       const error = new Error("This order has already moved beyond checkout.");
       error.status = 409;

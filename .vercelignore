@@ -14,3 +14,4 @@ docs/
 scripts/build_*.py
 scripts/__pycache__/
 samples/
+screens/
