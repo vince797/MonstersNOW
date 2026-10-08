@@ -23,7 +23,7 @@
       "includeFiles": "assets/master-references/**"
     },
     "api/render-child-character.js": {
-      "maxDuration": 60,
+      "maxDuration": 150,
       "includeFiles": "assets/child-editor/**"
     },
     "api/convert-heic.js": {

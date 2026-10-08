@@ -1,42 +1,39 @@
 (() => {
   const storageKey = "monstersnow_child_character_profile_v3";
-  const ageLabels = { "2-4": "Ages 2–4", "5-6": "Ages 5–6", "7-8": "Ages 7–8" };
-  const heightLabels = { shorter: "Shorter", average: "About average", taller: "Taller" };
-  const mobilityLabels = { none: "Standing", wheelchair: "Wheelchair", "forearm-crutches": "Forearm crutches" };
+  const DETAIL_MAX = 80;
   const optionLabels = {
-    presentation: { boy: "Boy", girl: "Girl" },
-    skinTone: { light: "Light", golden: "Golden", medium: "Medium", warm: "Warm brown", deep: "Deep" },
-    hairStyle: { short: "Short", curly: "Curls", coils: "Coils", wavy: "Waves", straight: "Straight", braids: "Braids" },
-    hairColor: { black: "Black", "dark-brown": "Dark brown", brown: "Brown", auburn: "Auburn", blonde: "Blonde" },
+    presentation: { boy: "Boy", girl: "Girl", neutral: "Kid" },
+    skinTone: { porcelain: "Porcelain", light: "Light", peach: "Peach", golden: "Golden", olive: "Olive", medium: "Medium", tan: "Tan", warm: "Warm brown", deep: "Deep", rich: "Rich deep" },
+    hairStyle: { short: "Short", curly: "Curls", coils: "Coils", wavy: "Waves", straight: "Straight", braids: "Braids", locs: "Locs", ponytail: "Ponytail", puffs: "Puffs", buzz: "Buzz cut" },
+    hairColor: { black: "Black", "dark-brown": "Dark brown", brown: "Brown", auburn: "Auburn", red: "Red / ginger", blonde: "Blonde", platinum: "Platinum" },
     eyeColor: { brown: "Brown", hazel: "Hazel", green: "Green", blue: "Blue", gray: "Gray" },
-    outfitStyle: { overalls: "Overalls", hoodie: "Hoodie", tee: "T-shirt", dress: "Dress" },
+    outfitStyle: { overalls: "Overalls", hoodie: "Hoodie", tee: "T-shirt", dress: "Dress", sweater: "Sweater & jeans", jacket: "Rain jacket", shorts: "Shorts & tee", costume: "Halloween costume" },
     outfitColor: { teal: "Teal", orange: "Orange", purple: "Purple", blue: "Blue", rose: "Rose", green: "Green" },
+    costume: { pumpkin: "Pumpkin", witch: "Witch or wizard", superhero: "Superhero", dinosaur: "Dinosaur", astronaut: "Astronaut", cat: "Black cat" },
+    glasses: { none: "No glasses", round: "Round glasses", square: "Square glasses" },
+    hearingAid: { none: "None", "hearing-aids": "Hearing aids", cochlear: "Cochlear implant" },
+    headwear: { none: "None", hijab: "Hijab", patka: "Patka / turban", headwrap: "Head wrap", kippah: "Kippah", beanie: "Beanie", cap: "Baseball cap" },
+    faceDetail: { none: "None", freckles: "Freckles", birthmark: "Birthmark", "freckles-birthmark": "Freckles + birthmark" },
+    ageBand: { "2-4": "Ages 2–4", "5-6": "Ages 5–6", "7-8": "Ages 7–8", "9-10": "Ages 9–10" },
+    relativeHeight: { shorter: "Shorter", average: "About average", taller: "Taller" },
+    mobilityAid: { none: "Standing", wheelchair: "Wheelchair", "forearm-crutches": "Forearm crutches", walker: "Walker", "prosthetic-leg": "Prosthetic leg", "leg-braces": "Leg braces" },
   };
-  const palettes = {
-    skinTone: {
-      light: ["#f3cdb5", "#dca98a", "#ed9e95"], golden: ["#dda06f", "#bd7950", "#cf746f"],
-      medium: ["#b9724f", "#945137", "#b85f61"], warm: ["#8a4d35", "#683426", "#9d4f56"], deep: ["#593225", "#3d211a", "#7e3d4a"],
-    },
-    hairColor: {
-      black: ["#18151a", "#393039"], "dark-brown": ["#38231d", "#684438"], brown: ["#6b4028", "#a06b42"],
-      auburn: ["#963f28", "#d26a3e"], blonde: ["#d8a83f", "#f2cf69"],
-    },
-    eyeColor: { brown: "#6d3e27", hazel: "#9a7a32", green: "#43856d", blue: "#4989be", gray: "#7e8b98" },
-    outfitColor: {
-      teal: ["#168b91", "#49b8b3", "#0c6068"], orange: ["#e97832", "#f6a654", "#b94b1f"],
-      purple: ["#7950b8", "#a77bd9", "#563185"], blue: ["#367cc2", "#67a4dd", "#23578e"],
-      rose: ["#c85273", "#e7829d", "#923650"], green: ["#4b8b55", "#79b56f", "#32673b"],
-    },
+  // Radio group name for each profile field.
+  const fieldInputs = {
+    presentation: "child-presentation", skinTone: "child-skin-tone", hairStyle: "child-hair-style", hairColor: "child-hair-color",
+    eyeColor: "child-eye-color", outfitStyle: "child-outfit-style", outfitColor: "child-outfit-color", costume: "child-costume",
+    glasses: "child-glasses", hearingAid: "child-hearing-aid", headwear: "child-headwear", faceDetail: "child-face-detail",
+    ageBand: "child-age-band", relativeHeight: "child-relative-height", mobilityAid: "child-mobility-aid",
   };
-  const wheelchairSupport = { appearanceIds: ["custom"], ageBands: ["2-4", "5-6", "7-8"], relativeHeights: ["shorter", "average", "taller"] };
-  const forearmCrutchSupport = { appearanceIds: ["custom"], ageBands: ["2-4", "5-6", "7-8"], relativeHeights: ["shorter", "average", "taller"] };
+  const ageBands = Object.keys(optionLabels.ageBand);
+  const heights = Object.keys(optionLabels.relativeHeight);
+  const wheelchairSupport = { appearanceIds: ["custom"], ageBands, relativeHeights: heights };
+  const forearmCrutchSupport = { appearanceIds: ["custom"], ageBands, relativeHeights: heights };
   const defaultProfile = {
-    id: "custom", ageBand: "5-6", relativeHeight: "average", mobilityAid: "none",
-    presentation: "girl",
-    skinTone: "medium", hairStyle: "curly", hairColor: "dark-brown", eyeColor: "brown",
-    outfitStyle: "overalls", outfitColor: "teal",
+    id: "custom", ageBand: "5-6", relativeHeight: "average", mobilityAid: "none", presentation: "girl",
+    skinTone: "medium", hairStyle: "curly", hairColor: "dark-brown", eyeColor: "brown", outfitStyle: "overalls", outfitColor: "teal",
+    costume: "", glasses: "none", hearingAid: "none", headwear: "none", faceDetail: "none", detail: "",
   };
-  const hairAssetNames = { short: "short", curly: "curls", coils: "coils", wavy: "waves", straight: "straight", braids: "braids" };
   const legacyProfiles = {
     "warm-curly-dark": ["warm", "curly", "dark-brown"], "deep-coils-black": ["deep", "coils", "black"],
     "medium-wavy-brown": ["medium", "wavy", "brown"], "golden-straight-black": ["golden", "straight", "black"],
@@ -46,246 +43,327 @@
   const root = document.querySelector("[data-child-selector]");
   const history = [];
   let lastProfile = null;
+  let presetManifest = { presets: [] };
+  let presetsRequested = false;
 
-  const customCharacterSvg = `
-    <svg class="custom-child-svg" viewBox="0 0 360 560" role="img" aria-label="Editable illustrated child character">
-      <defs>
-        <filter id="child-soft-shadow" x="-35%" y="-35%" width="170%" height="190%"><feDropShadow dx="0" dy="12" stdDeviation="11" flood-color="#24102f" flood-opacity=".3"/></filter>
-        <filter id="child-eye-glow" x="-40%" y="-40%" width="180%" height="180%"><feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#2d1738" flood-opacity=".22"/></filter>
-        <linearGradient id="child-skin-gradient" x1=".12" y1=".02" x2=".9" y2=".96"><stop offset="0" stop-color="var(--skin)"/><stop offset=".48" stop-color="var(--skin)"/><stop offset="1" stop-color="var(--skin-shadow)"/></linearGradient>
-        <radialGradient id="child-face-light" cx="38%" cy="25%" r="75%"><stop offset="0" stop-color="#fff" stop-opacity=".3"/><stop offset=".52" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="var(--skin-shadow)" stop-opacity=".2"/></radialGradient>
-        <linearGradient id="child-hair-gradient" x1=".15" y1="0" x2=".85" y2="1"><stop offset="0" stop-color="var(--hair-light)"/><stop offset=".5" stop-color="var(--hair)"/><stop offset="1" stop-color="var(--hair)"/></linearGradient>
-        <linearGradient id="child-outfit-gradient" x1=".12" y1="0" x2=".88" y2="1"><stop offset="0" stop-color="var(--outfit-light)"/><stop offset=".5" stop-color="var(--outfit)"/><stop offset="1" stop-color="var(--outfit-dark)"/></linearGradient>
-        <radialGradient id="child-iris-gradient" cx="35%" cy="28%" r="72%"><stop offset="0" stop-color="#fff" stop-opacity=".65"/><stop offset=".22" stop-color="var(--eye)"/><stop offset=".82" stop-color="var(--eye)"/><stop offset="1" stop-color="#161018"/></radialGradient>
-      </defs>
-      <ellipse class="character-ground" cx="184" cy="526" rx="105" ry="18" fill="#392354" opacity=".12"/>
-      <g class="wheelchair-art"><circle cx="235" cy="424" r="76" fill="#f7fbfb" stroke="#31546b" stroke-width="15"/><circle cx="235" cy="424" r="51" fill="none" stroke="#9db3be" stroke-width="4"/><path d="M187 330h73l-17 81h-83zM251 409l43 69" fill="none" stroke="#31546b" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/><circle cx="300" cy="483" r="17" fill="#f7fbfb" stroke="#31546b" stroke-width="8"/></g>
-      <g class="custom-child-figure" filter="url(#child-soft-shadow)">
-        <g class="character-legs"><path d="M132 394l47 1-6 108h-43zM184 395l47-1 14 109h-43z" fill="var(--outfit-dark)"/><path d="M119 494h61v27c-18 8-43 8-65 0zM195 494h61v27c-18 8-43 8-65 0z" fill="#f4f0e9" stroke="#d7d0c9" stroke-width="4"/></g>
-        <g class="character-arms"><path d="M125 291c-27 19-40 58-39 101 0 18 28 19 30 1 1-31 11-56 30-70zM232 290c29 18 45 52 49 91 2 18-25 23-30 5-5-28-16-50-38-62z" fill="url(#child-skin-gradient)"/><circle cx="99" cy="397" r="17" fill="url(#child-skin-gradient)"/><circle cx="266" cy="390" r="17" fill="url(#child-skin-gradient)"/></g>
-        <path class="character-neck" d="M157 246h52v66h-52z" fill="var(--skin-shadow)"/>
-        <g class="outfit outfit-tee"><path d="M126 285c17-14 42-22 58-22s42 8 58 22l-14 110h-87z" fill="url(#child-outfit-gradient)"/><path d="M127 286l-19 44 29 12 15-45zM240 286l22 40-27 15-18-44z" fill="var(--outfit-light)"/><path d="M164 271c5 12 35 12 40 0" fill="none" stroke="var(--outfit-dark)" stroke-width="7" stroke-linecap="round"/></g>
-        <g class="outfit outfit-overalls"><path d="M128 285c17-14 39-21 56-21 18 0 41 7 57 21l-12 111h-89z" fill="var(--outfit-light)"/><path d="M143 301h82l8 106h-96z" fill="url(#child-outfit-gradient)"/><path d="M151 272l19 66M217 272l-18 66" fill="none" stroke="var(--outfit-dark)" stroke-width="10" stroke-linecap="round"/><path d="M164 324h41v39h-41z" fill="var(--outfit-light)" stroke="var(--outfit-dark)" stroke-width="4"/><circle cx="169" cy="335" r="5" fill="#ffd86a"/><circle cx="201" cy="335" r="5" fill="#ffd86a"/></g>
-        <g class="outfit outfit-hoodie"><path d="M124 295c12-21 35-32 60-32 26 0 48 11 61 32l-12 113h-97z" fill="url(#child-outfit-gradient)"/><path d="M151 281c3 24 63 24 66 0M181 303v56" fill="none" stroke="var(--outfit-dark)" stroke-width="6" stroke-linecap="round"/><path d="M153 364c19 12 45 12 64 0" fill="none" stroke="var(--outfit-light)" stroke-width="12" stroke-linecap="round"/></g>
-        <g class="outfit outfit-dress"><path d="M151 272h66l10 82 40 81H103l38-81z" fill="url(#child-outfit-gradient)"/><path d="M160 274c6 14 42 14 48 0M133 399c34 13 70 13 103 0" fill="none" stroke="var(--outfit-light)" stroke-width="7" stroke-linecap="round"/><circle cx="184" cy="337" r="9" fill="var(--outfit-light)"/></g>
-        <g class="character-head">
-          <ellipse cx="109" cy="188" rx="23" ry="30" fill="url(#child-skin-gradient)"/><ellipse cx="257" cy="188" rx="23" ry="30" fill="url(#child-skin-gradient)"/>
-          <ellipse cx="183" cy="176" rx="78" ry="91" fill="url(#child-skin-gradient)"/>
-          <ellipse cx="183" cy="176" rx="76" ry="89" fill="url(#child-face-light)"/>
-          <path d="M130 130c17-31 43-44 72-40" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round" opacity=".13"/>
-          <g filter="url(#child-eye-glow)">
-            <path d="M132 177c3-23 14-34 31-34 18 0 29 13 30 35-3 19-14 29-31 29-17 0-28-11-30-30z" fill="#fffdf9"/>
-            <path d="M194 178c2-23 13-35 30-35 18 0 29 13 31 34-2 19-13 30-31 30-17 0-28-10-30-29z" fill="#fffdf9"/>
-            <ellipse cx="164" cy="178" rx="13" ry="16" fill="url(#child-iris-gradient)"/><ellipse cx="223" cy="178" rx="13" ry="16" fill="url(#child-iris-gradient)"/>
-            <ellipse cx="164" cy="180" rx="6" ry="8" fill="#17131a"/><ellipse cx="223" cy="180" rx="6" ry="8" fill="#17131a"/>
-            <circle cx="159" cy="171" r="4" fill="#fff"/><circle cx="218" cy="171" r="4" fill="#fff"/><circle cx="168" cy="184" r="2" fill="#fff" opacity=".72"/><circle cx="227" cy="184" r="2" fill="#fff" opacity=".72"/>
-          </g>
-          <path d="M135 158c8-10 21-15 35-11M204 147c14-4 27 1 35 11" fill="none" stroke="var(--hair)" stroke-width="7" stroke-linecap="round"/>
-          <g class="presentation-detail presentation-girl" fill="none" stroke="var(--hair)" stroke-width="3" stroke-linecap="round"><path d="M135 171l-7-4M137 164l-6-7M250 171l7-4M248 164l6-7"/></g>
-          <g class="presentation-detail presentation-boy" fill="var(--skin-shadow)" opacity=".48"><circle cx="143" cy="209" r="1.8"/><circle cx="150" cy="212" r="1.5"/><circle cx="225" cy="212" r="1.5"/><circle cx="232" cy="209" r="1.8"/></g>
-          <path d="M183 179c-3 13-6 24 3 29 5 2 10 0 13-3" fill="none" stroke="var(--skin-shadow)" stroke-width="4" stroke-linecap="round" opacity=".72"/>
-          <path d="M175 204c7 3 14 3 20 0" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".34"/>
-          <ellipse cx="136" cy="214" rx="17" ry="8" fill="var(--blush)" opacity=".43"/><ellipse cx="232" cy="214" rx="17" ry="8" fill="var(--blush)" opacity=".43"/>
-          <path d="M153 224c17 22 45 22 62 0-10 6-20 9-31 9s-21-3-31-9z" fill="#fbf7f4" stroke="#8f3d4b" stroke-width="4" stroke-linejoin="round"/>
-          <path d="M162 226c15 7 30 7 44 0" fill="none" stroke="#d8848c" stroke-width="3" stroke-linecap="round" opacity=".72"/>
-        </g>
-        <g class="hair hair-short"><path d="M111 164c-9-58 22-98 73-98 50 0 80 38 70 94-13-26-31-39-55-49-16 26-48 39-88 53z" fill="url(#child-hair-gradient)"/><path d="M126 116c31-32 73-41 108-14" fill="none" stroke="var(--hair-light)" stroke-width="12" stroke-linecap="round" opacity=".65"/></g>
-        <g class="hair hair-curly" fill="url(#child-hair-gradient)"><circle cx="121" cy="117" r="31"/><circle cx="150" cy="89" r="34"/><circle cx="188" cy="78" r="35"/><circle cx="226" cy="91" r="34"/><circle cx="251" cy="121" r="31"/><circle cx="111" cy="151" r="26"/><circle cx="258" cy="153" r="26"/><path d="M113 157c15-31 39-48 72-48s57 16 72 48c-22-7-40-22-56-42-18 25-48 39-88 42z"/></g>
-        <g class="hair hair-coils" fill="url(#child-hair-gradient)"><circle cx="112" cy="116" r="25"/><circle cx="132" cy="91" r="26"/><circle cx="160" cy="76" r="27"/><circle cx="190" cy="72" r="28"/><circle cx="220" cy="80" r="27"/><circle cx="245" cy="99" r="26"/><circle cx="258" cy="128" r="25"/><circle cx="106" cy="146" r="23"/><circle cx="263" cy="155" r="23"/><circle cx="136" cy="126" r="25"/><circle cx="172" cy="111" r="26"/><circle cx="210" cy="113" r="26"/><circle cx="241" cy="134" r="24"/></g>
-        <g class="hair hair-wavy"><path d="M102 175c-5-73 30-111 84-111 55 0 88 42 80 116l-22 72-15-81c-3-22-15-40-32-55-19 25-48 42-85 47l-8 89z" fill="url(#child-hair-gradient)"/><path d="M119 122c22-31 50-45 83-40 30 4 48 22 57 52" fill="none" stroke="var(--hair-light)" stroke-width="13" stroke-linecap="round" opacity=".65"/></g>
-        <g class="hair hair-straight"><path d="M105 170c-4-69 25-106 80-106 55 0 84 38 80 106l-10 111-28-39 4-92c-13-9-27-22-39-39-18 24-45 39-81 45l4 88-27 37z" fill="url(#child-hair-gradient)"/><path d="M122 118c30-28 69-39 109-22" fill="none" stroke="var(--hair-light)" stroke-width="11" stroke-linecap="round" opacity=".6"/></g>
-        <g class="hair hair-braids"><path d="M109 157c-6-63 25-94 77-94 51 0 82 33 75 96-19-18-37-32-61-45-16 25-48 39-91 43z" fill="url(#child-hair-gradient)"/><path d="M111 146c-10 48-8 91 7 125M258 146c10 48 8 91-7 125" fill="none" stroke="var(--hair)" stroke-width="19" stroke-linecap="round" stroke-dasharray="14 7"/><circle cx="119" cy="277" r="9" fill="var(--outfit-light)"/><circle cx="250" cy="277" r="9" fill="var(--outfit-light)"/></g>
-      </g>
-    </svg>`;
+  /** Same rules as the server's sanitizeChildDetail, so saved keys match. */
+  function sanitizeDetail(value) {
+    if (typeof value !== "string") return "";
+    const detail = value
+      .normalize("NFKC")
+      .replace(/[\u0000-\u001f\u007f-\u009f]/g, " ")
+      .replace(/https?:\/\/\S+|www\.\S+/gi, " ")
+      .replace(/[^\p{L}\p{N} ,.'!?&()-]/gu, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .slice(0, DETAIL_MAX)
+      .replace(/\p{Cs}/gu, "")
+      .trim();
+    // Same 150-byte UTF-8 cap as the server (only affects long non-Latin text).
+    const encoder = new TextEncoder();
+    let capped = detail;
+    while (encoder.encode(capped).length > 150) capped = Array.from(capped).slice(0, -1).join("");
+    return capped.trim();
+  }
 
   function selected(name, fallback = "") { return document.querySelector(`input[name="${name}"]:checked`)?.value || fallback; }
+  function valid(field, value, fallback) { return Object.hasOwn(optionLabels[field], value) ? value : fallback; }
 
   function getProfile() {
     const id = selected("child-character", "custom");
-    if (id === "none") return { id: "none", label: "Monster only", included: false, presentation: "", skinTone: "", hairColor: "", hairStyle: "", eyeColor: "", outfitStyle: "", outfitColor: "", ageBand: "", relativeHeight: "", mobilityAid: "" };
-    return {
-      id: "custom", label: "Custom illustrated child", included: true,
-      presentation: selected("child-presentation", defaultProfile.presentation),
-      skinTone: selected("child-skin-tone", defaultProfile.skinTone), hairStyle: selected("child-hair-style", defaultProfile.hairStyle),
-      hairColor: selected("child-hair-color", defaultProfile.hairColor), eyeColor: selected("child-eye-color", defaultProfile.eyeColor),
-      outfitStyle: selected("child-outfit-style", defaultProfile.outfitStyle), outfitColor: selected("child-outfit-color", defaultProfile.outfitColor),
-      ageBand: selected("child-age-band", defaultProfile.ageBand), relativeHeight: selected("child-relative-height", defaultProfile.relativeHeight),
-      mobilityAid: selected("child-mobility-aid", defaultProfile.mobilityAid),
-    };
+    if (id === "none") {
+      const empty = { id: "none", label: "Monster only", included: false, detail: "" };
+      for (const field of Object.keys(fieldInputs)) empty[field] = "";
+      return empty;
+    }
+    const profile = { id: "custom", label: "Custom illustrated child", included: true };
+    for (const [field, name] of Object.entries(fieldInputs)) {
+      if (field === "costume") continue;
+      profile[field] = valid(field, selected(name, defaultProfile[field]), defaultProfile[field]);
+    }
+    profile.costume = profile.outfitStyle === "costume" ? valid("costume", selected("child-costume", "pumpkin"), "pumpkin") : "";
+    profile.detail = sanitizeDetail(document.querySelector("#child-special-detail")?.value || "");
+    for (const field of Object.keys(fieldInputs)) {
+      if (profile[field]) profile[`${field}Label`] = optionLabels[field][profile[field]];
+    }
+    return profile;
   }
 
-  function supportsWheelchair(profile) { return Boolean(profile?.included && profile.id === "custom" && wheelchairSupport.ageBands.includes(profile.ageBand) && wheelchairSupport.relativeHeights.includes(profile.relativeHeight)); }
-  function supportsForearmCrutches(profile) { return Boolean(profile?.included && profile.id === "custom" && forearmCrutchSupport.ageBands.includes(profile.ageBand) && forearmCrutchSupport.relativeHeights.includes(profile.relativeHeight)); }
-
-  function premiumReferenceFor(profile) {
-    if (profile.mobilityAid === "forearm-crutches") {
-      return profile.presentation === "boy"
-        ? "assets/child-editor/default-boy-forearm-crutches-feature-animation-v1.webp"
-        : "assets/child-editor/default-girl-forearm-crutches-feature-animation-v1.webp";
-    }
-    if (profile.mobilityAid === "wheelchair") {
-      return profile.presentation === "boy"
-        ? "assets/child-editor/default-boy-wheelchair-feature-animation-v1.webp"
-        : "assets/child-editor/default-girl-wheelchair-feature-animation-v1.webp";
-    }
-    return profile.presentation === "boy"
-      ? "assets/child-editor/default-boy-feature-animation-v1.webp"
-      : "assets/child-editor/default-girl-feature-animation-v1.webp";
-  }
-
-  function refreshWheelchairControls() {
-    const wheelchair = document.querySelector('input[name="child-mobility-aid"][value="wheelchair"]');
-    const crutches = document.querySelector('input[name="child-mobility-aid"][value="forearm-crutches"]');
-    const none = document.querySelector('input[name="child-mobility-aid"][value="none"]');
-    if (!wheelchair || !crutches || !none) return;
-    let profile = getProfile();
-    if ((!supportsWheelchair(profile) && wheelchair.checked) || (!supportsForearmCrutches(profile) && crutches.checked)) { none.checked = true; profile = getProfile(); }
-    wheelchair.disabled = !supportsWheelchair(profile);
-    crutches.disabled = !supportsForearmCrutches(profile);
-    const wheelchairSelected = wheelchair.checked;
-    for (const input of document.querySelectorAll('input[name="child-age-band"]')) {
-      input.disabled = wheelchairSelected && !wheelchairSupport.ageBands.includes(input.value);
-      input.closest("label")?.classList.toggle("is-unavailable", input.disabled);
-    }
-    for (const input of document.querySelectorAll('input[name="child-relative-height"]')) {
-      input.disabled = wheelchairSelected && !wheelchairSupport.relativeHeights.includes(input.value);
-      input.closest("label")?.classList.toggle("is-unavailable", input.disabled);
-    }
-    const label = wheelchair.closest("label");
-    label?.classList.toggle("is-unavailable", wheelchair.disabled);
-    label?.setAttribute("aria-disabled", wheelchair.disabled ? "true" : "false");
-    const crutchesLabel = crutches.closest("label");
-    crutchesLabel?.classList.toggle("is-unavailable", crutches.disabled);
-    crutchesLabel?.setAttribute("aria-disabled", crutches.disabled ? "true" : "false");
-    const copy = document.querySelector("#child-wheelchair-option-copy");
-    if (copy) copy.textContent = wheelchair.disabled ? "Unavailable with these choices" : "Age-sized chair";
-    const crutchesCopy = document.querySelector("#child-crutches-option-copy");
-    if (crutchesCopy) crutchesCopy.textContent = crutches.disabled ? "Unavailable with these choices" : "Two fitted crutches";
-  }
-
-  function ensureCharacterArt(stage) {
-    let container = stage?.querySelector(".child-preview-character");
-    if (!container && stage) { container = document.createElement("span"); container.className = "child-preview-character"; stage.append(container); }
-    if (container && !container.querySelector(".custom-child-svg")) container.innerHTML = customCharacterSvg;
-    return container;
-  }
-
-  function renderProfile(stage, avatar, profile) {
-    if (!stage) return;
-    const figure = stage.querySelector(".child-preview-figure");
-    const premiumDefault = stage.querySelector(".child-premium-default");
-    const character = ensureCharacterArt(stage);
-    // Keep render lifecycle classes owned by main.js. Clearing the complete
-    // class list here used to reveal the starter avatar over a finished render
-    // whenever the user changed a choice or returned to another editor tab.
-    for (const className of [...stage.classList]) {
-      if (
-        className === "is-empty" ||
-        className === "has-character-art" ||
-        className === "has-premium-art" ||
-        className.startsWith("age-") ||
-        className.startsWith("height-") ||
-        className.startsWith("mobility-")
-      ) stage.classList.remove(className);
-    }
-    stage.classList.add("child-preview-stage");
-    if (!profile?.included) {
-      stage.classList.add("is-empty");
-      if (character) character.hidden = true;
-      if (premiumDefault) premiumDefault.hidden = true;
-      if (figure) figure.hidden = false;
-      return;
-    }
-    const skin = palettes.skinTone[profile.skinTone] || palettes.skinTone.medium;
-    const hair = palettes.hairColor[profile.hairColor] || palettes.hairColor["dark-brown"];
-    const outfit = palettes.outfitColor[profile.outfitColor] || palettes.outfitColor.teal;
-    const art = character?.querySelector(".custom-child-svg");
-    if (art) {
-      art.dataset.presentation = profile.presentation || defaultProfile.presentation;
-      art.dataset.hairStyle = profile.hairStyle;
-      art.dataset.outfitStyle = profile.outfitStyle;
-      art.dataset.mobility = profile.mobilityAid || "none";
-      art.style.setProperty("--skin", skin[0]); art.style.setProperty("--skin-shadow", skin[1]); art.style.setProperty("--blush", skin[2]);
-      art.style.setProperty("--hair", hair[0]); art.style.setProperty("--hair-light", hair[1]);
-      art.style.setProperty("--eye", palettes.eyeColor[profile.eyeColor] || palettes.eyeColor.brown);
-      art.style.setProperty("--outfit", outfit[0]); art.style.setProperty("--outfit-light", outfit[1]); art.style.setProperty("--outfit-dark", outfit[2]);
-    }
-    stage.classList.add(`age-${profile.ageBand || "5-6"}`, `height-${profile.relativeHeight || "average"}`, `mobility-${profile.mobilityAid || "none"}`, "has-character-art", "has-premium-art");
-    if (premiumDefault) {
-      const nextPremiumSource = premiumReferenceFor(profile);
-      if (premiumDefault.getAttribute("src") !== nextPremiumSource) {
-        premiumDefault.classList.remove("is-refreshing");
-        premiumDefault.src = nextPremiumSource;
-        window.requestAnimationFrame(() => premiumDefault.classList.add("is-refreshing"));
-      }
-      premiumDefault.hidden = stage.classList.contains("has-book-render");
-    }
-    if (character) character.hidden = true;
-    if (figure) figure.hidden = true;
-  }
+  function supportsWheelchair(profile) { return Boolean(profile?.included && profile.id === "custom"); }
+  function supportsForearmCrutches(profile) { return Boolean(profile?.included && profile.id === "custom"); }
 
   function compactProfile(profile) {
-    if (!profile?.included) return { id: "none" };
-    return {
-      id: "custom", presentation: profile.presentation || defaultProfile.presentation, skinTone: profile.skinTone || defaultProfile.skinTone, hairStyle: profile.hairStyle || defaultProfile.hairStyle,
-      hairColor: profile.hairColor || defaultProfile.hairColor, eyeColor: profile.eyeColor || defaultProfile.eyeColor,
-      outfitStyle: profile.outfitStyle || defaultProfile.outfitStyle, outfitColor: profile.outfitColor || defaultProfile.outfitColor,
-      ageBand: profile.ageBand || defaultProfile.ageBand, relativeHeight: profile.relativeHeight || defaultProfile.relativeHeight,
-      mobilityAid: profile.mobilityAid || defaultProfile.mobilityAid,
-    };
+    if (!profile || profile.included === false || profile.id === "none") return { id: "none" };
+    const value = { id: "custom" };
+    for (const field of Object.keys(fieldInputs)) {
+      if (field === "costume") continue;
+      value[field] = valid(field, profile[field], defaultProfile[field]);
+    }
+    value.costume = value.outfitStyle === "costume" ? valid("costume", profile.costume, "pumpkin") : "";
+    value.detail = sanitizeDetail(profile.detail || "");
+    return value;
   }
   function profileKey(profile) { return JSON.stringify(compactProfile(profile)); }
+
   function migrateProfile(profile) {
     if (!profile || typeof profile !== "object") return defaultProfile;
     if (profile.id === "none") return { id: "none" };
-    if (profile.id === "custom") return { ...defaultProfile, ...profile, id: "custom" };
+    if (profile.id === "custom") return compactProfile({ ...defaultProfile, ...profile, id: "custom" });
     const legacy = legacyProfiles[profile.id];
     if (!legacy) return defaultProfile;
-    return { ...defaultProfile, ...profile, id: "custom", presentation: profile.presentation || defaultProfile.presentation, skinTone: legacy[0], hairStyle: legacy[1], hairColor: legacy[2], eyeColor: "brown", outfitStyle: "overalls", outfitColor: "teal" };
+    return compactProfile({ ...defaultProfile, ...profile, id: "custom", skinTone: legacy[0], hairStyle: legacy[1], hairColor: legacy[2], eyeColor: "brown", outfitStyle: "overalls", outfitColor: "teal" });
   }
 
   function applyProfile(profile) {
     const value = migrateProfile(profile);
-    const fields = {
-      "child-character": value.id, "child-presentation": value.presentation, "child-skin-tone": value.skinTone, "child-hair-style": value.hairStyle,
-      "child-hair-color": value.hairColor, "child-eye-color": value.eyeColor, "child-outfit-style": value.outfitStyle,
-      "child-outfit-color": value.outfitColor, "child-age-band": value.ageBand,
-      "child-relative-height": value.relativeHeight, "child-mobility-aid": value.mobilityAid,
-    };
-    for (const [name, selectedValue] of Object.entries(fields)) {
-      if (!selectedValue) continue;
-      const input = [...document.querySelectorAll(`input[name="${name}"]`)].find((option) => option.value === selectedValue && !option.disabled);
+    const check = (name, wanted) => {
+      const input = [...document.querySelectorAll(`input[name="${name}"]`)].find((option) => option.value === wanted && !option.disabled);
       if (input) input.checked = true;
+    };
+    check("child-character", value.id);
+    if (value.id === "custom") {
+      for (const [field, name] of Object.entries(fieldInputs)) {
+        const wanted = field === "costume" ? (value.costume || "pumpkin") : value[field];
+        if (wanted) check(name, wanted);
+      }
+      const detail = document.querySelector("#child-special-detail");
+      if (detail) detail.value = value.detail || "";
     }
-    refreshWheelchairControls();
   }
 
-  function persist(profile) { try { localStorage.setItem(storageKey, JSON.stringify(compactProfile(profile))); } catch (error) { console.warn("Child character choices could not be saved locally.", error); } }
+  function persist(profile) {
+    try { localStorage.setItem(storageKey, JSON.stringify(compactProfile(profile))); } catch (error) { console.warn("Child character choices could not be saved locally.", error); }
+  }
   function restore() {
     let saved = null;
     try { saved = JSON.parse(localStorage.getItem(storageKey) || localStorage.getItem("monstersnow_child_character_profile_v2") || localStorage.getItem("monstersnow_child_character_profile_v1") || "null"); } catch { return; }
     if (saved) applyProfile(saved);
   }
   function updateHistoryControls(message = "") {
-    const undo = document.querySelector("#child-editor-undo");
+    const undoButton = document.querySelector("#child-editor-undo");
     const status = document.querySelector("#child-editor-action-status");
-    if (undo) undo.disabled = history.length === 0;
+    if (undoButton) undoButton.disabled = history.length === 0;
     if (status) status.textContent = message;
   }
 
-  function sync({ save = true, recordHistory = false, message = "" } = {}) {
-    if (!root) return getProfile();
-    refreshWheelchairControls();
-    const profile = getProfile();
-    const hairPalette = palettes.hairColor[profile.hairColor] || palettes.hairColor["dark-brown"];
-    const presentation = profile.presentation === "boy" ? "boy" : "girl";
-    root.dataset.presentation = presentation;
-    root.style.setProperty("--selected-hair-color", hairPalette[0]);
-    for (const thumbnail of root.querySelectorAll("[data-hair-thumbnail]")) {
-      const assetName = hairAssetNames[thumbnail.dataset.hairThumbnail];
-      const prefix = presentation === "boy" ? "hair-style-boy" : "hair-style";
-      if (assetName) thumbnail.src = `assets/child-editor/${prefix}-${assetName}-v1.webp`;
+  // ---------- Live sketch, thumbnails, and painted quick-start looks ----------
+  const sketchApi = () => window.MonstersNowChildSketch;
+
+  function ensureSketch(container, viewBox) {
+    if (!container || !sketchApi()) return null;
+    let svg = container.querySelector(".custom-child-svg");
+    if (!svg) {
+      svg = sketchApi().create();
+      if (viewBox) svg.setAttribute("viewBox", viewBox);
+      container.replaceChildren(svg);
     }
+    return svg;
+  }
+
+  function forgetPresetArt(imageUrl) {
+    for (const preset of presetManifest.presets) if (preset.imageUrl === imageUrl) preset.imageUrl = null;
+  }
+
+  function presetMatch(profile) {
+    if (!profile?.included) return null;
+    const key = profileKey(profile);
+    return presetManifest.presets.find((preset) => preset.imageUrl && profileKey(preset.profile) === key) || null;
+  }
+
+  function renderProfile(stage, _avatar, profile) {
+    if (!stage) return;
+    const figure = stage.querySelector(".child-preview-figure");
+    const character = stage.querySelector(".child-preview-character");
+    const presetImage = stage.querySelector(".child-preset-preview");
+    for (const className of [...stage.classList]) {
+      if (["is-empty", "has-character-art", "has-preset-art"].includes(className) || /^(age|height|mobility)-/.test(className)) stage.classList.remove(className);
+    }
+    stage.classList.add("child-preview-stage");
+    if (!profile?.included) {
+      stage.classList.add("is-empty");
+      if (character) character.hidden = true;
+      if (presetImage) presetImage.hidden = true;
+      if (figure) figure.hidden = false;
+      return;
+    }
+    const compact = compactProfile(profile);
+    sketchApi()?.apply(ensureSketch(character), compact);
+    if (character) character.hidden = false;
+    if (figure) figure.hidden = true;
+    stage.classList.add(`age-${compact.ageBand}`, `height-${compact.relativeHeight}`, `mobility-${compact.mobilityAid}`, "has-character-art");
+    const match = presetMatch(profile);
+    if (presetImage && !presetImage.dataset.errorBound) {
+      presetImage.dataset.errorBound = "true";
+      // Painted example unavailable (e.g. expired link): drop it and show the sketch.
+      presetImage.addEventListener("error", () => {
+        const src = presetImage.getAttribute("src");
+        if (!src) return;
+        forgetPresetArt(src);
+        presetImage.hidden = true;
+        presetImage.removeAttribute("src");
+        stage.classList.remove("has-preset-art");
+        window.MonstersNowChildStudio?.sync?.();
+      });
+    }
+    if (presetImage) {
+      if (match) {
+        if (presetImage.getAttribute("src") !== match.imageUrl) presetImage.src = match.imageUrl;
+        presetImage.alt = `Painted example of the ${match.label} look.`;
+        presetImage.hidden = false;
+        stage.classList.add("has-preset-art");
+      } else {
+        presetImage.hidden = true;
+      }
+    }
+  }
+
+  function renderMiniPreview(profile) {
+    const mini = document.querySelector("[data-child-mini-sketch]");
+    if (!mini) return;
+    if (profile?.included) sketchApi()?.apply(ensureSketch(mini, "40 30 290 510"), compactProfile(profile));
+  }
+
+  function renderHairThumbnails(profile) {
+    if (!root || !profile?.included) return;
+    const base = compactProfile(profile);
+    for (const thumb of root.querySelectorAll("[data-hair-thumb]")) {
+      const svg = ensureSketch(thumb, "70 30 226 230");
+      sketchApi()?.apply(svg, { ...base, hairStyle: thumb.dataset.hairThumb, headwear: "none", glasses: "none", outfitStyle: "tee", costume: "" });
+    }
+  }
+
+  function renderPresetOptions() {
+    const list = document.querySelector("#child-preset-options");
+    if (!list || !presetManifest.presets.length) return;
+    const current = lastProfile ? profileKey(lastProfile) : "";
+    if (list.childElementCount !== presetManifest.presets.length) {
+      list.replaceChildren(...presetManifest.presets.map((preset) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "child-preset-option";
+        button.dataset.presetId = preset.id;
+        const art = document.createElement("span");
+        art.className = "child-preset-art";
+        art.setAttribute("aria-hidden", "true");
+        if (preset.imageUrl) {
+          const image = document.createElement("img");
+          image.src = preset.imageUrl;
+          image.alt = "";
+          image.loading = "lazy";
+          image.decoding = "async";
+          image.addEventListener("error", () => { forgetPresetArt(preset.imageUrl); image.remove(); art.classList.add("is-sketch"); sketchApi()?.apply(ensureSketch(art, "40 20 290 520"), compactProfile(preset.profile)); }, { once: true });
+          art.append(image);
+        } else {
+          art.classList.add("is-sketch");
+          sketchApi()?.apply(ensureSketch(art, "40 20 290 520"), compactProfile(preset.profile));
+        }
+        const label = document.createElement("b");
+        label.textContent = preset.label;
+        button.append(art, label);
+        button.addEventListener("click", () => applyPreset(preset.id));
+        return button;
+      }));
+      list.closest("[data-child-presets]")?.removeAttribute("hidden");
+      refreshScrollHints();
+    }
+    for (const button of list.querySelectorAll("[data-preset-id]")) {
+      const preset = presetManifest.presets.find((item) => item.id === button.dataset.presetId);
+      button.setAttribute("aria-pressed", preset && profileKey(preset.profile) === current ? "true" : "false");
+    }
+  }
+
+  function applyPreset(id) {
+    const preset = presetManifest.presets.find((item) => item.id === id);
+    if (!preset) return;
+    const current = getProfile();
+    history.push(compactProfile(current));
+    if (history.length > 30) history.shift();
+    applyProfile({ ...defaultProfile, ...preset.profile, id: "custom", detail: "" });
+    sync({ message: `${preset.label} look applied. Every choice is still editable.` });
+  }
+
+  async function loadPresets() {
+    if (presetsRequested || !root) return;
+    presetsRequested = true;
+    try {
+      const response = await fetch("/api/render-child-character?resource=presets", { headers: { Accept: "application/json" } });
+      const result = await response.json();
+      if (!response.ok || !Array.isArray(result.presets)) return;
+      presetManifest = { presets: result.presets.filter((preset) => preset?.id && preset.profile).map((preset) => ({ ...preset, profile: compactProfile({ ...defaultProfile, ...preset.profile, id: "custom" }) })) };
+      renderPresetOptions();
+      sync({ save: false, silent: true });
+    } catch {
+      // Quick-start looks are optional; the live sketch covers every choice.
+    }
+  }
+
+  // ---------- Phone-friendly swipe rows ----------
+  const scrollRowSelector = ".child-color-options, .child-style-options, .child-segmented-options, .child-preset-options, .child-presentation-options";
+  function updateRowHint(row) {
+    const overflow = row.scrollWidth - row.clientWidth > 4;
+    row.classList.toggle("is-scrollable", overflow);
+    row.classList.toggle("at-start", row.scrollLeft <= 4);
+    row.classList.toggle("at-end", row.scrollLeft + row.clientWidth >= row.scrollWidth - 4);
+    const hint = row.parentElement?.querySelector(":scope > .child-swipe-hint");
+    if (hint) hint.hidden = !overflow || row.dataset.swiped === "true";
+  }
+  function refreshScrollHints() {
+    if (!root) return;
+    for (const row of root.querySelectorAll(scrollRowSelector)) {
+      if (!row.dataset.scrollHint) {
+        row.dataset.scrollHint = "true";
+        const hint = document.createElement("span");
+        hint.className = "child-swipe-hint";
+        hint.setAttribute("aria-hidden", "true");
+        hint.textContent = window.matchMedia("(pointer: coarse)").matches ? "Swipe for more →" : "Scroll for more →";
+        hint.hidden = true;
+        row.insertAdjacentElement("beforebegin", hint);
+        row.addEventListener("scroll", () => {
+          if (row.scrollLeft > 8) row.dataset.swiped = "true";
+          updateRowHint(row);
+        }, { passive: true });
+      }
+      updateRowHint(row);
+    }
+  }
+
+  function syncConditionalFields(profile) {
+    const costumeField = document.querySelector("#child-costume-field");
+    const outfitColorField = document.querySelector("#child-outfit-color-field");
+    const isCostume = profile.included && profile.outfitStyle === "costume";
+    if (costumeField) costumeField.hidden = !isCostume;
+    if (outfitColorField) outfitColorField.hidden = isCostume;
+    const counter = document.querySelector("#child-special-detail-count");
+    const input = document.querySelector("#child-special-detail");
+    if (counter && input) counter.textContent = `${input.value.length}/${DETAIL_MAX}`;
+  }
+
+  function describe(profile) {
+    const parts = [
+      optionLabels.presentation[profile.presentation],
+      `${optionLabels.skinTone[profile.skinTone]} skin`,
+      profile.headwear === "hijab" || profile.headwear === "patka" || profile.headwear === "headwrap"
+        ? optionLabels.headwear[profile.headwear]
+        : `${optionLabels.hairColor[profile.hairColor]} ${optionLabels.hairStyle[profile.hairStyle].toLowerCase()}`,
+      `${optionLabels.eyeColor[profile.eyeColor]} eyes`,
+      profile.outfitStyle === "costume" ? `${optionLabels.costume[profile.costume]} costume` : `${optionLabels.outfitColor[profile.outfitColor]} ${optionLabels.outfitStyle[profile.outfitStyle].toLowerCase()}`,
+    ];
+    const extras = [
+      profile.glasses !== "none" && optionLabels.glasses[profile.glasses],
+      profile.hearingAid !== "none" && optionLabels.hearingAid[profile.hearingAid],
+      !["none", "hijab", "patka", "headwrap"].includes(profile.headwear) && optionLabels.headwear[profile.headwear],
+      profile.faceDetail !== "none" && optionLabels.faceDetail[profile.faceDetail],
+      optionLabels.ageBand[profile.ageBand],
+      optionLabels.relativeHeight[profile.relativeHeight],
+      profile.mobilityAid !== "none" && optionLabels.mobilityAid[profile.mobilityAid],
+    ].filter(Boolean);
+    return `${parts.join(" · ")}. ${extras.join(" · ")}.${profile.detail ? ` “${profile.detail}”` : ""}`;
+  }
+
+  function sync({ save = true, recordHistory = false, message = "", silent = false } = {}) {
+    if (!root) return getProfile();
+    const profile = getProfile();
+    root.dataset.presentation = profile.presentation || "girl";
     if (recordHistory && lastProfile && profileKey(lastProfile) !== profileKey(profile)) { history.push(compactProfile(lastProfile)); if (history.length > 30) history.shift(); }
     const details = document.querySelector("#child-character-details");
     const selection = document.querySelector("#child-character-selection");
@@ -295,14 +373,17 @@
     if (details) details.hidden = !profile.included;
     if (selection) selection.textContent = profile.included ? "Live preview" : "Monster-only story";
     if (title) title.textContent = profile.included ? "Their storybook character is taking shape." : "Their monster takes center stage.";
-    if (copy) copy.textContent = profile.included
-      ? `${optionLabels.presentation[profile.presentation]} · ${optionLabels.skinTone[profile.skinTone]} skin · ${optionLabels.hairColor[profile.hairColor]} ${optionLabels.hairStyle[profile.hairStyle].toLowerCase()} · ${optionLabels.eyeColor[profile.eyeColor]} eyes · ${optionLabels.outfitColor[profile.outfitColor]} ${optionLabels.outfitStyle[profile.outfitStyle].toLowerCase()}. ${ageLabels[profile.ageBand]} · ${heightLabels[profile.relativeHeight]}${profile.mobilityAid !== "none" ? ` · ${mobilityLabels[profile.mobilityAid]}` : ""}.`
-      : "Your selected monster is shown here and will star in the story.";
-    renderProfile(document.querySelector("#child-preview-stage"), document.querySelector("#child-preview-avatar"), profile);
+    if (copy) copy.textContent = profile.included ? describe(profile) : "Your selected monster is shown here and will star in the story.";
+    syncConditionalFields(profile);
+    renderProfile(document.querySelector("#child-preview-stage"), null, profile);
+    renderMiniPreview(profile);
+    renderHairThumbnails(profile);
     if (save) persist(profile);
     lastProfile = compactProfile(profile);
+    renderPresetOptions();
     updateHistoryControls(message);
     root.dispatchEvent(new CustomEvent("childprofilechange", { detail: profile }));
+    if (!silent) window.requestAnimationFrame(refreshScrollHints);
     return profile;
   }
 
@@ -312,29 +393,59 @@
     if (profileKey(current) === profileKey(defaultProfile)) return current;
     history.push(compactProfile(current)); applyProfile(defaultProfile); return sync({ message: "Character reset to the starting design." });
   }
+  /** Applies a saved profile (e.g. from an earlier painted version) as an undoable change. */
+  function useProfile(profile, message = "") {
+    const current = getProfile();
+    if (profileKey(current) !== profileKey(profile)) { history.push(compactProfile(current)); if (history.length > 30) history.shift(); }
+    applyProfile(profile);
+    return sync({ message });
+  }
 
   function selectEditorTab(tabId) {
     for (const button of document.querySelectorAll("[data-editor-tab]")) {
       const active = button.dataset.editorTab === tabId;
       button.classList.toggle("is-active", active);
       button.setAttribute("aria-selected", active ? "true" : "false");
+      button.tabIndex = active ? 0 : -1;
     }
     for (const panel of document.querySelectorAll("[data-editor-panel]")) {
       const active = panel.dataset.editorPanel === tabId;
       panel.classList.toggle("is-active", active);
       if (active) panel.open = true;
     }
+    window.requestAnimationFrame(refreshScrollHints);
   }
 
-  window.MonstersNowChildSelector = { getProfile, renderProfile, restore, sync, undo, reset, supportsWheelchair, supportsForearmCrutches, storageKey, wheelchairSupport, forearmCrutchSupport };
+  window.MonstersNowChildSelector = {
+    getProfile, renderProfile, restore, sync, undo, reset, useProfile, compactProfile, profileKey, sanitizeDetail, presetMatch,
+    supportsWheelchair, supportsForearmCrutches, storageKey, wheelchairSupport, forearmCrutchSupport, optionLabels, defaultProfile, selectEditorTab,
+  };
   if (!root) return;
   restore();
-  root.addEventListener("change", () => sync({ recordHistory: true }));
+  let detailTimer;
+  root.addEventListener("change", (event) => {
+    if (event.target?.id === "child-special-detail") {
+      window.clearTimeout(detailTimer);
+      const input = event.target;
+      const clean = sanitizeDetail(input.value);
+      if (input.value !== clean) input.value = clean;
+    }
+    sync({ recordHistory: true });
+  });
+  document.querySelector("#child-special-detail")?.addEventListener("input", () => {
+    syncConditionalFields(getProfile());
+    window.clearTimeout(detailTimer);
+    detailTimer = window.setTimeout(() => {
+      if (!lastProfile || profileKey(getProfile()) !== profileKey(lastProfile)) sync({ recordHistory: true });
+    }, 450);
+  });
   for (const button of document.querySelectorAll("[data-editor-tab]")) {
     button.addEventListener("click", () => selectEditorTab(button.dataset.editorTab));
   }
   document.querySelector("#child-editor-undo")?.addEventListener("click", undo);
   document.querySelector("#child-editor-reset")?.addEventListener("click", reset);
   window.addEventListener("pageshow", () => { restore(); history.length = 0; lastProfile = null; sync({ save: false }); });
+  window.addEventListener("resize", () => window.requestAnimationFrame(refreshScrollHints), { passive: true });
   sync({ save: false });
+  loadPresets();
 })();

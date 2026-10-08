@@ -88,18 +88,10 @@ const converterTool = document.querySelector("[data-converter]");
 const backToMonsterButton = document.querySelector("#back-to-monster");
 const childEditorStart = document.querySelector("#child-editor-start");
 const childEditorKickerLabel = document.querySelector("#child-editor-kicker-label");
-const childPreviewStage = document.querySelector("#child-preview-stage");
-const childPreviewCharacter = document.querySelector("#child-preview-character");
-const childPremiumDefault = document.querySelector("#child-premium-default");
-const childMonsterOnlyPreview = document.querySelector("#child-monster-only-preview");
-const childPreviewLabelText = document.querySelector("#child-preview-label-text");
-const childPreviewModeText = document.querySelector("#child-preview-mode-text");
-const childRenderedPreview = document.querySelector("#child-rendered-preview");
-const childRenderButton = document.querySelector("#render-child-character");
 const childRenderStatus = document.querySelector("#child-render-status");
-const childRenderProgress = document.querySelector("#child-render-progress");
-const childRenderElapsed = document.querySelector("#child-render-elapsed");
-const childRenderProgressSteps = [...document.querySelectorAll("[data-child-render-step]")];
+const childStudio = () => window.MonstersNowChildStudio;
+const MONSTER_SUBMISSION_KEY = "monstersnow_monster_submission";
+const CREATOR_STATE_KEY = "monstersnow_creator_state_v1";
 const bookOfferStatus = document.querySelector("#book-offer-status");
 const storybookInterestButton = document.querySelector("#storybook-interest");
 const storybookInterestForm = document.querySelector("#storybook-interest-form");
@@ -177,9 +169,6 @@ let selectedPreviewId;
 let monsterConfirmed = false;
 let isCharacterStepVisible = false;
 let monsterSubmission;
-let renderedChildImage;
-let renderedChildProfileKey;
-let isRenderingChild = false;
 let checkoutSubmissionId;
 let isGeneratingPreview = false;
 let uploadDragDepth = 0;
@@ -188,8 +177,6 @@ let heicConverterPromise;
 let isPreparingUpload = false;
 let monsterProgressTimer;
 let monsterProgressStartedAt = 0;
-let childRenderProgressTimer;
-let childRenderProgressStartedAt = 0;
 
 if (monsterUpload && drawingPreview && monsterPreview && convertButton) {
   monsterUpload.addEventListener("change", () => {
@@ -280,24 +267,12 @@ if (featureMonster) {
 
 for (const input of childCharacterInputs) input.addEventListener("change", syncChildCharacterPicker);
 syncChildCharacterPicker();
-childRenderButton?.addEventListener("click", renderBookCharacter);
-childEditorStart?.addEventListener("childprofilechange", (event) => {
-  const nextKey = getChildProfileKey(event.detail);
-  let renderedMobilityAid = "";
-  try { renderedMobilityAid = JSON.parse(renderedChildProfileKey || "{}").mobilityAid || "none"; } catch {}
-  syncPremiumDefault(event.detail);
-  if (renderedChildImage && event.detail?.included && renderedChildProfileKey !== nextKey) {
-    markRenderedChildStale();
-    if ((event.detail.mobilityAid || "none") !== renderedMobilityAid) {
-      childPreviewStage?.classList.remove("has-book-render");
-      if (childRenderedPreview) childRenderedPreview.hidden = true;
-      if (childPremiumDefault) childPremiumDefault.hidden = false;
-      if (childRenderStatus) childRenderStatus.textContent = "The new mobility preview is shown. Apply the choices to create the exact book character.";
-    }
-  } else if (!event.detail?.included && childRenderStatus) {
-    childRenderStatus.textContent = "Monster-only stories use the selected monster and do not need a child character render.";
-  }
+childStudio()?.init({
+  getSubmission: () => (monsterSubmission?.id && monsterSubmission?.token ? monsterSubmission : null),
+  getMonsterImage: () => getSelectedMonsterImage(),
+  isStepVisible: () => isCharacterStepVisible,
 });
+restoreCreatorSession();
 
 async function handleStorybookInterestSubmit(event) {
   event.preventDefault();
@@ -313,16 +288,16 @@ async function handleStorybookInterestSubmit(event) {
     return;
   }
 
-  const childRenderIsCurrent = renderedChildImage && renderedChildProfileKey === getChildProfileKey(personalization.childCharacter);
-  if (personalization.childCharacter?.included && !childRenderIsCurrent) {
-    if (interestStatus) interestStatus.textContent = renderedChildImage
-      ? "Apply the latest character choices before reviewing the story."
-      : "Render the finished book character before reviewing the story.";
-    if (childRenderStatus) childRenderStatus.textContent = renderedChildImage
-      ? "Your current character is safe. Apply the updated choices so the book uses the version shown in the editor."
-      : "Finish this step by creating the polished character that will be used in the book.";
-    childRenderButton?.focus({ preventScroll: true });
-    childRenderButton?.scrollIntoView({ behavior: "smooth", block: "center" });
+  const childRender = personalization.childCharacter?.included ? childStudio()?.currentRender(personalization.childCharacter) : null;
+  if (personalization.childCharacter?.included && !childRender) {
+    if (interestStatus) interestStatus.textContent = childStudio()?.versions().length
+      ? "Paint the latest character choices (or pick an earlier painted version) before reviewing the story."
+      : "Paint the finished book character before reviewing the story.";
+    childStudio()?.explainMissing();
+    return;
+  }
+  if (childStudio()?.isBusy()) {
+    if (interestStatus) interestStatus.textContent = "Wait for the character painting to finish, or cancel it, before reviewing the story.";
     return;
   }
 
@@ -354,7 +329,7 @@ async function handleStorybookInterestSubmit(event) {
     selectedPreviewId: selectedPreview?.id || selectedPreviewId || null,
     style: selectedPreview?.style || selectedMonsterStyle,
     monsterImage: selectedPreview?.image || null,
-    childImage: personalization.childCharacter?.included ? renderedChildImage : null,
+    childImage: childRender?.image || null,
     featurePermission,
     storyId: selectedStory.id,
     storyLabel: selectedStory.label,
@@ -371,6 +346,8 @@ async function handleStorybookInterestSubmit(event) {
     });
     if (savedMonster?.id) submission.monsterSubmissionId = savedMonster.id;
     if (savedMonster?.id && monsterSubmission?.token) submission.monsterSubmissionToken = monsterSubmission.token;
+    // Lets checkout fetch the saved lossless master for print instead of the preview copy.
+    if (childRender?.saved && savedMonster?.id) submission.childRenderId = childRender.id;
   } catch (error) {
     console.error(error);
     if (interestStatus) interestStatus.textContent = error.message || "Your monster could not be saved. Please try again.";
@@ -528,192 +505,6 @@ function getSelectedChildCharacter() {
   };
   const id = input?.value || "none";
   return { id, label: labels[id] || labels.none, included: id !== "none" };
-}
-
-function getChildProfileKey(profile) {
-  if (!profile?.included) return "none";
-  return JSON.stringify({
-    id: profile.id,
-    presentation: profile.presentation,
-    skinTone: profile.skinTone,
-    hairStyle: profile.hairStyle,
-    hairColor: profile.hairColor,
-    eyeColor: profile.eyeColor,
-    outfitStyle: profile.outfitStyle,
-    outfitColor: profile.outfitColor,
-    ageBand: profile.ageBand,
-    relativeHeight: profile.relativeHeight,
-    mobilityAid: profile.mobilityAid,
-  });
-}
-
-function clearRenderedChild(message) {
-  renderedChildImage = undefined;
-  renderedChildProfileKey = undefined;
-  if (childRenderedPreview) {
-    childRenderedPreview.hidden = true;
-    childRenderedPreview.removeAttribute("src");
-    childRenderedPreview.alt = "";
-  }
-  childPreviewStage?.classList.remove("has-book-render", "has-pending-child-changes");
-  if (childPreviewCharacter) childPreviewCharacter.hidden = true;
-  childRenderButton?.closest(".child-render-actions")?.classList.remove("is-complete");
-  if (childRenderButton) childRenderButton.textContent = "Create This Character";
-  if (childRenderStatus && message) childRenderStatus.textContent = message;
-}
-
-function markRenderedChildStale() {
-  childPreviewStage?.classList.add("has-book-render", "has-pending-child-changes");
-  if (childPremiumDefault) childPremiumDefault.hidden = true;
-  if (childRenderedPreview) childRenderedPreview.hidden = false;
-  childRenderButton?.closest(".child-render-actions")?.classList.remove("is-complete");
-  if (childRenderButton) childRenderButton.textContent = "Apply Updated Choices";
-  if (childRenderStatus) childRenderStatus.textContent = "Your finished character stays here while you edit. Apply the updated choices when ready.";
-  if (childPreviewModeText) childPreviewModeText.textContent = "Changes ready";
-}
-
-function showChildRenderProgress() {
-  if (!childRenderProgress) return;
-  childRenderProgress.hidden = false;
-  childRenderProgressStartedAt = Date.now();
-  updateChildRenderProgress();
-  childRenderProgressTimer = window.setInterval(updateChildRenderProgress, 1000);
-}
-
-function updateChildRenderProgress() {
-  if (!childRenderProgressStartedAt) return;
-  const elapsed = Math.max(0, Math.floor((Date.now() - childRenderProgressStartedAt) / 1000));
-  const activeStep = elapsed >= 35 ? 3 : 2;
-  childRenderProgressSteps.forEach((item) => {
-    const step = Number(item.dataset.childRenderStep);
-    item.classList.toggle("is-complete", step < activeStep);
-    item.classList.toggle("is-active", step === activeStep);
-  });
-  if (childRenderElapsed) {
-    childRenderElapsed.textContent = elapsed < 3
-      ? "Just started"
-      : `${elapsed} seconds elapsed · Still working`;
-  }
-}
-
-function hideChildRenderProgress() {
-  if (childRenderProgress) childRenderProgress.hidden = true;
-  if (childRenderProgressTimer) window.clearInterval(childRenderProgressTimer);
-  childRenderProgressTimer = undefined;
-  childRenderProgressStartedAt = 0;
-}
-
-function getPremiumChildReference(profile = {}) {
-  if (profile.mobilityAid === "forearm-crutches") {
-    return profile.presentation === "boy"
-      ? "assets/child-editor/default-boy-forearm-crutches-feature-animation-v1.webp"
-      : "assets/child-editor/default-girl-forearm-crutches-feature-animation-v1.webp";
-  }
-  if (profile.mobilityAid === "wheelchair") {
-    return profile.presentation === "boy"
-      ? "assets/child-editor/default-boy-wheelchair-feature-animation-v1.webp"
-      : "assets/child-editor/default-girl-wheelchair-feature-animation-v1.webp";
-  }
-  return profile.presentation === "boy"
-    ? "assets/child-editor/default-boy-feature-animation-v1.webp"
-    : "assets/child-editor/default-girl-feature-animation-v1.webp";
-}
-
-function syncPremiumDefault(profile = getSelectedChildCharacter()) {
-  if (!childPremiumDefault) return;
-  const included = Boolean(profile?.included);
-  const monsterImage = getSelectedMonsterImage();
-  const showMonster = !included && Boolean(monsterImage);
-  childPremiumDefault.hidden = !included || Boolean(renderedChildImage);
-  childPremiumDefault.src = getPremiumChildReference(profile);
-  if (childMonsterOnlyPreview) {
-    childMonsterOnlyPreview.hidden = !showMonster;
-    if (showMonster) {
-      childMonsterOnlyPreview.src = monsterImage;
-      childMonsterOnlyPreview.alt = "Selected storybook monster.";
-    } else {
-      childMonsterOnlyPreview.removeAttribute("src");
-      childMonsterOnlyPreview.alt = "";
-    }
-  }
-  childPreviewStage?.classList.toggle("has-premium-art", included);
-  childPreviewStage?.classList.toggle("has-monster-only", showMonster);
-  childPreviewStage?.classList.toggle("has-book-render", Boolean(renderedChildImage));
-  if (childRenderedPreview && renderedChildImage) childRenderedPreview.hidden = false;
-  const renderActions = childRenderButton?.closest(".child-render-actions");
-  if (renderActions) renderActions.hidden = !included;
-  if (included && childRenderStatus?.textContent.includes("Monster-only")) {
-    childRenderStatus.textContent = "The premium sample updates to the exact selected hair, skin, eyes, and clothes when you apply the choices.";
-  }
-  if (childPreviewLabelText) childPreviewLabelText.textContent = included ? "Premium character preview" : "Your monster preview";
-  if (childPreviewModeText) childPreviewModeText.textContent = included ? "Book-quality avatar" : "Monster-only story";
-  if (childPreviewCharacter) childPreviewCharacter.hidden = true;
-}
-
-async function renderBookCharacter() {
-  if (isRenderingChild) return;
-  const profile = getSelectedChildCharacter();
-  if (!profile?.included) {
-    if (childRenderStatus) childRenderStatus.textContent = "Choose Include my child to create a book character.";
-    return;
-  }
-  if (!monsterSubmission?.id || !monsterSubmission?.token) {
-    if (childRenderStatus) childRenderStatus.textContent = "The monster must be saved before the book character can be rendered. Return to the monster step and try again.";
-    return;
-  }
-
-  isRenderingChild = true;
-  childRenderButton.disabled = true;
-  childRenderButton.textContent = "Applying choices…";
-  if (childPreviewModeText) childPreviewModeText.textContent = renderedChildImage ? "Updating avatar" : "Creating avatar";
-  showChildRenderProgress();
-  if (childRenderStatus) childRenderStatus.textContent = "Building the dimensional, book-ready character. This usually takes under a minute.";
-
-  try {
-    let previousChildImage = null;
-    if (renderedChildImage && renderedChildProfileKey) {
-      try {
-        const previousProfile = JSON.parse(renderedChildProfileKey);
-        if (previousProfile.presentation === profile.presentation && previousProfile.mobilityAid === profile.mobilityAid) previousChildImage = renderedChildImage;
-      } catch {}
-    }
-    const response = await fetch("/api/render-child-character", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        submissionId: monsterSubmission.id,
-        submissionToken: monsterSubmission.token,
-        profile,
-        previousChildImage,
-      }),
-    });
-    const result = await response.json().catch(() => ({ error: "The character renderer did not return a readable response." }));
-    if (!response.ok || !result.childImage) throw new Error(result.error || "The book character could not be rendered.");
-    renderedChildImage = result.childImage;
-    renderedChildProfileKey = getChildProfileKey(profile);
-    childRenderedPreview.src = result.childImage;
-    childRenderedPreview.alt = `${profile.presentationLabel || "Child"} storybook character, rendered in feature-animation style.`;
-    childRenderedPreview.hidden = false;
-    childPremiumDefault.hidden = true;
-    childPreviewStage?.classList.add("has-book-render");
-    childPreviewStage?.classList.remove("has-pending-child-changes");
-    if (childPreviewCharacter) childPreviewCharacter.hidden = true;
-    childRenderButton.textContent = "Create Another Version";
-    childRenderButton.closest(".child-render-actions")?.classList.add("is-complete");
-    if (childRenderStatus) childRenderStatus.textContent = "Book character ready. This polished render will carry into the story proof.";
-    if (childPreviewModeText) childPreviewModeText.textContent = "Book-quality avatar";
-  } catch (error) {
-    if (renderedChildImage) {
-      markRenderedChildStale();
-      if (childRenderStatus) childRenderStatus.textContent = `${error.message || "The updated character could not be rendered."} Your previous character is still shown.`;
-    } else {
-      clearRenderedChild(error.message || "The book character could not be rendered. Please try again.");
-    }
-  } finally {
-    isRenderingChild = false;
-    childRenderButton.disabled = false;
-    hideChildRenderProgress();
-  }
 }
 
 function syncChildCharacterPicker() {
@@ -1113,10 +904,11 @@ function selectGeneratedPreview(id, announce = false) {
   if (announce) {
     setUploadActionStatus(`${getPreviewStyleLabel(preview.style)} preview selected.`);
   }
+  saveCreatorState();
 }
 
 function resetPreviewState() {
-  clearRenderedChild("The final book character will be created after you choose a monster.");
+  childStudio()?.reset("The book character is painted after you choose a monster.");
   coloringPageUrl = undefined;
   previewsUsed = 0;
   generatedPreviews = [];
@@ -1125,7 +917,7 @@ function resetPreviewState() {
   isCharacterStepVisible = false;
   monsterSubmission = undefined;
   checkoutSubmissionId = undefined;
-  try { sessionStorage.removeItem("monstersnow_monster_submission"); } catch {}
+  try { sessionStorage.removeItem(MONSTER_SUBMISSION_KEY); sessionStorage.removeItem(CREATOR_STATE_KEY); } catch {}
   isGeneratingPreview = false;
   isPreparingUpload = false;
   hideMonsterProgress();
@@ -1447,12 +1239,8 @@ function showCharacterStep({ scroll = true } = {}) {
   monsterCreatorPanels.forEach((panel) => { panel.hidden = true; });
   converterTool?.classList.add("is-character-step");
   resultBookOffer.hidden = false;
-  const selectedChild = getSelectedChildCharacter();
-  syncPremiumDefault(selectedChild);
-  if (selectedChild?.included && !renderedChildImage) {
-    if (childRenderButton) childRenderButton.textContent = "Create This Character";
-    if (childRenderStatus) childRenderStatus.textContent = "Ready when you are. Every choice stays editable.";
-  }
+  childStudio()?.onStepShown();
+  saveCreatorState();
   setConverterStage("personalize");
   window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}#child-editor-start`);
   window.setTimeout(() => {
@@ -1467,6 +1255,7 @@ function showMonsterStep({ scroll = true } = {}) {
   monsterCreatorPanels.forEach((panel) => { panel.hidden = false; });
   converterTool?.classList.remove("is-character-step");
   if (resultBookOffer) resultBookOffer.hidden = true;
+  saveCreatorState();
   setConverterStage(selectedPreviewId ? "preview" : "upload");
   window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}#monster-upload`);
   if (scroll) document.querySelector("#monster-upload")?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -1766,6 +1555,81 @@ function loadTurnstile() {
   return turnstileScriptPromise;
 }
 
+function saveCreatorState() {
+  try {
+    if (!monsterSubmission?.id) return;
+    sessionStorage.setItem(CREATOR_STATE_KEY, JSON.stringify({
+      submissionId: monsterSubmission.id,
+      selectedPreviewId: selectedPreviewId || null,
+      monsterConfirmed,
+      step: isCharacterStepVisible ? "character" : "monster",
+    }));
+  } catch {}
+}
+
+/**
+ * After a refresh, brings back the saved monster previews, the chosen monster,
+ * the character step, and every saved child version. Any failure leaves the
+ * normal fresh start in place.
+ */
+async function restoreCreatorSession() {
+  let saved = null;
+  let creator = {};
+  try {
+    saved = JSON.parse(sessionStorage.getItem(MONSTER_SUBMISSION_KEY) || "null");
+    creator = JSON.parse(sessionStorage.getItem(CREATOR_STATE_KEY) || "{}") || {};
+  } catch {}
+  if (!saved?.id || !saved?.token || generatedPreviews.length) return;
+  const headers = { Accept: "application/json", "x-submission-id": saved.id, "x-submission-token": saved.token };
+  const loadImage = async (kind, id) => {
+    try {
+      const response = await fetch(`/api/render-child-character?resource=image&kind=${kind}&id=${encodeURIComponent(id)}`, { headers });
+      const result = await response.json().catch(() => ({}));
+      return response.ok && typeof result.image === "string" ? result.image : null;
+    } catch {
+      return null;
+    }
+  };
+  try {
+    const response = await fetch("/api/render-child-character?resource=session", { headers });
+    const session = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      if ([400, 401, 403, 404].includes(response.status)) {
+        try { sessionStorage.removeItem(MONSTER_SUBMISSION_KEY); sessionStorage.removeItem(CREATOR_STATE_KEY); } catch {}
+      }
+      return;
+    }
+    const listed = (Array.isArray(session.previews) ? session.previews : []).slice(0, maxFreePreviews);
+    if (!listed.length) return;
+    const previews = await Promise.all(listed.map(async (preview) => {
+      const [image, coloringPage] = await Promise.all([loadImage("preview", preview.id), preview.hasColoringPage ? loadImage("coloring", preview.id) : null]);
+      return image ? { ...preview, image, coloringPage: coloringPage || undefined } : null;
+    }));
+    // The visitor may have started a new upload while this was loading.
+    if (generatedPreviews.length || isGeneratingPreview || selectedDrawingFile) return;
+    const restored = previews.filter(Boolean);
+    if (!restored.length) return;
+    monsterSubmission = saved;
+    for (const preview of restored) addGeneratedPreview({ id: preview.id, image: preview.image, coloringPage: preview.coloringPage, mode: "ai", style: preview.style });
+    const preferredId = [creator.selectedPreviewId, session.submission?.selectedPreviewId].find((id) => restored.some((preview) => preview.id === id)) || restored[restored.length - 1].id;
+    selectGeneratedPreview(preferredId);
+    setConverterStage("preview");
+    if (converterStatus) converterStatus.textContent = "Welcome back—your monster previews are restored.";
+    setUploadActionStatus("Your saved monster previews are restored. Upload a drawing to start over.");
+    syncPreviewControls();
+    if (creator.submissionId === saved.id && creator.monsterConfirmed && creator.step === "character") {
+      monsterConfirmed = true;
+      if (confirmMonsterButton) confirmMonsterButton.textContent = "Monster Selected ✓";
+      if (storybookInterestButton) storybookInterestButton.disabled = false;
+      syncBookOfferStatus(true);
+      showCharacterStep({ scroll: false });
+    }
+    await childStudio()?.restoreRenders(saved, session.renders || []);
+  } catch (error) {
+    console.warn("The saved creator session could not be restored.", error);
+  }
+}
+
 async function ensureMonsterSubmission(drawing) {
   if (monsterSubmission?.id && monsterSubmission?.token) return monsterSubmission;
   const upload = async (turnstileToken) => {
@@ -1792,7 +1656,7 @@ async function ensureMonsterSubmission(drawing) {
     throw error;
   }
   monsterSubmission = result.submission;
-  try { sessionStorage.setItem("monstersnow_monster_submission", JSON.stringify(monsterSubmission)); } catch {}
+  try { sessionStorage.setItem(MONSTER_SUBMISSION_KEY, JSON.stringify(monsterSubmission)); } catch {}
   return monsterSubmission;
 }
 

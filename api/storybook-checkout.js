@@ -11,9 +11,10 @@ const {
 } = require("../lib/stripe-checkout");
 const { attachCheckoutSession, recordCheckoutOrder } = require("../lib/order-library");
 const { deriveOrderAccess } = require("../lib/customer-orders");
-const { getAdminMonsterAssets, requireSubmission, saveCheckoutChildImage } = require("../lib/monster-submissions");
+const { getAdminMonsterAssets, requireSubmission } = require("../lib/monster-submissions");
 const { listStories, validateStoryPublishReadiness } = require("../lib/story-library");
 const { buildHalloweenProof, verifyProof, STORY_ID, TITLE } = require("../lib/halloween-proof");
+const { saveOrderChildImage } = require("../lib/order-child-image");
 
 module.exports = async function handler(request, response) {
   if (request.method !== "POST") {
@@ -103,7 +104,7 @@ module.exports = async function handler(request, response) {
     // idempotency and the deterministic submission identity make retries safe.
     // Pin the exact child render the customer approved in the signed proof.
     const childImagePath = submission.personalization.childCharacter?.included && proof.childImage
-      ? await saveCheckoutChildImage({ submissionId: submission.submissionId, monsterSubmissionId: submission.monsterSubmissionId, childImage: proof.childImage })
+      ? await saveOrderChildImage(submission, proof, body)
       : null;
     const initialOrder = await recordCheckoutOrder(submission, null, { orderAccessTokenHash: access.tokenHash, childImagePath });
     if (!initialOrder || initialOrder.status !== "checkout_started") {
