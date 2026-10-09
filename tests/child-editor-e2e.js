@@ -31,20 +31,15 @@ const OPTIONS = {
   "child-mobility-aid": ["wheelchair", "forearm-crutches", "walker", "prosthetic-leg", "leg-braces", "none"],
 };
 const COSTUMES = ["witch", "superhero", "dinosaur", "astronaut", "cat", "pumpkin"];
-const LAYER_FOR = {
-  "child-hair-style": (v) => `.hair-${v}`,
-  "child-outfit-style": (v) => (v === "costume" ? ".costume-pumpkin" : `.outfit-${v}`),
-  "child-glasses": (v) => (v === "none" ? null : `.glasses-${v}`),
-  "child-hearing-aid": (v) => (v === "none" ? null : v === "cochlear" ? ".hearing-cochlear" : ".hearing-aids"),
-  "child-headwear": (v) => (v === "none" ? null : `.headwear-${v}`),
-  "child-face-detail": (v) => (v === "none" ? null : v === "birthmark" ? ".face-birthmark" : ".face-freckles"),
-  "child-mobility-aid": (v) => ({ wheelchair: ".wheelchair-art", "forearm-crutches": ".aid-crutches", walker: ".aid-walker", "prosthetic-leg": ".aid-prosthetic", "leg-braces": ".aid-braces" }[v] || null),
+const PREMIUM_FOR = {
+  boy: "assets/child-editor/default-boy-feature-animation-v1.webp",
+  girl: "assets/child-editor/default-girl-feature-animation-v1.webp",
+  "boy-wheelchair": "assets/child-editor/default-boy-wheelchair-feature-animation-v1.webp",
+  "girl-wheelchair": "assets/child-editor/default-girl-wheelchair-feature-animation-v1.webp",
+  "boy-forearm-crutches": "assets/child-editor/default-boy-forearm-crutches-feature-animation-v1.webp",
+  "girl-forearm-crutches": "assets/child-editor/default-girl-forearm-crutches-feature-animation-v1.webp",
 };
-const DATA_FOR = {
-  "child-presentation": "presentation", "child-hair-style": "hairStyle", "child-outfit-style": "outfitStyle", "child-glasses": "glasses",
-  "child-hearing-aid": "hearing", "child-headwear": "headwear", "child-face-detail": "faceDetail", "child-mobility-aid": "mobility",
-};
-const VAR_FOR = { "child-skin-tone": "--skin", "child-hair-color": "--hair", "child-eye-color": "--eye", "child-outfit-color": "--outfit" };
+const HAIR_ASSET = { short: "short", curly: "curls", coils: "coils", wavy: "waves", straight: "straight", braids: "braids", locs: "braids", ponytail: "waves", puffs: "coils", buzz: "short" };
 
 function log(step) { console.log(`  ✓ ${step}`); }
 // Every logged step also proves the layout is clean at that moment.
@@ -61,28 +56,28 @@ async function pick(page, name, value) {
   await page.waitForFunction(([n, v]) => document.querySelector(`input[name="${n}"][value="${v}"]`)?.checked, [name, value]);
 }
 
-async function sketchState(page, root = "#child-preview-stage") {
-  return page.evaluate((selector) => {
-    const svg = document.querySelector(`${selector} .custom-child-svg`);
-    const visible = (sel) => [...svg.querySelectorAll(sel)].some((el) => getComputedStyle(el).display !== "none" && el.getBBox().width > 0);
-    const style = getComputedStyle(svg);
+async function previewState(page) {
+  return page.evaluate(() => {
+    const stage = document.querySelector("#child-preview-stage");
+    const premium = document.querySelector("#child-premium-default");
+    const preset = document.querySelector("#child-preset-preview");
+    const rendered = document.querySelector("#child-rendered-preview");
+    const sketch = document.querySelector("#child-preview-character, .custom-child-svg");
     return {
-      data: { ...svg.dataset },
-      vars: Object.fromEntries(["--skin", "--hair", "--eye", "--outfit"].map((name) => [name, svg.style.getPropertyValue(name).trim()])),
-      visible: Object.fromEntries([".hair", ".costume", ".headwear-hijab", ".ears"].map((sel) => [sel, visible(sel)])),
-      layerVisible: (window.__layer ? visible(window.__layer) : null),
-      stageClasses: [...document.querySelector("#child-preview-stage").classList],
-      sketchShown: getComputedStyle(document.querySelector("#child-preview-character")).display !== "none",
-      color: style.color,
+      stageClasses: [...stage.classList],
+      premiumSrc: premium?.getAttribute("src") || "",
+      premiumVisible: Boolean(premium && !premium.hidden && getComputedStyle(premium).display !== "none"),
+      presetHidden: !preset || preset.hidden,
+      renderedHidden: !rendered || rendered.hidden,
+      sketchPresent: Boolean(sketch),
+      label: document.querySelector("#child-preview-label-text")?.textContent || "",
+      honestHidden: document.querySelector("#child-preview-honest")?.hidden ?? true,
     };
-  }, root);
+  });
 }
 
-async function layerVisible(page, selector, root = "#child-preview-stage") {
-  return page.evaluate(([rootSel, sel]) => {
-    const svg = document.querySelector(`${rootSel} .custom-child-svg`);
-    return [...svg.querySelectorAll(sel)].some((el) => getComputedStyle(el).display !== "none" && el.getBBox().width > 0);
-  }, [root, selector]);
+async function premiumSrc(page) {
+  return page.locator("#child-premium-default").getAttribute("src");
 }
 
 async function openEditor(page, base) {
@@ -130,49 +125,58 @@ async function runDesktop(browser, h) {
   page.on("pageerror", (error) => errors.push(error.message));
   await openEditor(page, h.base);
   assert.equal(await noHorizontalOverflow(page), true);
-  assert.equal(await page.locator("#child-preview-label-text").textContent(), "Live sketch");
-  await step(page, "editor opens after monster confirm; live sketch label");
+  let preview = await previewState(page);
+  assert.equal(preview.label, "Premium character preview");
+  assert.equal(preview.premiumVisible, true);
+  assert.equal(preview.sketchPresent, false);
+  assert.match(preview.premiumSrc, /default-girl-feature-animation-v1\.webp$/);
+  assert.equal(preview.honestHidden, false);
+  await step(page, "editor opens after monster confirm; painted avatar preview");
 
-  // (1) Every option in every category changes the live sketch.
+  // Presentation + mobility swap the closest painted avatar (same art as the live site).
+  await pick(page, "child-presentation", "boy");
+  assert.match(await premiumSrc(page), /default-boy-feature-animation-v1\.webp$/);
+  await pick(page, "child-mobility-aid", "wheelchair");
+  assert.match(await premiumSrc(page), /default-boy-wheelchair-feature-animation-v1\.webp$/);
+  await pick(page, "child-mobility-aid", "forearm-crutches");
+  assert.match(await premiumSrc(page), /default-boy-forearm-crutches-feature-animation-v1\.webp$/);
+  await pick(page, "child-presentation", "girl");
+  assert.match(await premiumSrc(page), /default-girl-forearm-crutches-feature-animation-v1\.webp$/);
+  await pick(page, "child-mobility-aid", "none");
+  assert.match(await premiumSrc(page), /default-girl-feature-animation-v1\.webp$/);
+  // Aids without dedicated art fall back to the standing painted avatar.
+  await pick(page, "child-mobility-aid", "walker");
+  assert.match(await premiumSrc(page), /default-girl-feature-animation-v1\.webp$/);
+  await pick(page, "child-mobility-aid", "none");
+
+  // Every option is still selectable; the painted avatar stays the main image (never a sketch).
   for (const [name, values] of Object.entries(OPTIONS)) {
     for (const value of values) {
       await pick(page, name, value);
-      const state = await sketchState(page);
-      if (DATA_FOR[name]) assert.equal(state.data[DATA_FOR[name]], value, `${name}=${value} data attribute`);
-      if (VAR_FOR[name]) assert.ok(state.vars[VAR_FOR[name]], `${name}=${value} color var`);
-      if (name === "child-age-band") assert.ok(state.stageClasses.includes(`age-${value}`));
-      if (name === "child-relative-height") assert.ok(state.stageClasses.includes(`height-${value}`));
-      if (name === "child-mobility-aid") assert.ok(state.stageClasses.includes(`mobility-${value}`));
-      const layer = LAYER_FOR[name]?.(value);
-      if (layer) assert.equal(await layerVisible(page, layer), true, `${name}=${value} shows ${layer}`);
-      assert.equal(state.sketchShown, true, `${name}=${value} keeps the sketch visible`);
+      preview = await previewState(page);
+      assert.equal(preview.premiumVisible || !preview.presetHidden, true, `${name}=${value} shows painted art`);
+      assert.equal(preview.sketchPresent, false, `${name}=${value} never shows a sketch`);
+      if (name === "child-age-band") assert.ok(preview.stageClasses.includes(`age-${value}`));
+      if (name === "child-relative-height") assert.ok(preview.stageClasses.includes(`height-${value}`));
+      if (name === "child-mobility-aid") assert.ok(preview.stageClasses.includes(`mobility-${value}`));
     }
   }
-  // Color vars differ per option (not just "set").
-  const colors = {};
-  for (const tone of OPTIONS["child-skin-tone"]) { await pick(page, "child-skin-tone", tone); colors[tone] = (await sketchState(page)).vars["--skin"]; }
-  assert.equal(new Set(Object.values(colors)).size, OPTIONS["child-skin-tone"].length, "10 distinct skin tones");
-  // Costumes.
+  // Costumes still toggle the costume field.
   await pick(page, "child-outfit-style", "costume");
   assert.equal(await page.locator("#child-costume-field").isVisible(), true);
   assert.equal(await page.locator("#child-outfit-color-field").isHidden(), true);
-  for (const costume of COSTUMES) {
-    await pick(page, "child-costume", costume);
-    assert.equal((await sketchState(page)).data.costume, costume);
-    assert.equal(await layerVisible(page, `.costume-${costume}`), true, `costume ${costume} visible`);
-  }
-  // Covering headwear hides hair; hair thumbnails follow the hair color.
-  await pick(page, "child-headwear", "hijab");
-  let state = await sketchState(page);
-  assert.equal(state.visible[".hair"], false, "hijab covers hair");
-  assert.equal(state.visible[".headwear-hijab"], true);
-  await pick(page, "child-headwear", "none");
-  await pick(page, "child-hair-color", "red");
-  const thumbHair = await page.evaluate(() => document.querySelector('[data-hair-thumb="locs"] svg').style.getPropertyValue("--hair"));
-  assert.equal(thumbHair, "#c4521f", "hair thumbnails use the chosen hair color");
+  for (const costume of COSTUMES) await pick(page, "child-costume", costume);
+  // Hair thumbnails are the painted hair assets (boy/girl variants).
+  await pick(page, "child-presentation", "boy");
+  await pick(page, "child-hair-style", "curly");
+  const thumbSrc = await page.evaluate(() => document.querySelector('[data-hair-thumbnail="curly"]').getAttribute("src"));
+  assert.match(thumbSrc, /hair-style-boy-curls-v1\.webp$/);
+  await pick(page, "child-presentation", "girl");
+  const thumbGirl = await page.evaluate(() => document.querySelector('[data-hair-thumbnail="curly"]').getAttribute("src"));
+  assert.match(thumbGirl, /hair-style-curls-v1\.webp$/);
   await pick(page, "child-presentation", "neutral");
-  assert.match(await page.locator("#child-preview-details").textContent(), /Kid · .*Red \/ ginger/);
-  await step(page, "all 14 option categories + 6 costumes update the sketch; hijab hides hair; thumbnails recolor");
+  assert.match(await page.locator("#child-preview-details").textContent(), /Kid ·/);
+  await step(page, "painted avatar swaps with presentation/mobility; all options selectable; hair thumbs are painted");
 
   // Special detail is sanitized and counted.
   await page.locator('[data-editor-tab="build"]').click();
@@ -199,10 +203,11 @@ async function runDesktop(browser, h) {
   assert.equal(await page.locator('input[name="child-hair-color"][value="red"]').isChecked(), true);
   assert.equal(await page.locator('input[name="child-glasses"][value="round"]').isChecked(), true);
   assert.equal(await page.locator('[data-preset-id="finn"]').getAttribute("aria-pressed"), "true");
-  assert.equal(await page.locator("#child-preset-preview").isHidden(), true, "ungenerated preset falls back to the sketch");
+  assert.equal(await page.locator("#child-preset-preview").isHidden(), true, "ungenerated preset falls back to closest painted avatar");
+  assert.equal(await page.locator("#child-premium-default").isVisible(), true);
   await page.locator("#child-editor-undo").click();
   assert.equal(await page.locator('input[name="child-hair-color"][value="dark-brown"]').isChecked(), true);
-  await step(page, "quick-start looks apply + undo; ungenerated preset falls back to sketch");
+  await step(page, "quick-start looks apply + undo; ungenerated preset falls back to closest painted avatar");
   await settleScroll(page); await page.screenshot({ path: path.join(SCREENS, "desktop-1-live-sketch.png"), fullPage: false, clip: await page.locator("#child-editor-start").boundingBox().then((b) => ({ x: 0, y: Math.max(0, b.y - 10), width: 1440, height: 1000 })) });
 
   // (6) Paint 2 versions.
@@ -220,7 +225,7 @@ async function runDesktop(browser, h) {
   assert.equal(await page.locator("#child-rendered-preview").isVisible(), true);
   assert.equal(await page.locator("#child-preview-label-text").textContent(), "Painted character");
   assert.match(await statusText(page), /2 versions are ready/);
-  assert.equal(await page.locator("#render-child-character").textContent(), "Paint Another Version");
+  assert.equal(await page.locator("#render-child-character").textContent(), "Create Another Version");
   const subId = await page.evaluate(() => JSON.parse(sessionStorage.getItem("monstersnow_monster_submission")).id);
   const childObjects = [...h.state.storage.keys()].filter((key) => key.startsWith(`monster-submissions/${subId}/child/`));
   assert.equal(childObjects.filter((key) => /render-[^.]+\.png$/.test(key)).length, 2, "lossless PNG masters saved");
@@ -238,24 +243,25 @@ async function runDesktop(browser, h) {
   assert.equal(await page.evaluate(() => window.MonstersNowChildStudio.currentRender().id), secondId);
   await step(page, "choosing a version updates the book selection");
 
-  // Changing a choice shows the sketch + earlier painted version card; tapping it restores.
+  // Changing a choice returns to the closest painted avatar + earlier version card; tapping it restores.
   await pick(page, "child-hair-color", "blonde");
   assert.equal(await page.locator("#child-rendered-preview").isHidden(), true);
   assert.equal(await page.locator("#child-stale-render").isVisible(), true);
-  assert.equal(await page.locator("#child-preview-label-text").textContent(), "Live sketch");
-  assert.equal(await page.locator("#render-child-character").textContent(), "Paint 2 Versions of This Look");
+  assert.equal(await page.locator("#child-preview-label-text").textContent(), "Premium character preview");
+  assert.equal(await page.locator("#child-premium-default").isVisible(), true);
+  assert.equal(await page.locator("#render-child-character").textContent(), "Create This Character");
   await settleScroll(page); await page.screenshot({ path: path.join(SCREENS, "desktop-3-edited-after-paint.png") });
   await page.locator("#child-stale-render").click();
   assert.equal(await page.locator('input[name="child-hair-color"][value="dark-brown"]').isChecked(), true);
   assert.equal(await page.evaluate(() => window.MonstersNowChildStudio.currentRender()?.id), secondId);
-  await step(page, "editing shows the sketch; earlier painted version restores its choices");
+  await step(page, "editing shows closest painted avatar; earlier painted version restores its choices");
 
   // One more version → 3 max per look.
   await page.locator("#render-child-character").click();
   await waitIdle(page);
   assert.equal(await page.locator(".child-render-version").count(), 3);
   assert.equal(await page.locator("#render-child-character").isDisabled(), true);
-  assert.match(await page.locator("#render-child-character").textContent(), /3 Versions Painted/);
+  assert.match(await page.locator("#render-child-character").textContent(), /3 Versions Ready/);
   await step(page, "one more version → capped at 3 per look");
 
   // (2) Refresh restores monster, step, versions, and the chosen version.
@@ -431,12 +437,9 @@ async function runPhone(browser, h) {
   assert.deepEqual(small, [], `small tap targets: ${JSON.stringify(small)}`);
   await step(page, "all visible tap targets ≥ 44 px");
 
-  // Painted quick-start art shows only for an exact match; broken art falls back to the sketch.
+  // Painted quick-start art shows only for an exact match; broken art falls back to closest stock painted avatar.
   await page.locator('[data-preset-id="finn"] img').waitFor({ state: "attached" });
-  await page.locator('[data-preset-id="zuri"] .child-preset-art.is-sketch svg').waitFor({ state: "attached", timeout: 10000 }).catch(async () => {
-    await page.locator('[data-preset-id="zuri"]').scrollIntoViewIfNeeded();
-    await page.locator('[data-preset-id="zuri"] .child-preset-art.is-sketch svg').waitFor({ state: "attached" });
-  });
+  await page.locator('[data-preset-id="zuri"] img').waitFor({ state: "attached" });
   await page.locator('[data-preset-id="finn"]').click();
   await page.waitForFunction(() => { const img = document.querySelector("#child-preset-preview"); return img && !img.hidden && img.complete && img.naturalWidth > 0; });
   assert.equal(await page.locator("#child-preview-stage").evaluate((el) => el.classList.contains("has-preset-art")), true);
@@ -444,15 +447,17 @@ async function runPhone(browser, h) {
   await page.locator("#child-preview-stage").scrollIntoViewIfNeeded();
   await settleScroll(page); await page.screenshot({ path: path.join(SCREENS, "mobile-1b-painted-quick-start.png") });
   await pick(page, "child-glasses", "square");
-  assert.equal(await page.locator("#child-preset-preview").isHidden(), true, "any edit returns to the live sketch");
-  assert.match(await page.locator("#child-preview-label-text").textContent(), /^Live sketch$/);
+  assert.equal(await page.locator("#child-preset-preview").isHidden(), true, "any edit returns to the closest painted avatar");
+  assert.match(await page.locator("#child-preview-label-text").textContent(), /^Premium character preview$/);
+  assert.equal(await page.locator("#child-premium-default").isVisible(), true);
   await page.locator('[data-preset-id="zuri"]').click();
   await page.waitForFunction(() => document.querySelector('input[name="child-mobility-aid"][value="wheelchair"]').checked);
-  assert.equal(await page.locator("#child-preset-preview").isHidden(), true, "broken art is never shown");
-  assert.equal(await page.locator("#child-preview-character").isVisible(), true);
-  assert.match(await page.locator("#child-preview-label-text").textContent(), /^Live sketch$/);
+  assert.equal(await page.locator("#child-preset-preview").isHidden(), true, "broken exact-match art is never shown as the main preview");
+  assert.equal(await page.locator("#child-premium-default").isVisible(), true);
+  assert.match(await page.locator("#child-premium-default").getAttribute("src"), /wheelchair-feature-animation/);
+  assert.match(await page.locator("#child-preview-label-text").textContent(), /^Premium character preview$/);
   await page.locator("#child-editor-reset").click();
-  await step(page, "painted quick-start art on exact match only; broken art falls back to the sketch");
+  await step(page, "painted quick-start art on exact match only; broken art falls back to closest painted avatar");
 
   // Swipe rows: overflowing rows are scrollable with a hint that hides after a swipe.
   await page.locator('[data-editor-tab="appearance"]').click();
@@ -530,7 +535,8 @@ async function runPhone(browser, h) {
   await page.locator("#child-mini-preview").waitFor({ state: "visible" });
   await pick(page, "child-glasses", "square");
   await page.locator("#child-mini-preview").waitFor({ state: "visible" });
-  assert.equal(await page.evaluate(() => document.querySelector("#child-mini-preview .custom-child-svg").dataset.glasses), "square");
+  assert.match(await page.evaluate(() => document.querySelector("#child-mini-art")?.getAttribute("src") || ""), /feature-animation/);
+  assert.equal(await page.locator("#child-mini-title").textContent(), "Premium preview");
   const mini = await page.evaluate(() => {
     const bar = document.querySelector("#child-mini-preview").getBoundingClientRect();
     return { top: bar.top, left: bar.left, width: bar.width, header: document.querySelector(".site-header").getBoundingClientRect().bottom, inBody: document.querySelector("#child-mini-preview").parentElement === document.body, padding: document.documentElement.style.scrollPaddingTop };

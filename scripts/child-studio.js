@@ -110,6 +110,9 @@
     const lookVersions = included ? versionsFor(key) : [];
     const monsterImage = !included ? options.getMonsterImage() : "";
     const presetShown = Boolean(included && !render && els.preset && !els.preset.hidden);
+    const premium = els.stage?.querySelector(".child-premium-default");
+    const honest = document.querySelector("#child-preview-honest");
+    const specs = document.querySelector(".child-preview-specs");
 
     if (els.monsterOnly) {
       els.monsterOnly.hidden = !monsterImage;
@@ -117,6 +120,7 @@
     }
     els.stage?.classList.toggle("has-monster-only", Boolean(monsterImage));
     els.stage?.classList.toggle("has-book-render", Boolean(render));
+    if (premium) premium.hidden = Boolean(render) || !included || presetShown;
     if (els.rendered) {
       if (render) {
         if (els.rendered.getAttribute("src") !== render.image) els.rendered.src = render.image;
@@ -131,8 +135,10 @@
       els.stale.hidden = !previous;
       if (previous && els.staleImage && els.staleImage.getAttribute("src") !== previous.image) els.staleImage.src = previous.image;
     }
-    if (els.label) els.label.textContent = !included ? "Your monster preview" : render ? "Painted character" : presetShown ? "Painted example" : "Live sketch";
-    if (els.mode) els.mode.textContent = state.job ? "Painting…" : !included ? "Monster-only story" : render ? "Used in the book" : presetShown ? "Matches a quick-start look" : "Updates as you choose";
+    if (els.label) els.label.textContent = !included ? "Your monster preview" : render ? "Painted character" : presetShown ? "Painted example" : "Premium character preview";
+    if (els.mode) els.mode.textContent = state.job ? "Painting…" : !included ? "Monster-only story" : render ? "Used in the book" : presetShown ? "Matches a quick-start look" : "Book-quality avatar";
+    if (honest) honest.hidden = !included || Boolean(render) || presetShown;
+    if (specs) specs.hidden = !included || Boolean(render);
 
     if (els.actions) els.actions.hidden = !included;
     els.actions?.classList.toggle("is-complete", Boolean(render));
@@ -140,10 +146,10 @@
       const atMax = lookVersions.length >= MAX_VERSIONS_PER_LOOK;
       els.button.disabled = Boolean(state.job) || atMax;
       els.button.textContent = state.job
-        ? "Painting…"
+        ? "Creating…"
         : lookVersions.length === 0
-          ? (state.versions.length ? "Paint 2 Versions of This Look" : "Paint 2 Versions")
-          : atMax ? `${MAX_VERSIONS_PER_LOOK} Versions Painted` : "Paint Another Version";
+          ? "Create This Character"
+          : atMax ? `${MAX_VERSIONS_PER_LOOK} Versions Ready` : "Create Another Version";
       els.button.dataset.count = String(lookVersions.length === 0 ? VERSIONS_PER_PAINT : 1);
     }
     const failure = state.failure && state.failure.key === key ? state.failure : null;
@@ -226,8 +232,8 @@
       if (render && els.miniRender.getAttribute("src") !== render.image) els.miniRender.src = render.image;
     }
     els.mini.classList.toggle("has-render", Boolean(render));
-    if (els.miniTitle) els.miniTitle.textContent = state.job ? "Painting…" : render ? "Painted character" : "Live sketch";
-    if (els.miniStatus) els.miniStatus.textContent = state.job ? "You can keep editing" : render ? "Used in the book" : "Updates with every choice";
+    if (els.miniTitle) els.miniTitle.textContent = state.job ? "Creating…" : render ? "Painted character" : "Premium preview";
+    if (els.miniStatus) els.miniStatus.textContent = state.job ? "You can keep editing" : render ? "Used in the book" : "Closest match for your choices";
   }
 
   // The bar shows while the controls fill the screen and the big preview is scrolled away.

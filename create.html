@@ -11,7 +11,7 @@
     <title>Create Your Monster | MonstersNOW</title>
     <link rel="icon" href="assets/brand/monstersnow-icon-32-v1.png" type="image/png" sizes="32x32" />
     <link rel="stylesheet" href="styles.css?v=20261004-monster-studio-v5" />
-    <link rel="stylesheet" href="child-selector.css?v=20261008-child-editor-v2b" />
+    <link rel="stylesheet" href="child-selector.css?v=20261008-child-editor-v2c" />
     <link rel="stylesheet" href="storefront.css?v=20261002-public-storefront" />
     <link rel="apple-touch-icon" href="assets/brand/monstersnow-icon-180-v1.png" />
     <link rel="stylesheet" href="brand.css?v=20261004-selected-logo" />
@@ -240,9 +240,9 @@
                           </fieldset>
                           <div class="child-character-details" id="child-character-details">
                           <div class="child-mini-preview" id="child-mini-preview" hidden>
-                            <span class="child-mini-art" data-child-mini-sketch aria-hidden="true"></span>
+                            <img class="child-mini-art" id="child-mini-art" alt="" width="80" height="104" decoding="async" />
                             <img class="child-mini-render" id="child-mini-render" alt="" hidden />
-                            <span class="child-mini-copy"><b id="child-mini-title">Live sketch</b><small id="child-mini-status">Updates with every choice</small></span>
+                            <span class="child-mini-copy"><b id="child-mini-title">Premium preview</b><small id="child-mini-status">Closest match for your choices</small></span>
                             <button type="button" id="child-mini-jump">See preview</button>
                           </div>
                           <section class="child-preset-section" data-child-presets aria-labelledby="child-preset-title" hidden>
@@ -271,7 +271,7 @@
                             <button type="button" role="tab" aria-selected="false" tabindex="-1" data-editor-tab="build"><span aria-hidden="true">04</span> Details</button>
                           </div>
                           <details class="child-editor-section child-appearance-section is-active" data-editor-panel="appearance" open>
-                            <summary><span>Face &amp; hair</span><small>The live sketch updates with every choice.</small></summary>
+                            <summary><span>Face &amp; hair</span><small>Every applied choice changes the finished character.</small></summary>
                             <div class="child-appearance-builder">
                               <fieldset class="child-presentation-picker">
                                 <legend>Character</legend>
@@ -301,16 +301,16 @@
                               <fieldset>
                                 <legend>Hair style</legend>
                                 <div class="child-style-options child-hair-style-options" role="radiogroup" aria-label="Hair style">
-                                  <label><input type="radio" name="child-hair-style" value="short" /><span class="hair-thumb" data-hair-thumb="short" aria-hidden="true"></span><b>Short</b></label>
-                                  <label><input type="radio" name="child-hair-style" value="curly" checked /><span class="hair-thumb" data-hair-thumb="curly" aria-hidden="true"></span><b>Curls</b></label>
-                                  <label><input type="radio" name="child-hair-style" value="coils" /><span class="hair-thumb" data-hair-thumb="coils" aria-hidden="true"></span><b>Coils</b></label>
-                                  <label><input type="radio" name="child-hair-style" value="wavy" /><span class="hair-thumb" data-hair-thumb="wavy" aria-hidden="true"></span><b>Waves</b></label>
-                                  <label><input type="radio" name="child-hair-style" value="straight" /><span class="hair-thumb" data-hair-thumb="straight" aria-hidden="true"></span><b>Straight</b></label>
-                                  <label><input type="radio" name="child-hair-style" value="braids" /><span class="hair-thumb" data-hair-thumb="braids" aria-hidden="true"></span><b>Braids</b></label>
-                                  <label><input type="radio" name="child-hair-style" value="locs" /><span class="hair-thumb" data-hair-thumb="locs" aria-hidden="true"></span><b>Locs</b></label>
-                                  <label><input type="radio" name="child-hair-style" value="ponytail" /><span class="hair-thumb" data-hair-thumb="ponytail" aria-hidden="true"></span><b>Ponytail</b></label>
-                                  <label><input type="radio" name="child-hair-style" value="puffs" /><span class="hair-thumb" data-hair-thumb="puffs" aria-hidden="true"></span><b>Puffs</b></label>
-                                  <label><input type="radio" name="child-hair-style" value="buzz" /><span class="hair-thumb" data-hair-thumb="buzz" aria-hidden="true"></span><b>Buzz cut</b></label>
+                                  <label><input type="radio" name="child-hair-style" value="short" /><span data-style="short" aria-hidden="true"><img data-hair-thumbnail="short" src="assets/child-editor/hair-style-short-v1.webp" alt="" /></span><b>Short</b></label>
+                                  <label><input type="radio" name="child-hair-style" value="curly" checked /><span data-style="curly" aria-hidden="true"><img data-hair-thumbnail="curly" src="assets/child-editor/hair-style-curls-v1.webp" alt="" /></span><b>Curls</b></label>
+                                  <label><input type="radio" name="child-hair-style" value="coils" /><span data-style="coils" aria-hidden="true"><img data-hair-thumbnail="coils" src="assets/child-editor/hair-style-coils-v1.webp" alt="" /></span><b>Coils</b></label>
+                                  <label><input type="radio" name="child-hair-style" value="wavy" /><span data-style="wavy" aria-hidden="true"><img data-hair-thumbnail="wavy" src="assets/child-editor/hair-style-waves-v1.webp" alt="" /></span><b>Waves</b></label>
+                                  <label><input type="radio" name="child-hair-style" value="straight" /><span data-style="straight" aria-hidden="true"><img data-hair-thumbnail="straight" src="assets/child-editor/hair-style-straight-v1.webp" alt="" /></span><b>Straight</b></label>
+                                  <label><input type="radio" name="child-hair-style" value="braids" /><span data-style="braids" aria-hidden="true"><img data-hair-thumbnail="braids" src="assets/child-editor/hair-style-braids-v1.webp" alt="" /></span><b>Braids</b></label>
+                                  <label><input type="radio" name="child-hair-style" value="locs" /><span data-style="locs" aria-hidden="true"><img data-hair-thumbnail="locs" src="assets/child-editor/hair-style-braids-v1.webp" alt="" /></span><b>Locs</b></label>
+                                  <label><input type="radio" name="child-hair-style" value="ponytail" /><span data-style="ponytail" aria-hidden="true"><img data-hair-thumbnail="ponytail" src="assets/child-editor/hair-style-waves-v1.webp" alt="" /></span><b>Ponytail</b></label>
+                                  <label><input type="radio" name="child-hair-style" value="puffs" /><span data-style="puffs" aria-hidden="true"><img data-hair-thumbnail="puffs" src="assets/child-editor/hair-style-coils-v1.webp" alt="" /></span><b>Puffs</b></label>
+                                  <label><input type="radio" name="child-hair-style" value="buzz" /><span data-style="buzz" aria-hidden="true"><img data-hair-thumbnail="buzz" src="assets/child-editor/hair-style-short-v1.webp" alt="" /></span><b>Buzz cut</b></label>
                                 </div>
                               </fieldset>
                               <fieldset>
@@ -454,14 +454,14 @@
                         </div>
                         <aside class="child-live-preview" id="child-live-preview" aria-labelledby="child-preview-title">
                           <div class="child-preview-topline">
-                            <span class="child-preview-label"><i aria-hidden="true"></i> <span id="child-preview-label-text">Live sketch</span></span>
-                            <span class="child-preview-updates"><i aria-hidden="true"></i> <span id="child-preview-mode-text">Updates as you choose</span></span>
+                            <span class="child-preview-label"><i aria-hidden="true"></i> <span id="child-preview-label-text">Premium character preview</span></span>
+                            <span class="child-preview-updates"><i aria-hidden="true"></i> <span id="child-preview-mode-text">Book-quality avatar</span></span>
                           </div>
                           <div class="child-preview-stage" id="child-preview-stage">
                             <span class="child-stage-corners" aria-hidden="true"></span>
                             <span class="child-stage-scanline" aria-hidden="true"></span>
                             <img class="child-monster-only-preview" id="child-monster-only-preview" alt="" hidden />
-                            <span class="child-preview-character" id="child-preview-character" aria-hidden="true"></span>
+                            <img class="child-premium-default" id="child-premium-default" src="assets/child-editor/default-girl-feature-animation-v1.webp" alt="Closest painted preview of the storybook character" width="1024" height="1536" decoding="async" />
                             <img class="child-preset-preview" id="child-preset-preview" alt="" decoding="async" hidden />
                             <img class="child-rendered-preview" id="child-rendered-preview" alt="" hidden />
                             <button type="button" class="child-stale-render" id="child-stale-render" hidden>
@@ -488,15 +488,17 @@
                             <div class="child-render-versions-heading"><b>Painted versions</b><small id="child-render-versions-hint">Tap one to use it in the book.</small></div>
                             <div class="child-render-version-list" id="child-render-version-list" role="radiogroup" aria-label="Painted character versions"></div>
                           </div>
+                          <div class="child-preview-specs" aria-hidden="true"><span>Designed by you</span><span>Premium preview</span><span>Book ready</span></div>
+                          <p class="child-preview-honest" id="child-preview-honest">Closest preview. Your exact choices are painted when you create this character.</p>
                           <div class="child-preview-copy" aria-live="polite">
                             <span>Their character</span>
                             <strong id="child-preview-title">Build the hero of their story.</strong>
-                            <p id="child-preview-details">Choose the hair, skin, eyes, and clothes, then paint the book-quality character.</p>
+                            <p id="child-preview-details">Choose the hair, skin, eyes, and clothes, then create the book-quality character.</p>
                           </div>
                           <div class="child-render-actions">
-                            <button class="button primary" id="render-child-character" type="button">Paint 2 Versions</button>
+                            <button class="button primary" id="render-child-character" type="button">Create This Character</button>
                             <button class="button secondary child-render-retry" id="child-render-retry" type="button" hidden>Try Again</button>
-                            <p id="child-render-status" role="status" aria-live="polite">The sketch shows your choices. Paint the character to see the finished book look.</p>
+                            <p id="child-render-status" role="status" aria-live="polite">Ready when you are. Every choice stays editable.</p>
                           </div>
                         </aside>
                       </div>
@@ -645,9 +647,8 @@
       </div>
     </footer>
 
-    <script src="scripts/child-sketch.js?v=20261008-child-editor-v2b"></script>
-    <script src="scripts/child-selector.js?v=20261008-child-editor-v2b"></script>
-    <script src="scripts/child-studio.js?v=20261008-child-editor-v2b"></script>
-    <script src="scripts/main.js?v=20261008-child-editor-v2b"></script>
+    <script src="scripts/child-selector.js?v=20261008-child-editor-v2c"></script>
+    <script src="scripts/child-studio.js?v=20261008-child-editor-v2c"></script>
+    <script src="scripts/main.js?v=20261008-child-editor-v2c"></script>
   </body>
 </html>

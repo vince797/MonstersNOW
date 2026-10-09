@@ -341,6 +341,9 @@
   font-weight: 950;
   box-shadow: inset 0 -4px 0 rgba(0,0,0,.06);
 }
+.child-hair-style-options label > span img {
+  display: block; width: 100%; height: 100%; object-fit: cover;
+}
 .child-hair-style-options label > span {
   width: 48px;
   height: 48px;
@@ -853,6 +856,7 @@
 }
 .child-premium-default[hidden] { display: none; }
 .child-preview-stage.has-premium-art .child-preview-character { display: none; }
+.child-preview-stage.has-preset-art .child-premium-default { display: none; }
 .child-preview-stage.has-book-render .child-preview-character { display: none; }
 .child-preview-stage.has-book-render .child-premium-default { display: none; }
 .child-preview-stage.mobility-wheelchair .child-premium-default { top: 3%; left: 1%; width: 98%; height: 92%; }
@@ -1259,8 +1263,6 @@
 .child-extras-builder { display: grid; gap: 14px; }
 .child-extras-builder .child-segmented-options { grid-template-columns: repeat(auto-fit, minmax(92px, 1fr)); }
 .child-costume-options { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.child-hair-style-options label > span.hair-thumb { width: 48px; height: 48px; padding: 0; overflow: hidden; border-radius: 50%; background: linear-gradient(160deg, #fdf6ef, #efe6f6); }
-.hair-thumb svg { display: block; width: 100%; height: 100%; }
 #child-costume-field[hidden], #child-outfit-color-field[hidden] { display: none; }
 .child-segmented-options span { min-height: 44px; }
 
@@ -1290,8 +1292,8 @@
   border-bottom: 1px solid #e3dbec; background: #fff; box-shadow: 0 10px 22px rgba(59,29,109,.13);
   font-family: inherit;
 }
-.child-mini-art, .child-mini-render { flex: 0 0 auto; width: 40px; height: 52px; border-radius: 10px; background: linear-gradient(160deg, #f6f1fb, #e8f7f6); overflow: hidden; }
-.child-mini-art svg { display: block; width: 100%; height: 100%; }
+.child-mini-art, .child-mini-render { flex: 0 0 auto; width: 40px; height: 52px; border-radius: 10px; background: linear-gradient(160deg, #f6f1fb, #e8f7f6); overflow: hidden; object-fit: contain; }
+.child-mini-art { display: block; }
 .child-mini-render { object-fit: contain; }
 .child-mini-preview.has-render .child-mini-art { display: none; }
 .child-mini-render[hidden] { display: none; }
@@ -1352,7 +1354,6 @@
   .child-mini-preview { display: none !important; }
 }
 /* Hair thumbnails are live sketches in the chosen color, so no color dot. */
-.child-hair-style-options label > span.hair-thumb::after { display: none; }
 @media (max-width: 700px) {
   .child-editor-toolbar button { min-height: 44px; }
 }
@@ -1381,3 +1382,9 @@
 /* Once a version is painted the paint button turns quiet teal; keep its hover
    teal too instead of the brand's orange hover. */
 .brand-theme .child-render-actions.is-complete .button.primary:is(:hover, :focus-visible):not(:disabled) { background: #dff3f1; color: #006b70; }
+
+.child-preview-honest {
+  margin: 8px 2px 0; color: #665c70; font-size: .72rem; font-weight: 650; line-height: 1.35; text-wrap: balance;
+}
+.child-preview-honest[hidden] { display: none; }
+.child-preview-specs[hidden] { display: none; }

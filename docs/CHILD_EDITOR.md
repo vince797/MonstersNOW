@@ -8,7 +8,6 @@ pick one, and carry it into the proof and the printed book.
 
 | File | Role |
 | --- | --- |
-| `scripts/child-sketch.js` | Layered SVG "live sketch". Every option is a layer or a CSS variable, so the preview changes instantly and offline. |
 | `scripts/child-selector.js` | The form: options, tabs, quick-start looks, undo/reset, swipe hints, special detail (sanitized exactly like the server), local profile (`monstersnow_child_character_profile_v3`). |
 | `scripts/child-studio.js` | Painting: versions, progress, cancel/retry, errors, version strip, sticky mini preview on phones, restore after refresh. |
 | `scripts/main.js` | Create flow; saves/restores the monster session (`resource=session`) and hands the chosen version to the proof. |
@@ -22,18 +21,20 @@ pick one, and carry it into the proof and the printed book.
 
 ## What the preview shows
 
-1. **Live sketch** (default). Reflects every choice immediately. Labelled
-   "Live sketch" so nobody mistakes it for the final art.
+1. **Closest painted avatar** (default). The same animated-film stock art the
+   live editor uses (`assets/child-editor/default-*-feature-animation-v1.webp`),
+   matched on presentation and mobility. Labelled "Premium character preview"
+   with a short honest caption that exact choices are painted on create.
 2. **Painted example**. Only when the current choices exactly match a
-   quick-start look that has painted art (see "Quick-start art" below). Any
-   edit returns to the sketch. A broken/expired image falls back to the sketch.
+   quick-start look that has painted art. Any edit returns to the closest
+   stock avatar. A broken/expired image falls back to that stock avatar.
 3. **Painted character**. The chosen painted version for the current choices.
    After edits, a small "Painted version · earlier choices" card offers to go
    back to those choices.
 
 ## Versions and limits
 
-- "Paint 2 Versions" sends two parallel render requests; "Paint Another
+- "Create This Character" (still paints 2 versions) sends two parallel render requests; "Paint Another
   Version" adds a third. At most 3 versions per look; up to 12 kept per monster.
 - Each version is one request against the existing `child` limits
   (12 per monster session per day, plus IP and global limits in
@@ -149,8 +150,7 @@ SITE_URL=https://monstersnow.com ADMIN_PASSWORD='…' node scripts/generate-chil
 ## Known limits
 
 - Safari before 16 has no `overflow: clip`; the editor sections fall back to
-  `overflow: hidden`, which looks the same but can scroll sideways when a
-  swipe-row chip is focused from the keyboard.
+  `overflow: hidden`, which looks the same.
 - The static sample images in `assets/child-editor/` are unchanged; the
   e2e "painting" uses them as mock output.
 - New aids (walker, prosthetic leg, leg braces) and the new extras rely on

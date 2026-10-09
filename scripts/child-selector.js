@@ -146,18 +146,33 @@
     if (status) status.textContent = message;
   }
 
-  // ---------- Live sketch, thumbnails, and painted quick-start looks ----------
-  const sketchApi = () => window.MonstersNowChildSketch;
+  // ---------- Painted avatar preview, thumbnails, and quick-start looks ----------
+  // Closest matching painted art from assets/child-editor (same images as the live editor).
+  const HAIR_COLOR_HEX = Object.freeze({
+    black: "#18151a", "dark-brown": "#38231d", brown: "#6b4028", auburn: "#963f28",
+    red: "#c4521f", blonde: "#d8a83f", platinum: "#d9c897",
+  });
+  const HAIR_ASSET = Object.freeze({
+    short: "short", curly: "curls", coils: "coils", wavy: "waves", straight: "straight", braids: "braids",
+    locs: "braids", ponytail: "waves", puffs: "coils", buzz: "short",
+  });
 
-  function ensureSketch(container, viewBox) {
-    if (!container || !sketchApi()) return null;
-    let svg = container.querySelector(".custom-child-svg");
-    if (!svg) {
-      svg = sketchApi().create();
-      if (viewBox) svg.setAttribute("viewBox", viewBox);
-      container.replaceChildren(svg);
-    }
-    return svg;
+  function presentationKey(profile) {
+    return profile?.presentation === "boy" ? "boy" : "girl";
+  }
+
+  function premiumReferenceFor(profile) {
+    const who = presentationKey(profile);
+    if (profile?.mobilityAid === "forearm-crutches") return `assets/child-editor/default-${who}-forearm-crutches-feature-animation-v1.webp`;
+    if (profile?.mobilityAid === "wheelchair") return `assets/child-editor/default-${who}-wheelchair-feature-animation-v1.webp`;
+    return `assets/child-editor/default-${who}-feature-animation-v1.webp`;
+  }
+
+  function hairThumbnailSrc(profile, style) {
+    const who = presentationKey(profile);
+    const asset = HAIR_ASSET[style] || "curls";
+    const prefix = who === "boy" ? "hair-style-boy" : "hair-style";
+    return `assets/child-editor/${prefix}-${asset}-v1.webp`;
   }
 
   function forgetPresetArt(imageUrl) {
@@ -170,31 +185,39 @@
     return presetManifest.presets.find((preset) => preset.imageUrl && profileKey(preset.profile) === key) || null;
   }
 
+  function setPaintedSrc(image, src, alt) {
+    if (!image) return;
+    if (image.getAttribute("src") !== src) {
+      image.classList.remove("is-refreshing");
+      image.src = src;
+      requestAnimationFrame(() => image.classList.add("is-refreshing"));
+    }
+    if (alt != null) image.alt = alt;
+  }
+
   function renderProfile(stage, _avatar, profile) {
     if (!stage) return;
     const figure = stage.querySelector(".child-preview-figure");
-    const character = stage.querySelector(".child-preview-character");
+    const premium = stage.querySelector(".child-premium-default");
     const presetImage = stage.querySelector(".child-preset-preview");
     for (const className of [...stage.classList]) {
-      if (["is-empty", "has-character-art", "has-preset-art"].includes(className) || /^(age|height|mobility)-/.test(className)) stage.classList.remove(className);
+      if (["is-empty", "has-character-art", "has-premium-art", "has-preset-art"].includes(className) || /^(age|height|mobility)-/.test(className)) stage.classList.remove(className);
     }
     stage.classList.add("child-preview-stage");
     if (!profile?.included) {
       stage.classList.add("is-empty");
-      if (character) character.hidden = true;
+      if (premium) premium.hidden = true;
       if (presetImage) presetImage.hidden = true;
       if (figure) figure.hidden = false;
       return;
     }
     const compact = compactProfile(profile);
-    sketchApi()?.apply(ensureSketch(character), compact);
-    if (character) character.hidden = false;
     if (figure) figure.hidden = true;
-    stage.classList.add(`age-${compact.ageBand}`, `height-${compact.relativeHeight}`, `mobility-${compact.mobilityAid}`, "has-character-art");
+    stage.classList.add(`age-${compact.ageBand}`, `height-${compact.relativeHeight}`, `mobility-${compact.mobilityAid}`, "has-character-art", "has-premium-art");
+
     const match = presetMatch(profile);
     if (presetImage && !presetImage.dataset.errorBound) {
       presetImage.dataset.errorBound = "true";
-      // Painted example unavailable (e.g. expired link): drop it and show the sketch.
       presetImage.addEventListener("error", () => {
         const src = presetImage.getAttribute("src");
         if (!src) return;
@@ -202,33 +225,47 @@
         presetImage.hidden = true;
         presetImage.removeAttribute("src");
         stage.classList.remove("has-preset-art");
+        // Fall back to the closest stock painted avatar for the CURRENT choices.
+        if (premium) {
+          premium.hidden = stage.classList.contains("has-book-render");
+          setPaintedSrc(premium, premiumReferenceFor(getProfile()), "Closest painted preview of the storybook character");
+        }
         window.MonstersNowChildStudio?.sync?.();
       });
     }
-    if (presetImage) {
-      if (match) {
-        if (presetImage.getAttribute("src") !== match.imageUrl) presetImage.src = match.imageUrl;
-        presetImage.alt = `Painted example of the ${match.label} look.`;
-        presetImage.hidden = false;
-        stage.classList.add("has-preset-art");
-      } else {
-        presetImage.hidden = true;
+
+    if (match && presetImage) {
+      setPaintedSrc(presetImage, match.imageUrl, `Painted example of the ${match.label} look.`);
+      presetImage.hidden = false;
+      stage.classList.add("has-preset-art");
+      if (premium) premium.hidden = true;
+    } else {
+      if (presetImage) presetImage.hidden = true;
+      if (premium) {
+        premium.hidden = stage.classList.contains("has-book-render");
+        setPaintedSrc(premium, premiumReferenceFor(compact), "Closest painted preview of the storybook character");
       }
     }
   }
 
   function renderMiniPreview(profile) {
-    const mini = document.querySelector("[data-child-mini-sketch]");
+    const mini = document.querySelector("#child-mini-art");
     if (!mini) return;
-    if (profile?.included) sketchApi()?.apply(ensureSketch(mini, "40 30 290 510"), compactProfile(profile));
+    if (!profile?.included) {
+      mini.removeAttribute("src");
+      return;
+    }
+    const match = presetMatch(profile);
+    setPaintedSrc(mini, match?.imageUrl || premiumReferenceFor(compactProfile(profile)), "");
   }
 
   function renderHairThumbnails(profile) {
     if (!root || !profile?.included) return;
-    const base = compactProfile(profile);
-    for (const thumb of root.querySelectorAll("[data-hair-thumb]")) {
-      const svg = ensureSketch(thumb, "70 30 226 230");
-      sketchApi()?.apply(svg, { ...base, hairStyle: thumb.dataset.hairThumb, headwear: "none", glasses: "none", outfitStyle: "tee", costume: "" });
+    root.style.setProperty("--selected-hair-color", HAIR_COLOR_HEX[profile.hairColor] || HAIR_COLOR_HEX["dark-brown"]);
+    for (const thumb of root.querySelectorAll("[data-hair-thumbnail]")) {
+      const style = thumb.dataset.hairThumbnail;
+      const src = hairThumbnailSrc(profile, style);
+      if (thumb.getAttribute("src") !== src) thumb.src = src;
     }
   }
 
@@ -245,18 +282,17 @@
         const art = document.createElement("span");
         art.className = "child-preset-art";
         art.setAttribute("aria-hidden", "true");
-        if (preset.imageUrl) {
-          const image = document.createElement("img");
-          image.src = preset.imageUrl;
-          image.alt = "";
-          image.loading = "lazy";
-          image.decoding = "async";
-          image.addEventListener("error", () => { forgetPresetArt(preset.imageUrl); image.remove(); art.classList.add("is-sketch"); sketchApi()?.apply(ensureSketch(art, "40 20 290 520"), compactProfile(preset.profile)); }, { once: true });
-          art.append(image);
-        } else {
-          art.classList.add("is-sketch");
-          sketchApi()?.apply(ensureSketch(art, "40 20 290 520"), compactProfile(preset.profile));
-        }
+        const image = document.createElement("img");
+        image.alt = "";
+        image.loading = "lazy";
+        image.decoding = "async";
+        const fallback = premiumReferenceFor(preset.profile);
+        image.src = preset.imageUrl || fallback;
+        image.addEventListener("error", () => {
+          if (preset.imageUrl) forgetPresetArt(preset.imageUrl);
+          if (image.getAttribute("src") !== fallback) image.src = fallback;
+        }, { once: true });
+        art.append(image);
         const label = document.createElement("b");
         label.textContent = preset.label;
         button.append(art, label);
@@ -293,7 +329,7 @@
       renderPresetOptions();
       sync({ save: false, silent: true });
     } catch {
-      // Quick-start looks are optional; the live sketch covers every choice.
+      // Quick-start looks are optional; the painted avatar still covers every choice.
     }
   }
 
@@ -423,7 +459,7 @@
   }
 
   window.MonstersNowChildSelector = {
-    getProfile, renderProfile, restore, sync, undo, reset, useProfile, compactProfile, profileKey, sanitizeDetail, presetMatch,
+    getProfile, renderProfile, restore, sync, undo, reset, useProfile, compactProfile, profileKey, sanitizeDetail, presetMatch, premiumReferenceFor,
     supportsWheelchair, supportsForearmCrutches, storageKey, wheelchairSupport, forearmCrutchSupport, optionLabels, defaultProfile, selectEditorTab,
   };
   if (!root) return;

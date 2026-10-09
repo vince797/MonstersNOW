@@ -97,7 +97,6 @@ test("custom child profiles preserve independently editable appearance choices",
 test("selector UI is a true layered character editor with a MonstersNOW storybook preview", () => {
   const html = fs.readFileSync(path.join(root, "create.html"), "utf8");
   const script = fs.readFileSync(path.join(root, "scripts/child-selector.js"), "utf8");
-  const sketch = fs.readFileSync(path.join(root, "scripts/child-sketch.js"), "utf8");
   const studio = fs.readFileSync(path.join(root, "scripts/child-studio.js"), "utf8");
   const mainScript = fs.readFileSync(path.join(root, "scripts/main.js"), "utf8");
   const css = fs.readFileSync(path.join(root, "child-selector.css"), "utf8");
@@ -126,36 +125,40 @@ test("selector UI is a true layered character editor with a MonstersNOW storyboo
   assert.match(html, /id="result-book-offer" aria-labelledby="result-book-title" hidden/);
   assert.match(html, /id="back-to-monster"/);
   assert.equal((html.match(/data-monster-step-panel/g) || []).length, 2);
-  // Preview layers: live sketch, painted quick-start example, painted version.
-  assert.match(html, /id="child-preview-stage"[\s\S]*id="child-preview-character"[\s\S]*id="child-preset-preview"[\s\S]*id="child-rendered-preview"/);
+  // Preview layers: closest painted avatar, painted quick-start example, painted version.
+  assert.match(html, /id="child-preview-stage"[\s\S]*id="child-premium-default"[\s\S]*id="child-preset-preview"[\s\S]*id="child-rendered-preview"/);
   assert.match(html, /id="child-stale-render"/);
   assert.match(html, /id="child-render-cancel"/);
   assert.match(html, /id="child-render-retry"/);
   assert.match(html, /id="child-render-version-list" role="radiogroup"/);
   assert.match(html, /id="child-mini-preview"/);
+  assert.match(html, /id="child-mini-art"/);
   assert.match(html, /id="child-monster-only-preview"/);
-  assert.doesNotMatch(html, /id="child-premium-default"/, "the static sample no longer poses as the child's preview");
-  // Scripts load sketch → selector → studio → main.
-  assert.match(html, /child-sketch\.js\?v=20261008-child-editor-v2b[\s\S]*child-selector\.js\?v=20261008-child-editor-v2b[\s\S]*child-studio\.js\?v=20261008-child-editor-v2b[\s\S]*main\.js\?v=20261008-child-editor-v2b"/);
-  assert.match(html, /child-selector\.css\?v=20261008-child-editor-v2b"/);
+  assert.match(html, /id="child-preview-honest"/);
+  assert.match(html, /Create This Character/);
+  assert.match(html, /Premium character preview/);
+  assert.doesNotMatch(html, /child-sketch\.js/, "vector sketch script is not loaded");
+  assert.doesNotMatch(html, /id="child-preview-character"/, "vector sketch container is gone");
+  // Scripts load selector → studio → main (no sketch).
+  assert.match(html, /child-selector\.js\?v=20261008-child-editor-v2c[\s\S]*child-studio\.js\?v=20261008-child-editor-v2c[\s\S]*main\.js\?v=20261008-child-editor-v2c"/);
+  assert.match(html, /child-selector\.css\?v=20261008-child-editor-v2c"/);
   assert.match(script, /monstersnow_child_character_profile_v3/);
   assert.match(script, /function undo\(/);
   assert.match(script, /function reset\(/);
   assert.match(script, /function sanitizeDetail/);
-  assert.match(sketch, /dataset, \{/);
-  assert.match(sketch, /cs\$\{uid\}-/, "each sketch instance gets its own gradient ids");
+  assert.match(script, /function premiumReferenceFor/);
   assert.match(studio, /REQUEST_TIMEOUT_MS = 165 \* 1000/);
   assert.match(studio, /MAX_VERSIONS_PER_LOOK = 3/);
   assert.match(studio, /VERSIONS_PER_PAINT = 2/);
   assert.match(studio, /resource=image&kind=render/);
+  assert.match(studio, /Create This Character/);
   assert.match(mainScript, /resource=session/);
   assert.match(mainScript, /submission\.childRenderId = childRender\.id/);
   assert.match(mainScript, /function getSelectedMonsterImage\(\)/);
   assert.match(mainScript, /function showCharacterStep/);
   assert.match(mainScript, /classList\.add\("is-character-step"\)/);
   assert.doesNotMatch(mainScript, /renderedChildImage/);
-  assert.match(css, /\.custom-child-svg \.layer \{ display: none; \}/);
-  assert.match(css, /\.custom-child-svg\[data-headwear="hijab"\] \.headwear-hijab/);
+  assert.match(css, /\.child-premium-default \{/);
   assert.match(css, /\.child-mini-preview \{\s*position: fixed/);
   assert.match(css, /html body \.create-flow-section \{ overflow: clip; \}/);
   assert.match(css, /\.child-preview-stage\.has-book-render/);
@@ -266,15 +269,15 @@ test("premium editor defaults include optimized original feature-animation boy a
   }
 });
 
-test("hair selector shows a live sketch thumbnail for every hair style", () => {
+test("hair selector shows a painted thumbnail for every hair style", () => {
   const html = fs.readFileSync(path.join(root, "create.html"), "utf8");
   const selectorScript = fs.readFileSync(path.join(root, "scripts", "child-selector.js"), "utf8");
-  const sketch = fs.readFileSync(path.join(root, "scripts", "child-sketch.js"), "utf8");
   for (const style of childCustomizationIds().hairStyles) {
-    assert.match(html, new RegExp(`data-hair-thumb="${style}"`), `${style} thumbnail`);
-    assert.match(sketch, new RegExp(`class="layer hair hair-${style}"`), `${style} sketch layer`);
+    assert.match(html, new RegExp(`data-hair-thumbnail="${style}"`), `${style} thumbnail`);
   }
   assert.match(selectorScript, /renderHairThumbnails/);
+  assert.match(selectorScript, /hairThumbnailSrc/);
+  assert.match(selectorScript, /HAIR_ASSET/);
 });
 
 test("Halloween story directions keep wheelchair participation consistent and movement neutral", () => {
