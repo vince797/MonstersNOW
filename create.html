@@ -11,7 +11,7 @@
     <title>Create Your Monster | MonstersNOW</title>
     <link rel="icon" href="assets/brand/monstersnow-icon-32-v1.png" type="image/png" sizes="32x32" />
     <link rel="stylesheet" href="styles.css?v=20261004-monster-studio-v5" />
-    <link rel="stylesheet" href="child-selector.css?v=20261007-child-studio-v23" />
+    <link rel="stylesheet" href="child-selector.css?v=20261008-child-editor-v2c" />
     <link rel="stylesheet" href="storefront.css?v=20261002-public-storefront" />
     <link rel="apple-touch-icon" href="assets/brand/monstersnow-icon-180-v1.png" />
     <link rel="stylesheet" href="brand.css?v=20261004-selected-logo" />
@@ -239,43 +239,63 @@
                             </div>
                           </fieldset>
                           <div class="child-character-details" id="child-character-details">
+                          <div class="child-mini-preview" id="child-mini-preview" hidden>
+                            <img class="child-mini-art" id="child-mini-art" alt="" width="80" height="104" decoding="async" />
+                            <img class="child-mini-render" id="child-mini-render" alt="" hidden />
+                            <span class="child-mini-copy"><b id="child-mini-title">Premium preview</b><small id="child-mini-status">Closest match for your choices</small></span>
+                            <button type="button" id="child-mini-jump">See preview</button>
+                          </div>
+                          <section class="child-preset-section" data-child-presets aria-labelledby="child-preset-title" hidden>
+                            <h3 id="child-preset-title">Quick-start looks</h3>
+                            <p>Start from a look, then change anything.</p>
+                            <div class="child-preset-options" id="child-preset-options" role="group" aria-labelledby="child-preset-title"></div>
+                          </section>
                           <div class="child-accessibility-section">
-                            <fieldset class="child-mobility-options" aria-describedby="child-mobility-help child-mobility-blocker">
+                            <fieldset class="child-mobility-options" aria-describedby="child-mobility-help">
                               <legend>Movement &amp; support</legend>
                               <p id="child-mobility-help">Choose how they move through the story. No diagnosis or medical details needed.</p>
                               <div class="child-segmented-options child-mobility-choices">
                                 <label><input type="radio" name="child-mobility-aid" value="none" checked /><span><strong>Standing</strong><small>No support</small></span></label>
-                                <label aria-disabled="false"><input type="radio" name="child-mobility-aid" value="wheelchair" /><span><strong>Wheelchair</strong><small id="child-wheelchair-option-copy">Age-sized chair</small></span></label>
-                                <label aria-disabled="false"><input type="radio" name="child-mobility-aid" value="forearm-crutches" /><span><strong>Forearm crutches</strong><small id="child-crutches-option-copy">Two fitted crutches</small></span></label>
+                                <label><input type="radio" name="child-mobility-aid" value="wheelchair" /><span><strong>Wheelchair</strong><small id="child-wheelchair-option-copy">Age-sized chair</small></span></label>
+                                <label><input type="radio" name="child-mobility-aid" value="forearm-crutches" /><span><strong>Forearm crutches</strong><small id="child-crutches-option-copy">Two fitted crutches</small></span></label>
+                                <label><input type="radio" name="child-mobility-aid" value="walker" /><span><strong>Walker</strong><small>Kid-sized frame</small></span></label>
+                                <label><input type="radio" name="child-mobility-aid" value="prosthetic-leg" /><span><strong>Prosthetic leg</strong><small>Lower-leg prosthesis</small></span></label>
+                                <label><input type="radio" name="child-mobility-aid" value="leg-braces" /><span><strong>Leg braces</strong><small>Ankle-foot braces</small></span></label>
                               </div>
                             </fieldset>
-                            <p class="child-render-limit" id="child-mobility-blocker" role="note"><strong>Every look stays editable</strong> with any movement choice.</p>
                           </div>
                           <div class="child-editor-tabs" role="tablist" aria-label="Character customization categories">
                             <button type="button" class="is-active" role="tab" aria-selected="true" data-editor-tab="appearance"><span aria-hidden="true">01</span> Look</button>
-                            <button type="button" role="tab" aria-selected="false" data-editor-tab="outfit"><span aria-hidden="true">02</span> Clothes</button>
-                            <button type="button" role="tab" aria-selected="false" data-editor-tab="build"><span aria-hidden="true">03</span> Details</button>
+                            <button type="button" role="tab" aria-selected="false" tabindex="-1" data-editor-tab="outfit"><span aria-hidden="true">02</span> Clothes</button>
+                            <button type="button" role="tab" aria-selected="false" tabindex="-1" data-editor-tab="extras"><span aria-hidden="true">03</span> Extras</button>
+                            <button type="button" role="tab" aria-selected="false" tabindex="-1" data-editor-tab="build"><span aria-hidden="true">04</span> Details</button>
                           </div>
                           <details class="child-editor-section child-appearance-section is-active" data-editor-panel="appearance" open>
                             <summary><span>Face &amp; hair</span><small>Every applied choice changes the finished character.</small></summary>
                             <div class="child-appearance-builder">
                               <fieldset class="child-presentation-picker">
                                 <legend>Character</legend>
-                                <p>Choose boy or girl, then customize every detail below.</p>
-                                <div class="child-presentation-options" role="radiogroup" aria-label="Boy or girl character">
+                                <p>Choose boy, girl, or kid, then customize every detail below.</p>
+                                <div class="child-presentation-options" role="radiogroup" aria-label="Character type">
                                   <label><input type="radio" name="child-presentation" value="boy" /><span><i aria-hidden="true">B</i><b>Boy</b></span></label>
                                   <label><input type="radio" name="child-presentation" value="girl" checked /><span><i aria-hidden="true">G</i><b>Girl</b></span></label>
+                                  <label><input type="radio" name="child-presentation" value="neutral" /><span><i aria-hidden="true">K</i><b>Kid</b></span></label>
                                 </div>
                               </fieldset>
                               <fieldset class="child-skin-tone-picker">
                                 <legend>Skin tone</legend>
                                 <p>Choose the closest illustrated shade. This does not identify race or ethnicity.</p>
-                                <div class="child-color-options" role="radiogroup" aria-label="Illustrated skin tone">
+                                <div class="child-color-options child-skin-options" role="radiogroup" aria-label="Illustrated skin tone">
+                                  <label><input type="radio" name="child-skin-tone" value="porcelain" /><span style="--swatch:#f8dccb" aria-hidden="true"></span><b>Porcelain</b></label>
                                   <label><input type="radio" name="child-skin-tone" value="light" /><span style="--swatch:#f3cdb5" aria-hidden="true"></span><b>Light</b></label>
+                                  <label><input type="radio" name="child-skin-tone" value="peach" /><span style="--swatch:#efbf98" aria-hidden="true"></span><b>Peach</b></label>
                                   <label><input type="radio" name="child-skin-tone" value="golden" /><span style="--swatch:#dda06f" aria-hidden="true"></span><b>Golden</b></label>
+                                  <label><input type="radio" name="child-skin-tone" value="olive" /><span style="--swatch:#c79a6c" aria-hidden="true"></span><b>Olive</b></label>
                                   <label><input type="radio" name="child-skin-tone" value="medium" checked /><span style="--swatch:#b9724f" aria-hidden="true"></span><b>Medium</b></label>
-                                  <label><input type="radio" name="child-skin-tone" value="warm" /><span style="--swatch:#8a4d35" aria-hidden="true"></span><b>Warm</b></label>
+                                  <label><input type="radio" name="child-skin-tone" value="tan" /><span style="--swatch:#a3633d" aria-hidden="true"></span><b>Tan</b></label>
+                                  <label><input type="radio" name="child-skin-tone" value="warm" /><span style="--swatch:#8a4d35" aria-hidden="true"></span><b>Warm brown</b></label>
                                   <label><input type="radio" name="child-skin-tone" value="deep" /><span style="--swatch:#593225" aria-hidden="true"></span><b>Deep</b></label>
+                                  <label><input type="radio" name="child-skin-tone" value="rich" /><span style="--swatch:#43251b" aria-hidden="true"></span><b>Rich deep</b></label>
                                 </div>
                               </fieldset>
                               <fieldset>
@@ -287,6 +307,10 @@
                                   <label><input type="radio" name="child-hair-style" value="wavy" /><span data-style="wavy" aria-hidden="true"><img data-hair-thumbnail="wavy" src="assets/child-editor/hair-style-waves-v1.webp" alt="" /></span><b>Waves</b></label>
                                   <label><input type="radio" name="child-hair-style" value="straight" /><span data-style="straight" aria-hidden="true"><img data-hair-thumbnail="straight" src="assets/child-editor/hair-style-straight-v1.webp" alt="" /></span><b>Straight</b></label>
                                   <label><input type="radio" name="child-hair-style" value="braids" /><span data-style="braids" aria-hidden="true"><img data-hair-thumbnail="braids" src="assets/child-editor/hair-style-braids-v1.webp" alt="" /></span><b>Braids</b></label>
+                                  <label><input type="radio" name="child-hair-style" value="locs" /><span data-style="locs" aria-hidden="true"><img data-hair-thumbnail="locs" src="assets/child-editor/hair-style-braids-v1.webp" alt="" /></span><b>Locs</b></label>
+                                  <label><input type="radio" name="child-hair-style" value="ponytail" /><span data-style="ponytail" aria-hidden="true"><img data-hair-thumbnail="ponytail" src="assets/child-editor/hair-style-waves-v1.webp" alt="" /></span><b>Ponytail</b></label>
+                                  <label><input type="radio" name="child-hair-style" value="puffs" /><span data-style="puffs" aria-hidden="true"><img data-hair-thumbnail="puffs" src="assets/child-editor/hair-style-coils-v1.webp" alt="" /></span><b>Puffs</b></label>
+                                  <label><input type="radio" name="child-hair-style" value="buzz" /><span data-style="buzz" aria-hidden="true"><img data-hair-thumbnail="buzz" src="assets/child-editor/hair-style-short-v1.webp" alt="" /></span><b>Buzz cut</b></label>
                                 </div>
                               </fieldset>
                               <fieldset>
@@ -296,9 +320,10 @@
                                   <label><input type="radio" name="child-hair-color" value="dark-brown" checked /><span style="--swatch:#38231d" aria-hidden="true"></span><b>Dark brown</b></label>
                                   <label><input type="radio" name="child-hair-color" value="brown" /><span style="--swatch:#6b4028" aria-hidden="true"></span><b>Brown</b></label>
                                   <label><input type="radio" name="child-hair-color" value="auburn" /><span style="--swatch:#963f28" aria-hidden="true"></span><b>Auburn</b></label>
+                                  <label><input type="radio" name="child-hair-color" value="red" /><span style="--swatch:#c4521f" aria-hidden="true"></span><b>Red / ginger</b></label>
                                   <label><input type="radio" name="child-hair-color" value="blonde" /><span style="--swatch:#d8a83f" aria-hidden="true"></span><b>Blonde</b></label>
+                                  <label><input type="radio" name="child-hair-color" value="platinum" /><span style="--swatch:#e6dcc0" aria-hidden="true"></span><b>Platinum</b></label>
                                 </div>
-                                <p>Hair color is applied to the selected style in the premium avatar.</p>
                               </fieldset>
                               <fieldset>
                                 <legend>Eye color</legend>
@@ -322,9 +347,24 @@
                                   <label><input type="radio" name="child-outfit-style" value="hoodie" /><span aria-hidden="true">◠</span><b>Hoodie</b></label>
                                   <label><input type="radio" name="child-outfit-style" value="tee" /><span aria-hidden="true">T</span><b>T-shirt</b></label>
                                   <label><input type="radio" name="child-outfit-style" value="dress" /><span aria-hidden="true">△</span><b>Dress</b></label>
+                                  <label><input type="radio" name="child-outfit-style" value="sweater" /><span aria-hidden="true">≋</span><b>Sweater &amp; jeans</b></label>
+                                  <label><input type="radio" name="child-outfit-style" value="jacket" /><span aria-hidden="true">☂</span><b>Rain jacket</b></label>
+                                  <label><input type="radio" name="child-outfit-style" value="shorts" /><span aria-hidden="true">⊓</span><b>Shorts &amp; tee</b></label>
+                                  <label><input type="radio" name="child-outfit-style" value="costume" /><span aria-hidden="true">★</span><b>Halloween costume</b></label>
                                 </div>
                               </fieldset>
-                              <fieldset>
+                              <fieldset id="child-costume-field" hidden>
+                                <legend>Costume</legend>
+                                <div class="child-segmented-options child-costume-options" role="radiogroup" aria-label="Halloween costume">
+                                  <label><input type="radio" name="child-costume" value="pumpkin" checked /><span>Pumpkin</span></label>
+                                  <label><input type="radio" name="child-costume" value="witch" /><span>Witch or wizard</span></label>
+                                  <label><input type="radio" name="child-costume" value="superhero" /><span>Superhero</span></label>
+                                  <label><input type="radio" name="child-costume" value="dinosaur" /><span>Dinosaur</span></label>
+                                  <label><input type="radio" name="child-costume" value="astronaut" /><span>Astronaut</span></label>
+                                  <label><input type="radio" name="child-costume" value="cat" /><span>Black cat</span></label>
+                                </div>
+                              </fieldset>
+                              <fieldset id="child-outfit-color-field">
                                 <legend>Outfit color</legend>
                                 <div class="child-color-options child-outfit-color-options" role="radiogroup" aria-label="Outfit color">
                                   <label><input type="radio" name="child-outfit-color" value="teal" checked /><span style="--swatch:#168b91" aria-hidden="true"></span><b>Teal</b></label>
@@ -337,8 +377,50 @@
                               </fieldset>
                             </div>
                           </details>
+                          <details class="child-editor-section" data-editor-panel="extras">
+                            <summary><span>Extras</span><small>Glasses, hearing devices, headwear, and face details.</small></summary>
+                            <div class="child-editor-section-body child-extras-builder">
+                              <fieldset>
+                                <legend>Glasses</legend>
+                                <div class="child-segmented-options" role="radiogroup" aria-label="Glasses">
+                                  <label><input type="radio" name="child-glasses" value="none" checked /><span>None</span></label>
+                                  <label><input type="radio" name="child-glasses" value="round" /><span>Round</span></label>
+                                  <label><input type="radio" name="child-glasses" value="square" /><span>Square</span></label>
+                                </div>
+                              </fieldset>
+                              <fieldset>
+                                <legend>Hearing</legend>
+                                <div class="child-segmented-options" role="radiogroup" aria-label="Hearing devices">
+                                  <label><input type="radio" name="child-hearing-aid" value="none" checked /><span>None</span></label>
+                                  <label><input type="radio" name="child-hearing-aid" value="hearing-aids" /><span>Hearing aids</span></label>
+                                  <label><input type="radio" name="child-hearing-aid" value="cochlear" /><span>Cochlear implant</span></label>
+                                </div>
+                              </fieldset>
+                              <fieldset>
+                                <legend>Headwear</legend>
+                                <div class="child-segmented-options child-headwear-options" role="radiogroup" aria-label="Headwear">
+                                  <label><input type="radio" name="child-headwear" value="none" checked /><span>None</span></label>
+                                  <label><input type="radio" name="child-headwear" value="hijab" /><span>Hijab</span></label>
+                                  <label><input type="radio" name="child-headwear" value="patka" /><span>Patka / turban</span></label>
+                                  <label><input type="radio" name="child-headwear" value="headwrap" /><span>Head wrap</span></label>
+                                  <label><input type="radio" name="child-headwear" value="kippah" /><span>Kippah</span></label>
+                                  <label><input type="radio" name="child-headwear" value="beanie" /><span>Beanie</span></label>
+                                  <label><input type="radio" name="child-headwear" value="cap" /><span>Baseball cap</span></label>
+                                </div>
+                              </fieldset>
+                              <fieldset>
+                                <legend>Face details</legend>
+                                <div class="child-segmented-options" role="radiogroup" aria-label="Face details">
+                                  <label><input type="radio" name="child-face-detail" value="none" checked /><span>None</span></label>
+                                  <label><input type="radio" name="child-face-detail" value="freckles" /><span>Freckles</span></label>
+                                  <label><input type="radio" name="child-face-detail" value="birthmark" /><span>Birthmark</span></label>
+                                  <label><input type="radio" name="child-face-detail" value="freckles-birthmark" /><span>Both</span></label>
+                                </div>
+                              </fieldset>
+                            </div>
+                          </details>
                         <details class="child-editor-section" data-editor-panel="build">
-                          <summary><span>Age &amp; height</span><small>Optional illustration proportions.</small></summary>
+                          <summary><span>Age, height &amp; special detail</span><small>Illustration proportions and one personal touch.</small></summary>
                           <div class="child-editor-section-body child-basics-grid">
                             <fieldset>
                               <legend>Age range</legend>
@@ -347,6 +429,7 @@
                                 <label><input type="radio" name="child-age-band" value="2-4" /><span>Ages 2–4</span></label>
                                 <label><input type="radio" name="child-age-band" value="5-6" checked /><span>Ages 5–6</span></label>
                                 <label><input type="radio" name="child-age-band" value="7-8" /><span>Ages 7–8</span></label>
+                                <label><input type="radio" name="child-age-band" value="9-10" /><span>Ages 9–10</span></label>
                               </div>
                             </fieldset>
                             <fieldset>
@@ -358,46 +441,63 @@
                                 <label><input type="radio" name="child-relative-height" value="taller" /><span>Taller</span></label>
                               </div>
                             </fieldset>
+                            <div class="child-special-detail-field">
+                              <label for="child-special-detail">Special detail <span>Optional</span></label>
+                              <input id="child-special-detail" type="text" maxlength="80" autocomplete="off" spellcheck="true" placeholder="e.g. gap-toothed grin, star hair clip" aria-describedby="child-special-detail-help child-special-detail-count" />
+                              <small id="child-special-detail-help">One small look detail for the painted character. Plain words only; names of brands or characters are not used.</small>
+                              <small class="child-special-detail-count" id="child-special-detail-count">0/80</small>
+                            </div>
                           </div>
                         </details>
                           </div>
                           <p class="child-privacy-note"><strong>Private by design.</strong> This editor uses illustration settings only. MonstersNOW does not ask for a child photo or infer race, health, or exact body measurements.</p>
                         </div>
-                        <aside class="child-live-preview" aria-labelledby="child-preview-title">
+                        <aside class="child-live-preview" id="child-live-preview" aria-labelledby="child-preview-title">
                           <div class="child-preview-topline">
                             <span class="child-preview-label"><i aria-hidden="true"></i> <span id="child-preview-label-text">Premium character preview</span></span>
                             <span class="child-preview-updates"><i aria-hidden="true"></i> <span id="child-preview-mode-text">Book-quality avatar</span></span>
                           </div>
-                          <div class="child-preview-stage" id="child-preview-stage" aria-hidden="true">
-                            <span class="child-stage-corners"></span>
-                            <span class="child-stage-scanline"></span>
+                          <div class="child-preview-stage" id="child-preview-stage">
+                            <span class="child-stage-corners" aria-hidden="true"></span>
+                            <span class="child-stage-scanline" aria-hidden="true"></span>
                             <img class="child-monster-only-preview" id="child-monster-only-preview" alt="" hidden />
-                            <img class="child-premium-default" id="child-premium-default" src="assets/child-editor/default-girl-feature-animation-v1.webp" alt="" width="1024" height="1536" decoding="async" />
-                            <span class="child-preview-character" id="child-preview-character" hidden></span>
+                            <img class="child-premium-default" id="child-premium-default" src="assets/child-editor/default-girl-feature-animation-v1.webp" alt="Closest painted preview of the storybook character" width="1024" height="1536" decoding="async" />
+                            <img class="child-preset-preview" id="child-preset-preview" alt="" decoding="async" hidden />
                             <img class="child-rendered-preview" id="child-rendered-preview" alt="" hidden />
+                            <button type="button" class="child-stale-render" id="child-stale-render" hidden>
+                              <img alt="" id="child-stale-render-image" />
+                              <span><b>Painted version</b><small class="child-stale-long">Earlier&nbsp;choices&nbsp;· tap&nbsp;to&nbsp;go&nbsp;back</small><small class="child-stale-short" aria-hidden="true">Tap to go back</small></span>
+                            </button>
                             <div class="child-render-progress" id="child-render-progress" aria-live="polite" hidden>
                               <span class="child-render-progress-spinner" aria-hidden="true"><i></i></span>
-                              <small>Creating their character</small>
-                              <strong>Bringing their storybook character to life</strong>
-                              <p>Applying the selected hair, skin, eyes, and clothes—usually 30–60 seconds.</p>
+                              <small>Painting their character</small>
+                              <strong id="child-render-progress-title">Painting 2 versions to choose from</strong>
+                              <p id="child-render-progress-copy">Applying every choice in the animated storybook style. This usually takes 40–90 seconds.</p>
                               <div class="child-render-progress-track" aria-hidden="true"><i></i></div>
-                              <ol class="child-render-progress-steps" aria-label="Character creation progress">
+                              <ol class="child-render-progress-steps" aria-label="Character painting progress">
                                 <li class="is-complete" data-child-render-step="1"><i>1</i><span>Choices</span></li>
-                                <li class="is-active" data-child-render-step="2"><i>2</i><span>Character</span></li>
-                                <li data-child-render-step="3"><i>3</i><span>Finish</span></li>
+                                <li class="is-active" data-child-render-step="2"><i>2</i><span>Painting</span></li>
+                                <li data-child-render-step="3"><i>3</i><span>Finishing</span></li>
                               </ol>
                               <em id="child-render-elapsed">Just started</em>
+                              <button type="button" class="child-render-cancel" id="child-render-cancel">Cancel</button>
                             </div>
                             <span class="child-preview-figure"><span class="child-avatar child-avatar-none" id="child-preview-avatar">✦</span><span class="child-preview-body"></span></span>
                           </div>
+                          <div class="child-render-versions" id="child-render-versions" hidden>
+                            <div class="child-render-versions-heading"><b>Painted versions</b><small id="child-render-versions-hint">Tap one to use it in the book.</small></div>
+                            <div class="child-render-version-list" id="child-render-version-list" role="radiogroup" aria-label="Painted character versions"></div>
+                          </div>
                           <div class="child-preview-specs" aria-hidden="true"><span>Designed by you</span><span>Premium preview</span><span>Book ready</span></div>
+                          <p class="child-preview-honest" id="child-preview-honest">Closest preview. Your exact choices are painted when you create this character.</p>
                           <div class="child-preview-copy" aria-live="polite">
                             <span>Their character</span>
                             <strong id="child-preview-title">Build the hero of their story.</strong>
-                            <p id="child-preview-details">Choose the hair, skin, eyes, and clothes, then apply them to create the book-quality character.</p>
+                            <p id="child-preview-details">Choose the hair, skin, eyes, and clothes, then create the book-quality character.</p>
                           </div>
                           <div class="child-render-actions">
                             <button class="button primary" id="render-child-character" type="button">Create This Character</button>
+                            <button class="button secondary child-render-retry" id="child-render-retry" type="button" hidden>Try Again</button>
                             <p id="child-render-status" role="status" aria-live="polite">Ready when you are. Every choice stays editable.</p>
                           </div>
                         </aside>
@@ -547,7 +647,8 @@
       </div>
     </footer>
 
-    <script src="scripts/child-selector.js?v=20261007-child-studio-v12"></script>
-    <script src="scripts/main.js?v=20261007-child-studio-v21"></script>
+    <script src="scripts/child-selector.js?v=20261008-child-editor-v2c"></script>
+    <script src="scripts/child-studio.js?v=20261008-child-editor-v2c"></script>
+    <script src="scripts/main.js?v=20261008-child-editor-v2c"></script>
   </body>
 </html>

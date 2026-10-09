@@ -3,7 +3,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 
-const { childProfileKey, isSupportedForearmCrutchProfile, isSupportedWheelchairProfile, resolveChildCharacter } = require("../lib/child-characters");
+const { childAgeBandIds, childCustomizationIds, childMobilityAidIds, childProfileKey, childRelativeHeightIds, isSupportedForearmCrutchProfile, isSupportedWheelchairProfile, resolveChildCharacter } = require("../lib/child-characters");
 const { buildChildCharacterRenderPrompt } = require("../lib/child-character-style");
 const { buildStorybookInterestSubmission } = require("../lib/storybook-interest");
 const { buildHalloweenProof } = require("../lib/halloween-proof");
@@ -97,110 +97,74 @@ test("custom child profiles preserve independently editable appearance choices",
 test("selector UI is a true layered character editor with a MonstersNOW storybook preview", () => {
   const html = fs.readFileSync(path.join(root, "create.html"), "utf8");
   const script = fs.readFileSync(path.join(root, "scripts/child-selector.js"), "utf8");
+  const studio = fs.readFileSync(path.join(root, "scripts/child-studio.js"), "utf8");
   const mainScript = fs.readFileSync(path.join(root, "scripts/main.js"), "utf8");
   const css = fs.readFileSync(path.join(root, "child-selector.css"), "utf8");
-  assert.match(html, /name="child-age-band"/);
-  assert.match(html, /name="child-relative-height"/);
-  assert.match(html, /name="child-mobility-aid" value="wheelchair"/);
-  assert.match(html, /name="child-mobility-aid" value="forearm-crutches"/);
-  assert.doesNotMatch(html, /href="#child-editor-start">Explore the child creator/);
-  assert.equal((html.match(/data-monster-step-panel/g) || []).length, 2);
+  const ids = childCustomizationIds();
+  // Every server-side option has a matching control, so nothing is unreachable.
+  const groups = {
+    "child-presentation": ids.presentations, "child-skin-tone": ids.skinTones, "child-hair-style": ids.hairStyles,
+    "child-hair-color": ids.hairColors, "child-eye-color": ids.eyeColors, "child-outfit-style": ids.outfitStyles,
+    "child-outfit-color": ids.outfitColors, "child-costume": ids.costumes, "child-glasses": ids.glasses,
+    "child-hearing-aid": ids.hearingAids, "child-headwear": ids.headwear, "child-face-detail": ids.faceDetails,
+    "child-age-band": childAgeBandIds(), "child-relative-height": childRelativeHeightIds(), "child-mobility-aid": childMobilityAidIds(),
+  };
+  for (const [name, values] of Object.entries(groups)) {
+    const inHtml = [...html.matchAll(new RegExp(`name="${name}" value="([^"]+)"`, "g"))].map((match) => match[1]).sort();
+    assert.deepEqual(inHtml, [...values].sort(), `${name} controls match the server options`);
+  }
+  assert.equal(ids.skinTones.length, 10);
+  assert.ok(childAgeBandIds().includes("9-10"));
+  assert.match(html, /id="child-special-detail" type="text" maxlength="80"/);
+  assert.doesNotMatch(html, /type="date"|name="child-(?:birthdate|date-of-birth|height-(?:cm|in))"/i);
+  assert.match(html, /No diagnosis or medical details needed/);
+  assert.match(html, /name="child-character" value="custom" checked/);
+  assert.match(html, /name="child-presentation" value="girl" checked/);
+  for (const tab of ["appearance", "outfit", "extras", "build"]) assert.match(html, new RegExp(`data-editor-tab="${tab}"`));
+  assert.match(html, /id="child-editor-undo" disabled/);
   assert.match(html, /id="result-book-offer" aria-labelledby="result-book-title" hidden/);
   assert.match(html, /id="back-to-monster"/);
-  assert.match(html, /No diagnosis or medical details needed/);
-  assert.match(html, /Age-sized chair/i);
-  assert.doesNotMatch(html, /type="date"|name="child-(?:birthdate|date-of-birth|height-(?:cm|in))"/i);
-  assert.match(html, />Face &amp; hair<|>Outfit<|>Age, height &amp; accessibility/);
-  assert.match(html, /name="child-character" value="custom" checked/);
-  assert.match(html, /name="child-presentation" value="boy"/);
-  assert.match(html, /name="child-presentation" value="girl" checked/);
-  assert.match(html, /name="child-skin-tone" value="light"/);
-  assert.match(html, /name="child-hair-style" value="braids"/);
-  assert.match(html, /name="child-hair-color" value="auburn"/);
-  assert.match(html, /name="child-eye-color" value="green"/);
-  assert.match(html, /name="child-outfit-style" value="hoodie"/);
-  assert.match(html, /name="child-outfit-color" value="purple"/);
-  assert.match(html, /data-editor-tab="appearance"/);
-  assert.match(html, /data-editor-tab="outfit"/);
-  assert.match(html, /data-editor-tab="build"/);
-  assert.match(html, /id="child-editor-undo" disabled/);
-  assert.match(html, /id="child-editor-reset"/);
+  assert.equal((html.match(/data-monster-step-panel/g) || []).length, 2);
+  // Preview layers: closest painted avatar, painted quick-start example, painted version.
+  assert.match(html, /id="child-preview-stage"[\s\S]*id="child-premium-default"[\s\S]*id="child-preset-preview"[\s\S]*id="child-rendered-preview"/);
+  assert.match(html, /id="child-stale-render"/);
+  assert.match(html, /id="child-render-cancel"/);
+  assert.match(html, /id="child-render-retry"/);
+  assert.match(html, /id="child-render-version-list" role="radiogroup"/);
+  assert.match(html, /id="child-mini-preview"/);
+  assert.match(html, /id="child-mini-art"/);
+  assert.match(html, /id="child-monster-only-preview"/);
+  assert.match(html, /id="child-preview-honest"/);
+  assert.match(html, /Create This Character/);
+  assert.match(html, /Premium character preview/);
+  assert.doesNotMatch(html, /child-sketch\.js/, "vector sketch script is not loaded");
+  assert.doesNotMatch(html, /id="child-preview-character"/, "vector sketch container is gone");
+  // Scripts load selector → studio → main (no sketch).
+  assert.match(html, /child-selector\.js\?v=20261008-child-editor-v2c[\s\S]*child-studio\.js\?v=20261008-child-editor-v2c[\s\S]*main\.js\?v=20261008-child-editor-v2c"/);
+  assert.match(html, /child-selector\.css\?v=20261008-child-editor-v2c"/);
   assert.match(script, /monstersnow_child_character_profile_v3/);
-  assert.match(script, /dataset\.presentation/);
-  assert.match(script, /localStorage\.setItem/);
   assert.match(script, /function undo\(/);
   assert.match(script, /function reset\(/);
-  assert.match(script, /function supportsWheelchair/);
-  assert.match(script, /function supportsForearmCrutches/);
-  assert.match(script, /const customCharacterSvg/);
-  assert.match(script, /dataset\.hairStyle/);
-  assert.match(script, /dataset\.outfitStyle/);
-  assert.match(script, /--skin/);
-  assert.match(script, /--eye/);
-  assert.match(script, /--outfit/);
-  assert.match(script, /child-preview-character/);
-  assert.match(html, /id="child-monster-only-preview"/);
-  assert.doesNotMatch(html, /child-board-label-monster/);
-  assert.match(html, /Premium character preview/);
-  assert.match(html, /Book-quality avatar/);
-  assert.match(html, /id="child-premium-default"/);
-  assert.match(html, /default-girl-feature-animation-v1\.webp/);
-  assert.match(html, /id="render-child-character"/);
-  assert.match(html, /id="child-rendered-preview"/);
-  assert.match(mainScript, /fetch\("\/api\/render-child-character"/);
-  assert.match(mainScript, /childImage: personalization\.childCharacter/);
-  assert.match(css, /\.child-preview-stage\.has-book-render/);
-  assert.match(css, /height: 280px; min-height: 260px/);
-  assert.match(css, /\.create-flow-section \.child-live-preview \{ grid-column: 1; grid-row: 1; \}/);
-  assert.match(css, /\.create-flow-section \.child-editor-controls \{ grid-column: 1; grid-row: 2; \}/);
-  assert.match(css, /\.child-preview-copy p \{[\s\S]*white-space: normal;[\s\S]*-webkit-line-clamp: 2;/);
+  assert.match(script, /function sanitizeDetail/);
+  assert.match(script, /function premiumReferenceFor/);
+  assert.match(studio, /REQUEST_TIMEOUT_MS = 165 \* 1000/);
+  assert.match(studio, /MAX_VERSIONS_PER_LOOK = 3/);
+  assert.match(studio, /VERSIONS_PER_PAINT = 2/);
+  assert.match(studio, /resource=image&kind=render/);
+  assert.match(studio, /Create This Character/);
+  assert.match(mainScript, /resource=session/);
+  assert.match(mainScript, /submission\.childRenderId = childRender\.id/);
   assert.match(mainScript, /function getSelectedMonsterImage\(\)/);
-  assert.match(mainScript, /monsterPreview\?\.hasAttribute\("src"\)/);
-  assert.doesNotMatch(css, /storybook-forest-stage-v1\.webp/);
-  assert.match(css, /storybook-studio-stage-v1\.jpg/);
-  assert.match(css, /radial-gradient\(ellipse at 70% 90%/);
-  assert.match(css, /\.child-editor-tabs button\.is-active/);
-  assert.match(css, /\.custom-child-svg\[data-hair-style="curly"\]/);
-  assert.match(mainScript, /resultBookOffer\.hidden = false/);
   assert.match(mainScript, /function showCharacterStep/);
-  assert.match(mainScript, /function showMonsterStep/);
   assert.match(mainScript, /classList\.add\("is-character-step"\)/);
-  assert.match(css, /\.child-preview-stage\.mobility-wheelchair/);
-  assert.match(css, /\.child-preview-stage\.mobility-forearm-crutches/);
+  assert.doesNotMatch(mainScript, /renderedChildImage/);
+  assert.match(css, /\.child-premium-default \{/);
+  assert.match(css, /\.child-mini-preview \{\s*position: fixed/);
+  assert.match(css, /html body \.create-flow-section \{ overflow: clip; \}/);
+  assert.match(css, /\.child-preview-stage\.has-book-render/);
   assert.match(css, /\.child-live-preview \{[\s\S]*position: sticky/);
-  assert.match(css, /\.child-presence-toggle label\.is-selected::after/);
-  assert.match(css, /\.child-preview-character/);
-  assert.match(html, /child-selector\.css\?v=20261007-child-studio-v23/);
-  assert.match(html, /scripts\/child-selector\.js\?v=20261007-child-studio-v12/);
-  assert.match(html, /scripts\/main\.js\?v=20261007-child-studio-v21/);
-  assert.match(html, /id="child-preview-stage"[\s\S]*id="child-preview-details"[\s\S]*id="render-child-character"/);
-  assert.match(mainScript, /Ready when you are\. Every choice stays editable\./);
-  assert.match(html, /id="child-character-details"[\s\S]*class="child-accessibility-section"[\s\S]*class="child-editor-tabs"/);
-  assert.match(html, /Movement &amp; support/);
-  assert.match(html, /Every look stays editable/);
-  assert.match(css, /\.child-preview-stage\.mobility-wheelchair \.child-premium-default \{ top: 4%; height: 89%; \}/);
-  assert.match(css, /\.child-preview-stage\.mobility-forearm-crutches \.child-premium-default \{ top: 6%; height: 89%; \}/);
-  assert.match(mainScript, /childMonsterOnlyPreview\.src = monsterImage/);
-  assert.match(mainScript, /classList\.toggle\("has-monster-only", showMonster\)/);
-  assert.match(css, /\.child-monster-only-preview/);
-  assert.match(css, /\.child-premium-default[\s\S]*height: 84%/);
-  assert.match(css, /\.child-rendered-preview[\s\S]*object-position: center bottom/);
-  assert.match(css, /has-book-render \.child-premium-default/);
-  assert.match(css, /\.create-flow-section \.interest-form > \*/);
-  assert.match(css, /grid-template-columns: minmax\(0, 1fr\)/);
-  assert.match(css, /overscroll-behavior-inline: contain/);
-  assert.match(mainScript, /function markRenderedChildStale/);
-  assert.match(mainScript, /previousChildImage/);
-  assert.match(script, /Keep render lifecycle classes owned by main\.js/);
-  assert.match(mainScript, /childRenderIsCurrent/);
-  assert.match(html, /id="child-render-elapsed"/);
-  assert.match(html, /data-child-render-step="3"/);
-  assert.match(mainScript, /function showChildRenderProgress/);
-  assert.match(mainScript, /elapsed >= 35 \? 3 : 2/);
-  assert.match(css, /\.child-render-progress-track/);
-  assert.match(css, /\.child-render-progress-spinner \{[\s\S]*conic-gradient\([\s\S]*var\(--brand-purple[\s\S]*var\(--brand-orange[\s\S]*var\(--brand-teal[\s\S]*var\(--brand-blue/);
-  assert.doesNotMatch(mainScript, /syncStorySceneMonster/);
-  assert.doesNotMatch(mainScript, /removeConnectedWhiteBackground/);
+  assert.match(css, /storybook-studio-stage-v1\.jpg/);
+  assert.match(css, /\.child-render-progress-spinner \{[\s\S]*conic-gradient/);
 });
 
 test("book render prompt preserves every independent editor choice", () => {
@@ -305,23 +269,15 @@ test("premium editor defaults include optimized original feature-animation boy a
   }
 });
 
-test("hair selector includes premium boy and girl thumbnail sets", () => {
+test("hair selector shows a painted thumbnail for every hair style", () => {
   const html = fs.readFileSync(path.join(root, "create.html"), "utf8");
   const selectorScript = fs.readFileSync(path.join(root, "scripts", "child-selector.js"), "utf8");
-  assert.match(html, /data-hair-thumbnail="curly"/);
-  assert.match(html, /Hair color is applied to the selected style in the premium avatar/);
-  assert.match(selectorScript, /hair-style-boy/);
-  assert.match(selectorScript, /--selected-hair-color/);
-  for (const presentation of ["girl", "boy"]) {
-    for (const style of ["short", "curls", "coils", "waves", "straight", "braids"]) {
-      const prefix = presentation === "boy" ? "hair-style-boy" : "hair-style";
-      const filename = `${prefix}-${style}-v1.webp`;
-      const asset = path.join(root, "assets", "child-editor", filename);
-      assert.equal(fs.existsSync(asset), true, `${filename} should exist`);
-      assert.ok(fs.statSync(asset).size > 10_000, `${filename} should retain detailed hair texture`);
-      assert.ok(fs.statSync(asset).size < 100_000, `${filename} should stay lightweight for the selector`);
-    }
+  for (const style of childCustomizationIds().hairStyles) {
+    assert.match(html, new RegExp(`data-hair-thumbnail="${style}"`), `${style} thumbnail`);
   }
+  assert.match(selectorScript, /renderHairThumbnails/);
+  assert.match(selectorScript, /hairThumbnailSrc/);
+  assert.match(selectorScript, /HAIR_ASSET/);
 });
 
 test("Halloween story directions keep wheelchair participation consistent and movement neutral", () => {

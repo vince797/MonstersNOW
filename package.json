@@ -4,7 +4,9 @@
   "private": true,
   "scripts": {
     "test": "node --test tests/*.test.js",
-    "build:print-samples": "node scripts/build-print-samples.js"
+    "build:print-samples": "node scripts/build-print-samples.js",
+    "test:e2e": "node tests/child-editor-e2e.js",
+    "test:visual": "node tests/child-editor-visual-qa.js"
   },
   "dependencies": {
     "@napi-rs/canvas": "0.1.80",
