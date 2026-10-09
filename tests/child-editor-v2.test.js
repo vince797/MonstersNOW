@@ -43,8 +43,9 @@ function addSubmission() {
   return { id, token };
 }
 
-function request(method, url, { body, headers = {} } = {}) {
+function request(method, url, { body, headers = {}, query } = {}) {
   const req = Readable.from(body === undefined ? [] : [Buffer.from(JSON.stringify(body))]);
+  if (query) req.query = query;
   Object.assign(req, { method, url, headers: { host: "localhost", "x-forwarded-for": "203.0.113.7", ...headers }, socket: { remoteAddress: "203.0.113.7" } });
   return req;
 }
@@ -372,6 +373,25 @@ test("session and image reads require the submission token", async () => {
   const painted = await call("POST", "/api/render-child-character", { body: { submissionId: other.id, submissionToken: other.token, profile: kid } });
   assert.equal((await call("GET", `/api/render-child-character?resource=image&kind=render&id=${painted.body.render.id}`, { headers })).statusCode, 404);
   assert.equal((await call("DELETE", "/api/render-child-character?resource=session", { headers })).statusCode, 405);
+});
+
+test("GET routes read the query from request.query (Vercel) or the URL", async () => {
+  // Vercel-style: query string only on request.query, not on request.url.
+  const vercel = await call("GET", "/api/render-child-character", { query: { resource: "presets" } });
+  assert.equal(vercel.statusCode, 200);
+  assert.equal(vercel.body.presets.length, presets.CHILD_PRESETS.length);
+  const arrayValue = await call("GET", "/api/render-child-character", { query: { resource: ["presets"] } });
+  assert.equal(arrayValue.statusCode, 200);
+  // Plain Node: query string only on the URL.
+  const urlOnly = await call("GET", "/api/render-child-character?resource=presets");
+  assert.equal(urlOnly.statusCode, 200);
+  // Session and image routes reach their handlers too (auth/validation 4xx, not 405).
+  const session = await call("GET", "/api/render-child-character", { query: { resource: "session" } });
+  assert.ok(session.statusCode >= 400 && session.statusCode < 500 && session.statusCode !== 405);
+  const headers = { "x-submission-id": "x", "x-submission-token": "y" };
+  assert.notEqual((await call("GET", "/api/render-child-character", { query: { resource: "image", kind: "secret" }, headers })).statusCode, 405);
+  // No resource still means a POST-only render.
+  assert.equal((await call("GET", "/api/render-child-character")).statusCode, 405);
 });
 
 test("preset manifest is public; preset painting needs the admin password and a rate limit", async () => {
