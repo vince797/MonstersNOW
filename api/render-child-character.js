@@ -48,16 +48,20 @@ function referenceFor(profile) {
     || DEFAULT_REFERENCES.girl;
 }
 
-function resourceOf(request) {
-  try {
-    return new URL(request.url || "/", "http://localhost").searchParams.get("resource") || "render";
-  } catch {
-    return "render";
-  }
+function firstQueryValue(value) {
+  return Array.isArray(value) ? value[0] : value || "";
 }
 
+// Vercel's Node runtime puts the query string on request.query and may leave it
+// off request.url, so read request.query first and fall back to the URL.
 function queryParam(request, name) {
+  const fromQuery = firstQueryValue(request.query?.[name]);
+  if (fromQuery) return String(fromQuery);
   try { return new URL(request.url || "/", "http://localhost").searchParams.get(name) || ""; } catch { return ""; }
+}
+
+function resourceOf(request) {
+  return queryParam(request, "resource") || "render";
 }
 
 function header(request, name) {
