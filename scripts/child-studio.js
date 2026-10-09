@@ -517,7 +517,7 @@
   }
 
   function onStepShown() {
-    if (!state.versions.length && !state.job) setStatus("The sketch shows your choices. Paint the character to see the finished book look.");
+    if (!state.versions.length && !state.job) setStatus("Ready when you are. Every choice stays editable.");
     sync();
   }
 

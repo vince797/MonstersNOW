@@ -488,39 +488,8 @@
 .child-stage-corners { position: absolute; z-index: 6; inset: 15px; border: 1px solid transparent; background: linear-gradient(#63e7e2,#63e7e2) left top/22px 2px no-repeat, linear-gradient(#63e7e2,#63e7e2) left top/2px 22px no-repeat, linear-gradient(#63e7e2,#63e7e2) right top/22px 2px no-repeat, linear-gradient(#63e7e2,#63e7e2) right top/2px 22px no-repeat, linear-gradient(#63e7e2,#63e7e2) left bottom/22px 2px no-repeat, linear-gradient(#63e7e2,#63e7e2) left bottom/2px 22px no-repeat, linear-gradient(#63e7e2,#63e7e2) right bottom/22px 2px no-repeat, linear-gradient(#63e7e2,#63e7e2) right bottom/2px 22px no-repeat; opacity: .42; pointer-events: none; }
 .child-stage-scanline { position: absolute; z-index: 2; right: 3%; top: 19%; width: 53%; height: 1px; background: linear-gradient(90deg, transparent, rgba(112,240,233,.52), transparent); box-shadow: 0 0 13px rgba(112,240,233,.35); opacity: .7; animation: child-stage-scan 5.5s ease-in-out infinite; pointer-events: none; }
 @keyframes child-stage-scan { 0%, 100% { translate: 0 -28px; opacity: .16; } 50% { translate: 0 270px; opacity: .72; } }
-.child-preview-character {
-  position: absolute;
-  z-index: 4;
-  right: 0;
-  bottom: 0;
-  display: block;
-  width: 61%;
-  height: 94%;
-  transform: scale(1);
-  transform-origin: bottom center;
-  transition: height 160ms ease, transform 160ms ease, opacity 130ms ease;
-}
-.child-preview-character[hidden],
 .child-preview-figure[hidden] { display: none; }
-.child-preview-character.is-arriving { animation: character-arrival 340ms cubic-bezier(.22,.84,.28,1) both; }
-.custom-child-svg { display: block; width: 100%; height: 100%; overflow: visible; }
-/* Seated in the wheelchair: chair and child shift down together; seated legs replace standing legs. */
-.custom-child-svg[data-mobility="wheelchair"] :is(.custom-child-figure, .wheelchair-art) { transform: translateY(34px); }
-.custom-child-svg .seated-legs { display: none; }
-.custom-child-svg[data-mobility="wheelchair"] .seated-legs { display: inline; }
-.custom-child-svg[data-mobility="wheelchair"] .character-legs { display: none; }
-.custom-child-svg .seated-shorts { display: none; }
-.custom-child-svg[data-outfit-style="shorts"] .seated-shorts { display: inline; }
-.child-preview-stage.age-2-4 .child-preview-character { height: 82%; }
-.child-preview-stage.age-5-6 .child-preview-character { height: 92%; }
-.child-preview-stage.age-7-8 .child-preview-character { height: 98%; }
-.child-preview-stage.height-shorter .child-preview-character { transform: scale(.91); }
-.child-preview-stage.height-average .child-preview-character { transform: scale(1); }
-.child-preview-stage.height-taller .child-preview-character { transform: scale(1.06); }
-.child-preview-stage.mobility-wheelchair .child-preview-character { right: -2%; width: 55%; height: 91%; }
-.child-preview-stage.mobility-forearm-crutches .child-preview-character { right: -5%; width: 68%; height: 94%; }
 
-.child-preview-stage.is-empty .child-preview-character,
 .child-preview-stage.is-empty .child-board-label-character { display: none; }
 .child-preview-stage.is-empty .child-preview-figure { position: absolute; z-index: 4; right: 19%; bottom: 35%; display: grid; transform: scale(1.8); }
 .child-preview-stage:not(.is-empty) .child-preview-figure { display: none; }
@@ -552,7 +521,6 @@
 .proof-child-profile { display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: center; max-width: 760px; margin: 18px auto 0; padding: 14px 16px; border: 1px solid #48a1a8; border-radius: 14px; background: #0d334e; color: #fff; }
 .proof-child-profile[hidden] { display: none; }
 .proof-child-profile .child-preview-stage { width: 86px; height: 104px; border-radius: 10px; }
-.proof-child-profile .child-preview-character { right: 8%; width: 84%; height: 96%; }
 .proof-child-profile p { margin: 3px 0 0; color: #d4e5e9; }
 
 @media (max-width: 980px) {
@@ -577,7 +545,6 @@
   .child-presence-toggle > div { grid-template-columns: 1fr; }
   .child-live-preview { padding: 9px; border-radius: 20px; }
   .child-preview-stage { height: 350px; border-radius: 14px; }
-  .child-preview-character { right: -2%; width: 52%; height: 87%; }
   .child-preview-updates { display: none; }
   .child-preview-copy { padding: 5px 6px 7px; }
   .child-preview-copy strong { font-size: 1.08rem; }
@@ -591,8 +558,7 @@
 @media (prefers-reduced-motion: reduce) {
   .child-editor-section.is-active,
   .child-preview-updates i,
-  .child-stage-scanline,
-  .child-preview-character.is-arriving { animation: none; }
+  .child-stage-scanline { animation: none; }
 }
 
 /* MonstersNOW storybook character studio — cinematic, simple, and on-brand. */
@@ -690,10 +656,6 @@
 .child-preview-stage::after { z-index: 1; background: linear-gradient(180deg, rgba(255,255,255,.04), transparent 60%, rgba(59,29,109,.12)); }
 .child-stage-corners,
 .child-stage-scanline { display: none; }
-.child-preview-character { right: 1%; bottom: 1.5%; width: 65%; height: 95%; }
-.child-preview-stage.age-2-4 .child-preview-character { height: 84%; }
-.child-preview-stage.age-5-6 .child-preview-character { height: 94%; }
-.child-preview-stage.age-7-8 .child-preview-character { height: 99%; }
 
 .child-preview-specs span { border-color: #dfd4e8; background: rgba(255,255,255,.76); color: #6a5d73; }
 .child-preview-specs span::before { color: #00878b; }
@@ -717,7 +679,6 @@
   .child-editor-tabs button span { display: none; }
   .child-outfit-style-options { grid-template-columns: repeat(2, minmax(0, 1fr)); overflow: visible; }
   .child-preview-stage { height: 420px; }
-  .child-preview-character { right: -5%; width: 72%; height: 92%; }
   .child-preview-specs { gap: 4px; }
   .child-preview-specs span { padding-inline: 3px; font-size: .5rem; }
 }
@@ -740,34 +701,6 @@
   pointer-events: none;
   transform: translateX(-50%);
 }
-
-.child-preview-character {
-  right: auto;
-  bottom: 0;
-  left: 50%;
-  width: 74%;
-  height: 97%;
-  transform: translateX(-50%);
-  transform-origin: bottom center;
-  filter: drop-shadow(0 22px 18px rgba(59,29,109,.2));
-}
-
-.custom-child-svg .character-head { filter: drop-shadow(0 4px 4px rgba(74,38,54,.08)); }
-.custom-child-svg[data-presentation="boy"] .character-head { transform: scale(1.025,.985); transform-origin: 183px 176px; }
-.custom-child-svg[data-presentation="girl"] .character-head { transform: scale(.99,1.015); transform-origin: 183px 176px; }
-.custom-child-svg .character-arms,
-.custom-child-svg .character-legs { filter: drop-shadow(0 4px 3px rgba(46,24,48,.09)); }
-.custom-child-svg .hair { filter: drop-shadow(0 8px 5px rgba(46,24,48,.25)); }
-.custom-child-svg .outfit { filter: drop-shadow(0 6px 4px rgba(46,24,48,.15)); }
-
-.child-preview-stage.age-2-4 .child-preview-character { height: 87%; }
-.child-preview-stage.age-5-6 .child-preview-character { height: 96%; }
-.child-preview-stage.age-7-8 .child-preview-character { height: 100%; }
-.child-preview-stage.height-shorter .child-preview-character { transform: translateX(-50%) scale(.93); }
-.child-preview-stage.height-average .child-preview-character { transform: translateX(-50%) scale(1); }
-.child-preview-stage.height-taller .child-preview-character { transform: translateX(-50%) scale(1.05); }
-.child-preview-stage.mobility-wheelchair .child-preview-character { right: auto; left: 50%; width: 72%; height: 92%; transform: translateX(-50%); }
-.child-preview-stage.mobility-forearm-crutches .child-preview-character { right: auto; left: 50%; width: 79%; height: 96%; transform: translateX(-50%); }
 
 .child-preview-stage.is-empty .child-preview-figure {
   right: auto;
@@ -818,12 +751,6 @@
 .child-presentation-options input:checked + span i { background: #3b1d6d; color: #fff; }
 .child-presentation-options input:focus-visible + span { outline: 3px solid #175f9a; outline-offset: 2px; }
 
-@media (max-width: 430px) {
-  .child-preview-character { right: auto; left: 50%; width: 82%; height: 95%; }
-  .child-preview-stage.mobility-wheelchair .child-preview-character { left: 50%; width: 82%; height: 88%; }
-  .child-preview-stage.mobility-forearm-crutches .child-preview-character { left: 50%; width: 92%; height: 92%; }
-}
-
 /* The layered SVG stays instant while the final generated render becomes the book art. */
 .child-rendered-preview {
   position: absolute;
@@ -855,9 +782,7 @@
   to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0) drop-shadow(0 24px 22px rgba(59,29,109,.22)); }
 }
 .child-premium-default[hidden] { display: none; }
-.child-preview-stage.has-premium-art .child-preview-character { display: none; }
 .child-preview-stage.has-preset-art .child-premium-default { display: none; }
-.child-preview-stage.has-book-render .child-preview-character { display: none; }
 .child-preview-stage.has-book-render .child-premium-default { display: none; }
 .child-preview-stage.mobility-wheelchair .child-premium-default { top: 3%; left: 1%; width: 98%; height: 92%; }
 .child-preview-stage.mobility-forearm-crutches .child-premium-default { top: 4%; left: 1%; width: 98%; height: 89%; }
@@ -1040,9 +965,6 @@
   .child-preview-stage.mobility-wheelchair .child-premium-default { top: 4%; height: 89%; }
   .child-preview-stage.mobility-forearm-crutches .child-premium-default { top: 6%; height: 89%; }
   .child-monster-only-preview { top: 2%; height: 88%; }
-  .child-preview-character { width: 70%; height: 96%; }
-  .child-preview-stage.mobility-wheelchair .child-preview-character { width: 76%; height: 88%; }
-  .child-preview-stage.mobility-forearm-crutches .child-preview-character { width: 92%; height: 91%; }
   .child-preview-specs { margin-top: 7px; }
   .child-preview-specs span { min-height: 27px; padding: 3px; font-size: .49rem; }
   .child-preview-copy { grid-template-columns: minmax(0, 1fr); align-items: start; gap: 3px; padding: 8px 6px 7px; }
@@ -1089,7 +1011,6 @@
 
 @media (max-width: 430px) {
   .child-preview-stage { height: 280px; min-height: 260px; }
-  .child-preview-character { width: 74%; height: 97%; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1097,73 +1018,7 @@
   .child-render-progress-track i { animation: none; }
 }
 
-/* ===================== Character Studio v2 ===================== */
-/* Live sketch layers: every option maps to exactly one visible layer. */
-.custom-child-svg .layer { display: none; }
-.custom-child-svg[data-hair-style="short"] .hair-short,
-.custom-child-svg[data-hair-style="curly"] .hair-curly,
-.custom-child-svg[data-hair-style="coils"] .hair-coils,
-.custom-child-svg[data-hair-style="wavy"] .hair-wavy,
-.custom-child-svg[data-hair-style="straight"] .hair-straight,
-.custom-child-svg[data-hair-style="braids"] .hair-braids,
-.custom-child-svg[data-hair-style="locs"] .hair-locs,
-.custom-child-svg[data-hair-style="ponytail"] .hair-ponytail,
-.custom-child-svg[data-hair-style="ponytail"] .hair-back-ponytail,
-.custom-child-svg[data-hair-style="puffs"] .hair-puffs,
-.custom-child-svg[data-hair-style="buzz"] .hair-buzz,
-.custom-child-svg[data-outfit-style="tee"] .outfit-tee,
-.custom-child-svg[data-outfit-style="shorts"] .outfit-shorts,
-.custom-child-svg[data-outfit-style="shorts"] .shorts-overlay,
-.custom-child-svg[data-outfit-style="overalls"] .outfit-overalls,
-.custom-child-svg[data-outfit-style="hoodie"] .outfit-hoodie,
-.custom-child-svg[data-outfit-style="dress"] .outfit-dress,
-.custom-child-svg[data-outfit-style="sweater"] .outfit-sweater,
-.custom-child-svg[data-outfit-style="jacket"] .outfit-jacket,
-.custom-child-svg[data-costume="pumpkin"] .costume-pumpkin,
-.custom-child-svg[data-costume="witch"] .costume-witch,
-.custom-child-svg[data-costume="superhero"] .costume-superhero,
-.custom-child-svg[data-costume="dinosaur"] .costume-dinosaur,
-.custom-child-svg[data-costume="astronaut"] .costume-astronaut,
-.custom-child-svg[data-costume="cat"] .costume-cat,
-.custom-child-svg[data-presentation="girl"] .presentation-girl,
-.custom-child-svg[data-glasses="round"] .glasses-round,
-.custom-child-svg[data-glasses="square"] .glasses-square,
-.custom-child-svg[data-hearing="hearing-aids"] .hearing-aids,
-.custom-child-svg[data-hearing="cochlear"] .hearing-cochlear,
-.custom-child-svg[data-headwear="hijab"] .headwear-hijab,
-.custom-child-svg[data-headwear="patka"] .headwear-patka,
-.custom-child-svg[data-headwear="headwrap"] .headwear-headwrap,
-.custom-child-svg[data-headwear="kippah"] .headwear-kippah,
-.custom-child-svg[data-headwear="beanie"] .headwear-beanie,
-.custom-child-svg[data-headwear="cap"] .headwear-cap,
-.custom-child-svg[data-face-detail="freckles"] .face-freckles,
-.custom-child-svg[data-face-detail="birthmark"] .face-birthmark,
-.custom-child-svg[data-face-detail="freckles-birthmark"] .face-freckles,
-.custom-child-svg[data-face-detail="freckles-birthmark"] .face-birthmark,
-.custom-child-svg[data-mobility="wheelchair"] .wheelchair-art,
-.custom-child-svg[data-mobility="forearm-crutches"] .aid-crutches,
-.custom-child-svg[data-mobility="walker"] .aid-walker,
-.custom-child-svg[data-mobility="prosthetic-leg"] .aid-prosthetic,
-.custom-child-svg[data-mobility="leg-braces"] .aid-braces { display: inline; }
-/* Covering headwear hides the hair it covers; hats sit over puffs. */
-.custom-child-svg:is([data-headwear="hijab"], [data-headwear="patka"], [data-headwear="headwrap"]) :is(.hair, .hair-back) { display: none; }
-.custom-child-svg:is([data-headwear="beanie"], [data-headwear="cap"]) .puff-balls { display: none; }
-.custom-child-svg[data-headwear="hijab"] .ears { display: none; }
-.custom-child-svg[data-costume="witch"]:not([data-headwear="none"]) .costume-head,
-.custom-child-svg[data-costume="cat"]:is([data-headwear="hijab"], [data-headwear="beanie"], [data-headwear="cap"], [data-headwear="headwrap"], [data-headwear="patka"]) .costume-head,
-.custom-child-svg[data-costume="dinosaur"]:not([data-headwear="none"]) .costume-head,
-.custom-child-svg[data-costume="pumpkin"]:not([data-headwear="none"]) .costume-head { display: none; }
-.custom-child-svg[data-mobility="prosthetic-leg"] .leg-right-lower { display: none; }
-.custom-child-svg .headwear-kippah { transform: translateY(-4px); }
-.custom-child-svg:is([data-hair-style="curly"]) .headwear-kippah { transform: translateY(-30px); }
-.custom-child-svg:is([data-hair-style="coils"]) .headwear-kippah { transform: translateY(-26px); }
-.custom-child-svg:is([data-hair-style="puffs"]) .headwear-kippah { transform: translateY(-4px); }
-.custom-child-svg:is([data-hair-style="buzz"]) .headwear-kippah { transform: translateY(2px); }
-.custom-child-svg[data-presentation="neutral"] .character-head { transform: none; }
-.custom-child-svg .hair-back { filter: drop-shadow(0 6px 4px rgba(46,24,48,.2)); }
-
 /* Stage: sketch, painted quick-start example, painted version. */
-.child-preview-stage .child-preview-character[hidden],
 .child-preset-preview[hidden],
 .child-rendered-preview[hidden],
 .child-stale-render[hidden] { display: none; }
@@ -1172,13 +1027,7 @@
   object-fit: contain; object-position: center bottom;
   filter: drop-shadow(0 24px 22px rgba(59,29,109,.22));
 }
-.child-preview-stage.has-preset-art .child-preview-character,
-.child-preview-stage.has-book-render .child-preview-character,
-.child-preview-stage.has-book-render .child-preset-preview,
-.child-preview-stage.has-monster-only .child-preview-character { display: none; }
-.child-preview-stage.age-9-10 .child-preview-character { height: 100%; }
-.child-preview-stage.mobility-walker .child-preview-character,
-.child-preview-stage.mobility-forearm-crutches .child-preview-character { width: 82%; }
+.child-preview-stage.has-book-render .child-preset-preview { display: none; }
 .child-stale-render {
   position: absolute; z-index: 7; left: 12px; bottom: 12px;
   display: flex; max-width: min(70%, 260px); min-height: 44px; align-items: center; gap: 8px;
@@ -1384,7 +1233,25 @@
 .brand-theme .child-render-actions.is-complete .button.primary:is(:hover, :focus-visible):not(:disabled) { background: #dff3f1; color: #006b70; }
 
 .child-preview-honest {
-  margin: 8px 2px 0; color: #665c70; font-size: .72rem; font-weight: 650; line-height: 1.35; text-wrap: balance;
+  margin: 9px 8px 0; color: #6a5d73; font-size: .68rem; font-weight: 650; line-height: 1.4; text-align: center; text-wrap: balance;
 }
 .child-preview-honest[hidden] { display: none; }
 .child-preview-specs[hidden] { display: none; }
+
+/* Polish: painted thumbnails crop to head and shoulders so faces read at small sizes. */
+.child-preset-art img { object-fit: cover; object-position: 50% 4%; transform: scale(1.02); }
+.child-mini-art { object-fit: cover; object-position: 50% 6%; }
+.child-mini-render { object-fit: cover; object-position: 50% 8%; }
+.child-preset-option { transition: border-color 150ms ease, box-shadow 150ms ease, transform 150ms ease; }
+@media (hover: hover) and (pointer: fine) {
+  .child-preset-option:hover { border-color: rgba(0,127,137,.45); transform: translateY(-1px); }
+}
+.child-premium-default, .child-preset-preview, .child-rendered-preview { image-rendering: auto; backface-visibility: hidden; }
+/* Spec pills stay one line on phones. */
+@media (max-width: 420px) {
+  .child-preview-specs span { white-space: nowrap; letter-spacing: .02em; font-size: .5rem; padding-inline: 2px; }
+  .child-preview-honest { margin-inline: 4px; font-size: .66rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .child-preset-option { transition: none; }
+}

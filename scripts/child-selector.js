@@ -185,14 +185,37 @@
     return presetManifest.presets.find((preset) => preset.imageUrl && profileKey(preset.profile) === key) || null;
   }
 
+  // Swap painted art without a blank frame: decode the next image first, then
+  // swap and play a short fade/settle. Rapid taps only apply the latest choice.
+  const decoded = new Map();
+  function decodeArt(src) {
+    if (!decoded.has(src)) {
+      const img = new Image();
+      img.decoding = "async";
+      img.src = src;
+      decoded.set(src, (img.decode ? img.decode() : Promise.resolve()).catch(() => {}));
+    }
+    return decoded.get(src);
+  }
+  function preloadStockAvatars() {
+    for (const who of ["girl", "boy"]) {
+      for (const aid of ["", "-wheelchair", "-forearm-crutches"]) decodeArt(`assets/child-editor/default-${who}${aid}-feature-animation-v1.webp`);
+    }
+  }
+
   function setPaintedSrc(image, src, alt) {
     if (!image) return;
-    if (image.getAttribute("src") !== src) {
+    if (alt != null) image.alt = alt;
+    if (image.dataset.wantSrc === src || (!image.dataset.wantSrc && image.getAttribute("src") === src)) return;
+    image.dataset.wantSrc = src;
+    const swap = () => {
+      if (image.dataset.wantSrc !== src || image.getAttribute("src") === src) return;
       image.classList.remove("is-refreshing");
       image.src = src;
-      requestAnimationFrame(() => image.classList.add("is-refreshing"));
-    }
-    if (alt != null) image.alt = alt;
+      if (!image.hidden) requestAnimationFrame(() => image.classList.add("is-refreshing"));
+    };
+    if (!image.getAttribute("src") || image.hidden) { swap(); return; }
+    decodeArt(src).then(swap);
   }
 
   function renderProfile(stage, _avatar, profile) {
@@ -490,4 +513,5 @@
   window.addEventListener("resize", () => window.requestAnimationFrame(refreshScrollHints), { passive: true });
   sync({ save: false });
   loadPresets();
+  if (root) (window.requestIdleCallback || ((fn) => setTimeout(fn, 400)))(preloadStockAvatars);
 })();

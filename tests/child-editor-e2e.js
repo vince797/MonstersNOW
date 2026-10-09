@@ -76,7 +76,9 @@ async function previewState(page) {
   });
 }
 
+// The avatar swaps after the next image decodes; wait for it to land.
 async function premiumSrc(page) {
+  await page.waitForFunction(() => { const img = document.querySelector("#child-premium-default"); return !img.dataset.wantSrc || img.getAttribute("src") === img.dataset.wantSrc; });
   return page.locator("#child-premium-default").getAttribute("src");
 }
 
@@ -454,7 +456,7 @@ async function runPhone(browser, h) {
   await page.waitForFunction(() => document.querySelector('input[name="child-mobility-aid"][value="wheelchair"]').checked);
   assert.equal(await page.locator("#child-preset-preview").isHidden(), true, "broken exact-match art is never shown as the main preview");
   assert.equal(await page.locator("#child-premium-default").isVisible(), true);
-  assert.match(await page.locator("#child-premium-default").getAttribute("src"), /wheelchair-feature-animation/);
+  assert.match(await premiumSrc(page), /wheelchair-feature-animation/);
   assert.match(await page.locator("#child-preview-label-text").textContent(), /^Premium character preview$/);
   await page.locator("#child-editor-reset").click();
   await step(page, "painted quick-start art on exact match only; broken art falls back to closest painted avatar");
